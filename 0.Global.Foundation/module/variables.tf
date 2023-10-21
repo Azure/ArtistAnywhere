@@ -12,7 +12,7 @@ variable "resourceGroupName" {
 
 variable "rootStorage" {
   default = {
-    accountName = "azstudio0" # Set to a globally unique name (lowercase alphanumeric)
+    accountName = "xstudio0" # Set to a globally unique name (lowercase alphanumeric)
     containerName = {
       terraform = "terraform"
     }
@@ -25,7 +25,7 @@ variable "rootStorage" {
 
 variable "managedIdentity" {
   default = {
-    name = "azstudio" # Alphanumeric, underscores and hyphens are allowed
+    name = "xstudio" # Alphanumeric, underscores and hyphens are allowed
   }
 }
 
@@ -36,7 +36,7 @@ variable "managedIdentity" {
 variable "keyVault" {
   default = {
     enable = true
-    name   = "azstudio" # Set to a globally unique name (alphanumeric, hyphens)
+    name   = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
     secretName = {
       gatewayConnection = "GatewayConnection"
       adminUsername     = "AdminUsername"
@@ -57,7 +57,7 @@ variable "keyVault" {
 variable "monitor" {
   default = {
     enable = true
-    name   = "azstudio"
+    name   = "xstudio"
   }
 }
 

@@ -15,7 +15,7 @@ fileLoadSource = {
 storageAccounts = [
   {
     enable               = true
-    name                 = "azstudio1" # Name must be globally unique (lowercase alphanumeric)
+    name                 = "xstudio1"  # Name must be globally unique (lowercase alphanumeric)
     type                 = "StorageV2" # https://learn.microsoft.com/azure/storage/common/storage-account-overview
     tier                 = "Standard"  # https://learn.microsoft.com/azure/storage/common/storage-account-overview#performance-tiers
     redundancy           = "LRS"       # https://learn.microsoft.com/azure/storage/common/storage-redundancy
@@ -59,7 +59,7 @@ storageAccounts = [
   },
   {
     enable               = true
-    name                 = "azstudio2"   # Name must be globally unique (lowercase alphanumeric)
+    name                 = "xstudio2"    # Name must be globally unique (lowercase alphanumeric)
     type                 = "FileStorage" # https://learn.microsoft.com/azure/storage/common/storage-account-overview
     tier                 = "Premium"     # https://learn.microsoft.com/azure/storage/common/storage-account-overview#performance-tiers
     redundancy           = "LRS"         # https://learn.microsoft.com/azure/storage/common/storage-redundancy
@@ -92,14 +92,14 @@ weka = {
   enable   = false
   apiToken = ""
   name = {
-    resource = "azstudio"
+    resource = "xstudio"
     display  = "Azure Artist Anywhere"
   }
   machine = {
     size  = "Standard_L8as_v3"
     count = 6
     image = {
-      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/Linux/versions/0.0.0"
+      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
       plan = {
         enable    = false
         publisher = ""

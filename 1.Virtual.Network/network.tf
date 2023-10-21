@@ -21,6 +21,7 @@ variable "virtualNetworks" {
       workstation = number
       storage     = number
       cache       = number
+      ai          = number
     })
   }))
 }

@@ -21,7 +21,7 @@ virtualMachineScaleSets = [
       size  = "Standard_HB120rs_v3"
       count = 2
       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/Linux/versions/2.0.0"
+        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
         plan = {
           enable    = false
           publisher = ""
@@ -66,7 +66,7 @@ virtualMachineScaleSets = [
             {
               enable = false # File Storage
               mounts = [
-                "azstudio1.blob.core.windows.net:/azstudio1/content /mnt/content aznfs default,sec=sys,proto=tcp,vers=3,nolock 0 0"
+                "xstudio1.blob.core.windows.net:/xstudio1/content /mnt/content aznfs default,sec=sys,proto=tcp,vers=3,nolock 0 0"
               ]
             },
             {
@@ -106,7 +106,7 @@ virtualMachineScaleSets = [
       size  = "Standard_NV36ads_A10_v5"
       count = 2
       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/Linux/versions/2.1.0"
+        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.1.0"
         plan = {
           enable    = false
           publisher = ""
@@ -151,7 +151,7 @@ virtualMachineScaleSets = [
             {
               enable = false # File Storage
               mounts = [
-                "azstudio1.blob.core.windows.net:/azstudio1/content /mnt/content aznfs default,sec=sys,proto=tcp,vers=3,nolock 0 0"
+                "xstudio1.blob.core.windows.net:/xstudio1/content /mnt/content aznfs default,sec=sys,proto=tcp,vers=3,nolock 0 0"
               ]
             },
             {
@@ -191,7 +191,7 @@ virtualMachineScaleSets = [
       size  = "Standard_HB120rs_v3"
       count = 2
       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/WinFarm/versions/2.0.0"
+        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinFarm/versions/2.0.0"
         plan = {
           enable    = false
           publisher = ""
@@ -236,7 +236,7 @@ virtualMachineScaleSets = [
             {
               enable = false # File Storage
               mounts = [
-                "mount -o anon nolock \\\\azstudio1.blob.core.windows.net\\azstudio1\\content X:"
+                "mount -o anon nolock \\\\xstudio1.blob.core.windows.net\\xstudio1\\content X:"
               ]
             },
             {
@@ -276,7 +276,7 @@ virtualMachineScaleSets = [
       size  = "Standard_NV36ads_A10_v5"
       count = 2
       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/WinFarm/versions/2.1.0"
+        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinFarm/versions/2.1.0"
         plan = {
           enable    = false
           publisher = ""
@@ -321,7 +321,7 @@ virtualMachineScaleSets = [
             {
               enable = false # File Storage
               mounts = [
-                "mount -o anon nolock \\\\azstudio1.blob.core.windows.net\\azstudio1\\content X:"
+                "mount -o anon nolock \\\\xstudio1.blob.core.windows.net\\xstudio1\\content X:"
               ]
             },
             {
@@ -363,7 +363,7 @@ virtualMachineScaleSets = [
 batch = {
   enable = false
   account = {
-    name = "azstudio"
+    name = "xstudio"
     storage = {
       accountName       = ""
       resourceGroupName = ""
@@ -376,7 +376,7 @@ batch = {
       displayName = "Linux Render Farm (CPU)"
       node = {
         image = {
-          id      = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/Linux/versions/2.0.0"
+          id      = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
           agentId = "batch.node.el 9"
         }
         machine = {
@@ -406,7 +406,7 @@ batch = {
       displayName = "Linux Render Farm (GPU)"
       node = {
         image = {
-          id      = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/Linux/versions/2.1.0"
+          id      = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.1.0"
           agentId = "batch.node.el 9"
         }
         machine = {
@@ -436,7 +436,7 @@ batch = {
       displayName = "Windows Render Farm (CPU)"
       node = {
         image = {
-          id      = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/WinFarm/versions/2.0.0"
+          id      = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinFarm/versions/2.0.0"
           agentId = "batch.node.windows amd64"
         }
         machine = {
@@ -466,7 +466,7 @@ batch = {
       displayName = "Windows Render Farm (GPU)"
       node = {
         image = {
-          id      = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/WinFarm/versions/2.1.0"
+          id      = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinFarm/versions/2.1.0"
           agentId = "batch.node.windows amd64"
         }
         machine = {
@@ -500,7 +500,7 @@ batch = {
 azureOpenAI = {
   enable      = false
   regionName  = "EastUS"
-  accountName = "azstudio"
+  accountName = "xstudio"
   domainName  = ""
   serviceTier = "S0"
   chatDeployment = {
@@ -531,7 +531,7 @@ azureOpenAI = {
 
 functionApp = {
   enable = false
-  name   = "azstudio"
+  name   = "xstudio"
   servicePlan = {
     computeTier = "S1"
     workerCount = 1

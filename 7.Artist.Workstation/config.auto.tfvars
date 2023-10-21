@@ -20,7 +20,7 @@ virtualMachines = [
     machine = {
       size = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/Linux/versions/3.0.0"
+        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/3.0.0"
         plan = {
           enable    = false
           publisher = ""
@@ -57,7 +57,7 @@ virtualMachines = [
             {
               enable = false # File Storage
               mounts = [
-                "azstudio1.blob.core.windows.net:/azstudio1/content /mnt/content aznfs default,sec=sys,proto=tcp,vers=3,nolock 0 0"
+                "xstudio1.blob.core.windows.net:/xstudio1/content /mnt/content aznfs default,sec=sys,proto=tcp,vers=3,nolock 0 0"
               ]
             },
             {
@@ -87,7 +87,7 @@ virtualMachines = [
     machine = {
       size = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/Linux/versions/3.1.0"
+        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/3.1.0"
         plan = {
           enable    = false
           publisher = ""
@@ -124,7 +124,7 @@ virtualMachines = [
             {
               enable = false # File Storage
               mounts = [
-                "azstudio1.blob.core.windows.net:/azstudio1/content /mnt/content aznfs default,sec=sys,proto=tcp,vers=3,nolock 0 0"
+                "xstudio1.blob.core.windows.net:/xstudio1/content /mnt/content aznfs default,sec=sys,proto=tcp,vers=3,nolock 0 0"
               ]
             },
             {
@@ -154,7 +154,7 @@ virtualMachines = [
     machine = {
       size = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/WinArtist/versions/3.0.0"
+        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinArtist/versions/3.0.0"
         plan = {
           enable    = false
           publisher = ""
@@ -191,7 +191,7 @@ virtualMachines = [
             {
               enable = false # File Storage
               mounts = [
-                "mount -o anon nolock \\\\azstudio1.blob.core.windows.net\\azstudio1\\content X:"
+                "mount -o anon nolock \\\\xstudio1.blob.core.windows.net\\xstudio1\\content X:"
               ]
             },
             {
@@ -221,7 +221,7 @@ virtualMachines = [
     machine = {
       size = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/azstudio/images/WinArtist/versions/3.1.0"
+        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinArtist/versions/3.1.0"
         plan = {
           enable    = false
           publisher = ""
@@ -258,7 +258,7 @@ virtualMachines = [
             {
               enable = false # File Storage
               mounts = [
-                "mount -o anon nolock \\\\azstudio1.blob.core.windows.net\\azstudio1\\content X:"
+                "mount -o anon nolock \\\\xstudio1.blob.core.windows.net\\xstudio1\\content X:"
               ]
             },
             {

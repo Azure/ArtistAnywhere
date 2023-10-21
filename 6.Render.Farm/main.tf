@@ -1,13 +1,13 @@
 terraform {
-  required_version = ">= 1.5.7"
+  required_version = ">= 1.6.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.75.0"
+      version = "~>3.77.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.43.0"
+      version = "~>2.44.0"
     }
   }
   backend "azurerm" {
@@ -149,7 +149,7 @@ data "azurerm_subnet" "ai" {
 
 data "azurerm_private_dns_zone" "studio" {
   name                = data.terraform_remote_state.network.outputs.privateDns.zoneName
-  resource_group_name = data.azurerm_virtual_network.studio.resource_group_name
+  resource_group_name = data.terraform_remote_state.network.outputs.resourceGroupName
 }
 
 data "azurerm_storage_account" "studio" {

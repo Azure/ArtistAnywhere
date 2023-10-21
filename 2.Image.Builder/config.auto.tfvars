@@ -5,7 +5,7 @@ resourceGroupName = "ArtistAnywhere.Image" # Alphanumeric, underscores, hyphens,
 ###############################################################################################
 
 computeGallery = {
-  name = "azstudio"
+  name = "xstudio"
   imageDefinition = {
     Linux = {
       type       = "Linux"
@@ -40,6 +40,16 @@ computeGallery = {
     "WestUS3",
     "EastUS2"
   ]
+}
+
+#####################################################################################################
+# Container Registry (https://learn.microsoft.com/azure/container-registry/container-registry-intro) #
+#####################################################################################################
+
+containerRegistry = {
+  enable = true
+  name   = "xstudio"
+  sku    = "Premium"
 }
 
 #############################################################################################
