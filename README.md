@@ -58,7 +58,7 @@ The following sample images were rendered on Azure via multiple render farm, eng
 The following Disney Moana Island scene was rendered on Azure via the [Physically-Based Ray Tracer (PBRT) v4](https://github.com/mmp/pbrt-v4) render engine.
 
 <p align="center">
-  <img src=".github/images/moana-island.png" />
+  <img src="0.Global.Foundation/output/moana-island.png" />
 </p>
 
 To render the Disney Moana Island scene on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** and/or **Windows** artist workstation.
@@ -74,7 +74,7 @@ To render the Disney Moana Island scene on an Azure **Windows** render farm, the
 The following Blender 3.4 Splash screen was rendered on Azure via the [Blender](https://www.blender.org) render engine.
 
 <p align="center">
-  <img src=".github/images/blender-splash-3.4.png" />
+  <img src="0.Global.Foundation/output/blender-splash-3.4.png" />
 </p>
 
 To render the Blender Splash screen on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** and/or **Windows** artist workstation.
