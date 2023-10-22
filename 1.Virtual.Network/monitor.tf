@@ -82,7 +82,7 @@ resource "azurerm_private_endpoint" "monitor" {
   for_each = {
     for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if module.global.monitor.enable && !var.existingNetwork.enable
   }
-  name                = "Monitor"
+  name                = "${azurerm_monitor_private_link_scope.monitor[0].name}-monitor"
   resource_group_name = each.value.resourceGroupName
   location            = each.value.regionName
   subnet_id           = "${each.value.virtualNetworkId}/subnets/${each.value.name}"

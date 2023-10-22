@@ -1,7 +1,7 @@
-############################################################################################################################
-# Public IP Address Prefix (https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-address-prefix ) #
-# Public IP Addresses      (https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-addresses)             #
-############################################################################################################################
+######################################################################################################################
+# Public IP Address Prefix (https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-address-prefix ) #
+# Public IP Addresses      (https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-addresses)       #
+######################################################################################################################
 
 resource "azurerm_public_ip_prefix" "vpn_gateway" {
   for_each = {

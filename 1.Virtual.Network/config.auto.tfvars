@@ -21,7 +21,8 @@ virtualNetworks = [
           "10.0.0.0/17"
         ]
         serviceEndpoints = [
-          "Microsoft.Storage.Global"
+          "Microsoft.Storage.Global",
+          "Microsoft.ContainerRegistry"
         ]
         serviceDelegation    = ""
         denyOutboundInternet = false
@@ -115,7 +116,8 @@ virtualNetworks = [
           "10.1.0.0/17"
         ]
         serviceEndpoints = [
-          "Microsoft.Storage.Global"
+          "Microsoft.Storage.Global",
+          "Microsoft.ContainerRegistry"
         ]
         serviceDelegation    = ""
         denyOutboundInternet = false

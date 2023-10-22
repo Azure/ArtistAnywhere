@@ -106,17 +106,17 @@ resource "azapi_resource" "image_builder" {
         },
         {
           type        = "File"
-          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/0.Global.Foundation/functions.sh"
+          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.sh"
           destination = "/tmp/functions.sh"
         },
         {
           type        = "File"
-          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/2.Image.Builder/customize.sh"
+          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/customize.sh"
           destination = "/tmp/customize.sh"
         },
         {
           type        = "File"
-          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/2.Image.Builder/terminate.sh"
+          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/terminate.sh"
           destination = "/tmp/terminate.sh"
         },
         {
@@ -140,17 +140,17 @@ resource "azapi_resource" "image_builder" {
         },
         {
           type        = "File"
-          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/0.Global.Foundation/functions.ps1"
+          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.ps1"
           destination = "C:\\AzureData\\functions.ps1"
         },
         {
           type        = "File"
-          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/2.Image.Builder/customize.ps1"
+          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/customize.ps1"
           destination = "C:\\AzureData\\customize.ps1"
         },
         {
           type        = "File"
-          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/2.Image.Builder/terminate.ps1"
+          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/terminate.ps1"
           destination = "C:\\AzureData\\terminate.ps1"
         },
         {

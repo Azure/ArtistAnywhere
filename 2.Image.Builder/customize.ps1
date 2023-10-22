@@ -163,7 +163,7 @@ if ($renderEngines -contains "PBRT") {
 
 if ($renderEngines -contains "Blender") {
   Write-Host "Customize (Start): Blender"
-  $versionInfo = "3.6.4"
+  $versionInfo = "3.6.5"
   $installType = "blender"
   $installFile = "$installType-$versionInfo-windows-x64.msi"
   $downloadUrl = "$binStorageHost/Blender/$versionInfo/$installFile$binStorageAuth"

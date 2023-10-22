@@ -35,7 +35,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "key_vault" {
 
 resource "azurerm_private_dns_zone_virtual_network_link" "storage_blob" {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if !var.existingNetwork.enable && !var.existingNetwork.enable
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if !var.existingNetwork.enable
   }
   name                  = "${each.value.name}-blob"
   resource_group_name   = azurerm_resource_group.network.name
@@ -48,7 +48,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "storage_blob" {
 
 resource "azurerm_private_dns_zone_virtual_network_link" "storage_file" {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if !var.existingNetwork.enable && !var.existingNetwork.enable
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if !var.existingNetwork.enable
   }
   name                  = "${each.value.name}-file"
   resource_group_name   = azurerm_resource_group.network.name
