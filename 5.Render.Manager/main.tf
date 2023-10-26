@@ -44,10 +44,10 @@ variable "activeDirectory" {
   })
 }
 
-variable "privateDns" {
+variable "dnsARecord" {
   type = object({
-    aRecordName = string
-    ttlSeconds  = number
+    name       = string
+    ttlSeconds = number
   })
 }
 
@@ -113,7 +113,7 @@ data "azurerm_subnet" "farm" {
 
 data "azurerm_private_dns_zone" "studio" {
   name                = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.terraform_remote_state.network.outputs.privateDns.zoneName
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.resourceGroupName
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
 }
 
 resource "azurerm_resource_group" "scheduler" {
@@ -125,10 +125,10 @@ resource "azurerm_private_dns_a_record" "scheduler" {
   for_each = {
     for virtualMachine in var.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable
   }
-  name                = var.privateDns.aRecordName
+  name                = var.dnsARecord.name
   resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = data.azurerm_private_dns_zone.studio.name
-  ttl                 = var.privateDns.ttlSeconds
+  ttl                 = var.dnsARecord.ttlSeconds
   records = [
     azurerm_network_interface.scheduler[each.value.name].private_ip_address
   ]
@@ -138,6 +138,13 @@ output "resourceGroupName" {
   value = azurerm_resource_group.scheduler.name
 }
 
-output "privateDnsRecord" {
-  value = azurerm_private_dns_a_record.scheduler
+output "schedulerDns" {
+  value = [
+    for dnsRecord in azurerm_private_dns_a_record.scheduler : {
+      name              = dnsRecord.name
+      resourceGroupName = dnsRecord.resource_group_name
+      fqdn              = dnsRecord.fqdn
+      records           = dnsRecord.records
+    }
+  ]
 }

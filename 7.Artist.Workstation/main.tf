@@ -28,6 +28,10 @@ module "global" {
   source = "../0.Global.Foundation/module"
 }
 
+module "farm" {
+  source = "../6.Render.Farm/module"
+}
+
 variable "resourceGroupName" {
   type = string
 }

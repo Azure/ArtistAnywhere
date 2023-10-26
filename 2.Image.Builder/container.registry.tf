@@ -18,7 +18,7 @@ resource "azurerm_private_dns_zone" "container_registry" {
 
 resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
   count                 = var.containerRegistry.enable ? 1 : 0
-  name                  = "${data.azurerm_virtual_network.studio.name}-registry"
+  name                  = "container-registry-${lower(data.azurerm_virtual_network.studio.location)}"
   resource_group_name   = azurerm_resource_group.image.name
   private_dns_zone_name = azurerm_private_dns_zone.container_registry[0].name
   virtual_network_id    = data.azurerm_virtual_network.studio.id

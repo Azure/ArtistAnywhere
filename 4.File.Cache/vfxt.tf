@@ -174,13 +174,13 @@ resource "avere_vfxt" "cache" {
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
 ############################################################################
 
-resource "azurerm_private_dns_a_record" "studio_vfxt" {
+resource "azurerm_private_dns_a_record" "cache_vfxt" {
   count               = var.enableHPCCache ? 0 : 1
-  name                = "cache"
-  resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
-  zone_name           = data.azurerm_private_dns_zone.studio.name
+  name                = var.dnsARecord.name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
+  zone_name           = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.terraform_remote_state.network.outputs.privateDns.zoneName
   records             = avere_vfxt.cache[0].vserver_ip_addresses
-  ttl                 = 300
+  ttl                 = var.dnsARecord.ttlSeconds
 }
 
 output "vfxtCacheControllerAddress" {
@@ -197,8 +197,7 @@ output "vfxtCacheMountAddresses" {
 
 output "vfxtCacheDns" {
   value = var.enableHPCCache ? null : [
-    for dnsRecord in azurerm_private_dns_a_record.studio_vfxt : {
-      id                = dnsRecord.id
+    for dnsRecord in azurerm_private_dns_a_record.cache_vfxt : {
       name              = dnsRecord.name
       resourceGroupName = dnsRecord.resource_group_name
       fqdn              = dnsRecord.fqdn

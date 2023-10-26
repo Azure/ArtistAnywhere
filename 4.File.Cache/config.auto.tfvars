@@ -57,6 +57,15 @@ vfxtCache = {
   enableDevMode = false
 }
 
+############################################################################
+# Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
+############################################################################
+
+dnsARecord = {
+  name       = "cache"
+  ttlSeconds = 300
+}
+
 #######################################################################################
 # Storage Targets (https://learn.microsoft.com/azure/hpc-cache/hpc-cache-add-storage) #
 #######################################################################################

@@ -260,7 +260,7 @@ fi
 
 if [[ $renderEngines == *Unreal* ]] || [[ $renderEngines == *Unreal+PixelStream* ]]; then
   echo "Customize (Start): Unreal Engine Setup"
-  versionInfo="5.3.0"
+  versionInfo="5.3.1"
   installType="unreal-engine"
   installPath="/usr/local/unreal"
   installFile="UnrealEngine-$versionInfo-release.tar.gz"
@@ -283,7 +283,7 @@ if [[ $renderEngines == *Unreal* ]] || [[ $renderEngines == *Unreal+PixelStream*
 
   if [[ $renderEngines == *Unreal+PixelStream* ]]; then
     echo "Customize (Start): Unreal Pixel Streaming"
-    versionInfo="5.3-0.0.3"
+    versionInfo="5.3-1.0.0"
     installType="unreal-stream"
     installFile="UE$versionInfo.tar.gz"
     downloadUrl="$binStorageHost/Unreal/PixelStream/$versionInfo/$installFile$binStorageAuth"

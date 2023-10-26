@@ -13,18 +13,23 @@ variable "privateDns" {
 }
 
 resource "azurerm_private_dns_zone" "studio" {
-  count               = var.privateDns.enable && !var.existingNetwork.enable ? 1 : 0
+  for_each = {
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.privateDns.enable && !var.existingNetwork.enable
+  }
   name                = var.privateDns.zoneName
-  resource_group_name = azurerm_resource_group.network.name
+  resource_group_name = each.value.resourceGroupName
+  depends_on = [
+    azurerm_virtual_network.studio
+  ]
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "studio" {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.privateDns.enable && !var.existingNetwork.enable
   }
-  name                  = each.value.name
-  resource_group_name   = azurerm_resource_group.network.name
-  private_dns_zone_name = azurerm_private_dns_zone.studio[0].name
+  name                  = "studio-${lower(each.value.regionName)}"
+  resource_group_name   = each.value.resourceGroupName
+  private_dns_zone_name = azurerm_private_dns_zone.studio[each.value.name].name
   virtual_network_id    = each.value.id
   registration_enabled  = var.privateDns.autoRegistration.enable
   depends_on = [
@@ -33,5 +38,5 @@ resource "azurerm_private_dns_zone_virtual_network_link" "studio" {
 }
 
 output "privateDns" {
-  value = var.existingNetwork.enable ? null : var.privateDns
+  value = !var.existingNetwork.enable ? var.privateDns : null
 }

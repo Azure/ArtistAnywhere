@@ -131,8 +131,8 @@ virtualMachines = [
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
 ############################################################################
 
-privateDns = {
-  aRecordName = "scheduler"
+dnsARecord = {
+  name        = "scheduler"
   ttlSeconds  = 300
 }
 

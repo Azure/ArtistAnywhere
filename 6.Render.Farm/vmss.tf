@@ -51,10 +51,6 @@ variable "virtualMachineScaleSets" {
         enable     = bool
         fileName   = string
         parameters = object({
-          fileSystems = list(object({
-            enable = bool
-            mounts = list(string)
-          }))
           terminateNotification = object({
             enable       = bool
             delayTimeout = string
@@ -75,6 +71,12 @@ variable "virtualMachineScaleSets" {
 }
 
 locals {
+  fileSystemsLinux = [
+    for fileSystem in module.farm.fileSystems.linux : fileSystem if fileSystem.enable
+  ]
+  fileSystemsWindows = [
+    for fileSystem in module.farm.fileSystems.windows : fileSystem if fileSystem.enable
+  ]
   virtualMachineScaleSets = [
     for virtualMachineScaleSet in var.virtualMachineScaleSets : merge(virtualMachineScaleSet, {
       adminLogin = {
@@ -169,6 +171,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "farm" {
       settings = jsonencode({
         script = "${base64encode(
           templatefile(each.value.extension.initialize.fileName, merge(each.value.extension.initialize.parameters, {
+            fileSystems     = local.fileSystemsLinux,
             activeDirectory = each.value.activeDirectory
           }))
         )}"
@@ -274,6 +277,7 @@ resource "azurerm_windows_virtual_machine_scale_set" "farm" {
       settings = jsonencode({
         commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
           templatefile(each.value.extension.initialize.fileName, merge(each.value.extension.initialize.parameters, {
+            fileSystems     = local.fileSystemsWindows,
             activeDirectory = each.value.activeDirectory
           })), "UTF-16LE"
         )}"

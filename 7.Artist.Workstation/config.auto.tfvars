@@ -1,14 +1,5 @@
 resourceGroupName = "ArtistAnywhere.Workstation" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
-activeDirectory = {
-  enable           = true
-  domainName       = "artist.studio"
-  domainServerName = "WinScheduler"
-  orgUnitPath      = ""
-  adminUsername    = ""
-  adminPassword    = ""
-}
-
 #########################################################################
 # Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
 #########################################################################
@@ -53,26 +44,6 @@ virtualMachines = [
         enable   = true
         fileName = "initialize.sh"
         parameters = {
-          fileSystems = [
-            {
-              enable = false # File Storage
-              mounts = [
-                "xstudio1.blob.core.windows.net:/xstudio1/content /mnt/content aznfs default,sec=sys,proto=tcp,vers=3,nolock 0 0"
-              ]
-            },
-            {
-              enable = false # File Cache
-              mounts = [
-                "cache.artist.studio:/content /mnt/content nfs hard,proto=tcp,mountproto=tcp,retry=30,nolock 0 0"
-              ]
-            },
-            {
-              enable = true # Job Scheduler
-              mounts = [
-                "scheduler.artist.studio:/deadline /mnt/deadline nfs defaults 0 0"
-              ]
-            }
-          ]
           pcoipLicenseKey = ""
         }
       }
@@ -120,26 +91,6 @@ virtualMachines = [
         enable   = true
         fileName = "initialize.sh"
         parameters = {
-          fileSystems = [
-            {
-              enable = false # File Storage
-              mounts = [
-                "xstudio1.blob.core.windows.net:/xstudio1/content /mnt/content aznfs default,sec=sys,proto=tcp,vers=3,nolock 0 0"
-              ]
-            },
-            {
-              enable = false # File Cache
-              mounts = [
-                "cache.artist.studio:/content /mnt/content nfs hard,proto=tcp,mountproto=tcp,retry=30,nolock 0 0"
-              ]
-            },
-            {
-              enable = true # Job Scheduler
-              mounts = [
-                "scheduler.artist.studio:/deadline /mnt/deadline nfs defaults 0 0"
-              ]
-            }
-          ]
           pcoipLicenseKey = ""
         }
       }
@@ -187,26 +138,6 @@ virtualMachines = [
         enable   = true
         fileName = "initialize.ps1"
         parameters = {
-          fileSystems = [
-            {
-              enable = false # File Storage
-              mounts = [
-                "mount -o anon nolock \\\\xstudio1.blob.core.windows.net\\xstudio1\\content X:"
-              ]
-            },
-            {
-              enable = false # File Cache
-              mounts = [
-                "mount -o anon nolock \\\\cache.artist.studio\\content H:"
-              ]
-            },
-            {
-              enable = true # Job Scheduler
-              mounts = [
-                "mount -o anon \\\\scheduler.artist.studio\\deadline S:"
-              ]
-            }
-          ]
           pcoipLicenseKey = ""
         }
       }
@@ -254,26 +185,6 @@ virtualMachines = [
         enable   = true
         fileName = "initialize.ps1"
         parameters = {
-          fileSystems = [
-            {
-              enable = false # File Storage
-              mounts = [
-                "mount -o anon nolock \\\\xstudio1.blob.core.windows.net\\xstudio1\\content X:"
-              ]
-            },
-            {
-              enable = false # File Cache
-              mounts = [
-                "mount -o anon nolock \\\\cache.artist.studio\\content H:"
-              ]
-            },
-            {
-              enable = true # Job Scheduler
-              mounts = [
-                "mount -o anon \\\\scheduler.artist.studio\\deadline S:"
-              ]
-            }
-          ]
           pcoipLicenseKey = ""
         }
       }
@@ -304,6 +215,15 @@ trafficManager = {
 #######################################################################
 # Resource dependency configuration for pre-existing deployments only #
 #######################################################################
+
+activeDirectory = {
+  enable           = false
+  domainName       = "artist.studio"
+  domainServerName = "WinScheduler"
+  orgUnitPath      = ""
+  adminUsername    = ""
+  adminPassword    = ""
+}
 
 existingNetwork = {
   enable            = false

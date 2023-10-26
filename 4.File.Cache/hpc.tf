@@ -30,14 +30,22 @@ locals {
       name              = "${module.global.regionName}-${var.cacheName}"
       regionName        = module.global.regionName
       resourceGroupName = "${var.resourceGroupName}.${module.global.regionName}"
-      subnetId          = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.existingNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${var.existingNetwork.name}/subnets/${var.existingNetwork.subnetName}"
+      virtualNetwork = {
+        subnetId          = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.existingNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${var.existingNetwork.name}/subnets/${var.existingNetwork.subnetName}"
+        dnsZoneName       = var.existingNetwork.privateDnsZoneName
+        resourceGroupName = var.existingNetwork.resourceGroupName
+      }
     }) if var.enableHPCCache
   ] : [
     for virtualNetwork in local.virtualNetworks : merge(var.hpcCache, {
       name              = "${virtualNetwork.regionName}-${var.cacheName}"
       regionName        = virtualNetwork.regionName
       resourceGroupName = "${var.resourceGroupName}.${virtualNetwork.regionName}"
-      subnetId          = "${virtualNetwork.id}/subnets/${data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.cache].name}"
+      virtualNetwork = {
+        subnetId          = "${virtualNetwork.id}/subnets/${data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.cache].name}"
+        dnsZoneName       = data.terraform_remote_state.network.outputs.privateDns.zoneName
+        resourceGroupName = virtualNetwork.resourceGroupName
+      }
     }) if var.enableHPCCache
   ])
   storageTargetsNfs = flatten([
@@ -83,7 +91,7 @@ resource "azurerm_hpc_cache" "studio" {
   name                = each.value.name
   resource_group_name = each.value.resourceGroupName
   location            = each.value.regionName
-  subnet_id           = each.value.subnetId
+  subnet_id           = each.value.virtualNetwork.subnetId
   sku_name            = each.value.throughput
   cache_size_in_gb    = each.value.size
   mtu                 = each.value.mtuSize
@@ -151,15 +159,15 @@ resource "azurerm_hpc_cache_blob_nfs_target" "storage" {
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
 ############################################################################
 
-resource "azurerm_private_dns_a_record" "studio_hpc" {
+resource "azurerm_private_dns_a_record" "cache_hpc" {
   for_each = {
     for storageCache in local.storageCaches : storageCache.name => storageCache
   }
-  name                = "cache-${lower(each.value.regionName)}"
-  resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
-  zone_name           = data.azurerm_private_dns_zone.studio.name
+  name                = var.dnsARecord.name
+  resource_group_name = each.value.virtualNetwork.resourceGroupName
+  zone_name           = each.value.virtualNetwork.dnsZoneName
   records             = azurerm_hpc_cache.studio[each.value.name].mount_addresses
-  ttl                 = 300
+  ttl                 = var.dnsARecord.ttlSeconds
 }
 
 output "hpcCaches" {
@@ -175,8 +183,7 @@ output "hpcCaches" {
 
 output "hpcCachesDns" {
   value = !var.enableHPCCache ? null : [
-    for dnsRecord in azurerm_private_dns_a_record.studio_hpc : {
-      id                = dnsRecord.id
+    for dnsRecord in azurerm_private_dns_a_record.cache_hpc : {
       name              = dnsRecord.name
       resourceGroupName = dnsRecord.resource_group_name
       fqdn              = dnsRecord.fqdn

@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~>3.77.0"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = "~>3.4.0"
+    }
   }
   backend "azurerm" {
     key = "3.File.Storage"
@@ -114,7 +118,7 @@ data "azurerm_resource_group" "network" {
 }
 
 data "azurerm_resource_group" "dns" {
-  name = data.azurerm_private_dns_zone.studio.resource_group_name
+  name = data.terraform_remote_state.network.outputs.resourceGroupName
 }
 
 data "azurerm_virtual_network" "studio" {
@@ -130,7 +134,7 @@ data "azurerm_subnet" "storage" {
 
 data "azurerm_private_dns_zone" "studio" {
   name                = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.terraform_remote_state.network.outputs.privateDns.zoneName
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.resourceGroupName
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
 }
 
 locals {

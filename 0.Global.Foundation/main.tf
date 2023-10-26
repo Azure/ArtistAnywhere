@@ -9,6 +9,10 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~>2.44.0"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = "~>3.4.0"
+    }
     time = {
       source  = "hashicorp/time"
       version = "~>0.9.1"

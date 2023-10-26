@@ -42,10 +42,6 @@ variable "virtualMachines" {
         enable     = bool
         fileName   = string
         parameters = object({
-          fileSystems = list(object({
-            enable = bool
-            mounts = list(string)
-          }))
           pcoipLicenseKey = string
         })
       })
@@ -57,6 +53,12 @@ variable "virtualMachines" {
 }
 
 locals {
+  fileSystemsLinux = [
+    for fileSystem in module.farm.fileSystems.linux : fileSystem if fileSystem.enable
+  ]
+  fileSystemsWindows = [
+    for fileSystem in module.farm.fileSystems.windows : fileSystem if fileSystem.enable
+  ]
   virtualMachines = [
     for virtualMachine in var.virtualMachines : merge(virtualMachine, {
       adminLogin = {
@@ -155,6 +157,7 @@ resource "azurerm_virtual_machine_extension" "initialize_linux" {
   settings = jsonencode({
     script = "${base64encode(
       templatefile(each.value.extension.initialize.fileName, merge(each.value.extension.initialize.parameters, {
+        fileSystems     = local.fileSystemsLinux,
         activeDirectory = each.value.activeDirectory
       }))
     )}"
@@ -231,6 +234,7 @@ resource "azurerm_virtual_machine_extension" "initialize_windows" {
   settings = jsonencode({
     commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
       templatefile(each.value.extension.initialize.fileName, merge(each.value.extension.initialize.parameters, {
+        fileSystems     = local.fileSystemsWindows,
         activeDirectory = each.value.activeDirectory
       })), "UTF-16LE"
     )}"

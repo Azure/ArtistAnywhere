@@ -27,21 +27,21 @@ function SetFileSystems {
   curl -L https://github.com/Azure/AZNFS-mount/releases/download/1.0.10/aznfs_install.sh | bash
   for fileSystem in $(echo $fileSystems | jq -r '.[] | @base64'); do
     if [ $(GetEncodedValue $fileSystem .enable) == true ]; then
-      SetFileSystemMounts "$(GetEncodedValue $fileSystem .mounts)"
+      SetFileSystemMount "$(GetEncodedValue $fileSystem .mount)"
     fi
   done
   systemctl daemon-reload
   mount -a
 }
 
-function SetFileSystemMounts {
-  fileSystemMounts="$1"
-  for fileSystemMount in $(echo $fileSystemMounts | jq -r '.[] | @base64'); do
-    mount=$(echo $fileSystemMount | base64 -d)
-    mountDirectory=$(cut -d " " -f 2 <<< "$mount")
-    if [ $(grep -c $mountDirectory /etc/fstab) ]; then
-      mkdir -p $mountDirectory
-      echo "$mount" >> /etc/fstab
-    fi
-  done
+function SetFileSystemMount {
+  fileSystemMount="$1"
+  mountType=$(echo $fileSystemMount | jq -r .type)
+  mountPath=$(echo $fileSystemMount | jq -r .path)
+  mountSource=$(echo $fileSystemMount | jq -r .source)
+  mountOptions=$(echo $fileSystemMount | jq -r .options)
+  if [ $(grep -c $mountPath /etc/fstab) ]; then
+    mkdir -p $mountPath
+    echo "$mountSource $mountPath $mountType $mountOptions" >> /etc/fstab
+  fi
 }

@@ -87,6 +87,13 @@ variable "storageTargetsNfsBlob" {
   }))
 }
 
+variable "dnsARecord" {
+  type = object({
+    name       = string
+    ttlSeconds = number
+  })
+}
+
 variable "existingNetwork" {
   type = object({
     enable             = bool
@@ -138,24 +145,21 @@ data "terraform_remote_state" "network" {
   }
 }
 
-data "azurerm_private_dns_zone" "studio" {
-  name                = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.terraform_remote_state.network.outputs.privateDns.zoneName
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.resourceGroupName
-}
-
 locals {
   regionNames = var.existingNetwork.enable || !var.enablePerRegion ? [module.global.regionName] : [
     for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
   ]
   virtualNetworks = distinct(!var.enablePerRegion ? [
     for i in range(length(data.terraform_remote_state.network.outputs.virtualNetworks)) : {
-      id         = data.terraform_remote_state.network.outputs.virtualNetwork.id
-      regionName = data.terraform_remote_state.network.outputs.virtualNetwork.regionName
+      id                = data.terraform_remote_state.network.outputs.virtualNetwork.id
+      regionName        = data.terraform_remote_state.network.outputs.virtualNetwork.regionName
+      resourceGroupName = data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
     }
   ] : [
     for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : {
-      id         = virtualNetwork.id
-      regionName = virtualNetwork.regionName
+      id                = virtualNetwork.id
+      regionName        = virtualNetwork.regionName
+      resourceGroupName = virtualNetwork.resourceGroupName
     }
   ])
 }

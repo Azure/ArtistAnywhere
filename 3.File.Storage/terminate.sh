@@ -26,9 +26,9 @@ for scheduledEvent in $(echo $scheduledEvents | jq -r '.[] | @base64'); do
   if [[ $eventType == Terminate && $eventScope == $instanceName ]]; then
     az login --identity
     dnsRecordQuery="aRecords[?ipv4Address=='$(hostname -i)']"
-    dnsRecordAddress=$(az network private-dns record-set a show --resource-group ${dnsResourceGroupName} --zone-name ${dnsZoneName} --name ${dnsRecordSetName} --query $dnsRecordQuery --output tsv)
+    dnsRecordAddress=$(az network private-dns record-set a show --resource-group ${dnsResourceGroupName} --zone-name ${dnsZoneName} --name ${dnsARecordName} --query $dnsRecordQuery --output tsv)
     if [ -n "$dnsRecordAddress" ]; then
-      az network private-dns record-set a remove-record --resource-group ${dnsResourceGroupName} --zone-name ${dnsZoneName} --record-set-name ${dnsRecordSetName} --ipv4-address $dnsRecordAddress --keep-empty-record-set
+      az network private-dns record-set a remove-record --resource-group ${dnsResourceGroupName} --zone-name ${dnsZoneName} --record-set-name ${dnsARecordName} --ipv4-address $dnsRecordAddress --keep-empty-record-set
     fi
 
     weka user login admin ${wekaAdminPassword}

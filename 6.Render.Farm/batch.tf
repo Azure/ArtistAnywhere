@@ -17,10 +17,8 @@ variable "batch" {
       name        = string
       displayName = string
       node = object({
-        image = object({
-          id      = string
-          agentId = string
-        })
+        imageId = string
+        agentId = string
         machine = object({
           size  = string
           count = number
@@ -30,6 +28,7 @@ variable "batch" {
             enable = bool
           })
         })
+        placementPolicy    = string
         deallocationMode   = string
         maxConcurrentTasks = number
       })
@@ -60,6 +59,15 @@ data "azurerm_key_vault" "batch" {
   resource_group_name = module.global.resourceGroupName
 }
 
+locals {
+  fileSystemsLinuxBatch = [
+    for fileSystem in local.fileSystemsLinux : fileSystem if !fileSystem.iaasOnly
+  ]
+  fileSystemsWindowsBatch = [
+    for fileSystem in local.fileSystemsWindows : fileSystem if !fileSystem.iaasOnly
+  ]
+}
+
 ###############################################################################################
 # Private Endpoint (https://learn.microsoft.com/azure/private-link/private-endpoint-overview) #
 ###############################################################################################
@@ -72,7 +80,7 @@ resource "azurerm_private_dns_zone" "batch" {
 
 resource "azurerm_private_dns_zone_virtual_network_link" "batch" {
   count                 = var.batch.enable ? 1 : 0
-  name                  = "${data.azurerm_virtual_network.studio.name}-batch"
+  name                  = "batch-${lower(data.azurerm_virtual_network.studio.location)}"
   resource_group_name   = azurerm_resource_group.farm.name
   private_dns_zone_name = azurerm_private_dns_zone.batch[0].name
   virtual_network_id    = data.azurerm_virtual_network.studio.id
@@ -80,7 +88,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "batch" {
 
 resource "azurerm_private_endpoint" "batch_account" {
   count               = var.batch.enable ? 1 : 0
-  name                = "${var.batch.account.name}-batchAccount"
+  name                = "${azurerm_batch_account.scheduler[0].name}-batchAccount"
   resource_group_name = azurerm_resource_group.farm.name
   location            = azurerm_resource_group.farm.location
   subnet_id           = data.azurerm_subnet.farm.id
@@ -98,11 +106,14 @@ resource "azurerm_private_endpoint" "batch_account" {
       azurerm_private_dns_zone.batch[0].id
     ]
   }
+  depends_on = [
+    azurerm_private_dns_zone_virtual_network_link.batch
+  ]
 }
 
 resource "azurerm_private_endpoint" "batch_node" {
   count               = var.batch.enable ? 1 : 0
-  name                = "${var.batch.account.name}-batchNode"
+  name                = "${azurerm_batch_account.scheduler[0].name}-batchNode"
   resource_group_name = azurerm_resource_group.farm.name
   location            = azurerm_resource_group.farm.location
   subnet_id           = data.azurerm_subnet.farm.id
@@ -120,6 +131,9 @@ resource "azurerm_private_endpoint" "batch_node" {
       azurerm_private_dns_zone.batch[0].id
     ]
   }
+  depends_on = [
+    azurerm_private_dns_zone_virtual_network_link.batch
+  ]
 }
 
 ############################################################################
@@ -181,8 +195,8 @@ resource "azurerm_batch_pool" "farm" {
   display_name             = each.value.displayName != "" ? each.value.displayName : each.value.name
   resource_group_name      = azurerm_resource_group.farm.name
   account_name             = azurerm_batch_account.scheduler[0].name
+  node_agent_sku_id        = each.value.node.agentId
   vm_size                  = each.value.node.machine.size
-  node_agent_sku_id        = each.value.node.image.agentId
   max_tasks_per_node       = each.value.node.maxConcurrentTasks
   os_disk_placement        = each.value.node.osDisk.ephemeral.enable ? "CacheDisk" : null
   inter_node_communication = "Disabled"
@@ -193,19 +207,48 @@ resource "azurerm_batch_pool" "farm" {
     ]
   }
   storage_image_reference {
-    id = each.value.node.image.id
+    id = each.value.node.imageId
   }
   network_configuration {
     subnet_id = data.azurerm_subnet.farm.id
+  }
+  node_placement {
+    policy = each.value.node.placementPolicy
+  }
+  task_scheduling_policy {
+    node_fill_type = each.value.fillMode.nodePack.enable ? "Pack" : "Spread"
   }
   fixed_scale {
     node_deallocation_method  = each.value.node.deallocationMode
     target_low_priority_nodes = each.value.spot.enable ? each.value.node.machine.count : 0
     target_dedicated_nodes    = each.value.spot.enable ? 0 : each.value.node.machine.count
   }
-  task_scheduling_policy {
-    node_fill_type = each.value.fillMode.nodePack.enable ? "Pack" : "Spread"
+  mount {
+    dynamic nfs_mount {
+      for_each = strcontains(each.value.node.agentId, "linux") ? local.fileSystemsLinuxBatch : []
+      content {
+        relative_mount_path = each.value.path
+        source              = each.value.source
+        mount_options       = each.value.options
+      }
+    }
+    dynamic nfs_mount {
+      for_each = strcontains(each.value.node.agentId, "windows") ? local.fileSystemsWindowsBatch : []
+      content {
+        relative_mount_path = each.value.path
+        source              = each.value.source
+        mount_options       = each.value.options
+      }
+    }
   }
+  # dynamic start_task {
+  #   for_each = var.activeDirectory.enable && strcontains(each.value.node.agentId, "windows") ? [1] : []
+  #   content {
+  #     command_line = ""
+  #     user_identity {
+  #     }
+  #   }
+  # }
 }
 
 output "batchAccount" {

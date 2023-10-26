@@ -9,6 +9,10 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~>2.44.0"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = "~>3.4.0"
+    }
   }
   backend "azurerm" {
     key = "6.Render.Farm"
@@ -33,6 +37,10 @@ provider "azurerm" {
 
 module "global" {
   source = "../0.Global.Foundation/module"
+}
+
+module "farm" {
+  source = "./module"
 }
 
 variable "resourceGroupName" {
@@ -145,11 +153,6 @@ data "azurerm_subnet" "ai" {
   name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameAI : data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.ai].name
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
-}
-
-data "azurerm_private_dns_zone" "studio" {
-  name                = data.terraform_remote_state.network.outputs.privateDns.zoneName
-  resource_group_name = data.terraform_remote_state.network.outputs.resourceGroupName
 }
 
 data "azurerm_storage_account" "studio" {

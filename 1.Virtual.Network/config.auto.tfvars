@@ -234,7 +234,7 @@ privateDns = {
 ########################################################################
 
 bastion = {
-  enable              = true
+  enable              = false
   sku                 = "Standard"
   scaleUnitCount      = 2
   enableFileCopy      = true

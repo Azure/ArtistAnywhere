@@ -109,9 +109,9 @@ weka = {
     }
   }
   network = {
-    privateDnsZone = {
-      recordSetName    = "content"
-      recordTtlSeconds = 300
+    dnsARecord = {
+      name    = "content"
+      ttlSeconds = 300
     }
     enableAcceleration = false
   }

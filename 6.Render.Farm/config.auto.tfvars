@@ -1,14 +1,5 @@
 resourceGroupName = "ArtistAnywhere.Farm" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
-activeDirectory = {
-  enable           = true
-  domainName       = "artist.studio"
-  domainServerName = "WinScheduler"
-  orgUnitPath      = ""
-  adminUsername    = ""
-  adminPassword    = ""
-}
-
 ######################################################################################################
 # Virtual Machine Scale Sets (https://learn.microsoft.com/azure/virtual-machine-scale-sets/overview) #
 ######################################################################################################
@@ -62,26 +53,6 @@ virtualMachineScaleSets = [
         enable   = true
         fileName = "initialize.sh"
         parameters = {
-          fileSystems = [
-            {
-              enable = false # File Storage
-              mounts = [
-                "xstudio1.blob.core.windows.net:/xstudio1/content /mnt/content aznfs default,sec=sys,proto=tcp,vers=3,nolock 0 0"
-              ]
-            },
-            {
-              enable = false # File Cache
-              mounts = [
-                "cache.artist.studio:/content /mnt/content nfs hard,proto=tcp,mountproto=tcp,retry=30,nolock 0 0"
-              ]
-            },
-            {
-              enable = true # Job Scheduler
-              mounts = [
-                "scheduler.artist.studio:/deadline /mnt/deadline nfs defaults 0 0"
-              ]
-            }
-          ]
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
             enable       = true
             delayTimeout = "PT5M"
@@ -147,26 +118,6 @@ virtualMachineScaleSets = [
         enable   = true
         fileName = "initialize.sh"
         parameters = {
-          fileSystems = [
-            {
-              enable = false # File Storage
-              mounts = [
-                "xstudio1.blob.core.windows.net:/xstudio1/content /mnt/content aznfs default,sec=sys,proto=tcp,vers=3,nolock 0 0"
-              ]
-            },
-            {
-              enable = false # File Cache
-              mounts = [
-                "cache.artist.studio:/content /mnt/content nfs hard,proto=tcp,mountproto=tcp,retry=30,nolock 0 0"
-              ]
-            },
-            {
-              enable = true # Job Scheduler
-              mounts = [
-                "scheduler.artist.studio:/deadline /mnt/deadline nfs defaults 0 0"
-              ]
-            }
-          ]
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
             enable       = true
             delayTimeout = "PT5M"
@@ -232,26 +183,6 @@ virtualMachineScaleSets = [
         enable   = true
         fileName = "initialize.ps1"
         parameters = {
-          fileSystems = [
-            {
-              enable = false # File Storage
-              mounts = [
-                "mount -o anon nolock \\\\xstudio1.blob.core.windows.net\\xstudio1\\content X:"
-              ]
-            },
-            {
-              enable = false # File Cache
-              mounts = [
-                "mount -o anon nolock \\\\cache.artist.studio\\content H:"
-              ]
-            },
-            {
-              enable = true # Job Scheduler
-              mounts = [
-                "mount -o anon \\\\scheduler.artist.studio\\deadline S:"
-              ]
-            }
-          ]
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
             enable       = true
             delayTimeout = "PT5M"
@@ -317,26 +248,6 @@ virtualMachineScaleSets = [
         enable   = true
         fileName = "initialize.ps1"
         parameters = {
-          fileSystems = [
-            {
-              enable = false # File Storage
-              mounts = [
-                "mount -o anon nolock \\\\xstudio1.blob.core.windows.net\\xstudio1\\content X:"
-              ]
-            },
-            {
-              enable = false # File Cache
-              mounts = [
-                "mount -o anon nolock \\\\cache.artist.studio\\content H:"
-              ]
-            },
-            {
-              enable = true # Job Scheduler
-              mounts = [
-                "mount -o anon \\\\scheduler.artist.studio\\deadline S:"
-              ]
-            }
-          ]
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
             enable       = true
             delayTimeout = "PT5M"
@@ -375,10 +286,8 @@ batch = {
       name        = "LnxFarmC"
       displayName = "Linux Render Farm (CPU)"
       node = {
-        image = {
-          id      = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
-          agentId = "batch.node.el 9"
-        }
+        imageId = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
+        agentId = "batch.node.el 9"
         machine = {
           size  = "Standard_HB120rs_v3" # https://learn.microsoft.com/azure/batch/batch-pool-vm-sizes
           count = 2
@@ -388,7 +297,8 @@ batch = {
             enable = false # https://learn.microsoft.com/azure/batch/create-pool-ephemeral-os-disk
           }
         }
-        deallocationMode   = "TaskCompletion" # https://learn.microsoft.com/rest/api/batchservice/pool/remove-nodes
+        placementPolicy    = "Regional"       # https://learn.microsoft.com/rest/api/batchservice/pool/add?#nodeplacementpolicytype
+        deallocationMode   = "TaskCompletion" # https://learn.microsoft.com/rest/api/batchservice/pool/remove-nodes?#computenodedeallocationoption
         maxConcurrentTasks = 1
       }
       fillMode = { # https://learn.microsoft.com/azure/batch/batch-parallel-node-tasks
@@ -405,10 +315,8 @@ batch = {
       name        = "LnxFarmG"
       displayName = "Linux Render Farm (GPU)"
       node = {
-        image = {
-          id      = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.1.0"
-          agentId = "batch.node.el 9"
-        }
+        imageId = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.1.0"
+        agentId = "batch.node.el 9"
         machine = {
           size  = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/batch/batch-pool-vm-sizes
           count = 2
@@ -418,7 +326,8 @@ batch = {
             enable = false # https://learn.microsoft.com/azure/batch/create-pool-ephemeral-os-disk
           }
         }
-        deallocationMode   = "TaskCompletion" # https://learn.microsoft.com/rest/api/batchservice/pool/remove-nodes
+        placementPolicy    = "Regional"       # https://learn.microsoft.com/rest/api/batchservice/pool/add?#nodeplacementpolicytype
+        deallocationMode   = "TaskCompletion" # https://learn.microsoft.com/rest/api/batchservice/pool/remove-nodes?#computenodedeallocationoption
         maxConcurrentTasks = 1
       }
       fillMode = { # https://learn.microsoft.com/azure/batch/batch-parallel-node-tasks
@@ -435,10 +344,8 @@ batch = {
       name        = "WinFarmC"
       displayName = "Windows Render Farm (CPU)"
       node = {
-        image = {
-          id      = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinFarm/versions/2.0.0"
-          agentId = "batch.node.windows amd64"
-        }
+        imageId = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinFarm/versions/2.0.0"
+        agentId = "batch.node.windows amd64"
         machine = {
           size  = "Standard_HB120rs_v3" # https://learn.microsoft.com/azure/batch/batch-pool-vm-sizes
           count = 2
@@ -448,7 +355,8 @@ batch = {
             enable = false # https://learn.microsoft.com/azure/batch/create-pool-ephemeral-os-disk
           }
         }
-        deallocationMode   = "TaskCompletion" # https://learn.microsoft.com/rest/api/batchservice/pool/remove-nodes
+        placementPolicy    = "Regional"       # https://learn.microsoft.com/rest/api/batchservice/pool/add?#nodeplacementpolicytype
+        deallocationMode   = "TaskCompletion" # https://learn.microsoft.com/rest/api/batchservice/pool/remove-nodes?#computenodedeallocationoption
         maxConcurrentTasks = 1
       }
       fillMode = { # https://learn.microsoft.com/azure/batch/batch-parallel-node-tasks
@@ -465,10 +373,8 @@ batch = {
       name        = "WinFarmG"
       displayName = "Windows Render Farm (GPU)"
       node = {
-        image = {
-          id      = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinFarm/versions/2.1.0"
-          agentId = "batch.node.windows amd64"
-        }
+        imageId = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinFarm/versions/2.1.0"
+        agentId = "batch.node.windows amd64"
         machine = {
           size  = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/batch/batch-pool-vm-sizes
           count = 2
@@ -478,7 +384,8 @@ batch = {
             enable = false # https://learn.microsoft.com/azure/batch/create-pool-ephemeral-os-disk
           }
         }
-        deallocationMode   = "TaskCompletion" # https://learn.microsoft.com/rest/api/batchservice/pool/remove-nodes
+        placementPolicy    = "Regional"       # https://learn.microsoft.com/rest/api/batchservice/pool/add?#nodeplacementpolicytype
+        deallocationMode   = "TaskCompletion" # https://learn.microsoft.com/rest/api/batchservice/pool/remove-nodes?#computenodedeallocationoption
         maxConcurrentTasks = 1
       }
       fillMode = { # https://learn.microsoft.com/azure/batch/batch-parallel-node-tasks
@@ -551,6 +458,15 @@ functionApp = {
 #######################################################################
 # Resource dependency configuration for pre-existing deployments only #
 #######################################################################
+
+activeDirectory = {
+  enable           = false
+  domainName       = "artist.studio"
+  domainServerName = "WinScheduler"
+  orgUnitPath      = ""
+  adminUsername    = ""
+  adminPassword    = ""
+}
 
 existingNetwork = {
   enable            = false

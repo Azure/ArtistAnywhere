@@ -1,4 +1,4 @@
-$fileSystemMountPath = "C:\AzureData\fileSystemMount.bat"
+$fileSystemsPath = "C:\AzureData\fileSystems.bat"
 
 function InitializeClient ($binDirectory, $activeDirectoryJson) {
   StartProcess deadlinecommand.exe "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx" "$binDirectory\deadline-repository"
@@ -35,29 +35,28 @@ function SetFileSystems ($binDirectory, $fileSystemsJson) {
   $fileSystems = ConvertFrom-Json -InputObject $fileSystemsJson
   foreach ($fileSystem in $fileSystems) {
     if ($fileSystem.enable) {
-      SetFileSystemMounts $fileSystem.mounts
+      SetFileSystemMount $fileSystem.mount
     }
   }
   RegisterFileSystemMounts $binDirectory
 }
 
-function SetFileSystemMounts ($fileSystemMounts) {
-  if (!(FileExists $fileSystemMountPath)) {
-    New-Item -ItemType File -Path $fileSystemMountPath
+function SetFileSystemMount ($fileSystemMount) {
+  if (!(FileExists $fileSystemsPath)) {
+    New-Item -ItemType File -Path $fileSystemsPath
   }
-  $mountScript = Get-Content -Path $fileSystemMountPath
-  foreach ($fileSystemMount in $fileSystemMounts) {
-    if ($mountScript -eq $null -or $mountScript -notlike "*$fileSystemMount*") {
-      Add-Content -Path $fileSystemMountPath -Value $fileSystemMount
-    }
+  $mountScript = Get-Content -Path $fileSystemsPath
+  if ($mountScript -eq $null -or $mountScript -notlike "*$($fileSystemMount.path)*") {
+    $mount = "mount $($fileSystemMount.options) $($fileSystemMount.source) $($fileSystemMount.path)"
+    Add-Content -Path $fileSystemsPath -Value $mount
   }
 }
 
 function RegisterFileSystemMounts ($binDirectory) {
-  if (FileExists $fileSystemMountPath) {
-    StartProcess $fileSystemMountPath $null "$binDirectory\file-system-mount"
+  if (FileExists $fileSystemsPath) {
+    StartProcess $fileSystemsPath $null "$binDirectory\file-system-mount"
     $taskName = "AAA File System Mount"
-    $taskAction = New-ScheduledTaskAction -Execute $fileSystemMountPath
+    $taskAction = New-ScheduledTaskAction -Execute $fileSystemsPath
     $taskTrigger = New-ScheduledTaskTrigger -AtStartup
     Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -User System -Force
   }
