@@ -2,7 +2,7 @@
 # Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
 ######################################################################
 
-variable "monitor" {
+variable monitor {
   type = object({
     workspace = object({
       sku = string
@@ -14,7 +14,7 @@ variable "monitor" {
   })
 }
 
-resource "azurerm_log_analytics_workspace" "monitor" {
+resource azurerm_log_analytics_workspace monitor {
   count                      = module.global.monitor.enable ? 1 : 0
   name                       = module.global.monitor.name
   resource_group_name        = azurerm_resource_group.studio.name
@@ -25,7 +25,7 @@ resource "azurerm_log_analytics_workspace" "monitor" {
   internet_query_enabled     = false
 }
 
-resource "azurerm_application_insights" "monitor" {
+resource azurerm_application_insights monitor {
   count                      = module.global.monitor.enable ? 1 : 0
   name                       = module.global.monitor.name
   resource_group_name        = azurerm_resource_group.studio.name
@@ -37,7 +37,7 @@ resource "azurerm_application_insights" "monitor" {
   internet_query_enabled     = false
 }
 
-output "monitor" {
+output monitor {
   value = {
     enable = module.global.monitor.enable
     workspace = {

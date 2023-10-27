@@ -2,7 +2,7 @@
 # Storage (https://learn.microsoft.com/azure/storage) #
 #######################################################
 
-variable "rootStorage" {
+variable rootStorage {
   type = object({
     accountType        = string
     accountRedundancy  = string
@@ -10,7 +10,7 @@ variable "rootStorage" {
   })
 }
 
-resource "azurerm_storage_account" "studio" {
+resource azurerm_storage_account studio {
   name                            = module.global.rootStorage.accountName
   resource_group_name             = azurerm_resource_group.studio.name
   location                        = azurerm_resource_group.studio.location
@@ -26,14 +26,14 @@ resource "azurerm_storage_account" "studio" {
   }
 }
 
-resource "time_sleep" "storage_account_firewall" {
+resource time_sleep storage_account_firewall {
   create_duration = "30s"
   depends_on = [
     azurerm_storage_account.studio
   ]
 }
 
-resource "azurerm_storage_container" "terraform" {
+resource azurerm_storage_container terraform {
   name                 = module.global.rootStorage.containerName.terraform
   storage_account_name = azurerm_storage_account.studio.name
   depends_on = [
@@ -41,7 +41,7 @@ resource "azurerm_storage_container" "terraform" {
   ]
 }
 
-output "rootStorage" {
+output rootStorage {
   value = {
     accountName  = azurerm_storage_account.studio.name
     blobEndpoint = azurerm_storage_account.studio.primary_blob_endpoint

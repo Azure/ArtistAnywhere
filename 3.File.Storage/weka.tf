@@ -2,7 +2,7 @@
 # Weka (https://azuremarketplace.microsoft.com/marketplace/apps/weka1652213882079.weka_data_platform) #
 #######################################################################################################
 
-variable "weka" {
+variable weka {
   type = object({
     enable   = bool
     apiToken = string
@@ -90,7 +90,7 @@ variable "weka" {
   })
 }
 
-data "azurerm_storage_account" "blob" {
+data azurerm_storage_account blob {
   count               = var.weka.enable ? 1 : 0
   name                = local.blobStorageAccount.name
   resource_group_name = azurerm_resource_group.storage.name
@@ -99,7 +99,7 @@ data "azurerm_storage_account" "blob" {
   ]
 }
 
-data "azurerm_virtual_machine_scale_set" "weka" {
+data azurerm_virtual_machine_scale_set weka {
   count               = var.weka.enable ? 1 : 0
   name                = azurerm_linux_virtual_machine_scale_set.weka[0].name
   resource_group_name = azurerm_linux_virtual_machine_scale_set.weka[0].resource_group_name
@@ -169,34 +169,34 @@ locals {
   wekaFileSystemScript = "${local.binDirectory}/weka-file-system.sh"
 }
 
-resource "azurerm_resource_group" "weka" {
+resource azurerm_resource_group weka {
   count    = var.weka.enable ? 1 : 0
   name     = "${var.resourceGroupName}.Weka"
   location = azurerm_resource_group.storage.location
 }
 
-resource "azurerm_role_assignment" "weka_virtual_machine_contributor" {
+resource azurerm_role_assignment weka_virtual_machine_contributor {
   count                = var.weka.enable ? 1 : 0
   role_definition_name = "Virtual Machine Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#virtual-machine-contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = azurerm_resource_group.weka[0].id
 }
 
-resource "azurerm_role_assignment" "weka_private_dns_zone_contributor" {
+resource azurerm_role_assignment weka_private_dns_zone_contributor {
   count                = var.weka.enable ? 1 : 0
   role_definition_name = "Private DNS Zone Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#private-dns-zone-contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_resource_group.network.id
 }
 
-resource "azurerm_proximity_placement_group" "weka" {
+resource azurerm_proximity_placement_group weka {
   count               = var.weka.enable ? 1 : 0
   name                = var.weka.name.resource
   resource_group_name = azurerm_resource_group.weka[0].name
   location            = azurerm_resource_group.weka[0].location
 }
 
-resource "azurerm_linux_virtual_machine_scale_set" "weka" {
+resource azurerm_linux_virtual_machine_scale_set weka {
   count                           = var.weka.enable ? 1 : 0
   name                            = var.weka.name.resource
   resource_group_name             = azurerm_resource_group.weka[0].name
@@ -319,7 +319,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "weka" {
   ]
 }
 
-resource "azurerm_private_dns_a_record" "weka_cluster" {
+resource azurerm_private_dns_a_record weka_cluster {
   count               = var.weka.enable ? 1 : 0
   name                = var.weka.network.dnsARecord.name
   resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
@@ -328,7 +328,7 @@ resource "azurerm_private_dns_a_record" "weka_cluster" {
   ttl                 = var.weka.network.dnsARecord.ttlSeconds
 }
 
-resource "terraform_data" "weka_cluster_create" {
+resource terraform_data weka_cluster_create {
   count = var.weka.enable ? 1 : 0
   connection {
     type     = "ssh"
@@ -336,7 +336,7 @@ resource "terraform_data" "weka_cluster_create" {
     user     = var.weka.adminLogin.userName
     password = var.weka.adminLogin.userPassword
   }
-  provisioner "remote-exec" {
+  provisioner remote-exec {
     inline = [
       "machineSpec='${local.wekaMachineSpec}'",
       "source ${local.wekaDriveDisksScript}",
@@ -350,7 +350,7 @@ resource "terraform_data" "weka_cluster_create" {
   }
 }
 
-resource "terraform_data" "weka_container_setup" {
+resource terraform_data weka_container_setup {
   count = var.weka.enable ? var.weka.machine.count : 0
   connection {
     type     = "ssh"
@@ -358,7 +358,7 @@ resource "terraform_data" "weka_container_setup" {
     user     = var.weka.adminLogin.userName
     password = var.weka.adminLogin.userPassword
   }
-  provisioner "remote-exec" {
+  provisioner remote-exec {
     inline = [
       "failureDomain=$(hostname)",
       "machineSpec='${local.wekaMachineSpec}'",
@@ -373,7 +373,7 @@ resource "terraform_data" "weka_container_setup" {
   ]
 }
 
-resource "terraform_data" "weka_cluster_start" {
+resource terraform_data weka_cluster_start {
   count = var.weka.enable ? 1 : 0
   connection {
     type     = "ssh"
@@ -381,7 +381,7 @@ resource "terraform_data" "weka_cluster_start" {
     user     = var.weka.adminLogin.userName
     password = var.weka.adminLogin.userPassword
   }
-  provisioner "remote-exec" {
+  provisioner remote-exec {
     inline = [
       "weka cluster update --cluster-name='${var.weka.name.display}' --data-drives ${var.weka.dataProtection.stripeWidth} --parity-drives ${var.weka.dataProtection.parityLevel}",
       "weka cluster hot-spare ${var.weka.dataProtection.hotSpare}",
@@ -399,7 +399,7 @@ resource "terraform_data" "weka_cluster_start" {
   ]
 }
 
-resource "terraform_data" "weka_file_system" {
+resource terraform_data weka_file_system {
   count = var.weka.enable ? 1 : 0
   connection {
     type     = "ssh"
@@ -407,7 +407,7 @@ resource "terraform_data" "weka_file_system" {
     user     = var.weka.adminLogin.userName
     password = var.weka.adminLogin.userPassword
   }
-  provisioner "remote-exec" {
+  provisioner remote-exec {
     inline = [
       "ioStatus=$(weka status --json | jq -r .io_status)",
       "if [ $ioStatus == STARTED ]; then",
@@ -430,7 +430,7 @@ resource "terraform_data" "weka_file_system" {
   ]
 }
 
-resource "terraform_data" "weka_load" {
+resource terraform_data weka_load {
   count = var.weka.enable && var.weka.fileSystem.loadFiles && var.fileLoadSource.enable ? 1 : 0
   connection {
     type     = "ssh"
@@ -438,7 +438,7 @@ resource "terraform_data" "weka_load" {
     user     = var.weka.adminLogin.userName
     password = var.weka.adminLogin.userPassword
   }
-  provisioner "remote-exec" {
+  provisioner remote-exec {
     inline = [
       "sudo weka agent install-agent",
       "mountPath=/mnt/${var.fileLoadSource.containerName}",
@@ -456,11 +456,11 @@ resource "terraform_data" "weka_load" {
   ]
 }
 
-output "resourceGroupNameWeka" {
+output resourceGroupNameWeka {
   value = var.weka.enable ? azurerm_resource_group.weka[0].name : ""
 }
 
-output "wekaClusterDns" {
+output wekaClusterDns {
   value = var.weka.enable ? {
     name              = azurerm_private_dns_a_record.weka_cluster[0].name
     resourceGroupName = azurerm_private_dns_a_record.weka_cluster[0].resource_group_name

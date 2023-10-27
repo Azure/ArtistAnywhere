@@ -2,7 +2,7 @@
 # Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
 #########################################################################
 
-variable "virtualMachines" {
+variable virtualMachines {
   type = list(object({
     enable  = bool
     name    = string
@@ -81,7 +81,7 @@ locals {
   ]
 }
 
-resource "azurerm_network_interface" "workstation" {
+resource azurerm_network_interface workstation {
   for_each = {
     for virtualMachine in var.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable
   }
@@ -97,7 +97,7 @@ resource "azurerm_network_interface" "workstation" {
   enable_accelerated_networking = each.value.network.enableAcceleration
 }
 
-resource "azurerm_linux_virtual_machine" "workstation" {
+resource azurerm_linux_virtual_machine workstation {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.operatingSystem.type == "Linux"
   }
@@ -143,7 +143,7 @@ resource "azurerm_linux_virtual_machine" "workstation" {
   ]
 }
 
-resource "azurerm_virtual_machine_extension" "initialize_linux" {
+resource azurerm_virtual_machine_extension initialize_linux {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.initialize.enable && virtualMachine.operatingSystem.type == "Linux"
   }
@@ -167,7 +167,7 @@ resource "azurerm_virtual_machine_extension" "initialize_linux" {
   ]
 }
 
-resource "azurerm_virtual_machine_extension" "monitor_linux" {
+resource azurerm_virtual_machine_extension monitor_linux {
   for_each = {
     for virtualMachine in var.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.monitor.enable && virtualMachine.operatingSystem.type == "Linux" && module.global.monitor.enable
   }
@@ -189,7 +189,7 @@ resource "azurerm_virtual_machine_extension" "monitor_linux" {
   ]
 }
 
-resource "azurerm_windows_virtual_machine" "workstation" {
+resource azurerm_windows_virtual_machine workstation {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.operatingSystem.type == "Windows"
   }
@@ -220,7 +220,7 @@ resource "azurerm_windows_virtual_machine" "workstation" {
   ]
 }
 
-resource "azurerm_virtual_machine_extension" "initialize_windows" {
+resource azurerm_virtual_machine_extension initialize_windows {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.initialize.enable && virtualMachine.operatingSystem.type == "Windows"
   }
@@ -244,7 +244,7 @@ resource "azurerm_virtual_machine_extension" "initialize_windows" {
   ]
 }
 
-resource "azurerm_virtual_machine_extension" "monitor_windows" {
+resource azurerm_virtual_machine_extension monitor_windows {
   for_each = {
     for virtualMachine in var.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.monitor.enable && virtualMachine.operatingSystem.type == "Windows" && module.global.monitor.enable
   }
@@ -266,6 +266,6 @@ resource "azurerm_virtual_machine_extension" "monitor_windows" {
   ]
 }
 
-output "virtualMachines" {
+output virtualMachines {
   value = var.virtualMachines
 }

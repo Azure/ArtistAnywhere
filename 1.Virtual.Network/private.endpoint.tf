@@ -2,25 +2,25 @@
 # Private Endpoint (https://learn.microsoft.com/azure/private-link/private-endpoint-overview) #
 ###############################################################################################
 
-resource "azurerm_private_dns_zone" "key_vault" {
+resource azurerm_private_dns_zone key_vault {
   count               = module.global.keyVault.enable && !var.existingNetwork.enable ? 1 : 0
   name                = "privatelink.vaultcore.azure.net"
   resource_group_name = azurerm_resource_group.network.name
 }
 
-resource "azurerm_private_dns_zone" "storage_blob" {
+resource azurerm_private_dns_zone storage_blob {
   count               = !var.existingNetwork.enable ? 1 : 0
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = azurerm_resource_group.network.name
 }
 
-resource "azurerm_private_dns_zone" "storage_file" {
+resource azurerm_private_dns_zone storage_file {
   count               = !var.existingNetwork.enable ? 1 : 0
   name                = "privatelink.file.core.windows.net"
   resource_group_name = azurerm_resource_group.network.name
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "key_vault" {
+resource azurerm_private_dns_zone_virtual_network_link key_vault {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.keyVault.enable && !var.existingNetwork.enable
   }
@@ -33,7 +33,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "key_vault" {
   ]
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "storage_blob" {
+resource azurerm_private_dns_zone_virtual_network_link storage_blob {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if !var.existingNetwork.enable
   }
@@ -46,7 +46,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "storage_blob" {
   ]
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "storage_file" {
+resource azurerm_private_dns_zone_virtual_network_link storage_file {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if !var.existingNetwork.enable
   }
@@ -59,7 +59,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "storage_file" {
   ]
 }
 
-resource "azurerm_private_endpoint" "key_vault" {
+resource azurerm_private_endpoint key_vault {
   for_each = {
     for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if !var.existingNetwork.enable
   }
@@ -88,7 +88,7 @@ resource "azurerm_private_endpoint" "key_vault" {
   ]
 }
 
-resource "azurerm_private_endpoint" "key_vault_batch" {
+resource azurerm_private_endpoint key_vault_batch {
   for_each = {
     for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if !var.existingNetwork.enable
   }
@@ -117,7 +117,7 @@ resource "azurerm_private_endpoint" "key_vault_batch" {
   ]
 }
 
-resource "azurerm_private_endpoint" "storage_blob" {
+resource azurerm_private_endpoint storage_blob {
   for_each = {
     for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if !var.existingNetwork.enable
   }
@@ -146,7 +146,7 @@ resource "azurerm_private_endpoint" "storage_blob" {
  ]
 }
 
-resource "azurerm_private_endpoint" "storage_file" {
+resource azurerm_private_endpoint storage_file {
   for_each = {
     for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if !var.existingNetwork.enable
   }

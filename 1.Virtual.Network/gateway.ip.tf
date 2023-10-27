@@ -3,7 +3,7 @@
 # Public IP Addresses      (https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-addresses)       #
 ######################################################################################################################
 
-resource "azurerm_public_ip_prefix" "vpn_gateway" {
+resource azurerm_public_ip_prefix vpn_gateway {
   for_each = {
     for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enable && !var.existingNetwork.enable
   }
@@ -19,7 +19,7 @@ resource "azurerm_public_ip_prefix" "vpn_gateway" {
   }
 }
 
-resource "azurerm_public_ip" "vpn_gateway_1" {
+resource azurerm_public_ip vpn_gateway_1 {
   for_each = {
     for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enable && !var.existingNetwork.enable
   }
@@ -34,7 +34,7 @@ resource "azurerm_public_ip" "vpn_gateway_1" {
   ]
 }
 
-resource "azurerm_public_ip" "vpn_gateway_2" {
+resource azurerm_public_ip vpn_gateway_2 {
   for_each = {
     for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enable && !var.existingNetwork.enable && var.vpnGateway.enableActiveActive
   }
@@ -49,7 +49,7 @@ resource "azurerm_public_ip" "vpn_gateway_2" {
   ]
 }
 
-resource "azurerm_public_ip_prefix" "nat_gateway" {
+resource azurerm_public_ip_prefix nat_gateway {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.natGateway.enable && !var.existingNetwork.enable
   }
@@ -62,7 +62,7 @@ resource "azurerm_public_ip_prefix" "nat_gateway" {
   ]
 }
 
-resource "azurerm_public_ip" "nat_gateway" {
+resource azurerm_public_ip nat_gateway {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.natGateway.enable && !var.existingNetwork.enable
   }

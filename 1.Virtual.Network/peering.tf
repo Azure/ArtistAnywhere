@@ -2,7 +2,7 @@
 # Virtual Network Peering (https://learn.microsoft.com/azure/virtual-network/virtual-network-peering-overview) #
 ################################################################################################################
 
-variable "networkPeering" {
+variable networkPeering {
   type = object({
     enable                      = bool
     allowRemoteNetworkAccess    = bool
@@ -12,7 +12,7 @@ variable "networkPeering" {
   })
 }
 
-resource "azurerm_virtual_network_peering" "up" {
+resource azurerm_virtual_network_peering up {
   count                        = var.networkPeering.enable ? length(local.virtualNetworks) - 1 : 0
   name                         = "${local.virtualNetworks[count.index].name}-${local.virtualNetworks[count.index + 1].name}"
   resource_group_name          = local.virtualNetworks[count.index].resourceGroupName
@@ -27,7 +27,7 @@ resource "azurerm_virtual_network_peering" "up" {
   ]
 }
 
-resource "azurerm_virtual_network_peering" "down" {
+resource azurerm_virtual_network_peering down {
   count                        = var.networkPeering.enable ? length(local.virtualNetworks) - 1 : 0
   name                         = "${local.virtualNetworks[count.index + 1].name}-${local.virtualNetworks[count.index].name}"
   resource_group_name          = local.virtualNetworks[count.index + 1].resourceGroupName

@@ -2,13 +2,13 @@
 # Network Address Translation (NAT) Gateway (https://learn.microsoft.com/azure/virtual-network/nat-gateway/nat-overview) #
 ##########################################################################################################################
 
-variable "natGateway" {
+variable natGateway {
   type = object({
     enable = bool
   })
 }
 
-resource "azurerm_nat_gateway" "studio" {
+resource azurerm_nat_gateway studio {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.natGateway.enable && !var.existingNetwork.enable
   }
@@ -21,7 +21,7 @@ resource "azurerm_nat_gateway" "studio" {
   ]
 }
 
-# resource "azurerm_nat_gateway_public_ip_prefix_association" "studio" {
+# resource azurerm_nat_gateway_public_ip_prefix_association studio {
 #   for_each = {
 #     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.natGateway.enable && !var.existingNetwork.enable
 #   }
@@ -29,7 +29,7 @@ resource "azurerm_nat_gateway" "studio" {
 #   public_ip_prefix_id = azurerm_public_ip_prefix.nat_gateway[each.value.name].id
 # }
 
-resource "azurerm_nat_gateway_public_ip_association" "studio" {
+resource azurerm_nat_gateway_public_ip_association studio {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.natGateway.enable && !var.existingNetwork.enable
   }
@@ -37,7 +37,7 @@ resource "azurerm_nat_gateway_public_ip_association" "studio" {
   public_ip_address_id = azurerm_public_ip.nat_gateway[each.value.name].id
 }
 
-resource "azurerm_subnet_nat_gateway_association" "studio" {
+resource azurerm_subnet_nat_gateway_association studio {
   for_each = {
     for subnet in local.virtualNetworksSubnets : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if var.natGateway.enable && subnet.name != "GatewaySubnet" && !var.existingNetwork.enable
   }

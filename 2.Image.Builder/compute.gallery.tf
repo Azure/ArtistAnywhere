@@ -2,7 +2,7 @@
 # Compute Gallery (https://learn.microsoft.com/azure/virtual-machines/shared-image-galleries) #
 ###############################################################################################
 
-variable "computeGallery" {
+variable computeGallery {
   type = object({
     name = string
     imageDefinition = map(object({
@@ -16,13 +16,13 @@ variable "computeGallery" {
   })
 }
 
-resource "azurerm_shared_image_gallery" "studio" {
+resource azurerm_shared_image_gallery studio {
   name                = var.computeGallery.name
   resource_group_name = azurerm_resource_group.image.name
   location            = azurerm_resource_group.image.location
 }
 
-resource "azurerm_shared_image" "studio" {
+resource azurerm_shared_image studio {
   for_each            = var.computeGallery.imageDefinition
   name                = each.key
   resource_group_name = azurerm_resource_group.image.name
@@ -37,6 +37,6 @@ resource "azurerm_shared_image" "studio" {
   }
 }
 
-output "imageDefinition" {
+output imageDefinition {
   value = var.computeGallery.imageDefinition
 }

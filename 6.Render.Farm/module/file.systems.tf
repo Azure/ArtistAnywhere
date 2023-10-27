@@ -1,4 +1,4 @@
-variable "fileSystems" {
+variable fileSystems {
   default = {
     linux = [
       {
@@ -67,6 +67,6 @@ variable "fileSystems" {
   }
 }
 
-output "fileSystems" {
+output fileSystems {
   value = var.fileSystems
 }

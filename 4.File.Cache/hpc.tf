@@ -2,7 +2,7 @@
 # HPC Cache (https://learn.microsoft.com/azure/hpc-cache/hpc-cache-overview) #
 ##############################################################################
 
-variable "hpcCache" {
+variable hpcCache {
   type = object({
     throughput = string
     size       = number
@@ -19,7 +19,7 @@ variable "hpcCache" {
   })
 }
 
-data "azuread_service_principal" "hpc_cache" {
+data azuread_service_principal hpc_cache {
   count        = var.enableHPCCache ? 1 : 0
   display_name = "HPC Cache Resource Provider"
 }
@@ -42,7 +42,7 @@ locals {
       regionName        = virtualNetwork.regionName
       resourceGroupName = "${var.resourceGroupName}.${virtualNetwork.regionName}"
       virtualNetwork = {
-        subnetId          = "${virtualNetwork.id}/subnets/${data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.cache].name}"
+        subnetId          = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${virtualNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}/subnets/${data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.cache].name}"
         dnsZoneName       = data.terraform_remote_state.network.outputs.privateDns.zoneName
         resourceGroupName = virtualNetwork.resourceGroupName
       }
@@ -66,7 +66,7 @@ locals {
   ])
 }
 
-resource "azurerm_role_assignment" "storage_account_contributor" {
+resource azurerm_role_assignment storage_account_contributor {
   for_each = {
     for storageTargetNfsBlob in var.storageTargetsNfsBlob: storageTargetNfsBlob.name => storageTargetNfsBlob
   }
@@ -75,7 +75,7 @@ resource "azurerm_role_assignment" "storage_account_contributor" {
   scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.storage.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${each.value.storage.accountName}"
 }
 
-resource "azurerm_role_assignment" "storage_blob_data_contributor" {
+resource azurerm_role_assignment storage_blob_data_contributor {
   for_each = {
     for storageTargetNfsBlob in var.storageTargetsNfsBlob: storageTargetNfsBlob.name => storageTargetNfsBlob
   }
@@ -84,7 +84,7 @@ resource "azurerm_role_assignment" "storage_blob_data_contributor" {
   scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.storage.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${each.value.storage.accountName}"
 }
 
-resource "azurerm_hpc_cache" "studio" {
+resource azurerm_hpc_cache studio {
   for_each = {
     for storageCache in local.storageCaches : storageCache.name => storageCache
   }
@@ -118,7 +118,7 @@ resource "azurerm_hpc_cache" "studio" {
   ]
 }
 
-resource "azurerm_hpc_cache_nfs_target" "storage" {
+resource azurerm_hpc_cache_nfs_target storage {
   for_each = {
     for storageTargetNfs in local.storageTargetsNfs : "${storageTargetNfs.cacheName}-${storageTargetNfs.name}" => storageTargetNfs
   }
@@ -140,7 +140,7 @@ resource "azurerm_hpc_cache_nfs_target" "storage" {
   ]
 }
 
-resource "azurerm_hpc_cache_blob_nfs_target" "storage" {
+resource azurerm_hpc_cache_blob_nfs_target storage {
   for_each = {
     for storageTargetNfsBlob in local.storageTargetsNfsBlob : "${storageTargetNfsBlob.cacheName}-${storageTargetNfsBlob.name}" => storageTargetNfsBlob
   }
@@ -159,7 +159,7 @@ resource "azurerm_hpc_cache_blob_nfs_target" "storage" {
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
 ############################################################################
 
-resource "azurerm_private_dns_a_record" "cache_hpc" {
+resource azurerm_private_dns_a_record cache_hpc {
   for_each = {
     for storageCache in local.storageCaches : storageCache.name => storageCache
   }
@@ -170,10 +170,9 @@ resource "azurerm_private_dns_a_record" "cache_hpc" {
   ttl                 = var.dnsARecord.ttlSeconds
 }
 
-output "hpcCaches" {
+output hpcCaches {
   value = !var.enableHPCCache ? null : [
     for cache in azurerm_hpc_cache.studio : {
-      id                = cache.id
       name              = cache.name
       resourceGroupName = cache.resource_group_name
       mountAddresses    = cache.mount_addresses
@@ -181,7 +180,7 @@ output "hpcCaches" {
   ]
 }
 
-output "hpcCachesDns" {
+output hpcCachesDns {
   value = !var.enableHPCCache ? null : [
     for dnsRecord in azurerm_private_dns_a_record.cache_hpc : {
       name              = dnsRecord.name

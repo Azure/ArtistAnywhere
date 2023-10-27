@@ -2,7 +2,7 @@
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
 ############################################################################
 
-variable "privateDns" {
+variable privateDns {
   type = object({
     enable   = bool
     zoneName = string
@@ -12,7 +12,7 @@ variable "privateDns" {
   })
 }
 
-resource "azurerm_private_dns_zone" "studio" {
+resource azurerm_private_dns_zone studio {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.privateDns.enable && !var.existingNetwork.enable
   }
@@ -23,7 +23,7 @@ resource "azurerm_private_dns_zone" "studio" {
   ]
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "studio" {
+resource azurerm_private_dns_zone_virtual_network_link studio {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.privateDns.enable && !var.existingNetwork.enable
   }
@@ -37,6 +37,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "studio" {
   ]
 }
 
-output "privateDns" {
+output privateDns {
   value = !var.existingNetwork.enable ? var.privateDns : null
 }

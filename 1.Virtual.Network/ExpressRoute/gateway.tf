@@ -2,7 +2,7 @@
 # ExpressRoute Gateway (https://learn.microsoft.com/azure/expressroute/expressroute-about-virtual-network-gateways) #
 #####################################################################################################################
 
-variable "expressRouteGateway" {
+variable expressRouteGateway {
   type = object({
     enable          = bool
     name            = string
@@ -16,7 +16,7 @@ variable "expressRouteGateway" {
   })
 }
 
-resource "azurerm_public_ip" "express_route" {
+resource azurerm_public_ip express_route {
   count               = var.expressRouteGateway.enable ? 1 : 0
   name                = var.expressRouteGateway.name
   resource_group_name = azurerm_resource_group.express_route.name
@@ -25,7 +25,7 @@ resource "azurerm_public_ip" "express_route" {
   allocation_method   = "Static"
 }
 
-resource "azurerm_virtual_network_gateway" "express_route" {
+resource azurerm_virtual_network_gateway express_route {
   count               = var.expressRouteGateway.enable ? 1 : 0
   name                = var.expressRouteGateway.name
   resource_group_name = azurerm_resource_group.express_route.name
@@ -39,7 +39,7 @@ resource "azurerm_virtual_network_gateway" "express_route" {
   }
 }
 
-resource "azurerm_virtual_network_gateway_connection" "express_route" {
+resource azurerm_virtual_network_gateway_connection express_route {
   count                        = var.expressRouteGateway.enable ? 1 : 0
   name                         = var.expressRouteGateway.name
   resource_group_name          = azurerm_resource_group.express_route.name

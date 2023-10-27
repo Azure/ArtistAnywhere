@@ -2,7 +2,7 @@
 # Virtual Network Gateway (VPN) (https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-about-vpngateways) #
 ###############################################################################################################
 
-variable "vpnGateway" {
+variable vpnGateway {
   type = object({
     enable             = bool
     sku                = string
@@ -22,7 +22,7 @@ variable "vpnGateway" {
   })
 }
 
-variable "vpnGatewayLocal" {
+variable vpnGatewayLocal {
   type = object({
     fqdn         = string
     address      = string
@@ -53,7 +53,7 @@ locals {
   ])
 }
 
-resource "azurerm_virtual_network_gateway" "vpn" {
+resource azurerm_virtual_network_gateway vpn {
   for_each = {
     for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enable && !var.existingNetwork.enable
   }
@@ -100,7 +100,7 @@ resource "azurerm_virtual_network_gateway" "vpn" {
 # Local Network Gateway (VPN) (https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-about-vpn-gateway-settings#lng) #
 ##########################################################################################################################
 
-resource "azurerm_local_network_gateway" "vpn" {
+resource azurerm_local_network_gateway vpn {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enable && !var.existingNetwork.enable && (var.vpnGatewayLocal.fqdn != "" || var.vpnGatewayLocal.address != "")
   }
@@ -123,7 +123,7 @@ resource "azurerm_local_network_gateway" "vpn" {
   ]
 }
 
-resource "azurerm_virtual_network_gateway_connection" "site_to_site" {
+resource azurerm_virtual_network_gateway_connection site_to_site {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enable && !var.existingNetwork.enable && (var.vpnGatewayLocal.fqdn != "" || var.vpnGatewayLocal.address != "")
   }

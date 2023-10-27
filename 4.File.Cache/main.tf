@@ -3,23 +3,23 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.77.0"
+      version = "~>3.78.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.44.0"
+      version = "~>2.45.0"
     }
     avere = {
       source  = "hashicorp/avere"
       version = "~>1.3.3"
     }
   }
-  backend "azurerm" {
+  backend azurerm {
     key = "4.File.Cache"
   }
 }
 
-provider "azurerm" {
+provider azurerm {
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
@@ -32,27 +32,27 @@ provider "azurerm" {
   }
 }
 
-module "global" {
+module global {
   source = "../0.Global.Foundation/module"
 }
 
-variable "resourceGroupName" {
+variable resourceGroupName {
   type = string
 }
 
-variable "cacheName" {
+variable cacheName {
   type = string
 }
 
-variable "enableHPCCache" {
+variable enableHPCCache {
   type = bool
 }
 
-variable "enablePerRegion" {
+variable enablePerRegion {
   type = bool
 }
 
-variable "storageTargetsNfs" {
+variable storageTargetsNfs {
   type = list(object({
     enable      = bool
     name        = string
@@ -73,7 +73,7 @@ variable "storageTargetsNfs" {
   }))
 }
 
-variable "storageTargetsNfsBlob" {
+variable storageTargetsNfsBlob {
   type = list(object({
     enable     = bool
     name       = string
@@ -87,14 +87,14 @@ variable "storageTargetsNfsBlob" {
   }))
 }
 
-variable "dnsARecord" {
+variable dnsARecord {
   type = object({
     name       = string
     ttlSeconds = number
   })
 }
 
-variable "existingNetwork" {
+variable existingNetwork {
   type = object({
     enable             = bool
     name               = string
@@ -104,38 +104,38 @@ variable "existingNetwork" {
   })
 }
 
-data "azurerm_client_config" "studio" {}
+data azurerm_client_config studio {}
 
-data "azurerm_user_assigned_identity" "studio" {
+data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name
   resource_group_name = module.global.resourceGroupName
 }
 
-data "azurerm_key_vault" "studio" {
+data azurerm_key_vault studio {
   count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
   resource_group_name = module.global.resourceGroupName
 }
 
-data "azurerm_key_vault_secret" "admin_username" {
+data azurerm_key_vault_secret admin_username {
   count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminUsername
   key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
-data "azurerm_key_vault_secret" "admin_password" {
+data azurerm_key_vault_secret admin_password {
   count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminPassword
   key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
-data "azurerm_key_vault_key" "cache_encryption" {
+data azurerm_key_vault_key cache_encryption {
   count        = module.global.keyVault.enable && var.hpcCache.encryption.enable ? 1 : 0
   name         = module.global.keyVault.keyName.cacheEncryption
   key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
-data "terraform_remote_state" "network" {
+data terraform_remote_state network {
   backend = "azurerm"
   config = {
     resource_group_name  = module.global.resourceGroupName
@@ -151,30 +151,30 @@ locals {
   ]
   virtualNetworks = distinct(!var.enablePerRegion ? [
     for i in range(length(data.terraform_remote_state.network.outputs.virtualNetworks)) : {
-      id                = data.terraform_remote_state.network.outputs.virtualNetwork.id
+      name              = data.terraform_remote_state.network.outputs.virtualNetwork.name
       regionName        = data.terraform_remote_state.network.outputs.virtualNetwork.regionName
       resourceGroupName = data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
     }
   ] : [
     for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : {
-      id                = virtualNetwork.id
+      name              = virtualNetwork.name
       regionName        = virtualNetwork.regionName
       resourceGroupName = virtualNetwork.resourceGroupName
     }
   ])
 }
 
-resource "azurerm_resource_group" "cache_regions" {
+resource azurerm_resource_group cache_regions {
   count    = length(local.regionNames)
   name     = "${var.resourceGroupName}.${local.regionNames[count.index]}"
   location = local.regionNames[count.index]
 }
 
-output "resourceGroups" {
+output resourceGroups {
   value = [
     for resourceGroup in azurerm_resource_group.cache_regions : {
-      id   = resourceGroup.id
-      name = resourceGroup.name
+      name       = resourceGroup.name
+      regionName = resourceGroup.location
     }
   ]
 }

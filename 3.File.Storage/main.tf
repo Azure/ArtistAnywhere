@@ -3,19 +3,19 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.77.0"
+      version = "~>3.78.0"
     }
     http = {
       source  = "hashicorp/http"
       version = "~>3.4.0"
     }
   }
-  backend "azurerm" {
+  backend azurerm {
     key = "3.File.Storage"
   }
 }
 
-provider "azurerm" {
+provider azurerm {
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
@@ -36,15 +36,15 @@ provider "azurerm" {
   }
 }
 
-module "global" {
+module global {
   source = "../0.Global.Foundation/module"
 }
 
-variable "resourceGroupName" {
+variable resourceGroupName {
   type = string
 }
 
-variable "fileLoadSource" {
+variable fileLoadSource {
   type = object({
     enable        = bool
     accountName   = string
@@ -54,7 +54,7 @@ variable "fileLoadSource" {
   })
 }
 
-variable "existingNetwork" {
+variable existingNetwork {
   type = object({
     enable             = bool
     name               = string
@@ -68,42 +68,42 @@ variable "existingNetwork" {
   })
 }
 
-data "http" "client_address" {
+data http client_address {
   url = "https://api.ipify.org?format=json"
 }
 
-data "azurerm_client_config" "studio" {}
+data azurerm_client_config studio {}
 
-data "azurerm_user_assigned_identity" "studio" {
+data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name
   resource_group_name = module.global.resourceGroupName
 }
 
-data "azurerm_key_vault" "studio" {
+data azurerm_key_vault studio {
   count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
   resource_group_name = module.global.resourceGroupName
 }
 
-data "azurerm_key_vault_secret" "admin_username" {
+data azurerm_key_vault_secret admin_username {
   count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminUsername
   key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
-data "azurerm_key_vault_secret" "admin_password" {
+data azurerm_key_vault_secret admin_password {
   count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminPassword
   key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
-data "azurerm_log_analytics_workspace" "monitor" {
+data azurerm_log_analytics_workspace monitor {
   count               = module.global.monitor.enable ? 1 : 0
   name                = module.global.monitor.name
   resource_group_name = module.global.resourceGroupName
 }
 
-data "terraform_remote_state" "network" {
+data terraform_remote_state network {
   backend = "azurerm"
   config = {
     resource_group_name  = module.global.resourceGroupName
@@ -113,26 +113,26 @@ data "terraform_remote_state" "network" {
   }
 }
 
-data "azurerm_resource_group" "network" {
+data azurerm_resource_group network {
   name = data.azurerm_virtual_network.studio.resource_group_name
 }
 
-data "azurerm_resource_group" "dns" {
+data azurerm_resource_group dns {
   name = data.terraform_remote_state.network.outputs.resourceGroupName
 }
 
-data "azurerm_virtual_network" "studio" {
+data azurerm_virtual_network studio {
   name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.name
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
 }
 
-data "azurerm_subnet" "storage" {
+data azurerm_subnet storage {
   name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.storage].name
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
-data "azurerm_private_dns_zone" "studio" {
+data azurerm_private_dns_zone studio {
   name                = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.terraform_remote_state.network.outputs.privateDns.zoneName
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
 }
@@ -141,11 +141,11 @@ locals {
   binDirectory = "/usr/local/bin"
 }
 
-resource "azurerm_resource_group" "storage" {
+resource azurerm_resource_group storage {
   name     = var.resourceGroupName
   location = module.global.regionName
 }
 
-output "resourceGroupName" {
+output resourceGroupName {
   value = azurerm_resource_group.storage.name
 }

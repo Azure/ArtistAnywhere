@@ -2,7 +2,7 @@
 # NetApp Files (https://learn.microsoft.com/azure/azure-netapp-files/azure-netapp-files-introduction) #
 #######################################################################################################
 
-variable "netAppAccount" {
+variable netAppAccount {
   type = object({
     enable = bool
     name   = string
@@ -41,20 +41,20 @@ locals {
   ])
 }
 
-resource "azurerm_resource_group" "netapp_files" {
+resource azurerm_resource_group netapp_files {
   count    = var.netAppAccount.enable ? 1 : 0
   name     = "${var.resourceGroupName}.NetAppFiles"
   location = azurerm_resource_group.storage.location
 }
 
-resource "azurerm_netapp_account" "storage" {
+resource azurerm_netapp_account storage {
   count               = var.netAppAccount.enable ? 1 : 0
   name                = var.netAppAccount.name
   resource_group_name = azurerm_resource_group.netapp_files[0].name
   location            = azurerm_resource_group.netapp_files[0].location
 }
 
-resource "azurerm_netapp_pool" "storage" {
+resource azurerm_netapp_pool storage {
   for_each = {
     for capacityPool in var.netAppAccount.capacityPools : capacityPool.name => capacityPool if var.netAppAccount.enable && capacityPool.enable
   }
@@ -69,7 +69,7 @@ resource "azurerm_netapp_pool" "storage" {
   ]
 }
 
-resource "azurerm_netapp_volume" "storage" {
+resource azurerm_netapp_volume storage {
   for_each = {
     for volume in local.netAppVolumes : "${volume.capacityPoolName}-${volume.name}" => volume
   }
@@ -99,6 +99,6 @@ resource "azurerm_netapp_volume" "storage" {
   ]
 }
 
-output "resourceGroupNameNetAppFiles" {
+output resourceGroupNameNetAppFiles {
   value = var.netAppAccount.enable ? azurerm_resource_group.netapp_files[0].name : ""
 }

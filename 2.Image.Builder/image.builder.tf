@@ -2,7 +2,7 @@
 # Image Builder (https://learn.microsoft.com/azure/virtual-machines/image-builder-overview) #
 #############################################################################################
 
-variable "imageTemplates" {
+variable imageTemplates {
   type = list(object({
     name       = string
     regionName = string
@@ -22,7 +22,7 @@ variable "imageTemplates" {
   }))
 }
 
-variable "binStorage" {
+variable binStorage {
   type = object({
     host = string
     auth = string
@@ -43,19 +43,19 @@ locals {
   ]
 }
 
-resource "azurerm_role_assignment" "managed_identity_operator" {
+resource azurerm_role_assignment managed_identity_operator {
   role_definition_name = "Managed Identity Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#managed-identity-operator
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_user_assigned_identity.studio.id
 }
 
-resource "azurerm_role_assignment" "contributor" {
+resource azurerm_role_assignment contributor {
   role_definition_name = "Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = azurerm_resource_group.image.id
 }
 
-resource "azapi_resource" "image_builder" {
+resource azapi_resource image_builder {
   for_each = {
     for imageTemplate in var.imageTemplates : imageTemplate.name => imageTemplate
   }
@@ -186,6 +186,6 @@ resource "azapi_resource" "image_builder" {
   ]
 }
 
-output "imageTemplates" {
+output imageTemplates {
   value = var.imageTemplates
 }

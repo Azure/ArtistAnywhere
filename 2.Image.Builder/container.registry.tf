@@ -2,7 +2,7 @@
 # Container Registry (https://learn.microsoft.com/azure/container-registry/container-registry-intro) #
 ######################################################################################################
 
-variable "containerRegistry" {
+variable containerRegistry {
   type = object({
     enable = bool
     name   = string
@@ -10,13 +10,13 @@ variable "containerRegistry" {
   })
 }
 
-resource "azurerm_private_dns_zone" "container_registry" {
+resource azurerm_private_dns_zone container_registry {
   count               = var.containerRegistry.enable ? 1 : 0
   name                = "privatelink.azurecr.io"
   resource_group_name = azurerm_resource_group.image.name
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
+resource azurerm_private_dns_zone_virtual_network_link container_registry {
   count                 = var.containerRegistry.enable ? 1 : 0
   name                  = "container-registry-${lower(data.azurerm_virtual_network.studio.location)}"
   resource_group_name   = azurerm_resource_group.image.name
@@ -24,7 +24,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
   virtual_network_id    = data.azurerm_virtual_network.studio.id
 }
 
-resource "azurerm_private_endpoint" "container_registry" {
+resource azurerm_private_endpoint container_registry {
   count               = var.containerRegistry.enable ? 1 : 0
   name                = "${azurerm_container_registry.studio[0].name}-registry"
   resource_group_name = azurerm_resource_group.image.name
@@ -49,7 +49,7 @@ resource "azurerm_private_endpoint" "container_registry" {
   ]
 }
 
-resource "azurerm_container_registry" "studio" {
+resource azurerm_container_registry studio {
   count               = var.containerRegistry.enable ? 1 : 0
   name                = var.containerRegistry.name
   resource_group_name = azurerm_resource_group.image.name

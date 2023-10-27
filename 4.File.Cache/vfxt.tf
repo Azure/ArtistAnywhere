@@ -2,7 +2,7 @@
 # Avere vFXT (https://learn.microsoft.com/azure/avere-vfxt/avere-vfxt-overview) #
 #################################################################################
 
-variable "vfxtCache" {
+variable vfxtCache {
   type = object({
     cluster = object({
       nodeSize      = number
@@ -26,20 +26,20 @@ variable "vfxtCache" {
   })
 }
 
-# data "azurerm_resource_group" "studio" {
+# data azurerm_resource_group studio {
 #   name = module.global.resourceGroupName
 # }
 
-# data "azurerm_resource_group" "network" {
+# data azurerm_resource_group network {
 #   name = data.azurerm_virtual_network.compute.resource_group_name
 # }
 
-data "azurerm_virtual_network" "studio" {
+data azurerm_virtual_network studio {
   name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.name
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
 }
 
-data "azurerm_subnet" "cache" {
+data azurerm_subnet cache {
   name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.cache].name
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
@@ -58,43 +58,43 @@ locals {
   vfxtVServerAddressCount = 12
 }
 
-# resource "azurerm_role_assignment" "managed_identity" {
+# resource azurerm_role_assignment managed_identity {
 #   role_definition_name = "Managed Identity Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#managed-identity-operator
 #   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
 #   scope                = data.azurerm_resource_group.studio.id
 # }
 
-# resource "azurerm_role_assignment" "network_cache_contributor" {
+# resource azurerm_role_assignment network_cache_contributor {
 #   role_definition_name = "Avere Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#avere-contributor
 #   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
 #   scope                = data.azurerm_resource_group.network.id
 # }
 
-# resource "azurerm_role_assignment" "network_cache_operator" {
+# resource azurerm_role_assignment network_cache_operator {
 #   role_definition_name = "Avere Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#avere-operator
 #   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
 #   scope                = data.azurerm_resource_group.network.id
 # }
 
-# resource "azurerm_role_assignment" "cache_managed_identity" {
+# resource azurerm_role_assignment cache_managed_identity {
 #   role_definition_name = "Managed Identity Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#managed-identity-operator
 #   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
 #   scope                = azurerm_resource_group.cache.id
 # }
 
-# resource "azurerm_role_assignment" "cache_contributor" {
+# resource azurerm_role_assignment cache_contributor {
 #   role_definition_name = "Avere Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#avere-contributor
 #   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
 #   scope                = azurerm_resource_group.cache.id
 # }
 
-# resource "azurerm_role_assignment" "cache_operator" {
+# resource azurerm_role_assignment cache_operator {
 #   role_definition_name = "Avere Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#avere-operator
 #   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
 #   scope                = azurerm_resource_group.cache.id
 # }
 
-module "vfxt_controller" {
+module vfxt_controller {
   count                             = var.enableHPCCache ? 0 : 1
   source                            = "github.com/Azure/Avere/src/terraform/modules/controller3"
   create_resource_group             = false
@@ -120,7 +120,7 @@ module "vfxt_controller" {
   ]
 }
 
-resource "avere_vfxt" "cache" {
+resource avere_vfxt cache {
   count                           = var.enableHPCCache ? 0 : 1
   vfxt_cluster_name               = lower(var.cacheName)
   azure_resource_group            = var.resourceGroupName
@@ -174,7 +174,7 @@ resource "avere_vfxt" "cache" {
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
 ############################################################################
 
-resource "azurerm_private_dns_a_record" "cache_vfxt" {
+resource azurerm_private_dns_a_record cache_vfxt {
   count               = var.enableHPCCache ? 0 : 1
   name                = var.dnsARecord.name
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
@@ -183,19 +183,19 @@ resource "azurerm_private_dns_a_record" "cache_vfxt" {
   ttl                 = var.dnsARecord.ttlSeconds
 }
 
-output "vfxtCacheControllerAddress" {
+output vfxtCacheControllerAddress {
   value = var.enableHPCCache ? "" : length(avere_vfxt.cache) > 0 ? avere_vfxt.cache[0].controller_address : ""
 }
 
-output "vfxtCacheManagementAddress" {
+output vfxtCacheManagementAddress {
   value = var.enableHPCCache ? "" : length(avere_vfxt.cache) > 0 ? avere_vfxt.cache[0].vfxt_management_ip : ""
 }
 
-output "vfxtCacheMountAddresses" {
+output vfxtCacheMountAddresses {
   value = var.enableHPCCache ? "" : length(avere_vfxt.cache) > 0 ? avere_vfxt.cache[0].vserver_ip_addresses : ""
 }
 
-output "vfxtCacheDns" {
+output vfxtCacheDns {
   value = var.enableHPCCache ? null : [
     for dnsRecord in azurerm_private_dns_a_record.cache_vfxt : {
       name              = dnsRecord.name

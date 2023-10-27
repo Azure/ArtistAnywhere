@@ -2,7 +2,7 @@
 # Virtual Network (https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview) #
 #################################################################################################
 
-variable "virtualNetworks" {
+variable virtualNetworks {
   type = list(object({
     enable       = bool
     name         = string
@@ -26,7 +26,7 @@ variable "virtualNetworks" {
   }))
 }
 
-variable "existingNetwork" {
+variable existingNetwork {
   type = object({
     enable            = bool
     name              = string
@@ -63,7 +63,7 @@ locals {
   ]
 }
 
-resource "azurerm_virtual_network" "studio" {
+resource azurerm_virtual_network studio {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if !var.existingNetwork.enable
   }
@@ -77,7 +77,7 @@ resource "azurerm_virtual_network" "studio" {
   ]
 }
 
-resource "azurerm_subnet" "studio" {
+resource azurerm_subnet studio {
   for_each = {
     for subnet in local.virtualNetworksSubnets : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if !var.existingNetwork.enable
   }
@@ -102,7 +102,7 @@ resource "azurerm_subnet" "studio" {
   ]
 }
 
-resource "azurerm_network_security_group" "studio" {
+resource azurerm_network_security_group studio {
   for_each = {
     for subnet in local.virtualNetworksSubnetsSecurity : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if !var.existingNetwork.enable
   }
@@ -224,7 +224,7 @@ resource "azurerm_network_security_group" "studio" {
   ]
 }
 
-resource "azurerm_subnet_network_security_group_association" "studio" {
+resource azurerm_subnet_network_security_group_association studio {
   for_each = {
     for subnet in local.virtualNetworksSubnetsSecurity : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if !var.existingNetwork.enable
   }
@@ -236,15 +236,27 @@ resource "azurerm_subnet_network_security_group_association" "studio" {
   ]
 }
 
-output "virtualNetwork" {
-  value = local.virtualNetwork
+output virtualNetwork {
+  value = {
+    name              = local.virtualNetwork.name
+    regionName        = local.virtualNetwork.regionName
+    resourceGroupName = local.virtualNetwork.resourceGroupName
+    subnets           = local.virtualNetwork.subnets
+    subnetIndex       = local.virtualNetwork.subnetIndex
+  }
 }
 
-output "virtualNetworks" {
-  value = local.virtualNetworks
+output virtualNetworks {
+  value = [
+    for virtualNetwork in local.virtualNetworks : {
+      name              = virtualNetwork.name
+      regionName        = virtualNetwork.regionName
+      resourceGroupName = virtualNetwork.resourceGroupName
+    }
+  ]
 }
 
-output "storageEndpointSubnets" {
+output storageEndpointSubnets {
   value = flatten([
     for virtualNetwork in local.virtualNetworks : [
       for subnet in virtualNetwork.subnets : {

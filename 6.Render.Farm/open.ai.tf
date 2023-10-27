@@ -2,7 +2,7 @@
 # Azure OpenAI (https://learn.microsoft.com/azure/ai-services/openai/overview) #
 ################################################################################
 
-variable "azureOpenAI" {
+variable azureOpenAI {
   type = object({
     enable      = bool
     regionName  = string
@@ -32,7 +32,7 @@ variable "azureOpenAI" {
   })
 }
 
-resource "azurerm_cognitive_account" "open_ai" {
+resource azurerm_cognitive_account open_ai {
   count                 = var.azureOpenAI.enable ? 1 : 0
   name                  = var.azureOpenAI.accountName
   resource_group_name   = azurerm_resource_group.farm.name
@@ -54,7 +54,7 @@ resource "azurerm_cognitive_account" "open_ai" {
   }
 }
 
-resource "azurerm_cognitive_deployment" "open_ai_chat" {
+resource azurerm_cognitive_deployment open_ai_chat {
   count                = var.azureOpenAI.enable ? 1 : 0
   name                 = var.azureOpenAI.chatDeployment.model.name
   cognitive_account_id = azurerm_cognitive_account.open_ai[0].id
@@ -68,7 +68,7 @@ resource "azurerm_cognitive_deployment" "open_ai_chat" {
   }
 }
 
-output "azureOpenAI" {
+output azureOpenAI {
   value = {
     enable   = var.azureOpenAI.enable
     endpoint = var.azureOpenAI.enable ? azurerm_cognitive_account.open_ai[0].endpoint : ""

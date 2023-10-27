@@ -2,7 +2,7 @@
 # ExpressRoute Circuit (https://learn.microsoft.com/azure/expressroute/expressroute-circuit-peerings) #
 #######################################################################################################
 
-variable "expressRouteCircuit" {
+variable expressRouteCircuit {
   type = object({
     enable          = bool
     name            = string
@@ -14,7 +14,7 @@ variable "expressRouteCircuit" {
   })
 }
 
-resource "azurerm_express_route_circuit" "render" {
+resource azurerm_express_route_circuit render {
   count                 = var.expressRouteCircuit.enable ? 1 : 0
   name                  = var.expressRouteCircuit.name
   resource_group_name   = azurerm_resource_group.express_route.name
@@ -28,11 +28,11 @@ resource "azurerm_express_route_circuit" "render" {
   }
 }
 
-output "serviceKey" {
+output serviceKey {
   value     = var.expressRouteCircuit.enable ? azurerm_express_route_circuit.render[0].service_key : ""
   sensitive = true
 }
 
-output "serviceProviderProvisioningState" {
+output serviceProviderProvisioningState {
   value = var.expressRouteCircuit.enable ? azurerm_express_route_circuit.render[0].service_provider_provisioning_state : ""
 }

@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.77.0"
+      version = "~>3.78.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.44.0"
+      version = "~>2.45.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -20,7 +20,7 @@ terraform {
   }
 }
 
-provider "azurerm" {
+provider azurerm {
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
@@ -45,21 +45,21 @@ provider "azurerm" {
   }
 }
 
-module "global" {
+module global {
   source = "./module"
 }
 
-data "http" "client_address" {
+data http client_address {
   url = "https://api.ipify.org?format=json"
 }
 
-data "azurerm_client_config" "studio" {}
+data azurerm_client_config studio {}
 
-resource "azurerm_resource_group" "studio" {
+resource azurerm_resource_group studio {
   name     = module.global.resourceGroupName
   location = module.global.regionName
 }
 
-output "resourceGroupName" {
+output resourceGroupName {
   value = azurerm_resource_group.studio.name
 }

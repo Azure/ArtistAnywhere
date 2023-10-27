@@ -2,7 +2,7 @@
 # Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace_4_6_5) #
 #######################################################################################################
 
-variable "hammerspace" {
+variable hammerspace {
   type = object({
     namePrefix = string
     domainName = string
@@ -156,20 +156,20 @@ locals {
   hammerspaceEnableHighAvailability = var.hammerspace.namePrefix != "" && var.hammerspace.metadata.machine.count > 1
 }
 
-resource "azurerm_resource_group" "hammerspace" {
+resource azurerm_resource_group hammerspace {
   count    = var.hammerspace.namePrefix != "" ? 1 : 0
   name     = "${var.resourceGroupName}.Hammerspace"
   location = azurerm_resource_group.storage.location
 }
 
-resource "azurerm_proximity_placement_group" "storage" {
+resource azurerm_proximity_placement_group storage {
   count               = var.hammerspace.namePrefix != "" ? 1 : 0
   name                = var.hammerspace.namePrefix
   location            = azurerm_resource_group.hammerspace[0].location
   resource_group_name = azurerm_resource_group.hammerspace[0].name
 }
 
-resource "azurerm_availability_set" "storage_metadata" {
+resource azurerm_availability_set storage_metadata {
   count                        = var.hammerspace.namePrefix != "" ? 1 : 0
   name                         = "${var.hammerspace.namePrefix}${var.hammerspace.metadata.machine.namePrefix}"
   resource_group_name          = azurerm_resource_group.hammerspace[0].name
@@ -177,7 +177,7 @@ resource "azurerm_availability_set" "storage_metadata" {
   proximity_placement_group_id = azurerm_proximity_placement_group.storage[0].id
 }
 
-resource "azurerm_availability_set" "storage_data" {
+resource azurerm_availability_set storage_data {
   count                        = var.hammerspace.namePrefix != "" ? 1 : 0
   name                         = "${var.hammerspace.namePrefix}${var.hammerspace.data.machine.namePrefix}"
   resource_group_name          = azurerm_resource_group.hammerspace[0].name
@@ -185,7 +185,7 @@ resource "azurerm_availability_set" "storage_data" {
   proximity_placement_group_id = azurerm_proximity_placement_group.storage[0].id
 }
 
-resource "azurerm_network_interface" "storage_primary" {
+resource azurerm_network_interface storage_primary {
   for_each = {
     for node in concat(local.hammerspaceMetadataNodes, local.hammerspaceDataNodes) : node.name => node
   }
@@ -200,7 +200,7 @@ resource "azurerm_network_interface" "storage_primary" {
   enable_accelerated_networking = each.value.network.enableAcceleration
 }
 
-resource "azurerm_network_interface" "storage_secondary" {
+resource azurerm_network_interface storage_secondary {
   for_each = {
     for metadataNode in local.hammerspaceMetadataNodes : metadataNode.name => metadataNode if local.hammerspaceEnableHighAvailability
   }
@@ -215,7 +215,7 @@ resource "azurerm_network_interface" "storage_secondary" {
   enable_accelerated_networking = each.value.network.enableAcceleration
 }
 
-resource "azurerm_managed_disk" "storage" {
+resource azurerm_managed_disk storage {
   for_each = {
     for machineDisk in concat(local.hammerspaceMetadataNodes, local.hammerspaceDataDisks) : machineDisk.name => machineDisk
   }
@@ -227,7 +227,7 @@ resource "azurerm_managed_disk" "storage" {
   create_option        = "Empty"
 }
 
-resource "azurerm_linux_virtual_machine" "storage_metadata" {
+resource azurerm_linux_virtual_machine storage_metadata {
   for_each = {
     for metadataNode in local.hammerspaceMetadataNodes : metadataNode.name => metadataNode
   }
@@ -274,7 +274,7 @@ resource "azurerm_linux_virtual_machine" "storage_metadata" {
   ]
 }
 
-resource "azurerm_linux_virtual_machine" "storage_data" {
+resource azurerm_linux_virtual_machine storage_data {
   for_each = {
     for dataNode in local.hammerspaceDataNodes : dataNode.name => dataNode
   }
@@ -316,7 +316,7 @@ resource "azurerm_linux_virtual_machine" "storage_data" {
   ]
 }
 
-resource "azurerm_virtual_machine_data_disk_attachment" "storage_metadata" {
+resource azurerm_virtual_machine_data_disk_attachment storage_metadata {
   for_each = {
     for metadataDisk in local.hammerspaceMetadataNodes : metadataDisk.name => metadataDisk
   }
@@ -330,7 +330,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "storage_metadata" {
   ]
 }
 
-resource "azurerm_virtual_machine_data_disk_attachment" "storage_data" {
+resource azurerm_virtual_machine_data_disk_attachment storage_data {
   for_each = {
     for dataDisk in local.hammerspaceDataDisks : dataDisk.name => dataDisk
   }
@@ -344,7 +344,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "storage_data" {
   ]
 }
 
-resource "azurerm_virtual_machine_extension" "storage" {
+resource azurerm_virtual_machine_extension storage {
   for_each = {
     for node in concat(local.hammerspaceMetadataNodes, local.hammerspaceDataNodes) : node.name => node
   }
@@ -369,7 +369,7 @@ resource "azurerm_virtual_machine_extension" "storage" {
   ]
 }
 
-resource "azurerm_lb" "storage" {
+resource azurerm_lb storage {
   count               = local.hammerspaceEnableHighAvailability ? 1 : 0
   name                = var.hammerspace.namePrefix
   resource_group_name = azurerm_resource_group.hammerspace[0].name
@@ -381,13 +381,13 @@ resource "azurerm_lb" "storage" {
   }
 }
 
-resource "azurerm_lb_backend_address_pool" "storage" {
+resource azurerm_lb_backend_address_pool storage {
   count           = local.hammerspaceEnableHighAvailability ? 1 : 0
   name            = "BackendPool"
   loadbalancer_id = azurerm_lb.storage[0].id
 }
 
-resource "azurerm_network_interface_backend_address_pool_association" "storage" {
+resource azurerm_network_interface_backend_address_pool_association storage {
   for_each = {
     for metadataNode in local.hammerspaceMetadataNodes : metadataNode.name => metadataNode if local.hammerspaceEnableHighAvailability
   }
@@ -399,7 +399,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "storage" 
   ]
 }
 
-resource "azurerm_lb_rule" "storage" {
+resource azurerm_lb_rule storage {
   count                          = local.hammerspaceEnableHighAvailability ? 1 : 0
   name                           = "Rule"
   loadbalancer_id                = azurerm_lb.storage[0].id
@@ -414,7 +414,7 @@ resource "azurerm_lb_rule" "storage" {
   ]
 }
 
-resource "azurerm_lb_probe" "storage" {
+resource azurerm_lb_probe storage {
   count           = local.hammerspaceEnableHighAvailability ? 1 : 0
   name            = "Probe"
   loadbalancer_id = azurerm_lb.storage[0].id
@@ -422,6 +422,6 @@ resource "azurerm_lb_probe" "storage" {
   port            = 4505
 }
 
-output "resourceGroupNameHammerspace" {
+output resourceGroupNameHammerspace {
   value = var.hammerspace.namePrefix != "" ? azurerm_resource_group.hammerspace[0].name : ""
 }

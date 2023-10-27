@@ -2,7 +2,7 @@
 # Bastion (https://learn.microsoft.com/azure/bastion/bastion-overview) #
 ########################################################################
 
-variable "bastion" {
+variable bastion {
   type = object({
     enable              = bool
     sku                 = string
@@ -15,7 +15,7 @@ variable "bastion" {
   })
 }
 
-resource "azurerm_network_security_group" "bastion" {
+resource azurerm_network_security_group bastion {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.bastion.enable && !var.existingNetwork.enable
   }
@@ -124,7 +124,7 @@ resource "azurerm_network_security_group" "bastion" {
   ]
 }
 
-resource "azurerm_subnet_network_security_group_association" "bastion" {
+resource azurerm_subnet_network_security_group_association bastion {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.bastion.enable && !var.existingNetwork.enable
   }
@@ -135,7 +135,7 @@ resource "azurerm_subnet_network_security_group_association" "bastion" {
   ]
 }
 
-resource "azurerm_public_ip" "bastion" {
+resource azurerm_public_ip bastion {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.bastion.enable && !var.existingNetwork.enable
   }
@@ -149,7 +149,7 @@ resource "azurerm_public_ip" "bastion" {
   ]
 }
 
-resource "azurerm_bastion_host" "studio" {
+resource azurerm_bastion_host studio {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.bastion.enable && !var.existingNetwork.enable
   }

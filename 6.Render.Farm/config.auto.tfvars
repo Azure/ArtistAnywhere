@@ -441,8 +441,8 @@ functionApp = {
   name   = "xstudio"
   servicePlan = {
     computeTier = "S1"
-    workerCount = 1
-    alwaysOn    = true
+    workerCount = 2
+    alwaysOn    = false
   }
   monitor = {
     workspace = {

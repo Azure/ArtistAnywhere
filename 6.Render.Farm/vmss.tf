@@ -2,7 +2,7 @@
 # Virtual Machine Scale Sets (https://learn.microsoft.com/azure/virtual-machine-scale-sets/overview) #
 ######################################################################################################
 
-variable "virtualMachineScaleSets" {
+variable virtualMachineScaleSets {
   type = list(object({
     enable = bool
     name   = string
@@ -99,7 +99,7 @@ locals {
   ]
 }
 
-resource "azurerm_linux_virtual_machine_scale_set" "farm" {
+resource azurerm_linux_virtual_machine_scale_set farm {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.enable && virtualMachineScaleSet.operatingSystem.type == "Linux"
   }
@@ -220,7 +220,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "farm" {
   }
 }
 
-resource "azurerm_windows_virtual_machine_scale_set" "farm" {
+resource azurerm_windows_virtual_machine_scale_set farm {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.enable && virtualMachineScaleSet.operatingSystem.type == "Windows"
   }
@@ -326,6 +326,6 @@ resource "azurerm_windows_virtual_machine_scale_set" "farm" {
   }
 }
 
-output "virtualMachineScaleSets" {
+output virtualMachineScaleSets {
   value = var.virtualMachineScaleSets
 }

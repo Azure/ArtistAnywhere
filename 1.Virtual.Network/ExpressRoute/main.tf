@@ -3,25 +3,25 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.77.0"
+      version = "~>3.78.0"
     }
   }
 }
 
-provider "azurerm" {
+provider azurerm {
   features {
   }
 }
 
-variable "regionName" {
+variable regionName {
   type = string
 }
 
-variable "resourceGroupName" {
+variable resourceGroupName {
   type = string
 }
 
-resource "azurerm_resource_group" "express_route" {
+resource azurerm_resource_group express_route {
   name     = var.resourceGroupName
   location = var.regionName
 }

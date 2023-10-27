@@ -2,7 +2,7 @@
 # https://learn.microsoft.com/azure/azure-functions #
 #####################################################
 
-variable "functionApp" {
+variable functionApp {
   type = object({
     enable = bool
     name   = string
@@ -23,7 +23,46 @@ variable "functionApp" {
   })
 }
 
-resource "azurerm_log_analytics_workspace" "studio" {
+resource azurerm_private_dns_zone function_app {
+  count               = var.functionApp.enable ? 1 : 0
+  name                = "privatelink.azurewebsites.net"
+  resource_group_name = azurerm_resource_group.farm.name
+}
+
+resource azurerm_private_dns_zone_virtual_network_link function_app {
+  count                 = var.functionApp.enable ? 1 : 0
+  name                  = "functions-${lower(data.azurerm_virtual_network.studio.location)}"
+  resource_group_name   = azurerm_resource_group.farm.name
+  private_dns_zone_name = azurerm_private_dns_zone.function_app[0].name
+  virtual_network_id    = data.azurerm_virtual_network.studio.id
+}
+
+resource azurerm_private_endpoint function_app {
+  count               = var.functionApp.enable ? 1 : 0
+  name                = "${azurerm_windows_function_app.studio[0].name}-functions"
+  resource_group_name = azurerm_resource_group.farm.name
+  location            = azurerm_resource_group.farm.location
+  subnet_id           = data.azurerm_subnet.farm.id
+  private_service_connection {
+    name                           = azurerm_windows_function_app.studio[0].name
+    private_connection_resource_id = azurerm_windows_function_app.studio[0].id
+    is_manual_connection           = false
+    subresource_names = [
+      "sites"
+    ]
+  }
+  private_dns_zone_group {
+    name = azurerm_windows_function_app.studio[0].name
+    private_dns_zone_ids = [
+      azurerm_private_dns_zone.function_app[0].id
+    ]
+  }
+  depends_on = [
+    azurerm_private_dns_zone_virtual_network_link.function_app
+  ]
+}
+
+resource azurerm_log_analytics_workspace studio {
   count                      = var.functionApp.enable ? 1 : 0
   name                       = var.functionApp.name
   resource_group_name        = azurerm_resource_group.farm.name
@@ -34,7 +73,7 @@ resource "azurerm_log_analytics_workspace" "studio" {
   internet_query_enabled     = false
 }
 
-resource "azurerm_application_insights" "studio" {
+resource azurerm_application_insights studio {
   count                      = var.functionApp.enable ? 1 : 0
   name                       = var.functionApp.name
   resource_group_name        = azurerm_resource_group.farm.name
@@ -46,7 +85,7 @@ resource "azurerm_application_insights" "studio" {
   internet_query_enabled     = false
 }
 
-resource "azurerm_service_plan" "studio" {
+resource azurerm_service_plan studio {
   count               = var.functionApp.enable ? 1 : 0
   name                = var.functionApp.name
   resource_group_name = azurerm_resource_group.farm.name
@@ -56,7 +95,7 @@ resource "azurerm_service_plan" "studio" {
   os_type             = "Windows"
 }
 
-resource "azurerm_windows_function_app" "studio" {
+resource azurerm_windows_function_app studio {
   count                         = var.functionApp.enable ? 1 : 0
   name                          = var.functionApp.name
   resource_group_name           = azurerm_resource_group.farm.name
@@ -102,7 +141,7 @@ resource "azurerm_windows_function_app" "studio" {
   }
 }
 
-resource "azurerm_function_app_function" "image_generate" {
+resource azurerm_function_app_function image_generate {
   count           = var.functionApp.enable ? 1 : 0
   name            = "image-generate"
   language        = "CSharp"
@@ -147,7 +186,7 @@ resource "azurerm_function_app_function" "image_generate" {
   }
 }
 
-output "functionApp" {
+output functionApp {
   value = {
     enable   = var.functionApp.enable
     endpoint = var.functionApp.enable ? azurerm_windows_function_app.studio[0].default_hostname : ""
