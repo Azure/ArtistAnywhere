@@ -1,6 +1,7 @@
 $fileSystemsPath = "C:\AzureData\fileSystems.bat"
 
 function InitializeClient ($binDirectory, $activeDirectoryJson) {
+  StartProcess wsl.exe "apt -y install nfs-common" "$binDirectory\wsl-nfs"
   StartProcess deadlinecommand.exe "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx" "$binDirectory\deadline-repository"
   $activeDirectory = ConvertFrom-Json -InputObject $activeDirectoryJson
   if ($activeDirectory.enable) {

@@ -19,8 +19,10 @@ variable virtualMachines {
       })
     })
     network = object({
-      staticIpAddress    = string
-      enableAcceleration = bool
+      acceleration = object({
+        enable = bool
+      })
+      staticIpAddress = string
     })
     operatingSystem = object({
       type = string
@@ -95,7 +97,7 @@ resource azurerm_network_interface scheduler {
     private_ip_address            = each.value.network.staticIpAddress != "" ? each.value.network.staticIpAddress : null
     private_ip_address_allocation = each.value.network.staticIpAddress != "" ? "Static" : "Dynamic"
   }
-  enable_accelerated_networking = each.value.network.enableAcceleration
+  enable_accelerated_networking = each.value.network.acceleration.enable
 }
 
 resource azurerm_linux_virtual_machine scheduler {

@@ -109,11 +109,13 @@ weka = {
     }
   }
   network = {
+    acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+      enable = true
+    }
     dnsARecord = {
       name    = "content"
       ttlSeconds = 300
     }
-    enableAcceleration = false
   }
   terminateNotification = {
     enable       = true
@@ -231,7 +233,9 @@ hammerspace = {
       count      = 1 # Set to 2 (or more) to enable high availability
     }
     network = {
-      enableAcceleration = true
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
     }
     osDisk = {
       storageType = "Premium_LRS"
@@ -259,7 +263,9 @@ hammerspace = {
       count      = 2
     }
     network = {
-      enableAcceleration = true
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
     }
     osDisk = {
       storageType = "Premium_LRS"

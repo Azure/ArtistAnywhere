@@ -13,7 +13,9 @@ variable hammerspace {
         count      = number
       })
       network = object({
-        enableAcceleration = bool
+        acceleration = object({
+          enable = bool
+        })
       })
       osDisk = object({
         storageType = string
@@ -41,7 +43,9 @@ variable hammerspace {
         count      = number
       })
       network = object({
-        enableAcceleration = bool
+        acceleration = object({
+          enable = bool
+        })
       })
       osDisk = object({
         storageType = string
@@ -197,7 +201,7 @@ resource azurerm_network_interface storage_primary {
     subnet_id                     = data.azurerm_subnet.storage.id
     private_ip_address_allocation = "Dynamic"
   }
-  enable_accelerated_networking = each.value.network.enableAcceleration
+  enable_accelerated_networking = each.value.network.acceleration.enable
 }
 
 resource azurerm_network_interface storage_secondary {
@@ -212,7 +216,7 @@ resource azurerm_network_interface storage_secondary {
     subnet_id                     = data.azurerm_subnet.storage.id
     private_ip_address_allocation = "Dynamic"
   }
-  enable_accelerated_networking = each.value.network.enableAcceleration
+  enable_accelerated_networking = each.value.network.acceleration.enable
 }
 
 resource azurerm_managed_disk storage {

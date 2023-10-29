@@ -7,7 +7,12 @@ resourceGroupName = "ArtistAnywhere.Farm" # Alphanumeric, underscores, hyphens, 
 virtualMachineScaleSets = [
   {
     enable = false
-    name   = "LnxFarmC"
+    name = {
+      prefix = "LnxFarmC"
+      suffix = {
+        enable = true
+      }
+    }
     machine = {
       size  = "Standard_HB120rs_v3"
       count = 2
@@ -26,7 +31,9 @@ virtualMachineScaleSets = [
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
     }
     network = {
-      enableAcceleration = true
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
     }
     operatingSystem = {
       type = "Linux"
@@ -72,7 +79,12 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "LnxFarmG"
+    name = {
+      prefix = "LnxFarmG"
+      suffix = {
+        enable = true
+      }
+    }
     machine = {
       size  = "Standard_NV36ads_A10_v5"
       count = 2
@@ -91,7 +103,9 @@ virtualMachineScaleSets = [
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
     }
     network = {
-      enableAcceleration = true
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
     }
     operatingSystem = {
       type = "Linux"
@@ -137,7 +151,12 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "WinFarmC"
+    name = {
+      prefix = "WinFarmC"
+      suffix = {
+        enable = true
+      }
+    }
     machine = {
       size  = "Standard_HB120rs_v3"
       count = 2
@@ -156,7 +175,9 @@ virtualMachineScaleSets = [
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
     }
     network = {
-      enableAcceleration = true
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
     }
     operatingSystem = {
       type = "Windows"
@@ -202,7 +223,12 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "WinFarmG"
+    name = {
+      prefix = "WinFarmG"
+      suffix = {
+        enable = true
+      }
+    }
     machine = {
       size  = "Standard_NV36ads_A10_v5"
       count = 2
@@ -221,7 +247,9 @@ virtualMachineScaleSets = [
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
     }
     network = {
-      enableAcceleration = true
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
     }
     operatingSystem = {
       type = "Windows"
@@ -282,9 +310,14 @@ batch = {
   }
   pools = [
     {
-      enable      = false
-      name        = "LnxFarmC"
-      displayName = "Linux Render Farm (CPU)"
+      enable = false
+      name = {
+        display = "Linux Render Farm (CPU)"
+        prefix  = "LnxFarmC"
+        suffix = {
+          enable = true
+        }
+      }
       node = {
         imageId = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
         agentId = "batch.node.el 9"
@@ -292,14 +325,23 @@ batch = {
           size  = "Standard_HB120rs_v3" # https://learn.microsoft.com/azure/batch/batch-pool-vm-sizes
           count = 2
         }
+        network = {
+          acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+            enable = true
+          }
+        }
         osDisk = {
           ephemeral = {
             enable = false # https://learn.microsoft.com/azure/batch/create-pool-ephemeral-os-disk
           }
         }
+        adminLogin = {
+          userName     = ""
+          userPassword = ""
+        }
         placementPolicy    = "Regional"       # https://learn.microsoft.com/rest/api/batchservice/pool/add?#nodeplacementpolicytype
         deallocationMode   = "TaskCompletion" # https://learn.microsoft.com/rest/api/batchservice/pool/remove-nodes?#computenodedeallocationoption
-        maxConcurrentTasks = 1
+        maxConcurrentTasks = 3
       }
       fillMode = { # https://learn.microsoft.com/azure/batch/batch-parallel-node-tasks
         nodePack = {
@@ -311,9 +353,14 @@ batch = {
       }
     },
     {
-      enable      = false
-      name        = "LnxFarmG"
-      displayName = "Linux Render Farm (GPU)"
+      enable = false
+      name = {
+        display = "Linux Render Farm (GPU)"
+        prefix  = "LnxFarmG"
+        suffix = {
+          enable = true
+        }
+      }
       node = {
         imageId = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.1.0"
         agentId = "batch.node.el 9"
@@ -321,14 +368,23 @@ batch = {
           size  = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/batch/batch-pool-vm-sizes
           count = 2
         }
+        network = {
+          acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+            enable = true
+          }
+        }
         osDisk = {
           ephemeral = {
             enable = false # https://learn.microsoft.com/azure/batch/create-pool-ephemeral-os-disk
           }
         }
+        adminLogin = {
+          userName     = ""
+          userPassword = ""
+        }
         placementPolicy    = "Regional"       # https://learn.microsoft.com/rest/api/batchservice/pool/add?#nodeplacementpolicytype
         deallocationMode   = "TaskCompletion" # https://learn.microsoft.com/rest/api/batchservice/pool/remove-nodes?#computenodedeallocationoption
-        maxConcurrentTasks = 1
+        maxConcurrentTasks = 3
       }
       fillMode = { # https://learn.microsoft.com/azure/batch/batch-parallel-node-tasks
         nodePack = {
@@ -340,9 +396,14 @@ batch = {
       }
     },
     {
-      enable      = false
-      name        = "WinFarmC"
-      displayName = "Windows Render Farm (CPU)"
+      enable = false
+      name = {
+        display = "Windows Render Farm (CPU)"
+        prefix  = "WinFarmC"
+        suffix = {
+          enable = true
+        }
+      }
       node = {
         imageId = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinFarm/versions/2.0.0"
         agentId = "batch.node.windows amd64"
@@ -350,14 +411,23 @@ batch = {
           size  = "Standard_HB120rs_v3" # https://learn.microsoft.com/azure/batch/batch-pool-vm-sizes
           count = 2
         }
+        network = {
+          acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+            enable = true
+          }
+        }
         osDisk = {
           ephemeral = {
             enable = false # https://learn.microsoft.com/azure/batch/create-pool-ephemeral-os-disk
           }
         }
+        adminLogin = {
+          userName     = ""
+          userPassword = ""
+        }
         placementPolicy    = "Regional"       # https://learn.microsoft.com/rest/api/batchservice/pool/add?#nodeplacementpolicytype
         deallocationMode   = "TaskCompletion" # https://learn.microsoft.com/rest/api/batchservice/pool/remove-nodes?#computenodedeallocationoption
-        maxConcurrentTasks = 1
+        maxConcurrentTasks = 3
       }
       fillMode = { # https://learn.microsoft.com/azure/batch/batch-parallel-node-tasks
         nodePack = {
@@ -369,9 +439,14 @@ batch = {
       }
     },
     {
-      enable      = false
-      name        = "WinFarmG"
-      displayName = "Windows Render Farm (GPU)"
+      enable = false
+      name = {
+        display = "Windows Render Farm (GPU)"
+        prefix  = "WinFarmG"
+        suffix = {
+          enable = true
+        }
+      }
       node = {
         imageId = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinFarm/versions/2.1.0"
         agentId = "batch.node.windows amd64"
@@ -379,14 +454,23 @@ batch = {
           size  = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/batch/batch-pool-vm-sizes
           count = 2
         }
+        network = {
+          acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+            enable = true
+          }
+        }
         osDisk = {
           ephemeral = {
             enable = false # https://learn.microsoft.com/azure/batch/create-pool-ephemeral-os-disk
           }
         }
+        adminLogin = {
+          userName     = ""
+          userPassword = ""
+        }
         placementPolicy    = "Regional"       # https://learn.microsoft.com/rest/api/batchservice/pool/add?#nodeplacementpolicytype
         deallocationMode   = "TaskCompletion" # https://learn.microsoft.com/rest/api/batchservice/pool/remove-nodes?#computenodedeallocationoption
-        maxConcurrentTasks = 1
+        maxConcurrentTasks = 3
       }
       fillMode = { # https://learn.microsoft.com/azure/batch/batch-parallel-node-tasks
         nodePack = {

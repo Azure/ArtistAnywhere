@@ -13,9 +13,14 @@ variable batch {
       })
     })
     pools = list(object({
-      enable      = bool
-      name        = string
-      displayName = string
+      enable = bool
+      name = object({
+        display = string
+        prefix  = string
+        suffix = object({
+          enable = bool
+        })
+      })
       node = object({
         imageId = string
         agentId = string
@@ -23,10 +28,19 @@ variable batch {
           size  = string
           count = number
         })
+        network = object({
+          acceleration = object({
+            enable = bool
+          })
+        })
         osDisk = object({
           ephemeral = object({
             enable = bool
           })
+        })
+        adminLogin = object({
+          userName     = string
+          userPassword = string
         })
         placementPolicy    = string
         deallocationMode   = string
@@ -60,10 +74,26 @@ data azurerm_key_vault batch {
 }
 
 locals {
-  fileSystemsLinuxBatch = [
+  batchPoolsLinux = [
+    for pool in var.batch.pools : merge(pool, {
+      name = {
+        value   = pool.name.suffix.enable ? "${pool.name.prefix}_${replace(plantimestamp(), ":", "-")}" : pool.name.prefix
+        display = pool.name.display
+      }
+    }) if pool.enable && strcontains(pool.node.agentId, "node.el")
+  ]
+  batchPoolsWindows = [
+    for pool in var.batch.pools : merge(pool, {
+      name = {
+        value   = pool.name.suffix.enable ? "${pool.name.prefix}_${replace(plantimestamp(), ":", "-")}" : pool.name.prefix
+        display = pool.name.display
+      }
+    }) if pool.enable && strcontains(pool.node.agentId, "node.windows")
+  ]
+  batchFileSystemsLinux = [
     for fileSystem in local.fileSystemsLinux : fileSystem if !fileSystem.iaasOnly
   ]
-  fileSystemsWindowsBatch = [
+  batchFileSystemsWindows = [
     for fileSystem in local.fileSystemsWindows : fileSystem if !fileSystem.iaasOnly
   ]
 }
@@ -187,19 +217,20 @@ resource azurerm_batch_account scheduler {
   ]
 }
 
-resource azurerm_batch_pool farm {
+resource azurerm_batch_pool linux {
   for_each = {
-    for pool in var.batch.pools : pool.name => pool if var.batch.enable && pool.enable
+    for pool in local.batchPoolsLinux : pool.name.value => pool if var.batch.enable
   }
-  name                     = each.value.name
-  display_name             = each.value.displayName != "" ? each.value.displayName : each.value.name
-  resource_group_name      = azurerm_resource_group.farm.name
-  account_name             = azurerm_batch_account.scheduler[0].name
-  node_agent_sku_id        = each.value.node.agentId
-  vm_size                  = each.value.node.machine.size
-  max_tasks_per_node       = each.value.node.maxConcurrentTasks
-  os_disk_placement        = each.value.node.osDisk.ephemeral.enable ? "CacheDisk" : null
-  inter_node_communication = "Disabled"
+  name                           = each.value.name.value
+  display_name                   = each.value.name.display != "" ? each.value.name.display : each.value.name.value
+  resource_group_name            = azurerm_resource_group.farm.name
+  account_name                   = azurerm_batch_account.scheduler[0].name
+  node_agent_sku_id              = each.value.node.agentId
+  vm_size                        = each.value.node.machine.size
+  max_tasks_per_node             = each.value.node.maxConcurrentTasks
+  os_disk_placement              = each.value.node.osDisk.ephemeral.enable ? "CacheDisk" : null
+  inter_node_communication       = "Disabled"
+  target_node_communication_mode = "Simplified"
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -210,7 +241,9 @@ resource azurerm_batch_pool farm {
     id = each.value.node.imageId
   }
   network_configuration {
-    subnet_id = data.azurerm_subnet.farm.id
+    subnet_id                        = data.azurerm_subnet.farm.id
+    accelerated_networking_enabled   = each.value.node.network.acceleration.enable
+    public_address_provisioning_type = "NoPublicIPAddresses"
   }
   node_placement {
     policy = each.value.node.placementPolicy
@@ -223,33 +256,91 @@ resource azurerm_batch_pool farm {
     target_low_priority_nodes = each.value.spot.enable ? each.value.node.machine.count : 0
     target_dedicated_nodes    = each.value.spot.enable ? 0 : each.value.node.machine.count
   }
-  # dynamic mount {
-  #   for_each = length(local.fileSystemsLinuxBatch) > 0 || length(local.fileSystemsWindowsBatch) > 0 ? [1] : []
-  #   content {
-  #     dynamic nfs_mount {
-  #       for_each = strcontains(each.value.node.agentId, "linux") ? local.fileSystemsLinuxBatch : []
-  #       content {
-  #         relative_mount_path = each.value.path
-  #         source              = each.value.source
-  #         mount_options       = each.value.options
-  #       }
-  #     }
-  #     dynamic nfs_mount {
-  #       for_each = strcontains(each.value.node.agentId, "windows") ? local.fileSystemsWindowsBatch : []
-  #       content {
-  #         relative_mount_path = each.value.path
-  #         source              = each.value.source
-  #         mount_options       = each.value.options
-  #       }
-  #     }
-  #   }
-  # }
+  user_accounts {
+    elevation_level = "Admin"
+    name            = each.value.node.adminLogin.userName != "" ? each.value.node.adminLogin.userName : try(data.azurerm_key_vault_secret.admin_username[0].value, "")
+    password        = each.value.node.adminLogin.userPassword != "" ? each.value.node.adminLogin.userPassword : try(data.azurerm_key_vault_secret.admin_password[0].value, "")
+  }
+  dynamic mount {
+    for_each = length(local.batchFileSystemsLinux) > 0 ? [1] : []
+    content {
+      dynamic nfs_mount {
+        for_each = local.batchFileSystemsLinux
+        content {
+          relative_mount_path = nfs_mount.value["mount"].path
+          source              = nfs_mount.value["mount"].source
+          mount_options       = nfs_mount.value["mount"].options
+        }
+      }
+    }
+  }
+}
+
+resource azurerm_batch_pool windows {
+  for_each = {
+    for pool in local.batchPoolsWindows : pool.name.value => pool if var.batch.enable
+  }
+  name                           = each.value.name.value
+  display_name                   = each.value.name.display != "" ? each.value.name.display : each.value.name.value
+  resource_group_name            = azurerm_resource_group.farm.name
+  account_name                   = azurerm_batch_account.scheduler[0].name
+  node_agent_sku_id              = each.value.node.agentId
+  vm_size                        = each.value.node.machine.size
+  max_tasks_per_node             = each.value.node.maxConcurrentTasks
+  os_disk_placement              = each.value.node.osDisk.ephemeral.enable ? "CacheDisk" : null
+  inter_node_communication       = "Disabled"
+  target_node_communication_mode = "Simplified"
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
+  }
+  storage_image_reference {
+    id = each.value.node.imageId
+  }
+  network_configuration {
+    subnet_id                        = data.azurerm_subnet.farm.id
+    accelerated_networking_enabled   = each.value.node.network.acceleration.enable
+    public_address_provisioning_type = "NoPublicIPAddresses"
+  }
+  node_placement {
+    policy = each.value.node.placementPolicy
+  }
+  task_scheduling_policy {
+    node_fill_type = each.value.fillMode.nodePack.enable ? "Pack" : "Spread"
+  }
+  fixed_scale {
+    node_deallocation_method  = each.value.node.deallocationMode
+    target_low_priority_nodes = each.value.spot.enable ? each.value.node.machine.count : 0
+    target_dedicated_nodes    = each.value.spot.enable ? 0 : each.value.node.machine.count
+  }
+  user_accounts {
+    elevation_level = "Admin"
+    name            = each.value.node.adminLogin.userName != "" ? each.value.node.adminLogin.userName : try(data.azurerm_key_vault_secret.admin_username[0].value, "")
+    password        = each.value.node.adminLogin.userPassword != "" ? each.value.node.adminLogin.userPassword : try(data.azurerm_key_vault_secret.admin_password[0].value, "")
+  }
+  dynamic mount {
+    for_each = length(local.batchFileSystemsWindows) > 0 ? [1] : []
+    content {
+      dynamic cifs_mount {
+        for_each = local.batchFileSystemsWindows
+        content {
+          relative_mount_path = nfs_mount.value["mount"].path
+          source              = nfs_mount.value["mount"].source
+          mount_options       = nfs_mount.value["mount"].options
+          user_name           = nfs_mount.value["mount"].userName
+          password            = nfs_mount.value["mount"].password
+        }
+      }
+    }
+  }
   # dynamic start_task {
-  #   for_each = var.activeDirectory.enable && strcontains(each.value.node.agentId, "windows") ? [1] : []
+  #   for_each = var.activeDirectory.enable ? [1] : []
   #   content {
-  #     command_line = ""
-  #     user_identity {
-  #     }
+  #      command_line = ""
+  #      user_identity {
+  #      }
   #   }
   # }
 }

@@ -42,6 +42,6 @@ function SetFileSystemMount {
   mountOptions=$(echo $fileSystemMount | jq -r .options)
   if [ $(grep -c $mountPath /etc/fstab) ]; then
     mkdir -p $mountPath
-    echo "$mountSource $mountPath $mountType $mountOptions" >> /etc/fstab
+    echo "$mountSource /mnt/$mountPath $mountType $mountOptions 0 0" >> /etc/fstab
   fi
 }

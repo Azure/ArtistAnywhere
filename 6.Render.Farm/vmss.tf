@@ -5,7 +5,12 @@
 variable virtualMachineScaleSets {
   type = list(object({
     enable = bool
-    name   = string
+    name = object({
+      prefix = string
+      suffix = object({
+        enable = bool
+      })
+    })
     machine = object({
       size  = string
       count = number
@@ -24,7 +29,9 @@ variable virtualMachineScaleSets {
       evictionPolicy = string
     })
     network = object({
-      enableAcceleration = bool
+      acceleration = object({
+        enable = bool
+      })
     })
     operatingSystem = object({
       type = string
@@ -79,6 +86,10 @@ locals {
   ]
   virtualMachineScaleSets = [
     for virtualMachineScaleSet in var.virtualMachineScaleSets : merge(virtualMachineScaleSet, {
+      name = {
+        prefix = virtualMachineScaleSet.name.prefix
+        value  = virtualMachineScaleSet.name.suffix.enable ? "${virtualMachineScaleSet.name.prefix}_${replace(plantimestamp(), ":", "-")}" : virtualMachineScaleSet.name.prefix
+      }
       adminLogin = {
         userName     = virtualMachineScaleSet.adminLogin.userName != "" ? virtualMachineScaleSet.adminLogin.userName : try(data.azurerm_key_vault_secret.admin_username[0].value, "")
         userPassword = virtualMachineScaleSet.adminLogin.userPassword != "" ? virtualMachineScaleSet.adminLogin.userPassword : try(data.azurerm_key_vault_secret.admin_password[0].value, "")
@@ -101,9 +112,10 @@ locals {
 
 resource azurerm_linux_virtual_machine_scale_set farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.enable && virtualMachineScaleSet.operatingSystem.type == "Linux"
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name.value => virtualMachineScaleSet if virtualMachineScaleSet.enable && virtualMachineScaleSet.operatingSystem.type == "Linux"
   }
-  name                            = each.value.name
+  name                            = each.value.name.value
+  computer_name_prefix            = each.value.name.prefix
   resource_group_name             = azurerm_resource_group.farm.name
   location                        = azurerm_resource_group.farm.location
   sku                             = each.value.machine.size
@@ -117,14 +129,14 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   single_placement_group          = false
   overprovision                   = false
   network_interface {
-    name    = each.value.name
+    name    = each.value.name.prefix
     primary = true
     ip_configuration {
       name      = "ipConfig"
       primary   = true
       subnet_id = data.azurerm_subnet.farm.id
     }
-    enable_accelerated_networking = each.value.network.enableAcceleration
+    enable_accelerated_networking = each.value.network.acceleration.enable
   }
   os_disk {
     storage_account_type = each.value.operatingSystem.disk.storageType
@@ -222,9 +234,10 @@ resource azurerm_linux_virtual_machine_scale_set farm {
 
 resource azurerm_windows_virtual_machine_scale_set farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.enable && virtualMachineScaleSet.operatingSystem.type == "Windows"
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name.value => virtualMachineScaleSet if virtualMachineScaleSet.enable && virtualMachineScaleSet.operatingSystem.type == "Windows"
   }
-  name                   = each.value.name
+  name                   = each.value.name.value
+  computer_name_prefix   = each.value.name.prefix
   resource_group_name    = azurerm_resource_group.farm.name
   location               = azurerm_resource_group.farm.location
   sku                    = each.value.machine.size
@@ -238,14 +251,14 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   single_placement_group = false
   overprovision          = false
   network_interface {
-    name    = each.value.name
+    name    = each.value.name.prefix
     primary = true
     ip_configuration {
       name      = "ipConfig"
       primary   = true
       subnet_id = data.azurerm_subnet.farm.id
     }
-    enable_accelerated_networking = each.value.network.enableAcceleration
+    enable_accelerated_networking = each.value.network.acceleration.enable
   }
   os_disk {
     storage_account_type = each.value.operatingSystem.disk.storageType

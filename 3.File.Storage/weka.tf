@@ -24,11 +24,13 @@ variable weka {
       })
     })
     network = object({
+      acceleration = object({
+        enable = bool
+      })
       dnsARecord = object({
         name       = string
         ttlSeconds = number
       })
-      enableAcceleration = bool
     })
     terminateNotification = object({
       enable       = bool
@@ -226,7 +228,7 @@ resource azurerm_linux_virtual_machine_scale_set weka {
       primary   = true
       subnet_id = data.azurerm_subnet.storage.id
     }
-    enable_accelerated_networking = var.weka.network.enableAcceleration
+    enable_accelerated_networking = var.weka.network.acceleration.enable
   }
   os_disk {
     storage_account_type = var.weka.osDisk.storageType

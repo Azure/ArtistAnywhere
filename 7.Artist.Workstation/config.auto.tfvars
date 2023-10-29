@@ -21,7 +21,9 @@ virtualMachines = [
       }
     }
     network = {
-      enableAcceleration = true
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
     }
     operatingSystem = {
       type = "Linux"
@@ -68,7 +70,9 @@ virtualMachines = [
       }
     }
     network = {
-      enableAcceleration = true
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
     }
     operatingSystem = {
       type = "Linux"
@@ -115,7 +119,9 @@ virtualMachines = [
       }
     }
     network = {
-      enableAcceleration = true
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
     }
     operatingSystem = {
       type = "Windows"
@@ -162,7 +168,9 @@ virtualMachines = [
       }
     }
     network = {
-      enableAcceleration = true
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
     }
     operatingSystem = {
       type = "Windows"

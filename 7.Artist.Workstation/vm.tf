@@ -19,7 +19,9 @@ variable virtualMachines {
       })
     })
     network = object({
-      enableAcceleration = bool
+      acceleration = object({
+        enable = bool
+      })
     })
     operatingSystem = object({
       type = string
@@ -94,7 +96,7 @@ resource azurerm_network_interface workstation {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = var.trafficManager.enable ? azurerm_public_ip.workstation[each.value.name].id : null
   }
-  enable_accelerated_networking = each.value.network.enableAcceleration
+  enable_accelerated_networking = each.value.network.acceleration.enable
 }
 
 resource azurerm_linux_virtual_machine workstation {

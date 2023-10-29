@@ -6,9 +6,9 @@ variable fileSystems {
         iaasOnly = false
         mount = {
           type    = "aznfs"
-          path    = "/mnt/content"
+          path    = "content"
           source  = "xstudio1.blob.core.windows.net:/xstudio1/content"
-          options = "default,sec=sys,proto=tcp,vers=3,nolock 0 0"
+          options = "default,sec=sys,proto=tcp,vers=3,nolock"
         }
       },
       {
@@ -16,9 +16,9 @@ variable fileSystems {
         iaasOnly = false
         mount = {
           type    = "nfs"
-          path    = "/mnt/content"
+          path    = "content"
           source  = "cache.artist.studio:/content"
-          options = "hard,proto=tcp,mountproto=tcp,retry=30,nolock 0 0"
+          options = "hard,proto=tcp,mountproto=tcp,retry=30,nolock"
         }
       },
       {
@@ -26,41 +26,47 @@ variable fileSystems {
         iaasOnly = true
         mount = {
           type    = "nfs"
-          path    = "/mnt/deadline"
+          path    = "deadline"
           source  = "scheduler.artist.studio:/deadline"
-          options = "defaults 0 0"
+          options = "defaults"
         }
       }
     ]
     windows = [
       {
         enable   = false # File Storage
-        iaasOnly = false
+        iaasOnly = true
         mount = {
           type    = ""
           path    = "X:"
           source  = "\\\\xstudio1.blob.core.windows.net\\xstudio1\\content"
           options = "-o anon nolock"
+          userName = ""
+          password = ""
         }
       },
       {
         enable   = false # File Cache
-        iaasOnly = false
+        iaasOnly = true
         mount = {
           type    = ""
           path    = "X:"
           source  = "\\\\cache.artist.studio\\content"
           options = "-o anon nolock"
+          userName = ""
+          password = ""
         }
       },
       {
         enable   = true # Job Scheduler
         iaasOnly = true
         mount = {
-          type    = ""
-          path    = "S:"
-          source  = "\\\\scheduler.artist.studio\\deadline"
-          options = "-o anon"
+          type     = ""
+          path     = "S:"
+          source   = "\\\\scheduler.artist.studio\\deadline"
+          options  = "-o anon"
+          userName = ""
+          password = ""
         }
       }
     ]

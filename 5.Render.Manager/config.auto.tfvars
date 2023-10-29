@@ -27,8 +27,10 @@ virtualMachines = [
       }
     }
     network = {
-      staticIpAddress    = ""
-      enableAcceleration = true
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      staticIpAddress = ""
     }
     operatingSystem = {
       type = "Linux"
@@ -84,8 +86,10 @@ virtualMachines = [
       }
     }
     network = {
-      staticIpAddress    = "10.0.127.0"
-      enableAcceleration = true
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      staticIpAddress = "10.0.127.0"
     }
     operatingSystem = {
       type = "Windows"
