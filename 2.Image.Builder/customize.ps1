@@ -355,11 +355,11 @@ if ($machineType -eq "Scheduler") {
   StartProcess dism.exe "/Online /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All /NoRestart" "$binDirectory\$installType"
   Write-Host "Customize (End): NFS Client"
 
-  Write-Host "Customize (Start): WSL"
-  $installType = "wsl"
-  StartProcess dism.exe "/Online /Enable-Feature /FeatureName:Microsoft-Hyper-V-All /All /NoRestart" "$binDirectory\$installType-hyper-v"
-  StartProcess wsl.exe "--install" "$binDirectory\$installType"
-  Write-Host "Customize (End): WSL"
+  # Write-Host "Customize (Start): WSL"
+  # $installType = "wsl"
+  # StartProcess dism.exe "/Online /Enable-Feature /FeatureName:Microsoft-Hyper-V-All /All /NoRestart" "$binDirectory\$installType-hyper-v"
+  # StartProcess wsl.exe "--install" "$binDirectory\$installType"
+  # Write-Host "Customize (End): WSL"
 }
 
 if ($machineType -ne "Storage") {
