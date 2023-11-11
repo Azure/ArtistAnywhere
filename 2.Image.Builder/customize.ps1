@@ -113,7 +113,7 @@ if ($gpuProvider -eq "AMD") {
   Write-Host "Customize (End): NVIDIA GPU (GRID)"
 
   Write-Host "Customize (Start): NVIDIA GPU (CUDA)"
-  $versionInfo = "12.2.2"
+  $versionInfo = "12.3.0"
   $installType = "nvidia-gpu-cuda"
   $installFile = "cuda_${versionInfo}_windows_network.exe"
   $downloadUrl = "$binStorageHost/NVIDIA/CUDA/$versionInfo/$installFile$binStorageAuth"
@@ -131,7 +131,7 @@ if ($gpuProvider -eq "AMD") {
   $sdkDirectory = "C:\ProgramData\NVIDIA Corporation\OptiX SDK $versionInfo\SDK"
   $buildDirectory = "$sdkDirectory\build"
   New-Item -ItemType Directory $buildDirectory
-  $versionInfo = "v12.2"
+  $versionInfo = "v12.3"
   StartProcess $binPathCMake\cmake.exe "-B ""$buildDirectory"" -S ""$sdkDirectory"" -D CUDA_TOOLKIT_ROOT_DIR=""C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\$versionInfo""" "$binDirectory\$installType-cmake"
   StartProcess $binPathMSBuild\MSBuild.exe """$buildDirectory\OptiX-Samples.sln"" -p:Configuration=Release" "$binDirectory\$installType-msbuild"
   $binPaths += ";$buildDirectory\bin\Release"
@@ -182,44 +182,6 @@ if ($renderEngines -contains "RenderMan") {
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   StartProcess $installFile "/quiet /norestart /log $installType.log" $null
   Write-Host "Customize (End): RenderMan"
-}
-
-if ($renderEngines -contains "Maya") {
-  Write-Host "Customize (Start): Maya"
-  $versionInfo = "2024_0_1"
-  $installType = "maya"
-  $installFile = "Autodesk_Maya_${versionInfo}_Update_Windows_64bit_dlm.zip"
-  $downloadUrl = "$binStorageHost/Maya/$versionInfo/$installFile$binStorageAuth"
-  (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
-  Expand-Archive -Path $installFile
-  Start-Process -FilePath .\Autodesk_Maya*\Autodesk_Maya*\Setup.exe -ArgumentList "--silent" -RedirectStandardOutput $installType-out -RedirectStandardError $installType-err
-  Start-Sleep -Seconds 600
-  $binPaths += ";C:\Program Files\Autodesk\Maya2024\bin"
-  Write-Host "Customize (End): Maya"
-}
-
-if ($renderEngines -contains "Houdini") {
-  Write-Host "Customize (Start): Houdini"
-  $versionInfo = "19.5.569"
-  $versionEULA = "2021-10-13"
-  $installType = "houdini"
-  $installFile = "$installType-$versionInfo-win64-vc142.exe"
-  $downloadUrl = "$binStorageHost/Houdini/$versionInfo/$installFile$binStorageAuth"
-  (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
-  if ($machineType -eq "Workstation") {
-    $installArgs = "/MainApp=Yes"
-  } else {
-    $installArgs = "/HoudiniEngineOnly=Yes"
-  }
-  if ($renderEngines -contains "Maya") {
-    $installArgs += " /EngineMaya=Yes"
-  }
-  if ($renderEngines -contains "Unreal") {
-    $installArgs += " /EngineUnreal=Yes"
-  }
-  StartProcess .\$installFile "/S /AcceptEULA=$versionEULA $installArgs" "$binDirectory\$installType"
-  $binPaths += ";C:\Program Files\Side Effects Software\Houdini $versionInfo\bin"
-  Write-Host "Customize (End): Houdini"
 }
 
 if ($renderEngines -contains "Unreal" -or $renderEngines -contains "Unreal+PixelStream") {
@@ -325,6 +287,44 @@ if ($renderEngines -contains "Unreal" -or $renderEngines -contains "Unreal+Pixel
     $shortcut.Save()
     Write-Host "Customize (End): Unreal Editor"
   }
+}
+
+if ($renderEngines -contains "Maya") {
+  Write-Host "Customize (Start): Maya"
+  $versionInfo = "2024_0_1"
+  $installType = "maya"
+  $installFile = "Autodesk_Maya_${versionInfo}_Update_Windows_64bit_dlm.zip"
+  $downloadUrl = "$binStorageHost/Maya/$versionInfo/$installFile$binStorageAuth"
+  (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
+  Expand-Archive -Path $installFile
+  Start-Process -FilePath .\Autodesk_Maya*\Autodesk_Maya*\Setup.exe -ArgumentList "--silent" -RedirectStandardOutput $installType-out -RedirectStandardError $installType-err
+  Start-Sleep -Seconds 600
+  $binPaths += ";C:\Program Files\Autodesk\Maya2024\bin"
+  Write-Host "Customize (End): Maya"
+}
+
+if ($renderEngines -contains "Houdini") {
+  Write-Host "Customize (Start): Houdini"
+  $versionInfo = "19.5.569"
+  $versionEULA = "2021-10-13"
+  $installType = "houdini"
+  $installFile = "$installType-$versionInfo-win64-vc142.exe"
+  $downloadUrl = "$binStorageHost/Houdini/$versionInfo/$installFile$binStorageAuth"
+  (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
+  if ($machineType -eq "Workstation") {
+    $installArgs = "/MainApp=Yes"
+  } else {
+    $installArgs = "/HoudiniEngineOnly=Yes"
+  }
+  if ($renderEngines -contains "Maya") {
+    $installArgs += " /EngineMaya=Yes"
+  }
+  if ($renderEngines -contains "Unreal") {
+    $installArgs += " /EngineUnreal=Yes"
+  }
+  StartProcess .\$installFile "/S /AcceptEULA=$versionEULA $installArgs" "$binDirectory\$installType"
+  $binPaths += ";C:\Program Files\Side Effects Software\Houdini $versionInfo\bin"
+  Write-Host "Customize (End): Houdini"
 }
 
 if ($machineType -eq "Scheduler") {

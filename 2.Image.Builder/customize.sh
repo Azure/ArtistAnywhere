@@ -40,11 +40,11 @@ echo "Customize (End): Image Build Platform"
 if [ $machineType == Storage ]; then
   echo "Customize (Start): NVIDIA OFED"
   installType="mellanox-ofed"
-  installFile="MLNX_OFED_LINUX-23.07-0.5.1.2-rhel9.2-x86_64.tgz"
+  installFile="MLNX_OFED_LINUX-23.10-0.5.5.0-rhel8.8-x86_64.tgz"
   downloadUrl="$binStorageHost/NVIDIA/OFED/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xzf $installFile
-  StartProcess "dnf -y install kernel-rpm-macros rpm-build libtool gcc-gfortran pciutils tcl tk" $binDirectory/$installType
+  StartProcess "dnf -y install kernel-modules-extra kernel-rpm-macros rpm-build libtool gcc-gfortran pciutils tcl tk" $binDirectory/$installType
   StartProcess "./MLNX_OFED*/mlnxofedinstall --without-fw-update --add-kernel-support --skip-repo --force" $binDirectory/$installType
   echo "Customize (End): NVIDIA OFED"
 fi
@@ -62,7 +62,7 @@ if [ "$gpuProvider" == NVIDIA ]; then
 
   echo "Customize (Start): NVIDIA GPU (CUDA)"
   installType="nvidia-cuda"
-  StartProcess "dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo" $binDirectory/$installType
+  StartProcess "dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo" $binDirectory/$installType
   StartProcess "dnf -y install cuda" $binDirectory/$installType
   echo "Customize (End): NVIDIA GPU (CUDA)"
 
@@ -93,7 +93,7 @@ if [[ $machineType == Storage || $machineType == Scheduler ]]; then
   echo "Customize (Start): Azure CLI"
   installType="azure-cli"
   StartProcess "rpm --import https://packages.microsoft.com/keys/microsoft.asc" $binDirectory/$installType
-  StartProcess "dnf -y install https://packages.microsoft.com/config/rhel/9.0/packages-microsoft-prod.rpm" $binDirectory/$installType
+  StartProcess "dnf -y install https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm" $binDirectory/$installType
   StartProcess "dnf -y install $installType" $binDirectory/$installType
   echo "Customize (End): Azure CLI"
 fi
@@ -208,6 +208,53 @@ if [[ $renderEngines == *RenderMan* ]]; then
   echo "Customize (End): RenderMan"
 fi
 
+if [[ $renderEngines == *Unreal* ]] || [[ $renderEngines == *Unreal+PixelStream* ]]; then
+  echo "Customize (Start): Unreal Engine Setup"
+  versionInfo="5.3.1"
+  installType="unreal-engine"
+  installPath="/usr/local/unreal"
+  installFile="UnrealEngine-$versionInfo-release.tar.gz"
+  downloadUrl="$binStorageHost/Unreal/$versionInfo/$installFile$binStorageAuth"
+  curl -o $installFile -L $downloadUrl
+  tar -xzf $installFile
+  mkdir -p $installPath
+  mv UnrealEngine-$versionInfo-release/* $installPath
+  StartProcess "dnf -y install libicu" $binDirectory/$installType
+  StartProcess "$installPath/Setup.sh" $binDirectory/$installType
+  echo "Customize (End): Unreal Engine Setup"
+
+  echo "Customize (Start): Unreal Project Files Generate"
+  StartProcess "$installPath/GenerateProjectFiles.sh" $binDirectory/$installType
+  echo "Customize (End): Unreal Project Files Generate"
+
+  echo "Customize (Start): Unreal Engine Build"
+  StartProcess "make -C $installPath" $binDirectory/$installType
+  echo "Customize (End): Unreal Engine Build"
+
+  if [[ $renderEngines == *Unreal+PixelStream* ]]; then
+    echo "Customize (Start): Unreal Pixel Streaming"
+    versionInfo="5.3-1.0.0"
+    installType="unreal-stream"
+    installFile="UE$versionInfo.tar.gz"
+    downloadUrl="$binStorageHost/Unreal/PixelStream/$versionInfo/$installFile$binStorageAuth"
+    curl -o $installFile -L $downloadUrl
+    tar -xzf $installFile
+    StartProcess "dnf -y install coturn" $binDirectory/$installType
+    installFile="PixelStreamingInfrastructure-UE$versionInfo/SignallingWebServer/platform_scripts/bash/setup.sh"
+    chmod +x $installFile
+    StartProcess "./$installFile" $binDirectory/$installType
+    installFile="PixelStreamingInfrastructure-UE$versionInfo/Matchmaker/platform_scripts/bash/setup.sh"
+    chmod +x $installFile
+    StartProcess "./$installFile" $binDirectory/$installType
+    installFile="PixelStreamingInfrastructure-UE$versionInfo/SFU/platform_scripts/bash/setup.sh"
+    chmod +x $installFile
+    StartProcess "./$installFile" $binDirectory/$installType
+    echo "Customize (End): Unreal Pixel Streaming"
+  fi
+
+  binPaths="$binPaths:$installPath/Engine/Binaries/Linux"
+fi
+
 if [[ $renderEngines == *Maya* ]]; then
   echo "Customize (Start): Maya"
   versionInfo="2024_0_1"
@@ -256,53 +303,6 @@ if [[ $renderEngines == *Houdini* ]]; then
   StartProcess "./houdini*/houdini.install --auto-install --make-dir --no-install-license --accept-EULA $versionEULA $desktopMenus $mayaPlugIn $unrealPlugIn" $binDirectory/$installType
   binPaths="$binPaths:/opt/hfs$versionInfo/bin"
   echo "Customize (End): Houdini"
-fi
-
-if [[ $renderEngines == *Unreal* ]] || [[ $renderEngines == *Unreal+PixelStream* ]]; then
-  echo "Customize (Start): Unreal Engine Setup"
-  versionInfo="5.3.1"
-  installType="unreal-engine"
-  installPath="/usr/local/unreal"
-  installFile="UnrealEngine-$versionInfo-release.tar.gz"
-  downloadUrl="$binStorageHost/Unreal/$versionInfo/$installFile$binStorageAuth"
-  curl -o $installFile -L $downloadUrl
-  tar -xzf $installFile
-  mkdir -p $installPath
-  mv UnrealEngine-$versionInfo-release/* $installPath
-  StartProcess "dnf -y install libicu" $binDirectory/$installType
-  StartProcess "$installPath/Setup.sh" $binDirectory/$installType
-  echo "Customize (End): Unreal Engine Setup"
-
-  echo "Customize (Start): Unreal Project Files Generate"
-  StartProcess "$installPath/GenerateProjectFiles.sh" $binDirectory/$installType
-  echo "Customize (End): Unreal Project Files Generate"
-
-  echo "Customize (Start): Unreal Engine Build"
-  StartProcess "make -C $installPath" $binDirectory/$installType
-  echo "Customize (End): Unreal Engine Build"
-
-  if [[ $renderEngines == *Unreal+PixelStream* ]]; then
-    echo "Customize (Start): Unreal Pixel Streaming"
-    versionInfo="5.3-1.0.0"
-    installType="unreal-stream"
-    installFile="UE$versionInfo.tar.gz"
-    downloadUrl="$binStorageHost/Unreal/PixelStream/$versionInfo/$installFile$binStorageAuth"
-    curl -o $installFile -L $downloadUrl
-    tar -xzf $installFile
-    StartProcess "dnf -y install coturn" $binDirectory/$installType
-    installFile="PixelStreamingInfrastructure-UE$versionInfo/SignallingWebServer/platform_scripts/bash/setup.sh"
-    chmod +x $installFile
-    StartProcess "./$installFile" $binDirectory/$installType
-    installFile="PixelStreamingInfrastructure-UE$versionInfo/Matchmaker/platform_scripts/bash/setup.sh"
-    chmod +x $installFile
-    StartProcess "./$installFile" $binDirectory/$installType
-    installFile="PixelStreamingInfrastructure-UE$versionInfo/SFU/platform_scripts/bash/setup.sh"
-    chmod +x $installFile
-    StartProcess "./$installFile" $binDirectory/$installType
-    echo "Customize (End): Unreal Pixel Streaming"
-  fi
-
-  binPaths="$binPaths:$installPath/Engine/Binaries/Linux"
 fi
 
 if [ $machineType == Scheduler ]; then
@@ -378,7 +378,7 @@ if [ $machineType == Workstation ]; then
   echo "Customize (Start): HP Anyware"
   versionInfo="23.08"
   [ "$gpuProvider" == "" ] && installType=pcoip-agent-standard || installType=pcoip-agent-graphics
-  installFile="pcoip-agent-offline-rhel9.2_$versionInfo.2-1.el9.x86_64.tar.gz"
+  installFile="pcoip-agent-offline-rocky8.8_$versionInfo.2-1.el8.x86_64.tar.gz"
   downloadUrl="$binStorageHost/Teradici/$versionInfo/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   mkdir -p $installType
