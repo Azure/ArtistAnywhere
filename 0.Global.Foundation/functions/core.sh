@@ -11,7 +11,8 @@ function FileExists {
 }
 
 function InitializeClient {
-  enableWeka=$1
+  binDirectory=$1
+  enableWeka=$2
   StartProcess deadlinecommand "-ChangeRepository Direct /mnt/deadline" $binDirectory/deadline-repository
   if [ $enableWeka == true ]; then
     curl http://content.artist.studio:14000/dist/v1/install | sh
