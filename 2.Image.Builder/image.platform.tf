@@ -7,9 +7,9 @@ resource azapi_resource image_platform_linux {
     for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && imageTemplate.source.imageDefinition.name == "Linux" && imageTemplate.build.imageVersion == "0.0.0"
   }
   name      = each.value.name
-  type      = "Microsoft.VirtualMachineImages/imageTemplates@2022-07-01"
+  type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"
   parent_id = azurerm_resource_group.image.id
-  location  = each.value.regionName != "" ? each.value.regionName : azurerm_resource_group.image.location
+  location  = azurerm_resource_group.image.location
   body = jsonencode({
     identity = {
       type = "UserAssigned"

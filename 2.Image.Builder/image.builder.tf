@@ -61,7 +61,7 @@ resource azapi_resource image_builder_linux {
     for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && imageTemplate.source.imageDefinition.name == "Linux" && imageTemplate.build.imageVersion != "0.0.0"
   }
   name      = each.value.name
-  type      = "Microsoft.VirtualMachineImages/imageTemplates@2022-07-01"
+  type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"
   parent_id = azurerm_resource_group.image.id
   location  = azurerm_resource_group.image.location
   body = jsonencode({
@@ -160,7 +160,7 @@ resource azapi_resource image_builder_windows {
     for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && startswith(imageTemplate.source.imageDefinition.name, "Win")
   }
   name      = each.value.name
-  type      = "Microsoft.VirtualMachineImages/imageTemplates@2022-07-01"
+  type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"
   parent_id = azurerm_resource_group.image.id
   location  = azurerm_resource_group.image.location
   body = jsonencode({
