@@ -2,40 +2,39 @@
 # Image Builder (https://learn.microsoft.com/azure/virtual-machines/image-builder-overview) #
 #############################################################################################
 
-variable imageTemplates {
-  type = list(object({
-    name       = string
-    regionName = string
-    source = object({
-      definitionName = string
-      inputVersion   = string
-    })
-    build = object({
-      machineType    = string
-      machineSize    = string
-      gpuProvider    = string
-      outputVersion  = string
-      timeoutMinutes = number
-      osDiskSizeGB   = number
-      renderEngines  = list(string)
-    })
-  }))
-}
-
-variable binStorage {
+variable imageBuilder {
   type = object({
-    host = string
-    auth = string
+    templates = list(object({
+      name = string
+      source = object({
+        imageDefinition = object({
+          name    = string
+          version = string
+        })
+        imageVersion = object({
+          id = string
+        })
+      })
+      build = object({
+        machineType    = string
+        machineSize    = string
+        gpuProvider    = string
+        imageVersion   = string
+        osDiskSizeGB   = number
+        timeoutMinutes = number
+        renderEngines  = list(string)
+        customization  = list(string)
+      })
+    }))
   })
-  validation {
-    condition     = var.binStorage.host != "" && var.binStorage.auth != ""
-    error_message = "Missing required deployment configuration."
-  }
 }
 
 locals {
+  regionNames = var.existingNetwork.enable ? [module.global.regionName] : [
+    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
+  ]
   targetRegions = [
-    for regionName in var.computeGallery.replicationRegions : {
+    for regionName in local.regionNames : {
       name               = regionName
       replicaCount       = 1
       storageAccountType = "Standard_LRS"
@@ -44,32 +43,133 @@ locals {
 }
 
 resource azurerm_role_assignment managed_identity_operator {
+  count                = var.computeGallery.enable ? 1 : 0
   role_definition_name = "Managed Identity Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#managed-identity-operator
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_user_assigned_identity.studio.id
 }
 
 resource azurerm_role_assignment contributor {
+  count                = var.computeGallery.enable ? 1 : 0
   role_definition_name = "Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = azurerm_resource_group.image.id
 }
 
-resource azapi_resource image_builder {
+resource azapi_resource image_builder_linux {
   for_each = {
-    for imageTemplate in var.imageTemplates : imageTemplate.name => imageTemplate
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && imageTemplate.source.imageDefinition.name == "Linux" && imageTemplate.build.imageVersion != "0.0.0"
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2022-07-01"
   parent_id = azurerm_resource_group.image.id
-  location  = each.value.regionName != "" ? each.value.regionName : azurerm_resource_group.image.location
-  identity {
-    type = "UserAssigned"
-    identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
-    ]
-  }
+  location  = azurerm_resource_group.image.location
   body = jsonencode({
+    identity = {
+      type = "UserAssigned"
+      userAssignedIdentities = {
+        "${data.azurerm_user_assigned_identity.studio.id}" : {}
+      }
+    }
+    properties = {
+      buildTimeoutInMinutes = each.value.build.timeoutMinutes
+      vmProfile = {
+        vmSize       = each.value.build.machineSize
+        osDiskSizeGB = each.value.build.osDiskSizeGB
+        userAssignedIdentities = [
+          data.azurerm_user_assigned_identity.studio.id
+        ]
+      }
+      source = {
+        type           = "SharedImageVersion"
+        imageVersionId = each.value.source.imageVersion.id
+      }
+      optimize = {
+        vmBoot = {
+          state = "Enabled"
+        }
+      }
+      customize = concat(
+        [
+          {
+            type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.sh"
+            destination = "/tmp/functions.sh"
+            inline      = null
+          },
+          {
+            type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/customize.sh"
+            destination = "/tmp/customize.sh"
+            inline      = null
+          },
+          {
+            type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/terminate.sh"
+            destination = "/tmp/terminate.sh"
+            inline      = null
+          }
+        ], length(each.value.build.customization) > 0 ?
+        [
+          {
+            type   = "Shell"
+            inline = each.value.build.customization
+          }
+        ] : [
+          {
+            type = "Shell"
+            inline = [
+              "hostname ${each.value.name}"
+            ]
+          },
+          {
+            type = "Shell"
+            inline = [
+              "cat /tmp/customize.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {binStorage = var.binStorage})))} /bin/bash"
+            ]
+          }
+        ]
+      )
+      distribute = [
+        {
+          type           = "SharedImage"
+          runOutputName  = "${each.value.name}-${each.value.build.imageVersion}"
+          galleryImageId = "${azurerm_shared_image.studio[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
+          versioning = {
+            scheme = "Latest"
+            major  = tonumber(split(".", each.value.build.imageVersion)[0])
+          }
+          targetRegions = local.targetRegions
+          artifactTags = {
+            imageTemplateName = each.value.name
+          }
+        }
+      ]
+    }
+  })
+  schema_validation_enabled = false
+  depends_on = [
+    azurerm_role_assignment.managed_identity_operator,
+    azurerm_role_assignment.contributor,
+    terraform_data.image_platform_linux_build
+  ]
+}
+
+resource azapi_resource image_builder_windows {
+  for_each = {
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && startswith(imageTemplate.source.imageDefinition.name, "Win")
+  }
+  name      = each.value.name
+  type      = "Microsoft.VirtualMachineImages/imageTemplates@2022-07-01"
+  parent_id = azurerm_resource_group.image.id
+  location  = azurerm_resource_group.image.location
+  body = jsonencode({
+    identity = {
+      type = "UserAssigned"
+      userAssignedIdentities = {
+        "${data.azurerm_user_assigned_identity.studio.id}" : {}
+      }
+    }
     properties = {
       buildTimeoutInMinutes = each.value.build.timeoutMinutes
       vmProfile = {
@@ -81,95 +181,83 @@ resource azapi_resource image_builder {
       }
       source = {
         type      = "PlatformImage"
-        publisher = var.computeGallery.imageDefinition[each.value.source.definitionName].publisher
-        offer     = var.computeGallery.imageDefinition[each.value.source.definitionName].offer
-        sku       = var.computeGallery.imageDefinition[each.value.source.definitionName].sku
-        version   = each.value.source.inputVersion
+        publisher = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].publisher
+        offer     = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].offer
+        sku       = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].sku
+        version   = each.value.source.imageDefinition.version
       }
       optimize = {
         vmBoot = {
           state = "Enabled"
         }
       }
-      customize = each.value.source.definitionName == "Linux" ? [
-        {
-          type = "Shell"
-          inline = [
-            "hostname ${each.value.name}"
-          ]
-        },
-        {
-          type = "Shell"
-          inline = [
-            ":"
-          ]
-        },
-        {
-          type        = "File"
-          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.sh"
-          destination = "/tmp/functions.sh"
-        },
-        {
-          type        = "File"
-          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/customize.sh"
-          destination = "/tmp/customize.sh"
-        },
-        {
-          type        = "File"
-          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/terminate.sh"
-          destination = "/tmp/terminate.sh"
-        },
-        {
-          type = "Shell"
-          inline = [
-            "cat /tmp/customize.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {binStorage = var.binStorage})))} /bin/bash"
-          ]
-          runElevated = false
-          runAsSystem = false
-        }
-      ] : [
-        {
-          type = "PowerShell"
-          inline = [
-            "Rename-Computer -NewName ${each.value.name}"
-          ]
-        },
-        {
-          type   = "WindowsRestart"
-          inline = null
-        },
-        {
-          type        = "File"
-          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.ps1"
-          destination = "C:\\AzureData\\functions.ps1"
-        },
-        {
-          type        = "File"
-          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/customize.ps1"
-          destination = "C:\\AzureData\\customize.ps1"
-        },
-        {
-          type        = "File"
-          sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/terminate.ps1"
-          destination = "C:\\AzureData\\terminate.ps1"
-        },
-        {
-          type = "PowerShell"
-          inline = [
-            "C:\\AzureData\\customize.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {binStorage = var.binStorage})))}"
-          ]
-          runElevated = true
-          runAsSystem = true
-        }
-      ]
+      customize = concat(
+        [
+          {
+            type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.ps1"
+            destination = "C:\\AzureData\\functions.ps1"
+            inline      = null
+            runElevated = false
+            runAsSystem = false
+          },
+          {
+            type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/customize.ps1"
+            destination = "C:\\AzureData\\customize.ps1"
+            inline      = null
+            runElevated = false
+            runAsSystem = false
+          },
+          {
+            type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/terminate.ps1"
+            destination = "C:\\AzureData\\terminate.ps1"
+            inline      = null
+            runElevated = false
+            runAsSystem = false
+          },
+        ], length(each.value.build.customization) > 0 ?
+        [
+          {
+            type        = "PowerShell"
+            inline      = each.value.build.customization
+            runElevated = false
+            runAsSystem = false
+          }
+        ] : [
+          {
+            type = "PowerShell"
+            inline = [
+              "Rename-Computer -NewName ${each.value.name}"
+            ]
+            runElevated = false
+            runAsSystem = false
+          },
+          {
+            type        = "WindowsRestart"
+            inline      = null
+            runElevated = false
+            runAsSystem = false
+          },
+          {
+            type = "PowerShell"
+            inline = [
+              "C:\\AzureData\\customize.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {binStorage = var.binStorage})))}"
+            ]
+            runElevated = true
+            runAsSystem = true
+          }
+        ]
+      )
       distribute = [
         {
           type           = "SharedImage"
-          runOutputName  = "${each.value.name}-${each.value.build.outputVersion}"
-          galleryImageId = "${azurerm_shared_image.studio[each.value.source.definitionName].id}/versions/${each.value.build.outputVersion}"
+          runOutputName  = "${each.value.name}-${each.value.build.imageVersion}"
+          galleryImageId = "${azurerm_shared_image.studio[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
           versioning = {
             scheme = "Latest"
-            major  = tonumber(split(".", each.value.build.outputVersion)[0])
+            major  = tonumber(split(".", each.value.build.imageVersion)[0])
           }
           targetRegions = local.targetRegions
           artifactTags = {
@@ -186,6 +274,18 @@ resource azapi_resource image_builder {
   ]
 }
 
-output imageTemplates {
-  value = var.imageTemplates
+output imageTemplatesLinux {
+  value = [
+    for imageTemplate in azapi_resource.image_builder_linux : {
+      name = imageTemplate.name
+    }
+  ]
+}
+
+output imageTemplatesWindows {
+  value = [
+    for imageTemplate in azapi_resource.image_builder_windows : {
+      name = imageTemplate.name
+    }
+  ]
 }

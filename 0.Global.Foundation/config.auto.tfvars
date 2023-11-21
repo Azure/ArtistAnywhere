@@ -27,7 +27,7 @@ keyVault = {
     },
     {
       name  = "AdminUsername"
-      value = "azadmin"
+      value = "xadmin"
     },
     {
       name  = "AdminPassword"

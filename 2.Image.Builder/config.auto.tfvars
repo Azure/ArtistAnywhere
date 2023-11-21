@@ -1,47 +1,5 @@
 resourceGroupName = "ArtistAnywhere.Image" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
-###############################################################################################
-# Compute Gallery (https://learn.microsoft.com/azure/virtual-machines/shared-image-galleries) #
-###############################################################################################
-
-computeGallery = {
-  name = "xstudio"
-  imageDefinition = {
-    Linux = {
-      type       = "Linux"
-      generation = "V2"
-      publisher  = "AlmaLinux"
-      offer      = "AlmaLinux-x86_64"
-      sku        = "9-Gen2"
-    }
-    WinServer = {
-      type       = "Windows"
-      generation = "V2"
-      publisher  = "MicrosoftWindowsServer"
-      offer      = "WindowsServer"
-      sku        = "2022-Datacenter-G2"
-    }
-    WinFarm = {
-      type       = "Windows"
-      generation = "V2"
-      publisher  = "MicrosoftWindowsDesktop"
-      offer      = "Windows-10"
-      sku        = "Win10-22H2-Pro-G2"
-    }
-    WinArtist = {
-      type       = "Windows"
-      generation = "V2"
-      publisher  = "MicrosoftWindowsDesktop"
-      offer      = "Windows-11"
-      sku        = "Win11-22H2-Pro"
-    }
-  }
-  replicationRegions = [
-    "WestUS3",
-    "EastUS2"
-  ]
-}
-
 ######################################################################################################
 # Container Registry (https://learn.microsoft.com/azure/container-registry/container-registry-intro) #
 ######################################################################################################
@@ -52,256 +10,401 @@ containerRegistry = {
   sku    = "Premium"
 }
 
+###############################################################################################
+# Compute Gallery (https://learn.microsoft.com/azure/virtual-machines/shared-image-galleries) #
+###############################################################################################
+
+computeGallery = {
+  enable = true
+  name   = "xstudio"
+  imageDefinitions = [
+    {
+      name       = "Linux"
+      type       = "Linux"
+      generation = "V2"
+      publisher  = "AlmaLinux"
+      offer      = "AlmaLinux-x86_64"
+      sku        = "8-Gen2"
+    },
+    {
+      name       = "WinServer"
+      type       = "Windows"
+      generation = "V2"
+      publisher  = "MicrosoftWindowsServer"
+      offer      = "WindowsServer"
+      sku        = "2022-Datacenter-G2"
+    },
+    {
+      name       = "WinFarm"
+      type       = "Windows"
+      generation = "V2"
+      publisher  = "MicrosoftWindowsDesktop"
+      offer      = "Windows-10"
+      sku        = "Win10-22H2-Pro-G2"
+    },
+    {
+      name       = "WinArtist"
+      type       = "Windows"
+      generation = "V2"
+      publisher  = "MicrosoftWindowsDesktop"
+      offer      = "Windows-11"
+      sku        = "Win11-22H2-Pro"
+    }
+  ]
+}
+
 #############################################################################################
 # Image Builder (https://learn.microsoft.com/azure/virtual-machines/image-builder-overview) #
 #############################################################################################
 
-imageTemplates = [
-  {
-    name       = "LnxStorageCPU"
-    regionName = ""
-    source = {
-      definitionName = "Linux"
-      inputVersion   = "Latest"
+imageBuilder = {
+  templates = [
+    {
+      name = "LnxPlatform"
+      source = {
+        imageDefinition = {
+          name    = "Linux"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = ""
+        }
+      }
+      build = {
+        machineType    = ""
+        machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                 # NVIDIA or AMD
+        imageVersion   = "0.0.0"
+        osDiskSizeGB   = 0
+        timeoutMinutes = 120
+        renderEngines = [
+        ]
+        customization = [
+          "systemctl --now disable firewalld",
+          "sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config",
+          "dnf -y install gcc gcc-c++ python3-devel perl cmake git nfs-utils",
+          "dnf -y upgrade"
+        ]
+      }
+    },
+    {
+      name = "LnxStorageC"
+      source = {
+        imageDefinition = {
+          name    = "Linux"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
+        }
+      }
+      build = {
+        machineType    = "Storage"
+        machineSize    = "Standard_L8as_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                 # NVIDIA or AMD
+        imageVersion   = "0.1.0"
+        osDiskSizeGB   = 0
+        timeoutMinutes = 120
+        renderEngines = [
+        ]
+        customization = [
+        ]
+      }
+    },
+    {
+      name = "LnxStorageG"
+      source = {
+        imageDefinition = {
+          name    = "Linux"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
+        }
+      }
+      build = {
+        machineType    = "Storage"
+        machineSize    = "Standard_NG8ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "AMD"                     # NVIDIA or AMD
+        imageVersion   = "0.2.0"
+        osDiskSizeGB   = 0
+        timeoutMinutes = 120
+        renderEngines = [
+        ]
+        customization = [
+        ]
+      }
+    },
+    {
+      name = "LnxScheduler"
+      source = {
+        imageDefinition = {
+          name    = "Linux"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
+        }
+      }
+      build = {
+        machineType    = "Scheduler"
+        machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                 # NVIDIA or AMD
+        imageVersion   = "1.0.0"
+        osDiskSizeGB   = 0
+        timeoutMinutes = 120
+        renderEngines = [
+        ]
+        customization = [
+        ]
+      }
+    },
+    {
+      name = "LnxFarmC"
+      source = {
+        imageDefinition = {
+          name    = "Linux"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
+        }
+      }
+      build = {
+        machineType    = "Farm"
+        machineSize    = "Standard_D96as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                  # NVIDIA or AMD
+        imageVersion   = "2.0.0"
+        osDiskSizeGB   = 360
+        timeoutMinutes = 240
+        renderEngines = [
+          "PBRT",
+          "RenderMan"
+        ]
+        customization = [
+        ]
+      }
+    },
+    {
+      name = "LnxFarmG"
+      source = {
+        imageDefinition = {
+          name    = "Linux"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
+        }
+      }
+      build = {
+        machineType    = "Farm"
+        machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
+        imageVersion   = "2.1.0"
+        osDiskSizeGB   = 360
+        timeoutMinutes = 240
+        renderEngines = [
+          "PBRT",
+          "Blender",
+          "RenderMan",
+          "Unreal"
+        ]
+        customization = [
+        ]
+      }
+    },
+    {
+      name = "LnxArtistN"
+      source = {
+        imageDefinition = {
+          name    = "Linux"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
+        }
+      }
+      build = {
+        machineType    = "Workstation"
+        machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
+        imageVersion   = "3.0.0"
+        osDiskSizeGB   = 360
+        timeoutMinutes = 240
+        renderEngines = [
+          "PBRT",
+          "Blender",
+          "RenderMan",
+          "Unreal+PixelStream"
+        ]
+        customization = [
+        ]
+      }
+    },
+    # {
+    #   name = "LnxArtistA"
+    #   source = {
+    #     imageDefinition = {
+    #       name    = "Linux"
+    #       version = "Latest"
+    #     }
+    #     imageVersion = {
+    #       id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
+    #     }
+    #   }
+    #   build = {
+    #     machineType    = "Workstation"
+    #     machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    #     gpuProvider    = "AMD"                      # NVIDIA or AMD
+    #     imageVersion   = "3.1.0"
+    #     osDiskSizeGB   = 360
+    #     timeoutMinutes = 240
+    #     renderEngines = [
+    #       "PBRT",
+    #       "Blender",
+    #       "RenderMan",
+    #       "Unreal+PixelStream"
+    #     ]
+    #     customization = [
+    #     ]
+    #   }
+    # },
+    {
+      name = "WinScheduler"
+      source = {
+        imageDefinition = {
+          name    = "WinServer"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = ""
+        }
+      }
+      build = {
+        machineType    = "Scheduler"
+        machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                 # NVIDIA or AMD
+        imageVersion   = "1.0.0"
+        osDiskSizeGB   = 0
+        timeoutMinutes = 240
+        renderEngines = [
+        ]
+        customization = [
+        ]
+      }
+    },
+    {
+      name = "WinFarmC"
+      source = {
+        imageDefinition = {
+          name    = "WinFarm"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = ""
+        }
+      }
+      build = {
+        machineType    = "Farm"
+        machineSize    = "Standard_D96as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                  # NVIDIA or AMD
+        imageVersion   = "2.0.0"
+        osDiskSizeGB   = 360
+        timeoutMinutes = 360
+        renderEngines = [
+          "PBRT",
+          "RenderMan"
+        ]
+        customization = [
+        ]
+      }
+    },
+    {
+      name = "WinFarmG"
+      source = {
+        imageDefinition = {
+          name    = "WinFarm"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = ""
+        }
+      }
+      build = {
+        machineType    = "Farm"
+        machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                        # NVIDIA or AMD
+        imageVersion   = "2.1.0"
+        osDiskSizeGB   = 360
+        timeoutMinutes = 360
+        renderEngines = [
+          "PBRT",
+          "Blender",
+          "RenderMan",
+          "Unreal"
+        ]
+        customization = [
+        ]
     }
-    build = {
-      machineType    = "Storage"
-      machineSize    = "Standard_L8as_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      gpuProvider    = ""                 # NVIDIA or AMD
-      outputVersion  = "0.0.0"
-      timeoutMinutes = 120
-      osDiskSizeGB   = 0
-      renderEngines = [
-      ]
-    }
-  },
-  {
-    name       = "LnxStorageGPU"
-    regionName = ""
-    source = {
-      definitionName = "Linux"
-      inputVersion   = "Latest"
-    }
-    build = {
-      machineType    = "Storage"
-      machineSize    = "Standard_NG8ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      gpuProvider    = "AMD"                     # NVIDIA or AMD
-      outputVersion  = "0.1.0"
-      timeoutMinutes = 120
-      osDiskSizeGB   = 0
-      renderEngines = [
-      ]
-    }
-  },
-  {
-    name       = "LnxScheduler"
-    regionName = ""
-    source = {
-      definitionName = "Linux"
-      inputVersion   = "Latest"
-    }
-    build = {
-      machineType    = "Scheduler"
-      machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      gpuProvider    = ""                 # NVIDIA or AMD
-      outputVersion  = "1.0.0"
-      timeoutMinutes = 120
-      osDiskSizeGB   = 0
-      renderEngines = [
-      ]
-    }
-  },
-  {
-    name       = "LnxFarmCPU"
-    regionName = ""
-    source = {
-      definitionName = "Linux"
-      inputVersion   = "Latest"
-    }
-    build = {
-      machineType    = "Farm"
-      machineSize    = "Standard_D96as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      gpuProvider    = ""                  # NVIDIA or AMD
-      outputVersion  = "2.0.0"
-      timeoutMinutes = 240
-      osDiskSizeGB   = 360
-      renderEngines = [
-        "PBRT",
-        "Blender",
-        "MoonRay",
-        "RenderMan"
-      ]
-    }
-  },
-  {
-    name       = "LnxFarmGPU"
-    regionName = ""
-    source = {
-      definitionName = "Linux"
-      inputVersion   = "Latest"
-    }
-    build = {
-      machineType    = "Farm"
-      machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
-      outputVersion  = "2.1.0"
-      timeoutMinutes = 240
-      osDiskSizeGB   = 360
-      renderEngines = [
-        "PBRT",
-        "Blender",
-        "MoonRay",
-        "RenderMan"
-      ]
-    }
-  },
-  {
-    name       = "LnxArtistNVIDIA"
-    regionName = ""
-    source = {
-      definitionName = "Linux"
-      inputVersion   = "Latest"
-    }
-    build = {
-      machineType    = "Workstation"
-      machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
-      outputVersion  = "3.0.0"
-      timeoutMinutes = 240
-      osDiskSizeGB   = 360
-      renderEngines = [
-        "PBRT",
-        "Blender",
-        "MoonRay",
-        "RenderMan"
-      ]
-    }
-  },
-  {
-    name       = "LnxArtistAMD"
-    regionName = "EastUS2"
-    source = {
-      definitionName = "Linux"
-      inputVersion   = "Latest"
-    }
-    build = {
-      machineType    = "Workstation"
-      machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      gpuProvider    = "AMD"                      # NVIDIA or AMD
-      outputVersion  = "3.1.0"
-      timeoutMinutes = 240
-      osDiskSizeGB   = 360
-      renderEngines = [
-        "PBRT",
-        "Blender",
-        "MoonRay",
-        "RenderMan"
-      ]
-    }
-  },
-  {
-    name       = "WinScheduler"
-    regionName = ""
-    source = {
-      definitionName = "WinServer"
-      inputVersion   = "Latest"
-    }
-    build = {
-      machineType    = "Scheduler"
-      machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      gpuProvider    = ""                 # NVIDIA or AMD
-      outputVersion  = "1.0.0"
-      timeoutMinutes = 240
-      osDiskSizeGB   = 0
-      renderEngines = [
-      ]
-    }
-  },
-  {
-    name       = "WinFarmCPU"
-    regionName = ""
-    source = {
-      definitionName = "WinFarm"
-      inputVersion   = "Latest"
-    }
-    build = {
-      machineType    = "Farm"
-      machineSize    = "Standard_D96as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      gpuProvider    = ""                  # NVIDIA or AMD
-      outputVersion  = "2.0.0"
-      timeoutMinutes = 360
-      osDiskSizeGB   = 360
-      renderEngines = [
-        "PBRT",
-        "Blender",
-        "RenderMan"
-      ]
-    }
-  },
-  {
-    name       = "WinFarmGPU"
-    regionName = ""
-    source = {
-      definitionName = "WinFarm"
-      inputVersion   = "Latest"
-    }
-    build = {
-      machineType    = "Farm"
-      machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      gpuProvider    = ""                        # NVIDIA or AMD
-      outputVersion  = "2.1.0"
-      timeoutMinutes = 360
-      osDiskSizeGB   = 360
-      renderEngines = [
-        "PBRT",
-        "Blender",
-        "RenderMan"
-      ]
-   }
-  },
-  {
-    name       = "WinArtistNVIDIA"
-    regionName = ""
-    source = {
-      definitionName = "WinArtist"
-      inputVersion   = "Latest"
-    }
-    build = {
-      machineType    = "Workstation"
-      machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
-      outputVersion  = "3.0.0"
-      timeoutMinutes = 360
-      osDiskSizeGB   = 360
-      renderEngines = [
-        "PBRT",
-        "Blender",
-        "RenderMan"
-      ]
-    }
-  },
-  {
-    name       = "WinArtistAMD"
-    regionName = "EastUS2"
-    source = {
-      definitionName = "WinArtist"
-      inputVersion   = "Latest"
-    }
-    build = {
-      machineType    = "Workstation"
-      machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      gpuProvider    = "AMD"                      # NVIDIA or AMD
-      outputVersion  = "3.1.0"
-      timeoutMinutes = 360
-      osDiskSizeGB   = 360
-      renderEngines = [
-        "PBRT",
-        "Blender",
-        "RenderMan"
-      ]
-    }
-  }
-]
+    },
+    {
+      name = "WinArtistN"
+      source = {
+        imageDefinition = {
+          name    = "WinArtist"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = ""
+        }
+      }
+      build = {
+        machineType    = "Workstation"
+        machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
+        imageVersion   = "3.0.0"
+        osDiskSizeGB   = 360
+        timeoutMinutes = 360
+        renderEngines = [
+          "PBRT",
+          "Blender",
+          "RenderMan",
+          "Unreal+PixelStream"
+        ]
+        customization = [
+        ]
+      }
+    },
+    # {
+    #   name = "WinArtistA"
+    #   source = {
+    #     imageDefinition = {
+    #       name    = "WinArtist"
+    #       version = "Latest"
+    #     }
+    #     imageVersion = {
+    #       id = ""
+    #     }
+    #   }
+    #   build = {
+    #     machineType    = "Workstation"
+    #     machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    #     gpuProvider    = "AMD"                      # NVIDIA or AMD
+    #     imageVersion   = "3.1.0"
+    #     osDiskSizeGB   = 360
+    #     timeoutMinutes = 360
+    #     renderEngines = [
+    #       "PBRT",
+    #       "Blender",
+    #       "RenderMan",
+    #       "Unreal+PixelStream"
+    #     ]
+    #     customization = [
+    #     ]
+    #   }
+    # }
+  ]
+}
 
 binStorage = {
   host = ""

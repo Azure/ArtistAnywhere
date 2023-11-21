@@ -73,3 +73,47 @@ resource azurerm_container_registry studio {
     }
   }
 }
+
+# resource azurerm_container_registry_task lnx_farmc_cmake {
+#   count                 = var.containerRegistry.enable ? 1 : 0
+#   name                  = "LnxFarmC"
+#   container_registry_id = azurerm_container_registry.studio[0].id
+#   identity {
+#     type = "UserAssigned"
+#     identity_ids = [
+#       data.azurerm_user_assigned_identity.studio.id
+#     ]
+#   }
+#   platform {
+#     os = "Linux"
+#   }
+#   docker_step {
+#     context_access_token = " "
+#     context_path         = "https://github.com/Azure/ArtistAnywhere.git"
+#     dockerfile_path      = "2.Image.Builder/docker/LnxFarmC-CMake"
+#     image_names          = ["LnxFarmC:CMake"]
+#     cache_enabled        = false
+#   }
+# }
+
+# resource azurerm_container_registry_task lnx_farmc_pbrt {
+#   count                 = var.containerRegistry.enable ? 1 : 0
+#   name                  = "LnxFarmC"
+#   container_registry_id = azurerm_container_registry.studio[0].id
+#   identity {
+#     type = "UserAssigned"
+#     identity_ids = [
+#       data.azurerm_user_assigned_identity.studio.id
+#     ]
+#   }
+#   platform {
+#     os = "Linux"
+#   }
+#   docker_step {
+#     context_access_token = " "
+#     context_path         = "https://github.com/Azure/ArtistAnywhere.git"
+#     dockerfile_path      = "2.Image.Builder/docker/LnxFarmC-PBRT"
+#     image_names          = ["LnxFarmC:PBRT{{.Run.ID}}"]
+#     cache_enabled        = false
+#   }
+# }

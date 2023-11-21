@@ -1,13 +1,13 @@
 terraform {
-  required_version = ">= 1.6.2"
+  required_version = ">= 1.6.4"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.78.0"
+      version = "~>3.81.0"
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>1.9.0"
+      version = "~>1.10.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -33,6 +33,17 @@ module global {
 
 variable resourceGroupName {
   type = string
+}
+
+variable binStorage {
+  type = object({
+    host = string
+    auth = string
+  })
+  validation {
+    condition     = var.binStorage.host != "" && var.binStorage.auth != ""
+    error_message = "Missing required deployment configuration."
+  }
 }
 
 variable existingNetwork {

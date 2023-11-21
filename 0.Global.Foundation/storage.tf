@@ -33,8 +33,9 @@ resource time_sleep storage_account_firewall {
   ]
 }
 
-resource azurerm_storage_container terraform {
-  name                 = module.global.rootStorage.containerName.terraform
+resource azurerm_storage_container studio {
+  for_each             = module.global.rootStorage.containerName
+  name                 = each.value
   storage_account_name = azurerm_storage_account.studio.name
   depends_on = [
     time_sleep.storage_account_firewall

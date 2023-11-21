@@ -8,7 +8,7 @@ $binPaths = ""
 $binDirectory = "C:\Users\Public\Downloads"
 Set-Location -Path $binDirectory
 
-. "C:\AzureData\functions.ps1"
+. C:\AzureData\functions.ps1
 
 Write-Host "Customize (Start): Resize OS Disk"
 $osDriveLetter = "C"
@@ -163,13 +163,13 @@ if ($renderEngines -contains "PBRT") {
 
 if ($renderEngines -contains "Blender") {
   Write-Host "Customize (Start): Blender"
-  $versionInfo = "3.6.5"
+  $versionInfo = "4.0.1"
   $installType = "blender"
   $installFile = "$installType-$versionInfo-windows-x64.msi"
   $downloadUrl = "$binStorageHost/Blender/$versionInfo/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   StartProcess $installFile "/quiet /norestart /log $installType.log" $null
-  $binPaths += ";C:\Program Files\Blender Foundation\Blender 3.6"
+  $binPaths += ";C:\Program Files\Blender Foundation\Blender 4.0"
   Write-Host "Customize (End): Blender"
 }
 
@@ -207,7 +207,7 @@ if ($renderEngines -contains "Unreal" -or $renderEngines -contains "Unreal+Pixel
   $installType = "dotnet-fx3"
   StartProcess dism.exe "/Online /Enable-Feature /FeatureName:NetFX3 /All /NoRestart" "$binDirectory\$installType"
   Set-Location -Path C:\
-  $versionInfo = "5.3.1"
+  $versionInfo = "5.3.2"
   $installType = "unreal-engine"
   $installFile = "UnrealEngine-$versionInfo-release.zip"
   $downloadUrl = "$binStorageHost/Unreal/$versionInfo/$installFile$binStorageAuth"
@@ -259,7 +259,7 @@ if ($renderEngines -contains "Unreal" -or $renderEngines -contains "Unreal+Pixel
 
   if ($renderEngines -contains "Unreal+PixelStream") {
     Write-Host "Customize (Start): Unreal Pixel Streaming"
-    $versionInfo = "5.3-1.0.0"
+    $versionInfo = "5.3-1.0.1"
     $installType = "unreal-stream"
     $installFile = "UE$versionInfo.zip"
     $downloadUrl = "$binStorageHost/Unreal/PixelStream/$versionInfo/$installFile$binStorageAuth"
@@ -305,10 +305,10 @@ if ($renderEngines -contains "Maya") {
 
 if ($renderEngines -contains "Houdini") {
   Write-Host "Customize (Start): Houdini"
-  $versionInfo = "19.5.569"
+  $versionInfo = "20.0.506"
   $versionEULA = "2021-10-13"
   $installType = "houdini"
-  $installFile = "$installType-$versionInfo-win64-vc142.exe"
+  $installFile = "$installType-$versionInfo-win64-vc143.exe"
   $downloadUrl = "$binStorageHost/Houdini/$versionInfo/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   if ($machineType -eq "Workstation") {
@@ -363,7 +363,7 @@ if ($machineType -eq "Scheduler") {
 }
 
 if ($machineType -ne "Storage") {
-  $versionInfo = "10.3.0.13"
+  $versionInfo = "10.3.0.15"
   $installRoot = "C:\deadline"
   $databaseHost = $(hostname)
   $databasePort = 27100

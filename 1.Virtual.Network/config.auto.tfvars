@@ -7,8 +7,8 @@ resourceGroupName = "ArtistAnywhere.Network" # Alphanumeric, underscores, hyphen
 virtualNetworks = [
   {
     enable     = true
-    name       = "Studio-WestUS3"
-    regionName = "WestUS3"
+    name       = "Studio"
+    regionName = ""
     addressSpace = [
       "10.0.0.0/16"
     ]
@@ -99,101 +99,6 @@ virtualNetworks = [
       cache       = 3
       ai          = 4
     }
-  },
-  {
-    enable     = true
-    name       = "Studio-EastUS2"
-    regionName = "EastUS2"
-    addressSpace = [
-      "10.1.0.0/16"
-    ]
-    dnsAddresses = [
-    ]
-    subnets = [
-      {
-        name = "Farm"
-        addressSpace = [
-          "10.1.0.0/17"
-        ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global",
-          "Microsoft.ContainerRegistry"
-        ]
-        serviceDelegation    = ""
-        denyOutboundInternet = false
-      },
-      {
-        name = "Workstation"
-        addressSpace = [
-          "10.1.128.0/18"
-        ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global"
-        ]
-        serviceDelegation    = ""
-        denyOutboundInternet = false
-      },
-      {
-        name = "Storage"
-        addressSpace = [
-          "10.1.192.0/24"
-        ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global"
-        ]
-        serviceDelegation    = "" # "Microsoft.Netapp/volumes"
-        denyOutboundInternet = false
-      },
-      {
-        name = "Cache"
-        addressSpace = [
-          "10.1.193.0/24"
-        ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global"
-        ]
-        serviceDelegation    = ""
-        denyOutboundInternet = false
-      },
-      {
-        name = "AI"
-        addressSpace = [
-          "10.1.194.0/24"
-        ]
-        serviceEndpoints = [
-          "Microsoft.CognitiveServices"
-        ]
-        serviceDelegation    = "Microsoft.Web/serverFarms"
-        denyOutboundInternet = false
-      },
-      {
-        name = "GatewaySubnet"
-        addressSpace = [
-          "10.1.255.0/26"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation    = ""
-        denyOutboundInternet = false
-      },
-      {
-        name = "AzureBastionSubnet"
-        addressSpace = [
-          "10.1.255.64/26"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation    = ""
-        denyOutboundInternet = false
-      }
-    ]
-    subnetIndex = { # Must be in sync with corresponding subnet
-      farm        = 0
-      workstation = 1
-      storage     = 2
-      cache       = 3
-      ai          = 4
-    }
   }
 ]
 
@@ -234,7 +139,7 @@ privateDns = {
 ########################################################################
 
 bastion = {
-  enable              = false
+  enable              = true
   sku                 = "Standard"
   scaleUnitCount      = 2
   enableFileCopy      = true

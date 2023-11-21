@@ -4,30 +4,34 @@
 
 variable computeGallery {
   type = object({
-    name = string
-    imageDefinition = map(object({
+    enable = bool
+    name   = string
+    imageDefinitions = list(object({
+      name       = string
       type       = string
       generation = string
       publisher  = string
       offer      = string
       sku        = string
     }))
-    replicationRegions = list(string)
   })
 }
 
 resource azurerm_shared_image_gallery studio {
+  count               = var.computeGallery.enable ? 1 : 0
   name                = var.computeGallery.name
   resource_group_name = azurerm_resource_group.image.name
   location            = azurerm_resource_group.image.location
 }
 
 resource azurerm_shared_image studio {
-  for_each            = var.computeGallery.imageDefinition
-  name                = each.key
+  for_each = {
+    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if var.computeGallery.enable
+  }
+  name                = each.value.name
   resource_group_name = azurerm_resource_group.image.name
   location            = azurerm_resource_group.image.location
-  gallery_name        = azurerm_shared_image_gallery.studio.name
+  gallery_name        = azurerm_shared_image_gallery.studio[0].name
   os_type             = each.value.type
   hyper_v_generation  = each.value.generation
   identifier {
@@ -35,8 +39,4 @@ resource azurerm_shared_image studio {
     offer     = each.value.offer
     sku       = each.value.sku
   }
-}
-
-output imageDefinition {
-  value = var.computeGallery.imageDefinition
 }

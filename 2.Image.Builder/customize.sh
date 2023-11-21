@@ -10,8 +10,7 @@ touch $aaaProfile
 source "/tmp/functions.sh"
 
 echo "Customize (Start): Image Build Parameters"
-installType="image-platform"
-StartProcess "dnf -y install jq" $binDirectory/$installType
+dnf -y install jq
 buildConfig=$(echo $buildConfigEncoded | base64 -d)
 machineType=$(echo $buildConfig | jq -r .machineType)
 gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
@@ -24,15 +23,11 @@ echo "Render Engines: $renderEngines"
 echo "Customize (End): Image Build Parameters"
 
 echo "Customize (Start): Image Build Platform"
-systemctl --now disable firewalld
-sed -i "s/SELINUX=enforcing/SELINUX=disabled/" /etc/selinux/config
-StartProcess "dnf -y install kernel-devel-$(uname -r)" $binDirectory/$installType
-StartProcess "dnf -y install gcc gcc-c++ python3-devel openssl-devel" $binDirectory/$installType
-StartProcess "dnf -y install perl cmake lsof bzip2 git bc nfs-utils" $binDirectory/$installType
+dnf -y install kernel-devel-$(uname -r)
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): Image Build Platform (Workstation)"
-  StartProcess "dnf -y group install workstation" $binDirectory/$installType
-  StartProcess "dnf -y module install nodejs" $binDirectory/$installType
+  dnf -y group install workstation
+  dnf -y module install nodejs
   echo "Customize (End): Image Build Platform (Workstation)"
 fi
 echo "Customize (End): Image Build Platform"
@@ -44,7 +39,7 @@ if [ $machineType == Storage ]; then
   downloadUrl="$binStorageHost/NVIDIA/OFED/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xzf $installFile
-  StartProcess "dnf -y install kernel-modules-extra kernel-rpm-macros rpm-build libtool gcc-gfortran pciutils tcl tk" $binDirectory/$installType
+  dnf -y install kernel-modules-extra kernel-rpm-macros rpm-build libtool gcc-gfortran pciutils tcl tk
   StartProcess "./MLNX_OFED*/mlnxofedinstall --without-fw-update --add-kernel-support --skip-repo --force" $binDirectory/$installType
   echo "Customize (End): NVIDIA OFED"
 fi
@@ -56,14 +51,14 @@ if [ "$gpuProvider" == NVIDIA ]; then
   downloadUrl="https://go.microsoft.com/fwlink/?linkid=874272"
   curl -o $installFile -L $downloadUrl
   chmod +x $installFile
-  StartProcess "dnf -y install mesa-vulkan-drivers libglvnd-devel" $binDirectory/$installType
+  dnf -y install mesa-vulkan-drivers libglvnd-devel
   StartProcess "./$installFile --silent" $binDirectory/$installType
   echo "Customize (End): NVIDIA GPU (GRID)"
 
   echo "Customize (Start): NVIDIA GPU (CUDA)"
   installType="nvidia-cuda"
-  StartProcess "dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo" $binDirectory/$installType
-  StartProcess "dnf -y install cuda" $binDirectory/$installType
+  dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
+  dnf -y install cuda
   echo "Customize (End): NVIDIA GPU (CUDA)"
 
   echo "Customize (Start): NVIDIA OptiX"
@@ -78,11 +73,11 @@ if [ "$gpuProvider" == NVIDIA ]; then
   StartProcess "./$installFile --skip-license --prefix=$installPath" $binDirectory/$installType
   buildDirectory="$installPath/build"
   mkdir -p $buildDirectory
-  StartProcess "dnf -y install mesa-libGL" $binDirectory/$installType
-  StartProcess "dnf -y install mesa-libGL-devel" $binDirectory/$installType
-  StartProcess "dnf -y install libXrandr-devel" $binDirectory/$installType
-  StartProcess "dnf -y install libXinerama-devel" $binDirectory/$installType
-  StartProcess "dnf -y install libXcursor-devel" $binDirectory/$installType
+  dnf -y install mesa-libGL
+  dnf -y install mesa-libGL-devel
+  dnf -y install libXrandr-devel
+  dnf -y install libXinerama-devel
+  dnf -y install libXcursor-devel
   StartProcess "cmake -B $buildDirectory -S $installPath/SDK" $binDirectory/$installType
   StartProcess "make -C $buildDirectory" $binDirectory/$installType
   binPaths="$binPaths:$buildDirectory/bin"
@@ -91,10 +86,9 @@ fi
 
 if [[ $machineType == Storage || $machineType == Scheduler ]]; then
   echo "Customize (Start): Azure CLI"
-  installType="azure-cli"
-  StartProcess "rpm --import https://packages.microsoft.com/keys/microsoft.asc" $binDirectory/$installType
-  StartProcess "dnf -y install https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm" $binDirectory/$installType
-  StartProcess "dnf -y install $installType" $binDirectory/$installType
+  rpm --import https://packages.microsoft.com/keys/microsoft.asc
+  dnf -y install https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm
+  dnf -y install azure-cli
   echo "Customize (End): Azure CLI"
 fi
 
@@ -104,11 +98,11 @@ if [[ $renderEngines == *PBRT* ]]; then
   installType="pbrt"
   installPath="/usr/local/pbrt"
   mkdir -p $installPath
-  StartProcess "dnf -y install mesa-libGL-devel" $binDirectory/$installType
-  StartProcess "dnf -y install libXrandr-devel" $binDirectory/$installType
-  StartProcess "dnf -y install libXinerama-devel" $binDirectory/$installType
-  StartProcess "dnf -y install libXcursor-devel" $binDirectory/$installType
-  StartProcess "dnf -y install libXi-devel" $binDirectory/$installType
+  dnf -y install mesa-libGL-devel
+  dnf -y install libXrandr-devel
+  dnf -y install libXinerama-devel
+  dnf -y install libXcursor-devel
+  dnf -y install libXi-devel
   StartProcess "git clone --recursive https://github.com/mmp/$installType-$versionInfo.git" $binDirectory/$installType
   StartProcess "cmake -B $installPath -S $binDirectory/$installType-$versionInfo" $binDirectory/$installType
   StartProcess "make -C $installPath" $binDirectory/$installType
@@ -118,7 +112,7 @@ fi
 
 if [[ $renderEngines == *Blender* ]]; then
   echo "Customize (Start): Blender"
-  versionInfo="3.6.5"
+  versionInfo="4.0.1"
   versionType="linux-x64"
   installType="blender"
   installPath="/usr/local/$installType"
@@ -126,75 +120,15 @@ if [[ $renderEngines == *Blender* ]]; then
   downloadUrl="$binStorageHost/Blender/$versionInfo/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xJf $installFile
-  StartProcess "dnf -y install mesa-libGL" $binDirectory/$installType
-  StartProcess "dnf -y install libXxf86vm" $binDirectory/$installType
-  StartProcess "dnf -y install libXfixes" $binDirectory/$installType
-  StartProcess "dnf -y install libXi" $binDirectory/$installType
-  StartProcess "dnf -y install libSM" $binDirectory/$installType
+  dnf -y install mesa-libGL
+  dnf -y install libXxf86vm
+  dnf -y install libXfixes
+  dnf -y install libXi
+  dnf -y install libSM
   mkdir -p $installPath
   mv $installType-$versionInfo-$versionType/* $installPath
   binPaths="$binPaths:$installPath"
   echo "Customize (End): Blender"
-fi
-
-if [[ $renderEngines == *MoonRay* ]]; then
-  echo "Customize (Start): MoonRay"
-  installRoot="/moonray"
-  installType="moonray"
-  StartProcess "git clone --recurse-submodules https://github.com/dreamworksanimation/openmoonray.git $installRoot" $binDirectory/$installType
-  StartProcess "source $installRoot/building/Rocky9/install_packages.sh" $binDirectory/$installType
-  cd $binDirectory
-
-  echo "Customize (Start): MoonRay Build Prerequisites"
-  StartProcess "dnf -y install cuda" $binDirectory/$installType
-
-  echo "Customize (Start): MoonRay NVIDIA OptiX"
-  versionInfo="7.3.0"
-  installType="moonray-nvidia-optix"
-  installFile="NVIDIA-OptiX-SDK-$versionInfo-linux64-x86_64.sh"
-  downloadUrl="$binStorageHost/NVIDIA/OptiX/$versionInfo/$installFile$binStorageAuth"
-  curl -o $installFile -L $downloadUrl
-  chmod +x $installFile
-  installPath="$binDirectory/$installType/$versionInfo"
-  mkdir -p $installPath
-  StartProcess "dnf -y install mesa-libGL" $binDirectory/$installType
-  StartProcess "dnf -y install mesa-libGL-devel" $binDirectory/$installType
-  StartProcess "dnf -y install libXrandr-devel" $binDirectory/$installType
-  StartProcess "dnf -y install libXinerama-devel" $binDirectory/$installType
-  StartProcess "dnf -y install libXcursor-devel" $binDirectory/$installType
-  StartProcess "./$installFile --skip-license --prefix=$installPath" $binDirectory/$installType
-  buildDirectory="$installPath/build"
-  mkdir -p $buildDirectory
-  StartProcess "cmake -B $buildDirectory -S $installPath/SDK" $binDirectory/$installType
-  StartProcess "make -C $buildDirectory" $binDirectory/$installType
-  binPathOptiX="$installPath"
-  echo "Customize (End): MoonRay NVIDIA OptiX"
-
-  mkdir -p $installRoot/build
-  cd $installRoot/build
-  installType="moonray-prereq"
-  StartProcess "cmake ../building/Rocky9" $binDirectory/$installType
-  StartProcess "cmake --build . -- -j 64" $binDirectory/$installType
-
-  echo "Customize (End): MoonRay Build Prerequisites"
-
-  echo "Customize (Start): MoonRay Build"
-  cd $installRoot/build
-  rm -rf *
-  installType="moonray"
-  [[ $machineType == Workstation ]] && uiApps=YES || uiApps=NO
-  StartProcess "cmake $installRoot -D PYTHON_EXECUTABLE=python3 -D BOOST_PYTHON_COMPONENT_NAME=python39 -D ABI_VERSION=0 -D OptiX_INCLUDE_DIRS=$binPathOptiX/include -D BUILD_QT_APPS=$uiApps" $binDirectory/$installType
-  StartProcess "cmake --build . -- -j 64" $binDirectory/$installType
-  mkdir -p /installs$installRoot
-  StartProcess "cmake --install $installRoot/build --prefix /installs$installRoot" $binDirectory/$installType
-  echo "Customize (End): MoonRay Build"
-
-  envSetupFile="/installs$installRoot/scripts/setup.sh"
-  if [ FileExists $envSetupFile ]; then
-    echo "source $envSetupFile" >> $aaaProfile
-  fi
-  cd $binDirectory
-  echo "Customize (End): MoonRay"
 fi
 
 if [[ $renderEngines == *RenderMan* ]]; then
@@ -210,7 +144,7 @@ fi
 
 if [[ $renderEngines == *Unreal* ]] || [[ $renderEngines == *Unreal+PixelStream* ]]; then
   echo "Customize (Start): Unreal Engine Setup"
-  versionInfo="5.3.1"
+  versionInfo="5.3.2"
   installType="unreal-engine"
   installPath="/usr/local/unreal"
   installFile="UnrealEngine-$versionInfo-release.tar.gz"
@@ -219,7 +153,7 @@ if [[ $renderEngines == *Unreal* ]] || [[ $renderEngines == *Unreal+PixelStream*
   tar -xzf $installFile
   mkdir -p $installPath
   mv UnrealEngine-$versionInfo-release/* $installPath
-  StartProcess "dnf -y install libicu" $binDirectory/$installType
+  dnf -y install libicu
   StartProcess "$installPath/Setup.sh" $binDirectory/$installType
   echo "Customize (End): Unreal Engine Setup"
 
@@ -233,13 +167,13 @@ if [[ $renderEngines == *Unreal* ]] || [[ $renderEngines == *Unreal+PixelStream*
 
   if [[ $renderEngines == *Unreal+PixelStream* ]]; then
     echo "Customize (Start): Unreal Pixel Streaming"
-    versionInfo="5.3-1.0.0"
+    versionInfo="5.3-1.0.1"
     installType="unreal-stream"
     installFile="UE$versionInfo.tar.gz"
     downloadUrl="$binStorageHost/Unreal/PixelStream/$versionInfo/$installFile$binStorageAuth"
     curl -o $installFile -L $downloadUrl
     tar -xzf $installFile
-    StartProcess "dnf -y install coturn" $binDirectory/$installType
+    dnf -y install coturn
     installFile="PixelStreamingInfrastructure-UE$versionInfo/SignallingWebServer/platform_scripts/bash/setup.sh"
     chmod +x $installFile
     StartProcess "./$installFile" $binDirectory/$installType
@@ -264,14 +198,14 @@ if [[ $renderEngines == *Maya* ]]; then
   curl -o $installFile -L $downloadUrl
   mkdir -p $installType
   tar -xzf $installFile -C $installType
-  StartProcess "dnf -y install mesa-libGL" $binDirectory/$installType
-  StartProcess "dnf -y install mesa-libGLU" $binDirectory/$installType
-  StartProcess "dnf -y install alsa-lib" $binDirectory/$installType
-  StartProcess "dnf -y install libXxf86vm" $binDirectory/$installType
-  StartProcess "dnf -y install libXmu" $binDirectory/$installType
-  StartProcess "dnf -y install libXpm" $binDirectory/$installType
-  StartProcess "dnf -y install libnsl" $binDirectory/$installType
-  StartProcess "dnf -y install gtk3" $binDirectory/$installType
+  dnf -y install mesa-libGL
+  dnf -y install mesa-libGLU
+  dnf -y install alsa-lib
+  dnf -y install libXxf86vm
+  dnf -y install libXmu
+  dnf -y install libXpm
+  dnf -y install libnsl
+  dnf -y install gtk3
   StartProcess "./$installType/Setup --silent" $binDirectory/$installType
   binPaths="$binPaths:/usr/autodesk/maya/bin"
   echo "Customize (End): Maya"
@@ -279,27 +213,27 @@ fi
 
 if [[ $renderEngines == *Houdini* ]]; then
   echo "Customize (Start): Houdini"
-  versionInfo="19.5.569"
+  versionInfo="20.0.506"
   versionEULA="2021-10-13"
   installType="houdini"
-  installFile="$installType-$versionInfo-linux_x86_64_gcc9.3.tar.gz"
+  installFile="$installType-$versionInfo-linux_x86_64_gcc11.2.tar.gz"
   downloadUrl="$binStorageHost/Houdini/$versionInfo/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xzf $installFile
   [[ $machineType == Workstation ]] && desktopMenus=--install-menus || desktopMenus=--no-install-menus
   [[ $renderEngines == *Maya* ]] && mayaPlugIn=--install-engine-maya || mayaPlugIn=--no-install-engine-maya
   [[ $renderEngines == *Unreal* ]] && unrealPlugIn=--install-engine-unreal || unrealPlugIn=--no-install-engine-unreal
-  StartProcess "dnf -y install mesa-libGL" $binDirectory/$installType
-  StartProcess "dnf -y install libXcomposite" $binDirectory/$installType
-  StartProcess "dnf -y install libXdamage" $binDirectory/$installType
-  StartProcess "dnf -y install libXrandr" $binDirectory/$installType
-  StartProcess "dnf -y install libXcursor" $binDirectory/$installType
-  StartProcess "dnf -y install libXi" $binDirectory/$installType
-  StartProcess "dnf -y install libXtst" $binDirectory/$installType
-  StartProcess "dnf -y install libXScrnSaver" $binDirectory/$installType
-  StartProcess "dnf -y install alsa-lib" $binDirectory/$installType
-  StartProcess "dnf -y install libnsl" $binDirectory/$installType
-  StartProcess "dnf -y install avahi" $binDirectory/$installType
+  dnf -y install mesa-libGL
+  dnf -y install libXcomposite
+  dnf -y install libXdamage
+  dnf -y install libXrandr
+  dnf -y install libXcursor
+  dnf -y install libXi
+  dnf -y install libXtst
+  dnf -y install libXScrnSaver
+  dnf -y install alsa-lib
+  dnf -y install libnsl
+  dnf -y install avahi
   StartProcess "./houdini*/houdini.install --auto-install --make-dir --no-install-license --accept-EULA $versionEULA $desktopMenus $mayaPlugIn $unrealPlugIn" $binDirectory/$installType
   binPaths="$binPaths:/opt/hfs$versionInfo/bin"
   echo "Customize (End): Houdini"
@@ -312,7 +246,7 @@ if [ $machineType == Scheduler ]; then
 fi
 
 if [ $machineType != Storage ]; then
-  versionInfo="10.3.0.13"
+  versionInfo="10.3.0.15"
   installRoot="/deadline"
   databaseHost=$(hostname)
   databasePort=27017
@@ -338,7 +272,7 @@ if [ $machineType != Storage ]; then
     echo "gpgcheck=1" >> $repoPath
     echo "enabled=1" >> $repoPath
     echo "gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc" >> $repoPath
-    StartProcess "dnf -y install mongodb-org" $binDirectory/$installType
+    dnf -y install mongodb-org
     configFile="/etc/mongod.conf"
     sed -i "s/bindIp: 127.0.0.1/bindIp: 0.0.0.0/" $configFile
     sed -i "/bindIp: 0.0.0.0/a\  tls:" $configFile

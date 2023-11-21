@@ -1,0 +1,8 @@
+FROM mcr.microsoft.com/windows:10.0.19042.985-amd64
+
+WORKDIR C:\Users\Public\Downloads
+
+RUN curl -o chocolatey.ps1 -L https://community.chocolatey.org/install.ps1 &&\
+    PowerShell -ExecutionPolicy Unrestricted -File chocolatey.ps1 &&\
+    C:\ProgramData\chocolatey\choco install git &&\
+    C:\ProgramData\chocolatey\choco install cmake

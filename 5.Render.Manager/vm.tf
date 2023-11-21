@@ -272,6 +272,20 @@ resource azurerm_virtual_machine_extension monitor_windows {
   ]
 }
 
-output virtualMachines {
-  value = var.virtualMachines
+output virtualMachinesLinux {
+  value = [
+    for virtualMachine in azurerm_linux_virtual_machine.scheduler : {
+      name              = virtualMachine.name
+      resourceGroupName = virtualMachine.resource_group_name
+    }
+  ]
+}
+
+output virtualMachinesWindows {
+  value = [
+    for virtualMachine in azurerm_windows_virtual_machine.scheduler : {
+      name              = virtualMachine.name
+      resourceGroupName = virtualMachine.resource_group_name
+    }
+  ]
 }

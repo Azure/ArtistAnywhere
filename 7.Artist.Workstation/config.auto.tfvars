@@ -7,7 +7,7 @@ resourceGroupName = "ArtistAnywhere.Workstation" # Alphanumeric, underscores, hy
 virtualMachines = [
   {
     enable = false
-    name   = "LnxArtistNVIDIA"
+    name   = "LnxArtistN"
     machine = {
       size = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
       image = {
@@ -56,7 +56,7 @@ virtualMachines = [
   },
   {
     enable = false
-    name   = "LnxArtistAMD"
+    name   = "LnxArtistA"
     machine = {
       size = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
       image = {
@@ -105,7 +105,7 @@ virtualMachines = [
   },
   {
     enable = false
-    name   = "WinArtistNVIDIA"
+    name   = "WinArtistN"
     machine = {
       size = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
       image = {
@@ -154,7 +154,7 @@ virtualMachines = [
   },
   {
     enable = false
-    name   = "WinArtistAMD"
+    name   = "WinArtistA"
     machine = {
       size = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
       image = {

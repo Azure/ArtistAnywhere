@@ -19,4 +19,4 @@ fi
 SetFileSystems '${jsonencode(fileSystems)}'
 
 enableWeka=false
-InitializeClient $enableWeka
+InitializeClient $binDirectory $enableWeka

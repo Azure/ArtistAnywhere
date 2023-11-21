@@ -361,7 +361,7 @@ resource azurerm_virtual_machine_extension storage {
   virtual_machine_id         = "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
   settings = jsonencode({
     script = "${base64encode(
-      <<-BASH
+      <<BASH
         #!/bin/bash -x
         ADMIN_PASSWORD=${module.global.keyVault.enable ? data.azurerm_key_vault_secret.admin_password[0].value : each.value.adminLogin.userPassword} /usr/bin/hs-init-admin-pw
       BASH

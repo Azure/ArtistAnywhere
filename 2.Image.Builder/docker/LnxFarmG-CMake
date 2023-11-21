@@ -1,0 +1,20 @@
+FROM rockylinux:9.2
+
+WORKDIR /usr/local/src
+
+RUN curl -o nvidia-gpu-grid.run -L https://go.microsoft.com/fwlink/?linkid=874272 &&\
+    chmod +x nvidia-gpu-grid.run &&\
+    nvidia-gpu-grid.run --silent
+
+# RUN dnf -y install gcc gcc-c++ git make openssl-devel &&\
+#     curl -o functions.sh -L https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.sh &&\
+#     curl -o cmake.tar.gz -L https://github.com/Kitware/CMake/releases/download/v3.27.8/cmake-3.27.8.tar.gz &&\
+#     mkdir /usr/local/cmake &&\
+#     tar -xzf cmake.tar.gz --strip-components=1 -C /usr/local/cmake
+
+# WORKDIR /usr/local/cmake
+
+# RUN source /usr/local/src/functions.sh &&\
+#     StartProcess ./bootstrap cmake &&\
+#     StartProcess make cmake &&\
+#     StartProcess "make install" cmake

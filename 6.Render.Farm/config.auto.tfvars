@@ -29,6 +29,10 @@ virtualMachineScaleSets = [
     spot = {
       enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
+      tryRestore = {
+        enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        timeout = "PT1H"
+      }
     }
     network = {
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -61,7 +65,7 @@ virtualMachineScaleSets = [
         fileName = "initialize.sh"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
-            enable       = true
+            enable       = false
             delayTimeout = "PT5M"
           }
         }
@@ -75,6 +79,10 @@ virtualMachineScaleSets = [
       monitor = {
         enable = false
       }
+    }
+    flexibleOrchestration = {
+      enable           = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+      faultDomainCount = 1     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
     }
   },
   {
@@ -101,6 +109,10 @@ virtualMachineScaleSets = [
     spot = {
       enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
+      tryRestore = {
+        enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        timeout = "PT1H"
+      }
     }
     network = {
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -133,7 +145,7 @@ virtualMachineScaleSets = [
         fileName = "initialize.sh"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
-            enable       = true
+            enable       = false
             delayTimeout = "PT5M"
           }
         }
@@ -147,6 +159,10 @@ virtualMachineScaleSets = [
       monitor = {
         enable = false
       }
+    }
+    flexibleOrchestration = {
+      enable           = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+      faultDomainCount = 1     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
     }
   },
   {
@@ -173,6 +189,10 @@ virtualMachineScaleSets = [
     spot = {
       enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
+      tryRestore = {
+        enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        timeout = "PT1H"
+      }
     }
     network = {
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -205,7 +225,7 @@ virtualMachineScaleSets = [
         fileName = "initialize.ps1"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
-            enable       = true
+            enable       = false
             delayTimeout = "PT5M"
           }
         }
@@ -219,6 +239,10 @@ virtualMachineScaleSets = [
       monitor = {
         enable = false
       }
+    }
+    flexibleOrchestration = {
+      enable           = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+      faultDomainCount = 1     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
     }
   },
   {
@@ -245,6 +269,10 @@ virtualMachineScaleSets = [
     spot = {
       enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
+      tryRestore = {
+        enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        timeout = "PT1H"
+      }
     }
     network = {
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -277,7 +305,7 @@ virtualMachineScaleSets = [
         fileName = "initialize.ps1"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
-            enable       = true
+            enable       = false
             delayTimeout = "PT5M"
           }
         }
@@ -291,6 +319,10 @@ virtualMachineScaleSets = [
       monitor = {
         enable = false
       }
+    }
+    flexibleOrchestration = {
+      enable           = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+      faultDomainCount = 1     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
     }
   }
 ]

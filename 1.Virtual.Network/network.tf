@@ -39,9 +39,10 @@ locals {
   virtualNetwork = local.virtualNetworks[0]
   virtualNetworks = [
     for virtualNetwork in var.virtualNetworks : merge(virtualNetwork, {
-      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.regionName}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}"
-      resourceGroupId   = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.regionName}"
-      resourceGroupName = "${var.resourceGroupName}.${virtualNetwork.regionName}"
+      regionName        = virtualNetwork.regionName != "" ? virtualNetwork.regionName : module.global.regionName
+      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${virtualNetwork.regionName != "" ? "${var.resourceGroupName}.${virtualNetwork.regionName}" : var.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}"
+      resourceGroupId   = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${virtualNetwork.regionName != "" ? "${var.resourceGroupName}.${virtualNetwork.regionName}" : var.resourceGroupName}"
+      resourceGroupName = virtualNetwork.regionName != "" ? "${var.resourceGroupName}.${virtualNetwork.regionName}" : var.resourceGroupName
     }) if virtualNetwork.enable
   ]
   virtualNetworksSubnets = flatten([
