@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.81.0"
+      version = "~>3.82.0"
     }
     azapi = {
       source = "azure/azapi"
@@ -83,6 +83,10 @@ data azurerm_subnet farm {
   name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameFarm : data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.farm].name
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
+}
+
+data azurerm_resource_group network {
+  name = data.azurerm_virtual_network.studio.resource_group_name
 }
 
 resource azurerm_resource_group image {

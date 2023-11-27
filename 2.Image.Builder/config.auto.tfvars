@@ -82,9 +82,13 @@ imageBuilder = {
         customization = [
           "systemctl --now disable firewalld",
           "sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config",
-          "dnf -y install gcc gcc-c++ python3-devel perl cmake git nfs-utils",
+          "dnf -y install gcc gcc-c++ python3-devel perl cmake git jq nfs-utils",
           "dnf -y upgrade"
         ]
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
       }
     },
     {
@@ -110,6 +114,10 @@ imageBuilder = {
         customization = [
         ]
       }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
+      }
     },
     {
       name = "LnxStorageG"
@@ -134,6 +142,10 @@ imageBuilder = {
         customization = [
         ]
       }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
+      }
     },
     {
       name = "LnxScheduler"
@@ -157,6 +169,10 @@ imageBuilder = {
         ]
         customization = [
         ]
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
       }
     },
     {
@@ -184,6 +200,10 @@ imageBuilder = {
         customization = [
         ]
       }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
+      }
     },
     {
       name = "LnxFarmG"
@@ -206,11 +226,14 @@ imageBuilder = {
         renderEngines = [
           "PBRT",
           "Blender",
-          "RenderMan",
-          "Unreal"
+          "RenderMan"
         ]
         customization = [
         ]
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
       }
     },
     {
@@ -234,11 +257,14 @@ imageBuilder = {
         renderEngines = [
           "PBRT",
           "Blender",
-          "RenderMan",
-          "Unreal+PixelStream"
+          "RenderMan"
         ]
         customization = [
         ]
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
       }
     },
     # {
@@ -262,11 +288,14 @@ imageBuilder = {
     #     renderEngines = [
     #       "PBRT",
     #       "Blender",
-    #       "RenderMan",
-    #       "Unreal+PixelStream"
+    #       "RenderMan"
     #     ]
     #     customization = [
     #     ]
+    #   }
+    #   errorHandling = {
+    #     validationMode    = "cleanup"
+    #     customizationMode = "cleanup"
     #   }
     # },
     {
@@ -291,6 +320,10 @@ imageBuilder = {
         ]
         customization = [
         ]
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
       }
     },
     {
@@ -318,6 +351,10 @@ imageBuilder = {
         customization = [
         ]
       }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
+      }
     },
     {
       name = "WinFarmG"
@@ -335,17 +372,21 @@ imageBuilder = {
         machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                        # NVIDIA or AMD
         imageVersion   = "2.1.0"
-        osDiskSizeGB   = 360
-        timeoutMinutes = 360
+        osDiskSizeGB   = 512
+        timeoutMinutes = 480
         renderEngines = [
           "PBRT",
           "Blender",
           "RenderMan",
-          "Unreal"
+          # "Unreal"
         ]
         customization = [
         ]
-    }
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
+      }
     },
     {
       name = "WinArtistN"
@@ -363,16 +404,20 @@ imageBuilder = {
         machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
         imageVersion   = "3.0.0"
-        osDiskSizeGB   = 360
-        timeoutMinutes = 360
+        osDiskSizeGB   = 512
+        timeoutMinutes = 480
         renderEngines = [
           "PBRT",
           "Blender",
           "RenderMan",
-          "Unreal+PixelStream"
+          # "Unreal+PixelStream"
         ]
         customization = [
         ]
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
       }
     },
     # {
@@ -391,16 +436,20 @@ imageBuilder = {
     #     machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
     #     gpuProvider    = "AMD"                      # NVIDIA or AMD
     #     imageVersion   = "3.1.0"
-    #     osDiskSizeGB   = 360
-    #     timeoutMinutes = 360
+    #     osDiskSizeGB   = 512
+    #     timeoutMinutes = 480
     #     renderEngines = [
     #       "PBRT",
     #       "Blender",
     #       "RenderMan",
-    #       "Unreal+PixelStream"
+    #       # "Unreal+PixelStream"
     #     ]
     #     customization = [
     #     ]
+    #   }
+    #   errorHandling = {
+    #     validationMode    = "cleanup"
+    #     customizationMode = "cleanup"
     #   }
     # }
   ]

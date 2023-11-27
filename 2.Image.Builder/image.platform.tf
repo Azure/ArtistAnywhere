@@ -25,6 +25,9 @@ resource azapi_resource image_platform_linux {
         userAssignedIdentities = [
           data.azurerm_user_assigned_identity.studio.id
         ]
+        vnetConfig = {
+          subnetId = data.azurerm_subnet.farm.id
+        }
       }
       source = {
         type      = "PlatformImage"
@@ -42,6 +45,10 @@ resource azapi_resource image_platform_linux {
         vmBoot = {
           state = "Enabled"
         }
+      }
+      errorHandling = {
+        onValidationError = each.value.errorHandling.validationMode
+        onCustomizerError = each.value.errorHandling.customizationMode
       }
       customize = [
         {
@@ -67,8 +74,9 @@ resource azapi_resource image_platform_linux {
     }
   })
   depends_on = [
-    azurerm_role_assignment.managed_identity_operator,
-    azurerm_role_assignment.contributor
+    azurerm_role_assignment.identity,
+    azurerm_role_assignment.network,
+    azurerm_role_assignment.image
   ]
 }
 

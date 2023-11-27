@@ -10,7 +10,6 @@ touch $aaaProfile
 source "/tmp/functions.sh"
 
 echo "Customize (Start): Image Build Parameters"
-dnf -y install jq
 buildConfig=$(echo $buildConfigEncoded | base64 -d)
 machineType=$(echo $buildConfig | jq -r .machineType)
 gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
@@ -142,53 +141,6 @@ if [[ $renderEngines == *RenderMan* ]]; then
   echo "Customize (End): RenderMan"
 fi
 
-if [[ $renderEngines == *Unreal* ]] || [[ $renderEngines == *Unreal+PixelStream* ]]; then
-  echo "Customize (Start): Unreal Engine Setup"
-  versionInfo="5.3.2"
-  installType="unreal-engine"
-  installPath="/usr/local/unreal"
-  installFile="UnrealEngine-$versionInfo-release.tar.gz"
-  downloadUrl="$binStorageHost/Unreal/$versionInfo/$installFile$binStorageAuth"
-  curl -o $installFile -L $downloadUrl
-  tar -xzf $installFile
-  mkdir -p $installPath
-  mv UnrealEngine-$versionInfo-release/* $installPath
-  dnf -y install libicu
-  StartProcess "$installPath/Setup.sh" $binDirectory/$installType
-  echo "Customize (End): Unreal Engine Setup"
-
-  echo "Customize (Start): Unreal Project Files Generate"
-  StartProcess "$installPath/GenerateProjectFiles.sh" $binDirectory/$installType
-  echo "Customize (End): Unreal Project Files Generate"
-
-  echo "Customize (Start): Unreal Engine Build"
-  StartProcess "make -C $installPath" $binDirectory/$installType
-  echo "Customize (End): Unreal Engine Build"
-
-  if [[ $renderEngines == *Unreal+PixelStream* ]]; then
-    echo "Customize (Start): Unreal Pixel Streaming"
-    versionInfo="5.3-1.0.1"
-    installType="unreal-stream"
-    installFile="UE$versionInfo.tar.gz"
-    downloadUrl="$binStorageHost/Unreal/PixelStream/$versionInfo/$installFile$binStorageAuth"
-    curl -o $installFile -L $downloadUrl
-    tar -xzf $installFile
-    dnf -y install coturn
-    installFile="PixelStreamingInfrastructure-UE$versionInfo/SignallingWebServer/platform_scripts/bash/setup.sh"
-    chmod +x $installFile
-    StartProcess "./$installFile" $binDirectory/$installType
-    installFile="PixelStreamingInfrastructure-UE$versionInfo/Matchmaker/platform_scripts/bash/setup.sh"
-    chmod +x $installFile
-    StartProcess "./$installFile" $binDirectory/$installType
-    installFile="PixelStreamingInfrastructure-UE$versionInfo/SFU/platform_scripts/bash/setup.sh"
-    chmod +x $installFile
-    StartProcess "./$installFile" $binDirectory/$installType
-    echo "Customize (End): Unreal Pixel Streaming"
-  fi
-
-  binPaths="$binPaths:$installPath/Engine/Binaries/Linux"
-fi
-
 if [[ $renderEngines == *Maya* ]]; then
   echo "Customize (Start): Maya"
   versionInfo="2024_0_1"
@@ -222,7 +174,6 @@ if [[ $renderEngines == *Houdini* ]]; then
   tar -xzf $installFile
   [[ $machineType == Workstation ]] && desktopMenus=--install-menus || desktopMenus=--no-install-menus
   [[ $renderEngines == *Maya* ]] && mayaPlugIn=--install-engine-maya || mayaPlugIn=--no-install-engine-maya
-  [[ $renderEngines == *Unreal* ]] && unrealPlugIn=--install-engine-unreal || unrealPlugIn=--no-install-engine-unreal
   dnf -y install mesa-libGL
   dnf -y install libXcomposite
   dnf -y install libXdamage
@@ -234,7 +185,7 @@ if [[ $renderEngines == *Houdini* ]]; then
   dnf -y install alsa-lib
   dnf -y install libnsl
   dnf -y install avahi
-  StartProcess "./houdini*/houdini.install --auto-install --make-dir --no-install-license --accept-EULA $versionEULA $desktopMenus $mayaPlugIn $unrealPlugIn" $binDirectory/$installType
+  StartProcess "./houdini*/houdini.install --auto-install --make-dir --no-install-license --accept-EULA $versionEULA $desktopMenus $mayaPlugIn" $binDirectory/$installType
   binPaths="$binPaths:/opt/hfs$versionInfo/bin"
   echo "Customize (End): Houdini"
 fi

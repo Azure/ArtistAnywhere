@@ -25,6 +25,10 @@ variable imageBuilder {
         renderEngines  = list(string)
         customization  = list(string)
       })
+      errorHandling = object({
+        validationMode    = string
+        customizationMode = string
+      })
     }))
   })
 }
@@ -42,14 +46,21 @@ locals {
   ]
 }
 
-resource azurerm_role_assignment managed_identity_operator {
+resource azurerm_role_assignment identity {
   count                = var.computeGallery.enable ? 1 : 0
   role_definition_name = "Managed Identity Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#managed-identity-operator
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_user_assigned_identity.studio.id
 }
 
-resource azurerm_role_assignment contributor {
+resource azurerm_role_assignment network {
+  count                = var.computeGallery.enable ? 1 : 0
+  role_definition_name = "Virtual Machine Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#virtual-machine-contributor
+  principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
+  scope                = data.azurerm_resource_group.network.id
+}
+
+resource azurerm_role_assignment image {
   count                = var.computeGallery.enable ? 1 : 0
   role_definition_name = "Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
@@ -79,6 +90,9 @@ resource azapi_resource image_builder_linux {
         userAssignedIdentities = [
           data.azurerm_user_assigned_identity.studio.id
         ]
+        vnetConfig = {
+          subnetId = data.azurerm_subnet.farm.id
+        }
       }
       source = {
         type           = "SharedImageVersion"
@@ -88,6 +102,10 @@ resource azapi_resource image_builder_linux {
         vmBoot = {
           state = "Enabled"
         }
+      }
+      errorHandling = {
+        onValidationError = each.value.errorHandling.validationMode
+        onCustomizerError = each.value.errorHandling.customizationMode
       }
       customize = concat(
         [
@@ -149,8 +167,9 @@ resource azapi_resource image_builder_linux {
   })
   schema_validation_enabled = false
   depends_on = [
-    azurerm_role_assignment.managed_identity_operator,
-    azurerm_role_assignment.contributor,
+    azurerm_role_assignment.identity,
+    azurerm_role_assignment.network,
+    azurerm_role_assignment.image,
     terraform_data.image_platform_linux_build
   ]
 }
@@ -178,6 +197,9 @@ resource azapi_resource image_builder_windows {
         userAssignedIdentities = [
           data.azurerm_user_assigned_identity.studio.id
         ]
+        vnetConfig = {
+          subnetId = data.azurerm_subnet.farm.id
+        }
       }
       source = {
         type      = "PlatformImage"
@@ -190,6 +212,10 @@ resource azapi_resource image_builder_windows {
         vmBoot = {
           state = "Enabled"
         }
+      }
+      errorHandling = {
+        onValidationError = each.value.errorHandling.validationMode
+        onCustomizerError = each.value.errorHandling.customizationMode
       }
       customize = concat(
         [
@@ -269,8 +295,9 @@ resource azapi_resource image_builder_windows {
   })
   schema_validation_enabled = false
   depends_on = [
-    azurerm_role_assignment.managed_identity_operator,
-    azurerm_role_assignment.contributor
+    azurerm_role_assignment.identity,
+    azurerm_role_assignment.network,
+    azurerm_role_assignment.image
   ]
 }
 
