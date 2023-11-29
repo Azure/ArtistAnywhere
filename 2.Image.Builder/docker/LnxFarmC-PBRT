@@ -1,4 +1,4 @@
-FROM xstudio.azurecr.io:lnx-farmc-cmake
+FROM xstudio.azurecr.io/lnx-farm-c:cmake
 
 WORKDIR /usr/local/src
 
@@ -10,9 +10,7 @@ RUN dnf -y install mesa-libGL-devel &&\
 
 RUN source /usr/local/src/functions.sh &&\
     git clone --recursive https://github.com/mmp/pbrt-v4.git &&\
-    StartProcess "cmake -S pbrt-v4 -B /usr/local/pbrt" pbrt-v4 &&\
-    StartProcess "make -C /usr/local/pbrt" pbrt-v4
+    StartProcess "cmake -S pbrt-v4 -B /usr/local/pbrt" pbrt &&\
+    StartProcess "make -C /usr/local/pbrt" pbrt
 
 ENV PATH=$PATH:/usr/local/pbrt
-
-RUN pbrt --version
