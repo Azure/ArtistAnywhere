@@ -13,6 +13,7 @@ RUN source /usr/local/src/functions.sh &&\
     StartProcess "cmake --build . -- -j $(nproc)" openmoonray-prereqs
 
 RUN rm -rf * &&\
+    source /usr/local/src/functions.sh &&\
     StartProcess "cmake .. -DPYTHON_EXECUTABLE=python3 -DBOOST_PYTHON_COMPONENT_NAME=python39 -DABI_VERSION=0 -DMOONRAY_USE_CUDA=NO" openmoonray-build &&\
     StartProcess "cmake --build . -- -j $(nproc)" openmoonray-build &&\
     mkdir /usr/local/openmoonray &&\
