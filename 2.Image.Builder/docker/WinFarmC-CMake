@@ -8,4 +8,4 @@ RUN curl -o chocolatey.ps1 -L https://community.chocolatey.org/install.ps1 &&\
     C:\\ProgramData\\chocolatey\\choco install cmake --confirm &&\
     C:\\ProgramData\\chocolatey\\choco install visualstudio2022buildtools --confirm
 
-ENV PATH=$PATH;"C:\\Program Files\\CMake\\bin";"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\amd64"
+ENV PATH=$PATH;"C:\\Program Files\\Git\\bin";"C:\\Program Files\\CMake\\bin";"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\amd64"
