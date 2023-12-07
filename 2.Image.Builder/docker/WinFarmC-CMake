@@ -2,8 +2,9 @@ FROM mcr.microsoft.com/windows:10.0.19042.985-amd64
 
 WORKDIR C:\\Users\\Public\\Downloads
 
-RUN curl -o functions.ps1 -L https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.ps1 &&\
-    curl -o chocolatey.ps1 -L https://community.chocolatey.org/install.ps1 &&\
+RUN curl -o chocolatey.ps1 -L https://community.chocolatey.org/install.ps1 &&\
     PowerShell -ExecutionPolicy Unrestricted -File chocolatey.ps1 &&\
     C:\\ProgramData\\chocolatey\\choco install git --confirm &&\
     C:\\ProgramData\\chocolatey\\choco install cmake --confirm
+
+ENV PATH=$PATH;"C:\\Program Files\\CMake\\bin"

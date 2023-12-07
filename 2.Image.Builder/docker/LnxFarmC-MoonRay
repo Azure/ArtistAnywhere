@@ -2,22 +2,19 @@ FROM xstudio.azurecr.io/lnx-farm-c:cmake
 
 WORKDIR /usr/local/src
 
-RUN source /usr/local/src/functions.sh &&\
-    git clone --recurse-submodules https://github.com/dreamworksanimation/openmoonray.git &&\
+RUN git clone --recurse-submodules https://github.com/dreamworksanimation/openmoonray.git &&\
     source openmoonray/building/Rocky9/install_packages.sh --nocuda
 
 WORKDIR openmoonray/build
 
-RUN source /usr/local/src/functions.sh &&\
-    StartProcess "cmake ../building/Rocky9" openmoonray-prereqs &&\
-    StartProcess "cmake --build . -- -j $(nproc)" openmoonray-prereqs
+RUN cmake ../building/Rocky9  &&\
+    cmake --build . -- -j $(nproc)
 
 RUN rm -rf * &&\
-    source /usr/local/src/functions.sh &&\
-    StartProcess "cmake .. -DPYTHON_EXECUTABLE=python3 -DBOOST_PYTHON_COMPONENT_NAME=python39 -DABI_VERSION=0 -DMOONRAY_USE_CUDA=NO" openmoonray-build &&\
-    StartProcess "cmake --build . -- -j $(nproc)" openmoonray-build &&\
+    cmake .. -DPYTHON_EXECUTABLE=python3 -DBOOST_PYTHON_COMPONENT_NAME=python39 -DABI_VERSION=0 -DMOONRAY_USE_CUDA=NO &&\
+    cmake --build . -- -j $(nproc) &&\
     mkdir /usr/local/openmoonray &&\
-    StartProcess "cmake --install . --prefix /usr/local/openmoonray" openmoonray-build
+    cmake --install . --prefix /usr/local/openmoonray
 
 ENV PATH=$PATH:/usr/local/openmoonray
 
