@@ -7,5 +7,3 @@ RUN git clone --recursive https://github.com/mmp/pbrt-v4.git &&\
     msbuild "C:\\Program Files\\PBRT\\PBRT-v4.sln" -p:Configuration=Release
 
 RUN setx PATH "%PATH%;C:\\Program Files\\PBRT\\Release" /m
-
-RUN pbrt --version

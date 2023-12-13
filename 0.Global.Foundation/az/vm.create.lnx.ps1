@@ -50,7 +50,7 @@ $virtualNetwork = @{
 }
 $virtualMachine = @{
   name     = "LnxStorage"
-  size     = "Standard_L8as_v3"
+  size     = "Standard_L8s_v3"
   imageId  = "AlmaLinux:AlmaLinux-x86_64:8-Gen2:Latest"
   subnetId = "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)"
   osDisk = @{

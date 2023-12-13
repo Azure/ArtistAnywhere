@@ -108,12 +108,11 @@ data azurerm_virtual_machine_scale_set weka {
 }
 
 locals {
-  weka = merge({
+  weka = merge(var.weka, {
     adminLogin = {
       userName     = var.weka.adminLogin.userName != "" ? var.weka.adminLogin.userName : try(data.azurerm_key_vault_secret.admin_username[0].value, "")
       userPassword = var.weka.adminLogin.userPassword != "" ? var.weka.adminLogin.userPassword : try(data.azurerm_key_vault_secret.admin_password[0].value, "")
-    }},
-    var.weka
+    }}
   )
   wekaObjectTier = merge(var.weka.objectTier, {
     storage = {
@@ -214,7 +213,7 @@ resource azurerm_linux_virtual_machine_scale_set weka {
   overprovision                   = false
   custom_data = base64encode(templatefile("terminate.sh", {
     wekaClusterName      = var.weka.name.resource
-    wekaAdminPassword    = var.weka.adminLogin.userPassword
+    wekaAdminPassword    = local.weka.adminLogin.userPassword
     dnsResourceGroupName = data.azurerm_private_dns_zone.studio.resource_group_name
     dnsZoneName          = data.azurerm_private_dns_zone.studio.name
     dnsARecordName       = var.weka.network.dnsARecord.name
@@ -262,7 +261,7 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     settings = jsonencode({
       script = "${base64encode(
         templatefile("initialize.sh", {
-          wekaVersion               = "4.2.5"
+          wekaVersion               = "4.2.6"
           wekaApiToken              = var.weka.apiToken
           wekaClusterName           = var.weka.name.resource
           wekaDataDiskSize          = var.weka.dataDisk.sizeGB
@@ -274,7 +273,7 @@ resource azurerm_linux_virtual_machine_scale_set weka {
           wekaFileSystemAutoScale   = var.weka.fileSystem.autoScale
           wekaObjectTierPercent     = local.wekaObjectTier.percent
           wekaTerminateNotification = var.weka.terminateNotification
-          wekaAdminPassword         = var.weka.adminLogin.userPassword
+          wekaAdminPassword         = local.weka.adminLogin.userPassword
           wekaResourceGroupName     = azurerm_resource_group.weka[0].name
           dnsResourceGroupName      = data.azurerm_private_dns_zone.studio.resource_group_name
           dnsZoneName               = data.azurerm_private_dns_zone.studio.name
@@ -311,7 +310,7 @@ resource azurerm_linux_virtual_machine_scale_set weka {
   dynamic admin_ssh_key {
     for_each = var.weka.adminLogin.sshPublicKey != "" ? [1] : []
     content {
-      username   = var.weka.adminLogin.userName
+      username   = local.weka.adminLogin.userName
       public_key = var.weka.adminLogin.sshPublicKey
     }
   }
@@ -335,15 +334,15 @@ resource terraform_data weka_cluster_create {
   connection {
     type     = "ssh"
     host     = data.azurerm_virtual_machine_scale_set.weka[0].instances[0].private_ip_address
-    user     = var.weka.adminLogin.userName
-    password = var.weka.adminLogin.userPassword
+    user     = local.weka.adminLogin.userName
+    password = local.weka.adminLogin.userPassword
   }
   provisioner remote-exec {
     inline = [
       "machineSpec='${local.wekaMachineSpec}'",
       "source ${local.wekaDriveDisksScript}",
-      "weka cluster create ${join(" ", data.azurerm_virtual_machine_scale_set.weka[0].instances[*].private_ip_address)} --admin-password ${var.weka.adminLogin.userPassword} 2>&1 | tee weka-cluster-create.log",
-      "weka user login admin ${var.weka.adminLogin.userPassword}",
+      "weka cluster create ${join(" ", data.azurerm_virtual_machine_scale_set.weka[0].instances[*].private_ip_address)} --admin-password ${local.weka.adminLogin.userPassword} 2>&1 | tee weka-cluster-create.log",
+      "weka user login admin ${local.weka.adminLogin.userPassword}",
       "for (( i=0; i<${var.weka.machine.count}; i++ )); do",
       "  hostName=${azurerm_linux_virtual_machine_scale_set.weka[0].name}$(printf %06X $i)",
       "  weka cluster drive add $i --HOST $hostName $nvmeDisks 2>&1 | tee --append weka-cluster-drive-add-$hostName.log",
@@ -357,8 +356,8 @@ resource terraform_data weka_container_setup {
   connection {
     type     = "ssh"
     host     = data.azurerm_virtual_machine_scale_set.weka[0].instances[count.index].private_ip_address
-    user     = var.weka.adminLogin.userName
-    password = var.weka.adminLogin.userPassword
+    user     = local.weka.adminLogin.userName
+    password = local.weka.adminLogin.userPassword
   }
   provisioner remote-exec {
     inline = [
@@ -380,8 +379,8 @@ resource terraform_data weka_cluster_start {
   connection {
     type     = "ssh"
     host     = data.azurerm_virtual_machine_scale_set.weka[0].instances[0].private_ip_address
-    user     = var.weka.adminLogin.userName
-    password = var.weka.adminLogin.userPassword
+    user     = local.weka.adminLogin.userName
+    password = local.weka.adminLogin.userPassword
   }
   provisioner remote-exec {
     inline = [
@@ -406,8 +405,8 @@ resource terraform_data weka_file_system {
   connection {
     type     = "ssh"
     host     = data.azurerm_virtual_machine_scale_set.weka[0].instances[0].private_ip_address
-    user     = var.weka.adminLogin.userName
-    password = var.weka.adminLogin.userPassword
+    user     = local.weka.adminLogin.userName
+    password = local.weka.adminLogin.userPassword
   }
   provisioner remote-exec {
     inline = [
@@ -437,8 +436,8 @@ resource terraform_data weka_load {
   connection {
     type     = "ssh"
     host     = data.azurerm_virtual_machine_scale_set.weka[0].instances[0].private_ip_address
-    user     = var.weka.adminLogin.userName
-    password = var.weka.adminLogin.userPassword
+    user     = local.weka.adminLogin.userName
+    password = local.weka.adminLogin.userPassword
   }
   provisioner remote-exec {
     inline = [

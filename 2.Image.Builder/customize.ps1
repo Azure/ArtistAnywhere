@@ -64,25 +64,18 @@ $binPathGit = "C:\Program Files\Git\bin"
 $binPaths += ";$binPathGit"
 Write-Host "Customize (End): Git"
 
+Write-Host "Customize (Start): Visual Studio Build Tools"
+$installType = "vsBuildTools"
+StartProcess $binPathChoco\choco.exe "install visualstudio2022buildtools --package-parameters '--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.Component.MSBuild' --confirm --no-progress" "$binDirectory\$installType"
+$binPathCMake = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
+$binPathMSBuild = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64"
+$binPaths += ";$binPathCMake;$binPathMSBuild"
+Write-Host "Customize (End): Visual Studio Build Tools"
+
 Write-Host "Customize (Start): 7-Zip"
 $installType = "7zip"
 StartProcess $binPathChoco\choco.exe "install $installType --confirm --no-progress" "$binDirectory\$installType"
 Write-Host "Customize (End): 7-Zip"
-
-Write-Host "Customize (Start): Visual Studio Build Tools"
-$versionInfo = "2022"
-$installType = "vs-build-tools"
-$installFile = "vs_BuildTools.exe"
-$downloadUrl = "$binStorageHost/VS/$versionInfo/$installFile$binStorageAuth"
-(New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
-$componentIds = "--add Microsoft.VisualStudio.Component.Windows11SDK.22621"
-$componentIds += " --add Microsoft.VisualStudio.Component.VC.CMake.Project"
-$componentIds += " --add Microsoft.Component.MSBuild"
-StartProcess .\$installFile "$componentIds --quiet --norestart" "$binDirectory\$installType"
-$binPathCMake = "C:\Program Files (x86)\Microsoft Visual Studio\$versionInfo\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
-$binPathMSBuild = "C:\Program Files (x86)\Microsoft Visual Studio\$versionInfo\BuildTools\MSBuild\Current\Bin\amd64"
-$binPaths += ";$binPathCMake;$binPathMSBuild"
-Write-Host "Customize (End): Visual Studio Build Tools"
 
 Write-Host "Customize (End): Image Build Platform"
 
@@ -163,7 +156,7 @@ if ($renderEngines -contains "PBRT") {
 
 if ($renderEngines -contains "Blender") {
   Write-Host "Customize (Start): Blender"
-  $versionInfo = "4.0.1"
+  $versionInfo = "4.0.2"
   $installType = "blender"
   $installFile = "$installType-$versionInfo-windows-x64.msi"
   $downloadUrl = "$binStorageHost/Blender/$versionInfo/$installFile$binStorageAuth"

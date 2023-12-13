@@ -104,8 +104,8 @@ imageBuilder = {
       }
       build = {
         machineType    = "Storage"
-        machineSize    = "Standard_L8as_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                 # NVIDIA or AMD
+        machineSize    = "Standard_L8s_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "0.1.0"
         osDiskSizeGB   = 0
         timeoutMinutes = 120
