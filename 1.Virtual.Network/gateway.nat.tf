@@ -17,6 +17,7 @@ resource azurerm_nat_gateway studio {
   location            = each.value.regionName
   sku_name            = "Standard"
   depends_on = [
+    azurerm_resource_group.network,
     azurerm_resource_group.network_regions
   ]
 }

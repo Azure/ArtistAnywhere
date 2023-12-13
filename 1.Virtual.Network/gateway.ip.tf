@@ -12,6 +12,7 @@ resource azurerm_public_ip_prefix vpn_gateway {
   location            = each.value.regionName
   prefix_length       = 31
   depends_on = [
+    azurerm_resource_group.network,
     azurerm_resource_group.network_regions
   ]
   lifecycle {
@@ -30,6 +31,7 @@ resource azurerm_public_ip vpn_gateway_1 {
   sku                 = "Standard"
   allocation_method   = "Static"
   depends_on = [
+    azurerm_resource_group.network,
     azurerm_resource_group.network_regions
   ]
 }
@@ -45,6 +47,7 @@ resource azurerm_public_ip vpn_gateway_2 {
   sku                 = "Standard"
   allocation_method   = "Static"
   depends_on = [
+    azurerm_resource_group.network,
     azurerm_resource_group.network_regions
   ]
 }
@@ -58,6 +61,7 @@ resource azurerm_public_ip_prefix nat_gateway {
   location            = each.value.regionName
   prefix_length       = 31
   depends_on = [
+    azurerm_resource_group.network,
     azurerm_resource_group.network_regions
   ]
 }
@@ -73,6 +77,7 @@ resource azurerm_public_ip nat_gateway {
   sku                 = "Standard"
   allocation_method   = "Static"
   depends_on = [
+    azurerm_resource_group.network,
     azurerm_resource_group.network_regions
   ]
 }
