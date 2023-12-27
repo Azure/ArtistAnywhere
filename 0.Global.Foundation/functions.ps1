@@ -1,6 +1,9 @@
 $fileSystemsPath = "C:\AzureData\fileSystems.bat"
 
 function StartProcess ($filePath, $argumentList, $logFile) {
+  Write-Host "filePath: $filePath"
+  Write-Host "argumentList: $argumentList"
+  Write-Host "logFile: $logFile"
   if ($logFile) {
     if ($argumentList) {
       Start-Process -FilePath $filePath -ArgumentList $argumentList -Wait -RedirectStandardOutput $logFile-out -RedirectStandardError $logFile-err

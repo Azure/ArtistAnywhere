@@ -146,7 +146,7 @@ if ($renderEngines -contains "PBRT") {
   $versionInfo = "v4"
   $installType = "pbrt"
   $installPath = "C:\Program Files\PBRT"
-  New-Item -ItemType Directory -Path $installPath -Force
+  New-Item -ItemType Directory -Path "$installPath" -Force
   StartProcess "$binPathGit\git.exe" "clone --recursive https://github.com/mmp/$installType-$versionInfo.git" "$binDirectory\$installType-git"
   StartProcess "$binPathCMake\cmake.exe" "-B ""$installPath"" -S $binDirectory\$installType-$versionInfo" "$binDirectory\$installType-cmake"
   StartProcess "$binPathMSBuild\MSBuild.exe" """$installPath\PBRT-$versionInfo.sln"" -p:Configuration=Release" "$binDirectory\$installType-msbuild"
@@ -208,8 +208,8 @@ if ($renderEngines -contains "Unreal" -or $renderEngines -contains "Unreal+Pixel
   Expand-Archive -Path $installFile
 
   $installPath = "C:\Program Files\Unreal"
-  New-Item -ItemType Directory -Path $installPath
-  Move-Item -Path "Unreal*\Unreal*\*" -Destination $installPath
+  New-Item -ItemType Directory -Path "$installPath"
+  Move-Item -Path "Unreal*\Unreal*\*" -Destination "$installPath"
   Remove-Item -Path "Unreal*" -Exclude "*.zip" -Recurse
   Set-Location -Path $binDirectory
 
