@@ -68,6 +68,7 @@ function JoinActiveDirectory ($domainName, $domainServerName, $orgUnitPath, $adm
 
 function InitializeClient ($binDirectory, $activeDirectoryJson) {
   StartProcess deadlinecommand.exe "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx" "$binDirectory\deadline-repository"
+  StartProcess wsl.exe "apt install -y nfs-common" "$binDirectory\wsl-nfs"
   $activeDirectory = ConvertFrom-Json -InputObject $activeDirectoryJson
   if ($activeDirectory.enable) {
     Retry 5 10 {

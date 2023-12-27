@@ -321,6 +321,10 @@ if ($renderEngines -contains "Houdini") {
 }
 
 if ($machineType -eq "Scheduler") {
+  Write-Host "Customize (Start): NFS Server"
+  Install-WindowsFeature -Name "FS-NFS-Service"
+  Write-Host "Customize (End): NFS Server"
+
   Write-Host "Customize (Start): AD Domain Services"
   Install-WindowsFeature -Name "AD-Domain-Services" -IncludeManagementTools
   Write-Host "Customize (End): AD Domain Services"
@@ -333,24 +337,20 @@ if ($machineType -eq "Scheduler") {
   $shortcut.TargetPath = "%SystemRoot%\system32\dsa.msc"
   $shortcut.Save()
   Write-Host "Customize (End): AD Users & Computers"
-
-  Write-Host "Customize (Start): NFS Server"
-  Install-WindowsFeature -Name "FS-NFS-Service"
-  Write-Host "Customize (End): NFS Server"
 } else {
+  Write-Host "Customize (Start): NFS Client"
+  $installType = "nfs-client"
+  StartProcess dism.exe "/Online /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All /NoRestart" "$binDirectory\$installType"
+  Write-Host "Customize (End): NFS Client"
+
   Write-Host "Customize (Start): AD Tools"
   $installType = "ad-tools" # RSAT: Active Directory Domain Services and Lightweight Directory Services Tools
   StartProcess dism.exe "/Online /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0 /NoRestart" "$binDirectory\$installType"
   Write-Host "Customize (End): AD Tools"
-
-  # Write-Host "Customize (Start): NFS Client"
-  # $installType = "nfs-client"
-  # StartProcess dism.exe "/Online /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All /NoRestart" "$binDirectory\$installType"
-  # Write-Host "Customize (End): NFS Client"
 }
 
 if ($machineType -ne "Storage") {
-  $versionInfo = "10.3.0.15"
+  $versionInfo = "10.3.1.4"
   $installRoot = "C:\deadline"
   $databaseHost = $(hostname)
   $databasePort = 27100
