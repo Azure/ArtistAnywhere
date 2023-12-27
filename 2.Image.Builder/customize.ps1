@@ -47,26 +47,26 @@ Write-Host "Customize (End): Chocolatey"
 
 Write-Host "Customize (Start): Python"
 $installType = "python"
-StartProcess $binPathChoco\choco.exe "install $installType --confirm --no-progress" "$binDirectory\$installType"
+StartProcess "$binPathChoco\choco.exe" "install $installType --confirm --no-progress" "$binDirectory\$installType"
 Write-Host "Customize (End): Python"
 
 if ($machineType -eq "Workstation") {
   Write-Host "Customize (Start): Node.js"
   $installType = "nodejs"
-  StartProcess $binPathChoco\choco.exe "install $installType --confirm --no-progress" "$binDirectory\$installType"
+  StartProcess "$binPathChoco\choco.exe" "install $installType --confirm --no-progress" "$binDirectory\$installType"
   Write-Host "Customize (End): Node.js"
 }
 
 Write-Host "Customize (Start): Git"
 $installType = "git"
-StartProcess $binPathChoco\choco.exe "install $installType --confirm --no-progress" "$binDirectory\$installType"
+StartProcess "$binPathChoco\choco.exe" "install $installType --confirm --no-progress" "$binDirectory\$installType"
 $binPathGit = "C:\Program Files\Git\bin"
 $binPaths += ";$binPathGit"
 Write-Host "Customize (End): Git"
 
 Write-Host "Customize (Start): Visual Studio Build Tools"
 $installType = "vsBuildTools"
-StartProcess $binPathChoco\choco.exe "install visualstudio2022buildtools --package-parameters '--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.Component.MSBuild' --confirm --no-progress" "$binDirectory\$installType"
+StartProcess "$binPathChoco\choco.exe" "install visualstudio2022buildtools --package-parameters '--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.Component.MSBuild' --confirm --no-progress" "$binDirectory\$installType"
 $binPathCMake = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
 $binPathMSBuild = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64"
 $binPaths += ";$binPathCMake;$binPathMSBuild"
@@ -74,7 +74,7 @@ Write-Host "Customize (End): Visual Studio Build Tools"
 
 Write-Host "Customize (Start): 7-Zip"
 $installType = "7zip"
-StartProcess $binPathChoco\choco.exe "install $installType --confirm --no-progress" "$binDirectory\$installType"
+StartProcess "$binPathChoco\choco.exe" "install $installType --confirm --no-progress" "$binDirectory\$installType"
 Write-Host "Customize (End): 7-Zip"
 
 Write-Host "Customize (End): Image Build Platform"
@@ -125,8 +125,8 @@ if ($gpuProvider -eq "AMD") {
   $buildDirectory = "$sdkDirectory\build"
   New-Item -ItemType Directory $buildDirectory
   $versionInfo = "v12.3"
-  StartProcess $binPathCMake\cmake.exe "-B ""$buildDirectory"" -S ""$sdkDirectory"" -D CUDA_TOOLKIT_ROOT_DIR=""C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\$versionInfo""" "$binDirectory\$installType-cmake"
-  StartProcess $binPathMSBuild\MSBuild.exe """$buildDirectory\OptiX-Samples.sln"" -p:Configuration=Release" "$binDirectory\$installType-msbuild"
+  StartProcess "$binPathCMake\cmake.exe" "-B ""$buildDirectory"" -S ""$sdkDirectory"" -D CUDA_TOOLKIT_ROOT_DIR=""C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\$versionInfo""" "$binDirectory\$installType-cmake"
+  StartProcess "$binPathMSBuild\MSBuild.exe" """$buildDirectory\OptiX-Samples.sln"" -p:Configuration=Release" "$binDirectory\$installType-msbuild"
   $binPaths += ";$buildDirectory\bin\Release"
   Write-Host "Customize (End): NVIDIA OptiX"
 }
@@ -147,9 +147,9 @@ if ($renderEngines -contains "PBRT") {
   $installType = "pbrt"
   $installPath = "C:\Program Files\PBRT"
   New-Item -ItemType Directory -Path $installPath -Force
-  StartProcess $binPathGit\git.exe "clone --recursive https://github.com/mmp/$installType-$versionInfo.git" "$binDirectory\$installType-git"
-  StartProcess $binPathCMake\cmake.exe "-B ""$installPath"" -S $binDirectory\$installType-$versionInfo" "$binDirectory\$installType-cmake"
-  StartProcess $binPathMSBuild\MSBuild.exe """$installPath\PBRT-$versionInfo.sln"" -p:Configuration=Release" "$binDirectory\$installType-msbuild"
+  StartProcess "$binPathGit\git.exe" "clone --recursive https://github.com/mmp/$installType-$versionInfo.git" "$binDirectory\$installType-git"
+  StartProcess "$binPathCMake\cmake.exe" "-B ""$installPath"" -S $binDirectory\$installType-$versionInfo" "$binDirectory\$installType-cmake"
+  StartProcess "$binPathMSBuild\MSBuild.exe" """$installPath\PBRT-$versionInfo.sln"" -p:Configuration=Release" "$binDirectory\$installType-msbuild"
   $binPaths += ";$installPath\Release"
   Write-Host "Customize (End): PBRT"
 }
@@ -247,7 +247,7 @@ if ($renderEngines -contains "Unreal" -or $renderEngines -contains "Unreal+Pixel
   Write-Host "Customize (Start): Unreal Engine Build"
   [System.Environment]::SetEnvironmentVariable("MSBuildEnableWorkloadResolver", "false")
   [System.Environment]::SetEnvironmentVariable("MSBuildSDKsPath", "$installPath\Engine\Binaries\ThirdParty\DotNet\6.0.302\windows\sdk\6.0.302\Sdks")
-  StartProcess $binPathMSBuild\MSBuild.exe """$installPath\UE5.sln"" -p:Configuration=""Development Editor"" -p:Platform=Win64 -restore" "$binDirectory\$installType-msbuild"
+  StartProcess "$binPathMSBuild\MSBuild.exe" """$installPath\UE5.sln"" -p:Configuration=""Development Editor"" -p:Platform=Win64 -restore" "$binDirectory\$installType-msbuild"
   Write-Host "Customize (End): Unreal Engine Build"
 
   if ($renderEngines -contains "Unreal+PixelStream") {
@@ -343,16 +343,10 @@ if ($machineType -eq "Scheduler") {
   StartProcess dism.exe "/Online /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0 /NoRestart" "$binDirectory\$installType"
   Write-Host "Customize (End): AD Tools"
 
-  Write-Host "Customize (Start): NFS Client"
-  $installType = "nfs-client"
-  StartProcess dism.exe "/Online /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All /NoRestart" "$binDirectory\$installType"
-  Write-Host "Customize (End): NFS Client"
-
-  # Write-Host "Customize (Start): WSL"
-  # $installType = "wsl"
-  # StartProcess dism.exe "/Online /Enable-Feature /FeatureName:Microsoft-Hyper-V-All /All /NoRestart" "$binDirectory\$installType-hyper-v"
-  # StartProcess wsl.exe "--install" "$binDirectory\$installType"
-  # Write-Host "Customize (End): WSL"
+  # Write-Host "Customize (Start): NFS Client"
+  # $installType = "nfs-client"
+  # StartProcess dism.exe "/Online /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All /NoRestart" "$binDirectory\$installType"
+  # Write-Host "Customize (End): NFS Client"
 }
 
 if ($machineType -ne "Storage") {

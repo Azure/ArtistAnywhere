@@ -34,7 +34,7 @@ echo "Customize (End): Image Build Platform"
 if [ $machineType == Storage ]; then
   echo "Customize (Start): NVIDIA OFED"
   installType="mellanox-ofed"
-  installFile="MLNX_OFED_LINUX-23.10-0.5.5.0-rhel8.8-x86_64.tgz"
+  installFile="MLNX_OFED_LINUX-23.10-1.1.9.0-rhel8.9-x86_64.tgz"
   downloadUrl="$binStorageHost/NVIDIA/OFED/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xzf $installFile
