@@ -14,6 +14,8 @@ Write-Host "Customize (Start): Resize OS Disk"
 $osDriveLetter = "C"
 $partitionSizeActive = (Get-Partition -DriveLetter $osDriveLetter).Size
 $partitionSizeRange = Get-PartitionSupportedSize -DriveLetter $osDriveLetter
+Write-Host $partitionSizeActive
+Write-Host $partitionSizeRange.SizeMax
 if ($partitionSizeActive -lt $partitionSizeRange.SizeMax) {
   Resize-Partition -DriveLetter $osDriveLetter -Size $partitionSizeRange.SizeMax
 }
