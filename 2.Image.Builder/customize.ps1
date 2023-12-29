@@ -14,9 +14,7 @@ Write-Host "Customize (Start): Resize OS Disk"
 $osDriveLetter = "C"
 $partitionSizeActive = (Get-Partition -DriveLetter $osDriveLetter).Size
 $partitionSizeRange = Get-PartitionSupportedSize -DriveLetter $osDriveLetter
-Write-Host $partitionSizeActive
-Write-Host $partitionSizeRange.SizeMax
-if ($partitionSizeActive -lt $partitionSizeRange.SizeMax) {
+if ($partitionSizeActive + 1000000 -lt $partitionSizeRange.SizeMax) {
   Resize-Partition -DriveLetter $osDriveLetter -Size $partitionSizeRange.SizeMax
 }
 Write-Host "Customize (End): Resize OS Disk"
@@ -433,4 +431,10 @@ if ($machineType -eq "Workstation") {
 
 if ($binPaths -ne "") {
   setx PATH "$env:PATH$binPaths" /m
+}
+
+if ($machineType -ne "Scheduler") {
+  Write-Host "Customize (Start): WSL"
+  StartProcess wsl.exe "--install" "$binDirectory\wsl"
+  Write-Host "Customize (End): WSL"
 }
