@@ -435,9 +435,6 @@ if ($binPaths -ne "") {
 
 if ($machineType -ne "Scheduler") {
   Write-Host "Customize (Start): WSL"
-  #StartProcess dism.exe "/Online /Enable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /All /NoRestart" "$binDirectory\wsl"
-  dism /Online /Enable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /All /NoRestart
-  Write-Host "WSL.WSL"
-  wsl --install
+  StartProcess dism.exe "/Online /Enable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /All /NoRestart" "$binDirectory\wsl"
   Write-Host "Customize (End): WSL"
 }
