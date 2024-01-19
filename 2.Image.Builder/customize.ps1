@@ -429,13 +429,17 @@ if ($machineType -eq "Workstation") {
   Write-Host "Customize (End): HP Anyware"
 }
 
-if ($binPaths -ne "") {
-  setx PATH "$env:PATH$binPaths" /m
+if ($machineType -ne "Scheduler") {
+  Write-Host "Customize (Start): PSTools"
+  $installFile = "PSTools.zip"
+  $downloadUrl = "https://download.sysinternals.com/files/$installFile"
+  (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
+  $binPathPSTools = "C:\Program Files\PSTools"
+  Expand-Archive -Path $installFile -DestinationPath $binPathPSTools
+  $binPaths += ";$binPathPSTools"
+  Write-Host "Customize (End): PSTools"
 }
 
-if ($machineType -ne "Scheduler") {
-  Write-Host "Customize (Start): WSL"
-  StartProcess dism.exe "/Online /Enable-Feature /FeatureName:VirtualMachinePlatform /All /NoRestart" "$binDirectory\wsl-vm"
-  StartProcess dism.exe "/Online /Enable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /All /NoRestart" "$binDirectory\wsl"
-  Write-Host "Customize (End): WSL"
+if ($binPaths -ne "") {
+  setx PATH "$env:PATH$binPaths" /m
 }
