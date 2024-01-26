@@ -198,7 +198,7 @@ if ($renderEngines -contains "Unreal" -or $renderEngines -contains "Unreal+Pixel
 
   Write-Host "Customize (Start): Unreal Engine Setup"
   $installType = "dotnet-fx3"
-  StartProcess dism.exe "/Online /Enable-Feature /FeatureName:NetFX3 /All /NoRestart" "$binDirectory\$installType"
+  dism /Online /NoRestart /LogPath:"$binDirectory\$installType" /Enable-Feature /FeatureName:NetFX3 /All
   Set-Location -Path C:\
   $versionInfo = "5.3.2"
   $installType = "unreal-engine"
@@ -340,12 +340,12 @@ if ($machineType -eq "Scheduler") {
 } else {
   Write-Host "Customize (Start): NFS Client"
   $installType = "nfs-client"
-  StartProcess dism.exe "/Online /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All /NoRestart" "$binDirectory\$installType"
+  dism /Online /NoRestart /LogPath:"$binDirectory\$installType" /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All
   Write-Host "Customize (End): NFS Client"
 
   Write-Host "Customize (Start): AD Tools"
   $installType = "ad-tools" # RSAT: Active Directory Domain Services and Lightweight Directory Services Tools
-  StartProcess dism.exe "/Online /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0 /NoRestart" "$binDirectory\$installType"
+  dism /Online /NoRestart /LogPath:"$binDirectory\$installType" /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
   Write-Host "Customize (End): AD Tools"
 }
 
@@ -437,7 +437,7 @@ if ($machineType -ne "Scheduler") {
   Install-Module -Name PSWindowsUpdate -Force
   Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -IgnoreReboot
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
-  dism /Online /Add-ProvisionedAppxPackage /PackagePath:$installFile /SkipLicense /LogPath:$binDirectory\wsl-appx.log
+  dism /Online /NoRestart /LogPath:"$binDirectory\wsl-appx" /Add-ProvisionedAppxPackage /PackagePath:$installFile /SkipLicense
   Write-Host "Customize (End): WSL"
 
   Write-Host "Customize (Start): PSTools"
