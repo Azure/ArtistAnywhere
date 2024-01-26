@@ -106,7 +106,7 @@ if ($gpuProvider -eq "AMD") {
   Write-Host "Customize (End): NVIDIA GPU (GRID)"
 
   Write-Host "Customize (Start): NVIDIA GPU (CUDA)"
-  $versionInfo = "12.3.0"
+  $versionInfo = "12.3.2"
   $installType = "nvidia-gpu-cuda"
   $installFile = "cuda_${versionInfo}_windows_network.exe"
   $downloadUrl = "$binStorageHost/NVIDIA/CUDA/$versionInfo/$installFile$binStorageAuth"
@@ -430,6 +430,16 @@ if ($machineType -eq "Workstation") {
 }
 
 if ($machineType -ne "Scheduler") {
+  Write-Host "Customize (Start): WSL"
+  $installFile = "wsl-ubuntu.appx"
+  $downloadUrl = "https://aka.ms/wslubuntu"
+  Install-PackageProvider -Name NuGet -Force
+  Install-Module -Name PSWindowsUpdate -Force
+  Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -IgnoreReboot
+  (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
+  dism /Online /Add-ProvisionedAppxPackage /PackagePath:$installFile /SkipLicense /LogPath:$binDirectory\wsl-appx.log
+  Write-Host "Customize (End): WSL"
+
   Write-Host "Customize (Start): PSTools"
   $installFile = "PSTools.zip"
   $downloadUrl = "https://download.sysinternals.com/files/$installFile"
