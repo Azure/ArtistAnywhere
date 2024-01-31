@@ -8,7 +8,7 @@ $binPaths = ""
 $binDirectory = "C:\Users\Public\Downloads"
 Set-Location -Path $binDirectory
 
-. C:\AzureData\functions.ps1
+. $binDirectory\functions.ps1
 
 Write-Host "Customize (Start): Resize OS Disk"
 $osDriveLetter = "C"
