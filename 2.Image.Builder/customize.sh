@@ -274,6 +274,5 @@ if [ $machineType == Workstation ]; then
   echo "Customize (End): HP Anyware"
 fi
 
-if [ "$binPaths" != "" ]; then
-  echo 'PATH=$PATH':$binPaths >> $aaaProfile
-fi
+echo "Customize (PATH): $binPaths"
+echo 'PATH=$PATH':$binPaths >> $aaaProfile

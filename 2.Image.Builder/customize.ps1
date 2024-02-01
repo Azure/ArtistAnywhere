@@ -450,6 +450,5 @@ if ($machineType -ne "Scheduler") {
   Write-Host "Customize (End): PSTools"
 }
 
-if ($binPaths -ne "") {
-  setx PATH "$env:PATH$binPaths" /m
-}
+Write-Host "Customize (PATH): $binPaths"
+setx PATH "$env:PATH$binPaths" /m
