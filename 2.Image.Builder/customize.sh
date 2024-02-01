@@ -7,7 +7,7 @@ cd $binDirectory
 aaaProfile="/etc/profile.d/aaa.sh"
 touch $aaaProfile
 
-source $binDirectory/functions.sh
+source /tmp/functions.sh
 
 echo "Customize (Start): Image Build Parameters"
 buildConfig=$(echo $buildConfigEncoded | base64 -d)
