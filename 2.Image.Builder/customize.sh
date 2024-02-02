@@ -237,7 +237,7 @@ if [ $machineType != Storage ]; then
     echo "Customize (Start): Deadline Server"
     installFile="DeadlineRepository-$versionInfo-linux-x64-installer.run"
     StartProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbauth false --installmongodb false" $binDirectory/$installType
-    cp /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
+    mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
     echo "$installRoot *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
     exportfs -r
     echo "Customize (End): Deadline Server"
@@ -253,7 +253,7 @@ if [ $machineType != Storage ]; then
     installArgs="$installArgs --slavestartup $workerStartup --launcherdaemon true"
   fi
   StartProcess "$installPath/$installFile $installArgs" $binDirectory/$installType
-  cp /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
+  mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
   echo "Customize (End): Deadline Client"
 
   binPaths="$binPaths:$binPathScheduler"
@@ -274,5 +274,5 @@ if [ $machineType == Workstation ]; then
   echo "Customize (End): HP Anyware"
 fi
 
-echo "Customize (PATH): $binPaths"
-echo 'PATH=$PATH':$binPaths >> $aaaProfile
+echo "Customize (PATH): ${binPaths:1}"
+echo 'PATH=$PATH'$binPaths >> $aaaProfile

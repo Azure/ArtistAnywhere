@@ -371,7 +371,7 @@ if ($machineType -ne "Storage") {
     $installType = "deadline-repository"
     $installFile = "DeadlineRepository-$versionInfo-windows-installer.exe"
     StartProcess .\$installFile "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$binDirectory\$installType"
-    Copy-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$installType.log
+    Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$installType.log
     Copy-Item -Path $databasePath\certs\$certificateFile -Destination $installRoot\$certificateFile
     New-NfsShare -Name "Deadline" -Path $installRoot -Permission ReadWrite
     Write-Host "Customize (End): Deadline Server"
@@ -392,7 +392,7 @@ if ($machineType -ne "Storage") {
     $installArgs = "$installArgs --slavestartup $workerStartup --launcherservice true"
   }
   StartProcess .\$installFile $installArgs "$binDirectory\$installType"
-  Copy-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$installType.log
+  Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$installType.log
   Set-Location -Path $binDirectory
   Write-Host "Customize (End): Deadline Client"
 
@@ -450,5 +450,5 @@ if ($machineType -ne "Scheduler") {
   Write-Host "Customize (End): PSTools"
 }
 
-Write-Host "Customize (PATH): $binPaths"
+Write-Host "Customize (PATH): $($binPaths.substring(1))"
 setx PATH "$env:PATH$binPaths" /m
