@@ -16,6 +16,9 @@ gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
 renderEngines=$(echo $buildConfig | jq -c .renderEngines)
 binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
 binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
+databaseUsername=$(echo $buildConfig | jq -r .schedulerDatabase.username)
+databasePassword=$(echo $buildConfig | jq -r .schedulerDatabase.password)
+databaseAuthRole=$(echo $buildConfig | jq -r .schedulerDatabase.authRole)
 echo "Machine Type: $machineType"
 echo "GPU Provider: $gpuProvider"
 echo "Render Engines: $renderEngines"
@@ -205,7 +208,6 @@ if [ $machineType != Storage ]; then
   binPathScheduler="$installRoot/bin"
 
   echo "Customize (Start): Deadline Download"
-  installType="deadline"
   installFile="Deadline-$versionInfo-linux-installers.tar"
   installPath=$(echo ${installFile%.tar})
   downloadUrl="$binStorageHost/Deadline/$versionInfo/$installFile$binStorageAuth"
@@ -216,6 +218,9 @@ if [ $machineType != Storage ]; then
 
   if [ $machineType == Scheduler ]; then
     echo "Customize (Start): Mongo DB Service"
+    if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+      echo never > /sys/kernel/mm/transparent_hugepage/enabled
+    fi
     repoPath="/etc/yum.repos.d/mongodb.repo"
     echo "[mongodb-org-5.0]" > $repoPath
     echo "name=MongoDB" >> $repoPath
@@ -234,9 +239,23 @@ if [ $machineType != Storage ]; then
     sleep 5s
     echo "Customize (End): Mongo DB Service"
 
+    echo "Customize (Start): Mongo DB User"
+    installType="mongo-create-user"
+    createUserScript="$installType.js"
+    echo "db = db.getSiblingDB(\"$databaseName\");" > $createUserScript
+    echo "db.createUser({" >> $createUserScript
+    echo "user: \"$databaseUsername\"," >> $createUserScript
+    echo "pwd: \"$databasePassword\"," >> $createUserScript
+    echo "roles: [" >> $createUserScript
+    echo "{ role: \"$databaseAuthRole\", db: \"$databaseName\" }" >> $createUserScript
+    echo "]})" >> $createUserScript
+    StartProcess "mongosh $createUserScript" $binDirectory/$installType.log
+    echo "Customize (End): Mongo DB User"
+
     echo "Customize (Start): Deadline Server"
+    installType="deadline-repository"
     installFile="DeadlineRepository-$versionInfo-linux-x64-installer.run"
-    StartProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbauth false --installmongodb false" $binDirectory/$installType
+    StartProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword $databasePassword --dbauth true --installmongodb false" $binDirectory/$installType
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
     echo "$installRoot *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
     exportfs -r
@@ -244,6 +263,7 @@ if [ $machineType != Storage ]; then
   fi
 
   echo "Customize (Start): Deadline Client"
+  installType="deadline-client"
   installFile="DeadlineClient-$versionInfo-linux-x64-installer.run"
   installArgs="--mode unattended --prefix $installRoot"
   if [ $machineType == Scheduler ]; then
@@ -254,6 +274,7 @@ if [ $machineType != Storage ]; then
   fi
   StartProcess "$installPath/$installFile $installArgs" $binDirectory/$installType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
+  StartProcess "$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" $binDirectory/$installType-auth
   echo "Customize (End): Deadline Client"
 
   binPaths="$binPaths:$binPathScheduler"
