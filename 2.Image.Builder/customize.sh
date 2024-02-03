@@ -16,9 +16,9 @@ gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
 renderEngines=$(echo $buildConfig | jq -c .renderEngines)
 binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
 binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
-databaseUsername=$(echo $buildConfig | jq -r .schedulerDatabase.username)
-databasePassword=$(echo $buildConfig | jq -r .schedulerDatabase.password)
-databaseAuthRole=$(echo $buildConfig | jq -r .schedulerDatabase.authRole)
+databaseUsername=$(echo $buildConfig | jq -r .jobDatabase.username)
+databasePassword=$(echo $buildConfig | jq -r .jobDatabase.password)
+databaseAuthRole=$(echo $buildConfig | jq -r .jobDatabase.authRole)
 echo "Machine Type: $machineType"
 echo "GPU Provider: $gpuProvider"
 echo "Render Engines: $renderEngines"
