@@ -16,9 +16,9 @@ gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
 renderEngines=$(echo $buildConfig | jq -c .renderEngines)
 binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
 binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
-databaseUsername=$(echo $buildConfig | jq -r .jobDatabase.username)
-databasePassword=$(echo $buildConfig | jq -r .jobDatabase.password)
-databaseAuthRole=$(echo $buildConfig | jq -r .jobDatabase.authRole)
+databaseUsername=$(echo $buildConfig | jq -r .schedulerDatabase.username)
+databasePassword=$(echo $buildConfig | jq -r .schedulerDatabase.password)
+databaseAuthRole=$(echo $buildConfig | jq -r .schedulerDatabase.authRole)
 echo "Machine Type: $machineType"
 echo "GPU Provider: $gpuProvider"
 echo "Render Engines: $renderEngines"
@@ -274,7 +274,15 @@ if [ $machineType != Storage ]; then
   fi
   StartProcess "$installPath/$installFile $installArgs" $binDirectory/$installType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
-  StartProcess "$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" $binDirectory/$installType-auth
+
+  servicePath="/etc/systemd/system/aaaSchedulerAuth.service"
+  echo "[Unit]" > $servicePath
+  echo "Description=AAA Scheduler Auth Service" >> $servicePath
+  echo "After=network-online.target" >> $servicePath
+  echo "" >> $servicePath
+  echo "[Service]" >> $servicePath
+  echo "ExecStart=$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" >> $servicePath
+  echo "" >> $servicePath
   echo "Customize (End): Deadline Client"
 
   binPaths="$binPaths:$binPathScheduler"
