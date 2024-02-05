@@ -255,7 +255,8 @@ if [ $machineType != Storage ]; then
     echo "Customize (Start): Deadline Server"
     installType="deadline-repository"
     installFile="DeadlineRepository-$versionInfo-linux-x64-installer.run"
-    StartProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword $databasePassword --dbauth true --installmongodb false" $binDirectory/$installType
+    export DB_PASSWORD=$databasePassword
+    StartProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$installType
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
     echo "$installRoot *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
     exportfs -r
@@ -286,7 +287,7 @@ if [ $machineType != Storage ]; then
     echo "ExecStart=$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" >> $servicePath
     echo "" >> $servicePath
     systemctl --now enable $serviceFile
-  else
+  elif [ $machineType == Workstation ]; then
     echo "$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" >> $aaaProfile
   fi
   echo "Customize (End): Deadline Client"
