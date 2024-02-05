@@ -275,17 +275,21 @@ if [ $machineType != Storage ]; then
   StartProcess "$installPath/$installFile $installArgs" $binDirectory/$installType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
 
-  serviceFile="aaaSchedulerAuth.service"
-  servicePath="/etc/systemd/system/$serviceFile"
-  echo "[Unit]" > $servicePath
-  echo "Description=AAA Scheduler Auth Service" >> $servicePath
-  echo "After=network-online.target" >> $servicePath
-  echo "" >> $servicePath
-  echo "[Service]" >> $servicePath
-  echo "ExecStart=$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" >> $servicePath
-  echo "" >> $servicePath
+  if [ $machineType == Farm ]; then
+    serviceFile="aaaSchedulerAuth.service"
+    servicePath="/etc/systemd/system/$serviceFile"
+    echo "[Unit]" > $servicePath
+    echo "Description=AAA Scheduler Auth Service" >> $servicePath
+    echo "After=network-online.target" >> $servicePath
+    echo "" >> $servicePath
+    echo "[Service]" >> $servicePath
+    echo "ExecStart=$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" >> $servicePath
+    echo "" >> $servicePath
+    systemctl --now enable $serviceFile
+  else
+    echo "$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" >> $aaaProfile
+  fi
   echo "Customize (End): Deadline Client"
-  systemctl --now enable $serviceFile
 
   binPaths="$binPaths:$binPathScheduler"
 fi
