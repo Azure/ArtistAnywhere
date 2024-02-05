@@ -396,16 +396,14 @@ if ($machineType -ne "Storage") {
   Set-Location -Path $binDirectory
   Write-Host "Customize (End): Deadline Client"
 
-  if ($machineType -ne "Scheduler") {
-    Write-Host "Customize (Start): Deadline Monitor"
-    $shortcutPath = "$env:AllUsersProfile\Desktop\Deadline Monitor.lnk"
-    $scriptShell = New-Object -ComObject WScript.Shell
-    $shortcut = $scriptShell.CreateShortcut($shortcutPath)
-    $shortcut.WorkingDirectory = $binPathScheduler
-    $shortcut.TargetPath = "$binPathScheduler\deadlinemonitor.exe"
-    $shortcut.Save()
-    Write-Host "Customize (End): Deadline Monitor"
-  }
+  Write-Host "Customize (Start): Deadline Monitor"
+  $shortcutPath = "$env:AllUsersProfile\Desktop\Deadline Monitor.lnk"
+  $scriptShell = New-Object -ComObject WScript.Shell
+  $shortcut = $scriptShell.CreateShortcut($shortcutPath)
+  $shortcut.WorkingDirectory = $binPathScheduler
+  $shortcut.TargetPath = "$binPathScheduler\deadlinemonitor.exe"
+  $shortcut.Save()
+  Write-Host "Customize (End): Deadline Monitor"
 
   $binPaths += ";$binPathScheduler"
 }
