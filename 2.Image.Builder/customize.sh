@@ -236,7 +236,7 @@ if [ $machineType != Storage ]; then
     sed -i "s/#security:/security:/" $configFile
     sed -i "/security:/a\  authorization: disabled" $configFile
     systemctl --now enable mongod
-    sleep 5s
+    sleep 30s
     echo "Customize (End): Mongo DB Service"
 
     echo "Customize (Start): Mongo DB User"
@@ -249,7 +249,7 @@ if [ $machineType != Storage ]; then
     echo "roles: [" >> $createUserScript
     echo "{ role: \"$databaseAuthRole\", db: \"$databaseName\" }" >> $createUserScript
     echo "]})" >> $createUserScript
-    StartProcess "mongosh $createUserScript" $binDirectory/$installType.log
+    StartProcess "mongosh $createUserScript" $binDirectory/$installType
     echo "Customize (End): Mongo DB User"
 
     echo "Customize (Start): Deadline Server"
