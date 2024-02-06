@@ -218,7 +218,6 @@ if [ $machineType != Storage ]; then
   echo "Customize (End): Deadline Download"
 
   if [ $machineType == Scheduler ]; then
-
     echo "Customize (Start): Mongo DB Service"
     if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
       echo never > /sys/kernel/mm/transparent_hugepage/enabled

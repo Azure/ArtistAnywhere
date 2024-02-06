@@ -1,6 +1,6 @@
-$fileSystemsPath = "C:\AzureData\fileSystems.bat"
+$fileSystemsPath = "C:\Users\Public\Downloads\fileSystems.bat"
 
-function StartProcess ($filePath, $argumentList, $logFile) {
+function RunProcess ($filePath, $argumentList, $logFile) {
   if ($logFile) {
     if ($argumentList) {
       Start-Process -FilePath $filePath -ArgumentList $argumentList -Wait -RedirectStandardOutput $logFile-out -RedirectStandardError $logFile-err
@@ -19,6 +19,37 @@ function StartProcess ($filePath, $argumentList, $logFile) {
 
 function FileExists ($filePath) {
   return Test-Path -PathType Leaf -Path $filePath
+}
+
+function SetFileSystems ($binDirectory, $fileSystemsJson) {
+  $fileSystems = ConvertFrom-Json -InputObject $fileSystemsJson
+  foreach ($fileSystem in $fileSystems) {
+    if ($fileSystem.enable) {
+      SetFileSystemMount $fileSystem.mount
+    }
+  }
+  RegisterFileSystemMounts $binDirectory
+}
+
+function SetFileSystemMount ($fileSystemMount) {
+  if (!(FileExists $fileSystemsPath)) {
+    New-Item -ItemType File -Path $fileSystemsPath
+  }
+  $mountScript = Get-Content -Path $fileSystemsPath
+  if ($mountScript -eq $null -or $mountScript -notlike "*$($fileSystemMount.path)*") {
+    $mount = "mount $($fileSystemMount.options) $($fileSystemMount.source) $($fileSystemMount.path)"
+    Add-Content -Path $fileSystemsPath -Value $mount
+  }
+}
+
+function RegisterFileSystemMounts ($binDirectory) {
+  if (FileExists $fileSystemsPath) {
+    RunProcess $fileSystemsPath $null "$binDirectory\file-system-mount"
+    $taskName = "AAA File System Mount"
+    $taskAction = New-ScheduledTaskAction -Execute $fileSystemsPath
+    $taskTrigger = New-ScheduledTaskTrigger -AtStartup
+    Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -User System -Force
+  }
 }
 
 function Retry ($delaySeconds, $maxCount, $scriptBlock) {
@@ -51,7 +82,7 @@ function JoinActiveDirectory ($domainName, $domainServerName, $orgUnitPath, $adm
     $localComputerName = $(hostname)
     $adComputer = Get-ADComputer -Identity $localComputerName -Server $domainServerName -Credential $adminCredential
     Remove-ADObject -Identity $adComputer -Server $domainServerName -Recursive -Confirm:$false
-    Start-Sleep -Seconds 5
+    #Start-Sleep -Seconds 30
     $adComputer = null
   } catch {
     if ($adComputer) {
@@ -60,50 +91,18 @@ function JoinActiveDirectory ($domainName, $domainServerName, $orgUnitPath, $adm
   }
 
   if ($orgUnitPath -ne "") {
-    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $adminCredential -OUPath $orgUnitPath -Force -PassThru -Verbose -Restart
+    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $adminCredential -OUPath $orgUnitPath -Force -PassThru -Verbose
   } else {
-    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $adminCredential -Force -PassThru -Verbose -Restart
+    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $adminCredential -Force -PassThru -Verbose
   }
 }
 
 function InitializeClient ($binDirectory, $activeDirectoryJson) {
-  StartProcess deadlinecommand.exe "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx" "$binDirectory\deadline-repository"
-  StartProcess wsl.exe "apt install -y nfs-common" "$binDirectory\wsl-nfs"
+  RunProcess deadlinecommand.exe "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx" "$binDirectory\deadline-repository"
   $activeDirectory = ConvertFrom-Json -InputObject $activeDirectoryJson
   if ($activeDirectory.enable) {
     Retry 5 10 {
       JoinActiveDirectory $activeDirectory.domainName $activeDirectory.domainServerName $activeDirectory.orgUnitPath $activeDirectory.adminUsername $activeDirectory.adminPassword
     }
-  }
-}
-
-function SetFileSystems ($binDirectory, $fileSystemsJson) {
-  $fileSystems = ConvertFrom-Json -InputObject $fileSystemsJson
-  foreach ($fileSystem in $fileSystems) {
-    if ($fileSystem.enable) {
-      SetFileSystemMount $fileSystem.mount
-    }
-  }
-  RegisterFileSystemMounts $binDirectory
-}
-
-function SetFileSystemMount ($fileSystemMount) {
-  if (!(FileExists $fileSystemsPath)) {
-    New-Item -ItemType File -Path $fileSystemsPath
-  }
-  $mountScript = Get-Content -Path $fileSystemsPath
-  if ($mountScript -eq $null -or $mountScript -notlike "*$($fileSystemMount.path)*") {
-    $mount = "mount $($fileSystemMount.options) $($fileSystemMount.source) $($fileSystemMount.path)"
-    Add-Content -Path $fileSystemsPath -Value $mount
-  }
-}
-
-function RegisterFileSystemMounts ($binDirectory) {
-  if (FileExists $fileSystemsPath) {
-    StartProcess $fileSystemsPath $null "$binDirectory\file-system-mount"
-    $taskName = "AAA File System Mount"
-    $taskAction = New-ScheduledTaskAction -Execute $fileSystemsPath
-    $taskTrigger = New-ScheduledTaskTrigger -AtStartup
-    Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -User System -Force
   }
 }

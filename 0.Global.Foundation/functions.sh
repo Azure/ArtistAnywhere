@@ -1,22 +1,12 @@
-function StartProcess {
+function RunProcess {
+  retryCount=0
   command="$1"
   logFile=$2
-  $command 1>> $logFile.out 2>> $logFile.err
-  cat $logFile.err
-}
-
-function FileExists {
-  filePath=$1
-  [ -f $filePath ]
-}
-
-function InitializeClient {
-  binDirectory=$1
-  enableWeka=$2
-  StartProcess deadlinecommand "-ChangeRepository Direct /mnt/deadline" $binDirectory/deadline-repository
-  if [ $enableWeka == true ]; then
-    curl http://content.artist.studio:14000/dist/v1/install | sh
-  fi
+  until [[ $($command 1> $logFile.out 2> $logFile.err) || ($retryCount -eq 3) ]]; do
+    ((retryCount++))
+    cat $logFile.err
+    sleep 3s
+  done
 }
 
 function GetEncodedValue {
@@ -25,7 +15,6 @@ function GetEncodedValue {
 
 function SetFileSystems {
   fileSystems="$1"
-  curl -L https://github.com/Azure/AZNFS-mount/releases/download/1.0.10/aznfs_install.sh | bash
   for fileSystem in $(echo $fileSystems | jq -r '.[] | @base64'); do
     if [ $(GetEncodedValue $fileSystem .enable) == true ]; then
       SetFileSystemMount "$(GetEncodedValue $fileSystem .mount)"
@@ -43,6 +32,15 @@ function SetFileSystemMount {
   mountOptions=$(echo $fileSystemMount | jq -r .options)
   if [ $(grep -c $mountPath /etc/fstab) ]; then
     mkdir -p $mountPath
-    echo "$mountSource /mnt/$mountPath $mountType $mountOptions 0 0" >> /etc/fstab
+    echo "$mountSource $mountPath $mountType $mountOptions 0 0" >> /etc/fstab
+  fi
+}
+
+function InitializeClient {
+  binDirectory=$1
+  enableWeka=$2
+  RunProcess "deadlinecommand -ChangeRepository Direct /mnt/deadline" $binDirectory/deadline-repository
+  if [ $enableWeka == true ]; then
+    curl http://content.artist.studio:14000/dist/v1/install | sh
   fi
 }
