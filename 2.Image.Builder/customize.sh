@@ -16,10 +16,10 @@ gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
 renderEngines=$(echo $buildConfig | jq -c .renderEngines)
 binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
 binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
-dataAdminUsername=$(echo $buildConfig | jq -r .dataPlatform.admin.username)
-dataAdminPassword=$(echo $buildConfig | jq -r .dataPlatform.admin.password)
-dataRenderUsername=$(echo $buildConfig | jq -r .dataPlatform.render.username)
-dataRenderPassword=$(echo $buildConfig | jq -r .dataPlatform.render.password)
+adminUsername=$(echo $buildConfig | jq -r .dataPlatform.admin.username)
+adminPassword=$(echo $buildConfig | jq -r .dataPlatform.admin.password)
+databaseUsername=$(echo $buildConfig | jq -r .dataPlatform.database.username)
+databasePassword=$(echo $buildConfig | jq -r .dataPlatform.database.password)
 echo "Machine Type: $machineType"
 echo "GPU Provider: $gpuProvider"
 echo "Render Engines: $renderEngines"
@@ -241,8 +241,8 @@ if [ $machineType != Storage ]; then
     mongoScript="$processType.js"
     echo "use admin" > $mongoScript
     echo "db.createUser({" >> $mongoScript
-    echo "  user: \"$dataAdminUsername\"," >> $mongoScript
-    echo "  pwd: \"$dataAdminPassword\"," >> $mongoScript
+    echo "  user: \"$adminUsername\"," >> $mongoScript
+    echo "  pwd: \"$adminPassword\"," >> $mongoScript
     echo "  roles: [" >> $mongoScript
     echo "    { role: \"userAdminAnyDatabase\", db: \"admin\" }," >> $mongoScript
     echo "    { role: \"readWriteAnyDatabase\", db: \"admin\" }" >> $mongoScript
@@ -258,21 +258,21 @@ if [ $machineType != Storage ]; then
     mongoScript="$processType.js"
     echo "db = db.getSiblingDB(\"$databaseName\");" > $mongoScript
     echo "db.createUser({" >> $mongoScript
-    echo "  user: \"$dataRenderUsername\"," >> $mongoScript
-    echo "  pwd: \"$dataRenderPassword\"," >> $mongoScript
+    echo "  user: \"$databaseUsername\"," >> $mongoScript
+    echo "  pwd: \"$databasePassword\"," >> $mongoScript
     echo "  roles: [" >> $mongoScript
     echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $mongoScript
     echo "  ]" >> $mongoScript
     echo "})" >> $mongoScript
-    # RunProcess "mongosh --authenticationDatabase admin -u $dataAdminUsername -p $dataAdminPassword $mongoScript" $binDirectory/$processType
+    # RunProcess "mongosh --authenticationDatabase admin -u $adminUsername -p $adminPassword $mongoScript" $binDirectory/$processType
     RunProcess "mongosh $mongoScript" $binDirectory/$processType
     echo "Customize (End): Mongo DB Users"
 
     echo "Customize (Start): Deadline Server"
     processType="deadline-repository"
     installFile="DeadlineRepository-$versionInfo-linux-x64-installer.run"
-    export DB_PASSWORD=$dataRenderPassword
-    RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $dataRenderUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
+    export DB_PASSWORD=$databasePassword
+    RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
     echo "$installRoot *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
     exportfs -r
