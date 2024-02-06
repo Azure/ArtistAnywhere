@@ -18,7 +18,6 @@ binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
 binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
 databaseUsername=$(echo $buildConfig | jq -r .schedulerDatabase.username)
 databasePassword=$(echo $buildConfig | jq -r .schedulerDatabase.password)
-databaseAuthRole=$(echo $buildConfig | jq -r .schedulerDatabase.authRole)
 echo "Machine Type: $machineType"
 echo "GPU Provider: $gpuProvider"
 echo "Render Engines: $renderEngines"
@@ -242,12 +241,13 @@ if [ $machineType != Storage ]; then
     echo "Customize (Start): Mongo DB User"
     installType="mongo-create-user"
     createUserScript="$installType.js"
-    echo "db = db.getSiblingDB(\"$databaseName\");" > $createUserScript
+    echo "use admin" > $createUserScript
     echo "db.createUser({" >> $createUserScript
     echo "user: \"$databaseUsername\"," >> $createUserScript
     echo "pwd: \"$databasePassword\"," >> $createUserScript
     echo "roles: [" >> $createUserScript
-    echo "{ role: \"$databaseAuthRole\", db: \"$databaseName\" }" >> $createUserScript
+    echo "{ role: \"userAdminAnyDatabase\", db: \"admin\" }," >> $createUserScript
+    echo "{ role: \"readWriteAnyDatabase\", db: \"admin\" }" >> $createUserScript
     echo "]})" >> $createUserScript
     StartProcess "mongosh $createUserScript" $binDirectory/$installType
     echo "Customize (End): Mongo DB User"
