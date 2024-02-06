@@ -37,43 +37,42 @@ echo "Customize (End): Image Build Platform"
 
 if [ $machineType == Storage ]; then
   echo "Customize (Start): NVIDIA OFED"
-  installType="mellanox-ofed"
+  processType="mellanox-ofed"
   installFile="MLNX_OFED_LINUX-23.10-1.1.9.0-rhel8.9-x86_64.tgz"
   downloadUrl="$binStorageHost/NVIDIA/OFED/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xzf $installFile
   dnf -y install kernel-modules-extra kernel-rpm-macros rpm-build libtool gcc-gfortran pciutils tcl tk
-  RunProcess "./MLNX_OFED*/mlnxofedinstall --without-fw-update --add-kernel-support --skip-repo --force" $binDirectory/$installType
+  RunProcess "./MLNX_OFED*/mlnxofedinstall --without-fw-update --add-kernel-support --skip-repo --force" $binDirectory/$processType
   echo "Customize (End): NVIDIA OFED"
 fi
 
 if [ "$gpuProvider" == NVIDIA ]; then
   echo "Customize (Start): NVIDIA GPU (GRID)"
-  installType="nvidia-gpu-grid"
-  installFile="$installType.run"
+  processType="nvidia-gpu-grid"
+  installFile="$processType.run"
   downloadUrl="https://go.microsoft.com/fwlink/?linkid=874272"
   curl -o $installFile -L $downloadUrl
   chmod +x $installFile
   dnf -y install mesa-vulkan-drivers libglvnd-devel
-  RunProcess "./$installFile --silent" $binDirectory/$installType
+  RunProcess "./$installFile --silent" $binDirectory/$processType
   echo "Customize (End): NVIDIA GPU (GRID)"
 
   echo "Customize (Start): NVIDIA GPU (CUDA)"
-  installType="nvidia-cuda"
   dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
   dnf -y install cuda
   echo "Customize (End): NVIDIA GPU (CUDA)"
 
   echo "Customize (Start): NVIDIA OptiX"
   versionInfo="8.0.0"
-  installType="nvidia-optix"
+  processType="nvidia-optix"
   installFile="NVIDIA-OptiX-SDK-$versionInfo-linux64-x86_64.sh"
   downloadUrl="$binStorageHost/NVIDIA/OptiX/$versionInfo/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   chmod +x $installFile
-  installPath="$binDirectory/$installType/$versionInfo"
+  installPath="$binDirectory/$processType/$versionInfo"
   mkdir -p $installPath
-  RunProcess "./$installFile --skip-license --prefix=$installPath" $binDirectory/$installType-1
+  RunProcess "./$installFile --skip-license --prefix=$installPath" $binDirectory/$processType-1
   buildDirectory="$installPath/build"
   mkdir -p $buildDirectory
   dnf -y install mesa-libGL
@@ -81,8 +80,8 @@ if [ "$gpuProvider" == NVIDIA ]; then
   dnf -y install libXrandr-devel
   dnf -y install libXinerama-devel
   dnf -y install libXcursor-devel
-  RunProcess "cmake -B $buildDirectory -S $installPath/SDK" $binDirectory/$installType-2
-  RunProcess "make -C $buildDirectory" $binDirectory/$installType-3
+  RunProcess "cmake -B $buildDirectory -S $installPath/SDK" $binDirectory/$processType-2
+  RunProcess "make -C $buildDirectory" $binDirectory/$processType-3
   binPaths="$binPaths:$buildDirectory/bin"
   echo "Customize (End): NVIDIA OptiX"
 fi
@@ -98,7 +97,7 @@ fi
 if [[ $renderEngines == *PBRT* ]]; then
   echo "Customize (Start): PBRT"
   versionInfo="v4"
-  installType="pbrt"
+  processType="pbrt"
   installPath="/usr/local/pbrt"
   mkdir -p $installPath
   dnf -y install mesa-libGL-devel
@@ -106,9 +105,9 @@ if [[ $renderEngines == *PBRT* ]]; then
   dnf -y install libXinerama-devel
   dnf -y install libXcursor-devel
   dnf -y install libXi-devel
-  RunProcess "git clone --recursive https://github.com/mmp/$installType-$versionInfo.git" $binDirectory/$installType-1
-  RunProcess "cmake -B $installPath -S $binDirectory/$installType-$versionInfo" $binDirectory/$installType-2
-  RunProcess "make -C $installPath" $binDirectory/$installType-3
+  RunProcess "git clone --recursive https://github.com/mmp/$processType-$versionInfo.git" $binDirectory/$processType-1
+  RunProcess "cmake -B $installPath -S $binDirectory/$processType-$versionInfo" $binDirectory/$processType-2
+  RunProcess "make -C $installPath" $binDirectory/$processType-3
   binPaths="$binPaths:$installPath"
   echo "Customize (End): PBRT"
 fi
@@ -117,9 +116,9 @@ if [[ $renderEngines == *Blender* ]]; then
   echo "Customize (Start): Blender"
   versionInfo="4.0.2"
   versionType="linux-x64"
-  installType="blender"
-  installPath="/usr/local/$installType"
-  installFile="$installType-$versionInfo-$versionType.tar.xz"
+  processType="blender"
+  installPath="/usr/local/$processType"
+  installFile="$processType-$versionInfo-$versionType.tar.xz"
   downloadUrl="$binStorageHost/Blender/$versionInfo/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xJf $installFile
@@ -129,7 +128,7 @@ if [[ $renderEngines == *Blender* ]]; then
   dnf -y install libXi
   dnf -y install libSM
   mkdir -p $installPath
-  mv $installType-$versionInfo-$versionType/* $installPath
+  mv $processType-$versionInfo-$versionType/* $installPath
   binPaths="$binPaths:$installPath"
   echo "Customize (End): Blender"
 fi
@@ -137,23 +136,23 @@ fi
 if [[ $renderEngines == *RenderMan* ]]; then
   echo "Customize (Start): RenderMan"
   versionInfo="25.2.0"
-  installType="renderman"
+  processType="renderman"
   installFile="RenderMan-InstallerNCR-${versionInfo}_2282810-linuxRHEL7_gcc93icc219.x86_64.rpm"
   downloadUrl="$binStorageHost/RenderMan/$versionInfo/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
-  RunProcess "rpm -i $installFile" $binDirectory/$installType
+  RunProcess "rpm -i $installFile" $binDirectory/$processType
   echo "Customize (End): RenderMan"
 fi
 
 if [[ $renderEngines == *Maya* ]]; then
   echo "Customize (Start): Maya"
   versionInfo="2024_0_1"
-  installType="autodesk-maya"
+  processType="autodesk-maya"
   installFile="Autodesk_Maya_${versionInfo}_Update_Linux_64bit.tgz"
   downloadUrl="$binStorageHost/Maya/$versionInfo/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
-  mkdir -p $installType
-  tar -xzf $installFile -C $installType
+  mkdir -p $processType
+  tar -xzf $installFile -C $processType
   dnf -y install mesa-libGL
   dnf -y install mesa-libGLU
   dnf -y install alsa-lib
@@ -162,7 +161,7 @@ if [[ $renderEngines == *Maya* ]]; then
   dnf -y install libXpm
   dnf -y install libnsl
   dnf -y install gtk3
-  RunProcess "./$installType/Setup --silent" $binDirectory/$installType
+  RunProcess "./$processType/Setup --silent" $binDirectory/$processType
   binPaths="$binPaths:/usr/autodesk/maya/bin"
   echo "Customize (End): Maya"
 fi
@@ -171,8 +170,8 @@ if [[ $renderEngines == *Houdini* ]]; then
   echo "Customize (Start): Houdini"
   versionInfo="20.0.506"
   versionEULA="2021-10-13"
-  installType="houdini"
-  installFile="$installType-$versionInfo-linux_x86_64_gcc11.2.tar.gz"
+  processType="houdini"
+  installFile="$processType-$versionInfo-linux_x86_64_gcc11.2.tar.gz"
   downloadUrl="$binStorageHost/Houdini/$versionInfo/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xzf $installFile
@@ -189,7 +188,7 @@ if [[ $renderEngines == *Houdini* ]]; then
   dnf -y install alsa-lib
   dnf -y install libnsl
   dnf -y install avahi
-  RunProcess "./houdini*/houdini.install --auto-install --make-dir --no-install-license --accept-EULA $versionEULA $desktopMenus $mayaPlugIn" $binDirectory/$installType
+  RunProcess "./houdini*/houdini.install --auto-install --make-dir --no-install-license --accept-EULA $versionEULA $desktopMenus $mayaPlugIn" $binDirectory/$processType
   binPaths="$binPaths:/opt/hfs$versionInfo/bin"
   echo "Customize (End): Houdini"
 fi
@@ -238,8 +237,8 @@ if [ $machineType != Storage ]; then
     echo "Customize (End): Mongo DB Service"
 
     echo "Customize (Start): Mongo DB Users"
-    installType="mongo-create-admin-user"
-    mongoScript="$installType.js"
+    processType="mongo-create-admin-user"
+    mongoScript="$processType.js"
     echo "use admin" > $mongoScript
     echo "db.createUser({" >> $mongoScript
     echo "  user: \"$dataAdminUsername\"," >> $mongoScript
@@ -249,14 +248,14 @@ if [ $machineType != Storage ]; then
     echo "    { role: \"readWriteAnyDatabase\", db: \"admin\" }" >> $mongoScript
     echo "  ]" >> $mongoScript
     echo "})" >> $mongoScript
-    RunProcess "mongosh $mongoScript" $binDirectory/$installType
+    RunProcess "mongosh $mongoScript" $binDirectory/$processType
 
     # sed -i "s/#security:/security:/" $configFile
     # sed -i "/security:/a\  authorization: enabled" $configFile
     # systemctl restart mongod
 
-    installType="mongo-create-database-user"
-    mongoScript="$installType.js"
+    processType="mongo-create-database-user"
+    mongoScript="$processType.js"
     echo "db = db.getSiblingDB(\"$databaseName\");" > $mongoScript
     echo "db.createUser({" >> $mongoScript
     echo "  user: \"$dataRenderUsername\"," >> $mongoScript
@@ -265,15 +264,15 @@ if [ $machineType != Storage ]; then
     echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $mongoScript
     echo "  ]" >> $mongoScript
     echo "})" >> $mongoScript
-    # RunProcess "mongosh --authenticationDatabase admin -u $dataAdminUsername -p $dataAdminPassword $mongoScript" $binDirectory/$installType
-    RunProcess "mongosh $mongoScript" $binDirectory/$installType
+    # RunProcess "mongosh --authenticationDatabase admin -u $dataAdminUsername -p $dataAdminPassword $mongoScript" $binDirectory/$processType
+    RunProcess "mongosh $mongoScript" $binDirectory/$processType
     echo "Customize (End): Mongo DB Users"
 
     echo "Customize (Start): Deadline Server"
-    installType="deadline-repository"
+    processType="deadline-repository"
     installFile="DeadlineRepository-$versionInfo-linux-x64-installer.run"
     export DB_PASSWORD=$dataRenderPassword
-    RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $dataRenderUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$installType
+    RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $dataRenderUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
     echo "$installRoot *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
     exportfs -r
@@ -281,7 +280,7 @@ if [ $machineType != Storage ]; then
   fi
 
   echo "Customize (Start): Deadline Client"
-  installType="deadline-client"
+  processType="deadline-client"
   installFile="DeadlineClient-$versionInfo-linux-x64-installer.run"
   installArgs="--mode unattended --prefix $installRoot"
   if [ $machineType == Scheduler ]; then
@@ -290,23 +289,9 @@ if [ $machineType != Storage ]; then
     [ $machineType == Farm ] && workerStartup=true || workerStartup=false
     installArgs="$installArgs --slavestartup $workerStartup --launcherdaemon true"
   fi
-  RunProcess "$installPath/$installFile $installArgs" $binDirectory/$installType
+  RunProcess "$installPath/$installFile $installArgs" $binDirectory/$processType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
-
-  if [ $machineType == Farm ]; then
-    serviceFile="aaaSchedulerAuth.service"
-    servicePath="/etc/systemd/system/$serviceFile"
-    echo "[Unit]" > $servicePath
-    echo "Description=AAA Scheduler Auth Service" >> $servicePath
-    echo "After=network-online.target" >> $servicePath
-    echo "" >> $servicePath
-    echo "[Service]" >> $servicePath
-    echo "ExecStart=$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $dataRenderUsername $dataRenderPassword" >> $servicePath
-    echo "" >> $servicePath
-    systemctl --now enable $serviceFile
-  else
-    echo "$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $dataRenderUsername $dataRenderPassword" >> $aaaProfile
-  fi
+  $binPathScheduler/deadlinecommand -StoreDatabaseCredentials $dataRenderUsername $dataRenderPassword
   echo "Customize (End): Deadline Client"
 
   binPaths="$binPaths:$binPathScheduler"
@@ -315,14 +300,14 @@ fi
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): HP Anyware"
   versionInfo="23.12"
-  [ "$gpuProvider" == "" ] && installType=pcoip-agent-standard || installType=pcoip-agent-graphics
+  [ "$gpuProvider" == "" ] && processType=pcoip-agent-standard || processType=pcoip-agent-graphics
   installFile="pcoip-agent-offline-rocky8.8_$versionInfo.2-1.el8.x86_64.tar.gz"
   downloadUrl="$binStorageHost/Teradici/$versionInfo/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
-  mkdir -p $installType
-  tar -xzf $installFile -C $installType
-  cd $installType
-  RunProcess "./install-pcoip-agent.sh $installType usb-vhci" $binDirectory/$installType
+  mkdir -p $processType
+  tar -xzf $installFile -C $processType
+  cd $processType
+  RunProcess "./install-pcoip-agent.sh $processType usb-vhci" $binDirectory/$processType
   cd $binDirectory
   echo "Customize (End): HP Anyware"
 fi
