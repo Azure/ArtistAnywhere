@@ -1,11 +1,16 @@
 function RunProcess {
+  exitStatus=-1
   retryCount=0
   command="$1"
   logFile=$2
-  until [[ $($command 1> $logFile.out 2> $logFile.err) || ($retryCount -eq 3) ]]; do
+  while [[ $exitStatus -ne 0 && $retryCount -lt 3 ]]; do
+    $command 1> $logFile.out 2> $logFile.err
+    exitStatus=$?
     ((retryCount++))
-    cat $logFile.err
-    sleep 3s
+    if [ $exitStatus -ne 0 ]; then
+      cat $logFile.err
+      sleep 3s
+    fi
   done
 }
 
@@ -38,8 +43,12 @@ function SetFileSystemMount {
 
 function InitializeClient {
   binDirectory=$1
-  enableWeka=$2
-  RunProcess "deadlinecommand -ChangeRepository Direct /mnt/deadline" $binDirectory/deadline-repository
+  schedulerPath=$2
+  databaseUsername=$3
+  databasePassword=$4
+  enableWeka=$5
+  deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword
+  RunProcess "deadlinecommand -ChangeRepository Direct $schedulerPath" $binDirectory/deadline-repository
   if [ $enableWeka == true ]; then
     curl http://content.artist.studio:14000/dist/v1/install | sh
   fi

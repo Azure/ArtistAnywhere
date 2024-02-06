@@ -291,7 +291,6 @@ if [ $machineType != Storage ]; then
   fi
   RunProcess "$installPath/$installFile $installArgs" $binDirectory/$processType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
-  $binPathScheduler/deadlinecommand -StoreDatabaseCredentials $dataRenderUsername $dataRenderPassword
   echo "Customize (End): Deadline Client"
 
   binPaths="$binPaths:$binPathScheduler"
