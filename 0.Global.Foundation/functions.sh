@@ -47,7 +47,7 @@ function InitializeClient {
   databaseUsername=$3
   databasePassword=$4
   enableWeka=$5
-  deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword
+  RunProcess "deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" $binDirectory/deadline-database
   RunProcess "deadlinecommand -ChangeRepository Direct $schedulerPath" $binDirectory/deadline-repository
   if [ $enableWeka == true ]; then
     curl http://content.artist.studio:14000/dist/v1/install | sh
