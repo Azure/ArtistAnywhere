@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -x
 
 binPaths=""
 binDirectory="/usr/local/bin"

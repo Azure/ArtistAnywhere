@@ -21,14 +21,14 @@ function FileExists ($filePath) {
   return Test-Path -PathType Leaf -Path $filePath
 }
 
-function SetFileSystems ($binDirectory, $fileSystemsJson) {
+function SetFileSystems ($fileSystemsJson) {
   $fileSystems = ConvertFrom-Json -InputObject $fileSystemsJson
   foreach ($fileSystem in $fileSystems) {
     if ($fileSystem.enable) {
       SetFileSystemMount $fileSystem.mount
     }
   }
-  RegisterFileSystemMounts $binDirectory
+  RegisterFileSystemMounts
 }
 
 function SetFileSystemMount ($fileSystemMount) {
@@ -42,9 +42,9 @@ function SetFileSystemMount ($fileSystemMount) {
   }
 }
 
-function RegisterFileSystemMounts ($binDirectory) {
+function RegisterFileSystemMounts {
   if (FileExists $fileSystemsPath) {
-    RunProcess $fileSystemsPath $null "$binDirectory\file-system-mount"
+    RunProcess $fileSystemsPath $null file-system-mount
     $taskName = "AAA File System Mount"
     $taskAction = New-ScheduledTaskAction -Execute $fileSystemsPath
     $taskTrigger = New-ScheduledTaskTrigger -AtStartup
@@ -97,8 +97,8 @@ function JoinActiveDirectory ($domainName, $domainServerName, $orgUnitPath, $adm
   }
 }
 
-function InitializeClient ($binDirectory, $activeDirectoryJson) {
-  RunProcess deadlinecommand.exe "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx" "$binDirectory\deadline-repository"
+function InitializeClient ($activeDirectoryJson) {
+  RunProcess deadlinecommand.exe "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx" deadline-repository
   $activeDirectory = ConvertFrom-Json -InputObject $activeDirectoryJson
   if ($activeDirectory.enable) {
     Retry 5 10 {
