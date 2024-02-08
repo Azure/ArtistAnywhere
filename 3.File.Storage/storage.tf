@@ -14,13 +14,13 @@ variable storageAccounts {
     enableLargeFileShare = bool
     privateEndpointTypes = list(string)
     blobContainers = list(object({
-      enable    = bool
-      name      = string
-      loadFiles = bool
+      enable = bool
+      name   = string
       fileSystem = object({
         enable  = bool
         rootAcl = string
       })
+      loadFiles = bool
     }))
     fileShares = list(object({
       enable         = bool
@@ -50,9 +50,10 @@ locals {
     ] if storageAccount.enable
   ])
   blobStorageAccount = one([
-    for storageAccount in var.storageAccounts : merge(storageAccount, {
-      resourceGroupName = var.resourceGroupName
-    }) if storageAccount.enable && storageAccount.type == "StorageV2"
+    for storageAccount in azurerm_storage_account.studio : storageAccount if storageAccount.nfsv3_enabled == false
+  ])
+  blobStorageAccountNfs = one([
+    for storageAccount in azurerm_storage_account.studio : storageAccount if storageAccount.nfsv3_enabled == true
   ])
   blobContainers = flatten([
     for storageAccount in var.storageAccounts : [
@@ -79,7 +80,7 @@ locals {
   ])
 }
 
-resource azurerm_storage_account storage {
+resource azurerm_storage_account studio {
   for_each = {
     for storageAccount in var.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
   }
@@ -129,7 +130,7 @@ resource azurerm_private_endpoint storage {
     ]
   }
   depends_on = [
-    azurerm_storage_account.storage
+    azurerm_storage_account.studio
   ]
 }
 
@@ -141,7 +142,7 @@ resource azurerm_role_assignment storage_contributor {
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = "${azurerm_resource_group.storage.id}/providers/Microsoft.Storage/storageAccounts/${each.value.name}"
   depends_on = [
-    azurerm_storage_account.storage
+    azurerm_storage_account.studio
   ]
 }
 
@@ -153,7 +154,7 @@ resource azurerm_role_assignment storage_blob_data_owner {
   principal_id         = data.azurerm_client_config.studio.object_id
   scope                = "${azurerm_resource_group.storage.id}/providers/Microsoft.Storage/storageAccounts/${each.value.name}"
   depends_on = [
-    azurerm_storage_account.storage
+    azurerm_storage_account.studio
   ]
 }
 
@@ -283,5 +284,17 @@ resource terraform_data file_share_load_blob {
 }
 
 output blobStorageAccount {
-  value = local.blobStorageAccount
+  value = {
+    name              = local.blobStorageAccount.name
+    resourceGroupName = local.blobStorageAccount.resource_group_name
+  }
+  sensitive = true
+}
+
+output blobStorageAccountNfs {
+  value = {
+    name              = local.blobStorageAccountNfs.name
+    resourceGroupName = local.blobStorageAccountNfs.resource_group_name
+  }
+  sensitive = true
 }

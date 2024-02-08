@@ -1,11 +1,5 @@
 resourceGroupName = "ArtistAnywhere.Scheduler" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
-activeDirectory = {
-  enable        = true
-  domainName    = "artist.studio"
-  adminPassword = ""
-}
-
 #########################################################################
 # Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
 #########################################################################
@@ -14,19 +8,18 @@ virtualMachines = [
   {
     enable = false
     name   = "LnxScheduler"
-    machine = {
-      size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/1.0.0"
-        plan = {
-          enable    = false
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
+    size   = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    image = {
+      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/1.0.0"
+      plan = {
+        enable    = false
+        publisher = ""
+        product   = ""
+        name      = ""
       }
     }
     network = {
+      subnetName = "Farm"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -73,19 +66,18 @@ virtualMachines = [
   {
     enable = false
     name   = "WinScheduler"
-    machine = {
-       size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinServer/versions/1.0.0"
-        plan = {
-          enable    = false
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
+      size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+      image = {
+      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinServer/versions/1.0.0"
+      plan = {
+        enable    = false
+        publisher = ""
+        product   = ""
+        name      = ""
       }
     }
     network = {
+      subnetName = "Farm"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -135,9 +127,19 @@ virtualMachines = [
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
 ############################################################################
 
-dnsARecord = {
+dnsRecord = {
   name        = "scheduler"
   ttlSeconds  = 300
+}
+
+###############################################################################################################
+# Active Directory (https://learn.microsoft.comtroubleshoot/windows-server/identity/active-directory-overview #
+###############################################################################################################
+
+activeDirectory = {
+  enable        = true
+  domainName    = "artist.studio"
+  adminPassword = ""
 }
 
 #######################################################################

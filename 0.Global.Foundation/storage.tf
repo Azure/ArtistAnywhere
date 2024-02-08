@@ -41,10 +41,3 @@ resource azurerm_storage_container studio {
     time_sleep.storage_account_firewall
   ]
 }
-
-output rootStorage {
-  value = {
-    accountName  = azurerm_storage_account.studio.name
-    blobEndpoint = azurerm_storage_account.studio.primary_blob_endpoint
-  }
-}

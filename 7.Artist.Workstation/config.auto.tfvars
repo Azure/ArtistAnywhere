@@ -8,19 +8,19 @@ virtualMachines = [
   {
     enable = false
     name   = "LnxArtistN"
-    machine = {
-      size = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/3.0.0"
-        plan = {
-          enable    = false
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
+    size   = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    count  = 1
+    image = {
+      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/3.0.0"
+      plan = {
+        enable    = false
+        publisher = ""
+        product   = ""
+        name      = ""
       }
     }
     network = {
+      subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -57,19 +57,19 @@ virtualMachines = [
   {
     enable = false
     name   = "LnxArtistA"
-    machine = {
-      size = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/3.1.0"
-        plan = {
-          enable    = false
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
+    size   = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    count  = 1
+    image = {
+      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/3.1.0"
+      plan = {
+        enable    = false
+        publisher = ""
+        product   = ""
+        name      = ""
       }
     }
     network = {
+      subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -106,19 +106,19 @@ virtualMachines = [
   {
     enable = false
     name   = "WinArtistN"
-    machine = {
-      size = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinArtist/versions/3.0.0"
-        plan = {
-          enable    = false
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
+    size   = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    count  = 1
+    image = {
+      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinArtist/versions/3.0.0"
+      plan = {
+        enable    = false
+        publisher = ""
+        product   = ""
+        name      = ""
       }
     }
     network = {
+      subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -155,19 +155,19 @@ virtualMachines = [
   {
     enable = false
     name   = "WinArtistA"
-    machine = {
-      size = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinArtist/versions/3.1.0"
-        plan = {
-          enable    = false
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
+    size   = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    count  = 1
+    image = {
+      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinArtist/versions/3.1.0"
+      plan = {
+        enable    = false
+        publisher = ""
+        product   = ""
+        name      = ""
       }
     }
     network = {
+      subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -202,23 +202,6 @@ virtualMachines = [
     }
   }
 ]
-
-###############################################################################################
-# Traffic Manager (https://learn.microsoft.comazure/traffic-manager/traffic-manager-overview) #
-###############################################################################################
-
-trafficManager = {
-  enable = false
-  profile = {
-    name              = ""
-    routingMethod     = "Performance"
-    enableTrafficView = true
-  }
-  dns = {
-    name = "artistanywhere"
-    ttl  = 100
-  }
-}
 
 #######################################################################
 # Resource dependency configuration for pre-existing deployments only #

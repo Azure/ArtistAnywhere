@@ -67,10 +67,3 @@ resource azurerm_cognitive_deployment open_ai_chat {
     type = var.azureOpenAI.chatDeployment.model.scale
   }
 }
-
-output azureOpenAI {
-  value = {
-    enable   = var.azureOpenAI.enable
-    endpoint = var.azureOpenAI.enable ? azurerm_cognitive_account.open_ai[0].endpoint : ""
-  }
-}

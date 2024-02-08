@@ -7,6 +7,12 @@ variable containerRegistry {
     enable = bool
     name   = string
     sku    = string
+    adminUser = object({
+      enable = bool
+    })
+    zoneRedundancy = object({
+      enable = bool
+    })
   })
 }
 
@@ -50,11 +56,13 @@ variable containerRegistry {
 # }
 
 resource azurerm_container_registry studio {
-  count               = var.containerRegistry.enable ? 1 : 0
-  name                = var.containerRegistry.name
-  resource_group_name = azurerm_resource_group.image.name
-  location            = azurerm_resource_group.image.location
-  sku                 = var.containerRegistry.sku
+  count                   = var.containerRegistry.enable ? 1 : 0
+  name                    = var.containerRegistry.name
+  resource_group_name     = azurerm_resource_group.image.name
+  location                = azurerm_resource_group.image.location
+  sku                     = var.containerRegistry.sku
+  admin_enabled           = var.containerRegistry.adminUser.enable
+  zone_redundancy_enabled = var.containerRegistry.zoneRedundancy.enable
   identity {
     type = "UserAssigned"
     identity_ids = [

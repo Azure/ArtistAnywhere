@@ -26,9 +26,9 @@ for scheduledEvent in $(echo $scheduledEvents | jq -r '.[] | @base64'); do
   if [[ $eventType == Terminate && $eventScope == $instanceName ]]; then
     az login --identity
     dnsRecordQuery="aRecords[?ipv4Address=='$(hostname -i)']"
-    dnsRecordAddress=$(az network private-dns record-set a show --resource-group ${dnsResourceGroupName} --zone-name ${dnsZoneName} --name ${dnsARecordName} --query $dnsRecordQuery --output tsv)
+    dnsRecordAddress=$(az network private-dns record-set a show --resource-group ${dnsResourceGroupName} --zone-name ${dnsZoneName} --name ${dnsRecordName} --query $dnsRecordQuery --output tsv)
     if [ -n "$dnsRecordAddress" ]; then
-      az network private-dns record-set a remove-record --resource-group ${dnsResourceGroupName} --zone-name ${dnsZoneName} --record-set-name ${dnsARecordName} --ipv4-address $dnsRecordAddress --keep-empty-record-set
+      az network private-dns record-set a remove-record --resource-group ${dnsResourceGroupName} --zone-name ${dnsZoneName} --record-set-name ${dnsRecordName} --ipv4-address $dnsRecordAddress --keep-empty-record-set
     fi
 
     weka user login admin ${wekaAdminPassword}
@@ -47,7 +47,7 @@ for scheduledEvent in $(echo $scheduledEvents | jq -r '.[] | @base64'); do
           driveStatus=$(weka cluster drive --filter uuid=$driveId --output status --no-header)
           [ $driveStatus != INACTIVE ]
         do
-          sleep 3
+          sleep 3s
         done
         weka cluster drive remove --force $driveId &> $logDirectory/$instanceName-weka-cluster-drive-remove-$driveId.log
       done
@@ -67,7 +67,7 @@ for scheduledEvent in $(echo $scheduledEvents | jq -r '.[] | @base64'); do
           containerStatus=$(weka cluster container --HOST $rootHost --filter id=$containerId --output status --no-header)
           [ $containerStatus != INACTIVE ]
         do
-          sleep 3
+          sleep 3s
         done
         weka cluster container remove $containerId --HOST $rootHost &> $logDirectory/$instanceName-weka-cluster-container-remove-$containerId.log
       done

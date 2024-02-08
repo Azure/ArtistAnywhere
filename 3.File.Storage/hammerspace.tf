@@ -83,8 +83,8 @@ locals {
       index = i
       name  = "${var.hammerspace.namePrefix}${var.hammerspace.metadata.machine.namePrefix}${i + 1}"
       adminLogin = {
-        userName = var.hammerspace.adminLogin.userName != "" ? var.hammerspace.adminLogin.userName : try(data.azurerm_key_vault_secret.admin_username[0].value, "")
-        userPassword = var.hammerspace.adminLogin.userPassword != "" ? var.hammerspace.adminLogin.userPassword : try(data.azurerm_key_vault_secret.admin_password[0].value, "")
+        userName = var.hammerspace.adminLogin.userName != "" ? var.hammerspace.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+        userPassword = var.hammerspace.adminLogin.userPassword != "" ? var.hammerspace.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
       }},
       var.hammerspace.metadata
     ) if var.hammerspace.namePrefix != ""
@@ -94,8 +94,8 @@ locals {
       index = i
       name  = "${var.hammerspace.namePrefix}${var.hammerspace.data.machine.namePrefix}${i + 1}"
       adminLogin = {
-        userName = var.hammerspace.adminLogin.userName != "" ? var.hammerspace.adminLogin.userName : try(data.azurerm_key_vault_secret.admin_username[0].value, "")
-        userPassword = var.hammerspace.adminLogin.userPassword != "" ? var.hammerspace.adminLogin.userPassword : try(data.azurerm_key_vault_secret.admin_password[0].value, "")
+        userName = var.hammerspace.adminLogin.userName != "" ? var.hammerspace.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+        userPassword = var.hammerspace.adminLogin.userPassword != "" ? var.hammerspace.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
       }},
       var.hammerspace.data
     ) if var.hammerspace.namePrefix != ""
@@ -359,13 +359,13 @@ resource azurerm_virtual_machine_extension storage {
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
   virtual_machine_id         = "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
-  settings = jsonencode({
-    script = "${base64encode(
+  protected_settings = jsonencode({
+    script = base64encode(
       <<BASH
         #!/bin/bash -x
-        ADMIN_PASSWORD=${module.global.keyVault.enable ? data.azurerm_key_vault_secret.admin_password[0].value : each.value.adminLogin.userPassword} /usr/bin/hs-init-admin-pw
+        ADMIN_PASSWORD=${each.value.adminLogin.userPassword != "" ? each.value.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value} /usr/bin/hs-init-admin-pw
       BASH
-    )}"
+    )
   })
   depends_on = [
     azurerm_virtual_machine_data_disk_attachment.storage_metadata,
@@ -424,8 +424,4 @@ resource azurerm_lb_probe storage {
   loadbalancer_id = azurerm_lb.storage[0].id
   protocol        = "Tcp"
   port            = 4505
-}
-
-output resourceGroupNameHammerspace {
-  value = var.hammerspace.namePrefix != "" ? azurerm_resource_group.hammerspace[0].name : ""
 }

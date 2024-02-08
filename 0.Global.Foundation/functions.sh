@@ -46,6 +46,9 @@ function InitializeClient {
   databasePassword=$2
   schedulerPath=$3
   enableWeka=$4
+  if [ $schedulerPath == null ]; then
+    schedulerPath="/mnt/deadline"
+  fi
   RunProcess "deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" deadline-database
   RunProcess "deadlinecommand -ChangeRepository Direct $schedulerPath" deadline-repository
   if [ $enableWeka == true ]; then

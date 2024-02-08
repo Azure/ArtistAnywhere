@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.6.5"
+  required_version = ">= 1.7.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.84.0"
+      version = "~>3.90.0"
     }
   }
   backend azurerm {
@@ -30,19 +30,16 @@ variable resourceGroupName {
 data azurerm_client_config studio {}
 
 data azurerm_key_vault studio {
-  count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
   resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret gateway_connection {
-  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.gatewayConnection
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault batch {
-  count               = module.global.keyVault.enable ? 1 : 0
   name                = "${module.global.keyVault.name}-batch"
   resource_group_name = module.global.resourceGroupName
 }
@@ -54,26 +51,19 @@ data azurerm_storage_account studio {
 
 resource azurerm_resource_group network {
   name     = var.resourceGroupName
-  location = module.global.regionName
+  location = local.virtualNetwork.regionName
+  tags = {
+    nameSuffix = local.virtualNetwork.nameSuffix
+  }
 }
 
 resource azurerm_resource_group network_regions {
   for_each = {
-    for virtualNetwork in var.virtualNetworks : virtualNetwork.name => virtualNetwork if virtualNetwork.regionName != ""
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
   }
-  name     = "${var.resourceGroupName}.${each.value.regionName}"
+  name     = each.value.resourceGroupName
   location = each.value.regionName
-}
-
-output resourceGroupName {
-  value = azurerm_resource_group.network.name
-}
-
-output resourceGroups {
-  value = [
-    for resourceGroup in azurerm_resource_group.network_regions : {
-      name       = resourceGroup.name
-      regionName = resourceGroup.location
-    }
-  ]
+  tags = {
+    nameSuffix = each.value.nameSuffix
+  }
 }

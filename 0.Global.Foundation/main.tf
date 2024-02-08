@@ -1,17 +1,17 @@
 terraform {
-  required_version = ">= 1.6.5"
+  required_version = ">= 1.7.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.84.0"
+      version = "~>3.90.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.46.0"
+      version = "~>2.47.0"
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.0"
+      version = "~>3.4.1"
     }
     time = {
       source  = "hashicorp/time"
@@ -58,8 +58,4 @@ data azurerm_client_config studio {}
 resource azurerm_resource_group studio {
   name     = module.global.resourceGroupName
   location = module.global.regionName
-}
-
-output resourceGroupName {
-  value = azurerm_resource_group.studio.name
 }

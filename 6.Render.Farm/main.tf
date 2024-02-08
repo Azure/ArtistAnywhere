@@ -1,17 +1,17 @@
 terraform {
-  required_version = ">= 1.6.5"
+  required_version = ">= 1.7.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.84.0"
+      version = "~>3.90.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.46.0"
+      version = "~>2.47.0"
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.0"
+      version = "~>3.4.1"
     }
   }
   backend azurerm {
@@ -39,12 +39,33 @@ module global {
   source = "../0.Global.Foundation/module"
 }
 
-module farm {
-  source = "./module"
-}
-
 variable resourceGroupName {
   type = string
+}
+
+variable fileSystems {
+  type = object({
+    linux = list(object({
+      enable   = bool
+      iaasOnly = bool
+      mount = object({
+        type    = string
+        path    = string
+        source  = string
+        options = string
+      })
+    }))
+    windows = list(object({
+      enable   = bool
+      iaasOnly = bool
+      mount = object({
+        type    = string
+        path    = string
+        source  = string
+        options = string
+      })
+    }))
+  })
 }
 
 variable activeDirectory {
@@ -89,21 +110,28 @@ data azurerm_user_assigned_identity studio {
 }
 
 data azurerm_key_vault studio {
-  count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
   resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret admin_username {
-  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault_secret admin_password {
-  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret database_username {
+  name         = module.global.keyVault.secretName.databaseUsername
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret database_password {
+  name         = module.global.keyVault.secretName.databasePassword
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_log_analytics_workspace monitor {
@@ -117,25 +145,30 @@ data terraform_remote_state network {
   config = {
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.rootStorage.accountName
-    container_name       = module.global.rootStorage.containerName.terraform
+    container_name       = module.global.rootStorage.containerName.terraformState
     key                  = "1.Virtual.Network"
   }
 }
+
+data terraform_remote_state image {
+  backend = "azurerm"
+  config = {
+    resource_group_name  = module.global.resourceGroupName
+    storage_account_name = module.global.rootStorage.accountName
+    container_name       = module.global.rootStorage.containerName.terraformState
+    key                  = "2.Image.Builder"
+  }
+}
+
 
 data terraform_remote_state storage {
   backend = "azurerm"
   config = {
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.rootStorage.accountName
-    container_name       = module.global.rootStorage.containerName.terraform
+    container_name       = module.global.rootStorage.containerName.terraformState
     key                  = "3.File.Storage"
   }
-}
-
-data azurerm_application_insights studio {
-  count               = module.global.monitor.enable ? 1 : 0
-  name                = module.global.monitor.name
-  resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_virtual_network studio {
@@ -143,33 +176,19 @@ data azurerm_virtual_network studio {
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
 }
 
-data azurerm_subnet farm {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameFarm : data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.farm].name
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
-}
-
-data azurerm_subnet ai {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameAI : data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.ai].name
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
-}
-
 data azurerm_storage_account studio {
   name                = var.existingStorage.enable ? var.existingStorage.name : data.terraform_remote_state.storage.outputs.blobStorageAccount.name
-  resource_group_name = var.existingStorage.enable ? var.existingStorage.resourceGroupName : data.terraform_remote_state.storage.outputs.resourceGroupName
+  resource_group_name = var.existingStorage.enable ? var.existingStorage.resourceGroupName : data.terraform_remote_state.storage.outputs.blobStorageAccount.resourceGroupName
 }
 
-data azurerm_storage_share studio {
-  name                 = var.existingStorage.enable ? var.existingStorage.fileShareName : data.terraform_remote_state.storage.outputs.blobStorageAccount.fileShares[0].name
-  storage_account_name = data.azurerm_storage_account.studio.name
+locals {
+  rootRegion = {
+    name       = var.existingNetwork.enable ? module.global.regionName : data.terraform_remote_state.network.outputs.virtualNetwork.regionName
+    nameSuffix = var.existingNetwork.enable ? "" : data.terraform_remote_state.network.outputs.virtualNetwork.nameSuffix
+  }
 }
 
 resource azurerm_resource_group farm {
-  name     = var.resourceGroupName
-  location = module.global.regionName
-}
-
-output resourceGroupName {
-  value = azurerm_resource_group.farm.name
+  name     = var.existingNetwork.enable || local.rootRegion.nameSuffix == "" ? var.resourceGroupName : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}"
+  location = local.rootRegion.name
 }

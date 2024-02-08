@@ -1,9 +1,13 @@
 #!/bin/bash -x
 
-source /etc/profile.d/aaa.sh
-
 binDirectory="/usr/local/bin"
 cd $binDirectory
+
+source /etc/profile.d/aaa.sh
+
+source /tmp/functions.sh
+
+InitializeClient ${databaseUsername} ${databasePassword} /deadline false
 
 serviceFile="aaaAutoScaler"
 dataFilePath="/var/lib/waagent/ovf-env.xml"

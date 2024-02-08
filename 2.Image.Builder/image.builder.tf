@@ -5,7 +5,8 @@
 variable imageBuilder {
   type = object({
     templates = list(object({
-      name = string
+      name   = string
+      enable = bool
       source = object({
         imageDefinition = object({
           name    = string
@@ -44,6 +45,16 @@ locals {
       storageAccountType = "Standard_LRS"
     }
   ]
+  dataPlatform = {
+    admin = {
+      username = data.azurerm_key_vault_secret.admin_username.value
+      password = data.azurerm_key_vault_secret.admin_password.value
+    }
+    database = {
+      username = data.azurerm_key_vault_secret.database_username.value
+      password = data.azurerm_key_vault_secret.database_password.value
+    }
+  }
 }
 
 resource azurerm_role_assignment identity {
@@ -69,7 +80,7 @@ resource azurerm_role_assignment image {
 
 resource azapi_resource image_builder_linux {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && imageTemplate.source.imageDefinition.name == "Linux" && imageTemplate.build.imageVersion != "0.0.0"
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && var.computeGallery.platform.linux.enable && imageTemplate.enable && imageTemplate.source.imageDefinition.name == "Linux" && imageTemplate.build.imageVersion != "0.0.0"
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"
@@ -143,7 +154,7 @@ resource azapi_resource image_builder_linux {
           {
             type = "Shell"
             inline = [
-              "cat /tmp/customize.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {binStorage = var.binStorage})))} /bin/bash"
+              "cat /tmp/customize.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {binStorage = var.binStorage}, {dataPlatform = local.dataPlatform})))} /bin/bash"
             ]
           }
         ]
@@ -152,7 +163,7 @@ resource azapi_resource image_builder_linux {
         {
           type           = "SharedImage"
           runOutputName  = "${each.value.name}-${each.value.build.imageVersion}"
-          galleryImageId = "${azurerm_shared_image.studio[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
+          galleryImageId = "${azurerm_shared_image.linux[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
           versioning = {
             scheme = "Latest"
             major  = tonumber(split(".", each.value.build.imageVersion)[0])
@@ -176,7 +187,7 @@ resource azapi_resource image_builder_linux {
 
 resource azapi_resource image_builder_windows {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && startswith(imageTemplate.source.imageDefinition.name, "Win")
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && var.computeGallery.platform.windows.enable && imageTemplate.enable && startswith(imageTemplate.source.imageDefinition.name, "Win")
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"
@@ -242,7 +253,7 @@ resource azapi_resource image_builder_windows {
             inline      = null
             runElevated = false
             runAsSystem = false
-          },
+          }
         ], length(each.value.build.customization) > 0 ?
         [
           {
@@ -255,7 +266,10 @@ resource azapi_resource image_builder_windows {
           {
             type = "PowerShell"
             inline = [
-              "Rename-Computer -NewName ${each.value.name}"
+              "Rename-Computer -NewName ${each.value.name}",
+              "dism /Online /NoRestart /Enable-Feature /FeatureName:VirtualMachinePlatform /All",
+              "dism /Online /NoRestart /Enable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /All",
+              "exit 0"
             ]
             runElevated = false
             runAsSystem = false
@@ -273,6 +287,12 @@ resource azapi_resource image_builder_windows {
             ]
             runElevated = true
             runAsSystem = true
+          },
+          {
+            type        = "WindowsRestart"
+            inline      = null
+            runElevated = false
+            runAsSystem = false
           }
         ]
       )
@@ -280,7 +300,7 @@ resource azapi_resource image_builder_windows {
         {
           type           = "SharedImage"
           runOutputName  = "${each.value.name}-${each.value.build.imageVersion}"
-          galleryImageId = "${azurerm_shared_image.studio[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
+          galleryImageId = "${azurerm_shared_image.windows[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
           versioning = {
             scheme = "Latest"
             major  = tonumber(split(".", each.value.build.imageVersion)[0])
@@ -298,21 +318,5 @@ resource azapi_resource image_builder_windows {
     azurerm_role_assignment.identity,
     azurerm_role_assignment.network,
     azurerm_role_assignment.image
-  ]
-}
-
-output imageTemplatesLinux {
-  value = [
-    for imageTemplate in azapi_resource.image_builder_linux : {
-      name = imageTemplate.name
-    }
-  ]
-}
-
-output imageTemplatesWindows {
-  value = [
-    for imageTemplate in azapi_resource.image_builder_windows : {
-      name = imageTemplate.name
-    }
   ]
 }

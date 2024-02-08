@@ -10,6 +10,8 @@ variable vfxtCache {
       adminUsername = string
       adminPassword = string
       sshPublicKey  = string
+      localTimezone = string
+      enableDevMode = bool
       imageId = object({
         controller = string
         node       = string
@@ -21,18 +23,8 @@ variable vfxtCache {
       enableProactive  = string
       rollingTraceFlag = string
     })
-    localTimezone = string
-    enableDevMode = bool
   })
 }
-
-# data azurerm_resource_group studio {
-#   name = module.global.resourceGroupName
-# }
-
-# data azurerm_resource_group network {
-#   name = data.azurerm_virtual_network.compute.resource_group_name
-# }
 
 data azurerm_virtual_network studio {
   name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.name
@@ -40,7 +32,7 @@ data azurerm_virtual_network studio {
 }
 
 data azurerm_subnet cache {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.cache].name
+  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Cache"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
@@ -48,8 +40,8 @@ data azurerm_subnet cache {
 locals {
   vfxtCache = merge({
     cluster = {
-      adminUsername = var.vfxtCache.cluster.adminUsername != "" ? var.vfxtCache.cluster.adminUsername : try(data.azurerm_key_vault_secret.admin_username[0].value, "")
-      adminPassword = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : try(data.azurerm_key_vault_secret.admin_password[0].value, "")
+      adminUsername = var.vfxtCache.cluster.adminUsername != "" ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username.value
+      adminPassword = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password.value
     }},
     var.vfxtCache
   )
@@ -58,72 +50,29 @@ locals {
   vfxtVServerAddressCount = 12
 }
 
-# resource azurerm_role_assignment managed_identity {
-#   role_definition_name = "Managed Identity Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#managed-identity-operator
-#   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-#   scope                = data.azurerm_resource_group.studio.id
-# }
-
-# resource azurerm_role_assignment network_cache_contributor {
-#   role_definition_name = "Avere Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#avere-contributor
-#   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-#   scope                = data.azurerm_resource_group.network.id
-# }
-
-# resource azurerm_role_assignment network_cache_operator {
-#   role_definition_name = "Avere Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#avere-operator
-#   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-#   scope                = data.azurerm_resource_group.network.id
-# }
-
-# resource azurerm_role_assignment cache_managed_identity {
-#   role_definition_name = "Managed Identity Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#managed-identity-operator
-#   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-#   scope                = azurerm_resource_group.cache.id
-# }
-
-# resource azurerm_role_assignment cache_contributor {
-#   role_definition_name = "Avere Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#avere-contributor
-#   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-#   scope                = azurerm_resource_group.cache.id
-# }
-
-# resource azurerm_role_assignment cache_operator {
-#   role_definition_name = "Avere Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#avere-operator
-#   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-#   scope                = azurerm_resource_group.cache.id
-# }
-
 module vfxt_controller {
-  count                             = var.enableHPCCache ? 0 : 1
-  source                            = "github.com/Azure/Avere/src/terraform/modules/controller3"
-  create_resource_group             = false
-  resource_group_name               = var.resourceGroupName
-  location                          = module.global.regionName
-  admin_username                    = module.global.keyVault.enable ? data.azurerm_key_vault_secret.admin_username[0].value : var.vfxtCache.cluster.adminUsername
-  admin_password                    = module.global.keyVault.enable ? data.azurerm_key_vault_secret.admin_password[0].value : var.vfxtCache.cluster.adminPassword
-  ssh_key_data                      = var.vfxtCache.cluster.sshPublicKey != "" ? var.vfxtCache.cluster.sshPublicKey : null
-  # user_assigned_managed_identity_id = data.azurerm_user_assigned_identity.studio.id
-  virtual_network_name              = data.azurerm_virtual_network.studio.name
-  virtual_network_resource_group    = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_subnet_name       = data.azurerm_subnet.cache.name
-  static_ip_address                 = local.vfxtControllerAddress
-  image_id                          = var.vfxtCache.cluster.imageId.controller
+  count                          = var.enableHPCCache ? 0 : 1
+  source                         = "github.com/Azure/Avere/src/terraform/modules/controller3"
+  create_resource_group          = false
+  resource_group_name            = azurerm_resource_group.cache_region[0].name
+  location                       = module.global.regionName
+  admin_username                 = var.vfxtCache.cluster.adminUsername != "" ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username.value
+  admin_password                 = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password.value
+  ssh_key_data                   = var.vfxtCache.cluster.sshPublicKey != "" ? var.vfxtCache.cluster.sshPublicKey : null
+  virtual_network_name           = data.azurerm_virtual_network.studio.name
+  virtual_network_resource_group = data.azurerm_virtual_network.studio.resource_group_name
+  virtual_network_subnet_name    = data.azurerm_subnet.cache.name
+  static_ip_address              = local.vfxtControllerAddress
+  image_id                       = var.vfxtCache.cluster.imageId.controller
   depends_on = [
-    azurerm_resource_group.cache_regions,
-    # azurerm_role_assignment.managed_identity,
-    # azurerm_role_assignment.network_cache_contributor,
-    # azurerm_role_assignment.network_cache_operator,
-    # azurerm_role_assignment.cache_managed_identity,
-    # azurerm_role_assignment.cache_contributor,
-    # azurerm_role_assignment.cache_operator
+    azurerm_resource_group.cache_region
   ]
 }
 
 resource avere_vfxt cache {
   count                           = var.enableHPCCache ? 0 : 1
   vfxt_cluster_name               = lower(var.cacheName)
-  azure_resource_group            = var.resourceGroupName
+  azure_resource_group            = azurerm_resource_group.cache_region[0].name
   location                        = module.global.regionName
   node_cache_size                 = var.vfxtCache.cluster.nodeSize
   vfxt_node_count                 = var.vfxtCache.cluster.nodeCount
@@ -131,11 +80,10 @@ resource avere_vfxt cache {
   azure_network_name              = data.azurerm_virtual_network.studio.name
   azure_network_resource_group    = data.azurerm_virtual_network.studio.resource_group_name
   azure_subnet_name               = data.azurerm_subnet.cache.name
-  # user_assigned_managed_identity  = data.azurerm_user_assigned_identity.studio.id
   controller_address              = module.vfxt_controller[count.index].controller_address
   controller_admin_username       = module.vfxt_controller[count.index].controller_username
-  controller_admin_password       = module.global.keyVault.enable ? data.azurerm_key_vault_secret.admin_password[0].value : var.vfxtCache.cluster.adminPassword
-  vfxt_admin_password             = module.global.keyVault.enable ? data.azurerm_key_vault_secret.admin_password[0].value : var.vfxtCache.cluster.adminPassword
+  controller_admin_password       = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password.value
+  vfxt_admin_password             = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password.value
   vfxt_ssh_key_data               = var.vfxtCache.cluster.sshPublicKey != "" ? var.vfxtCache.cluster.sshPublicKey : null
   support_uploads_company_name    = var.vfxtCache.support.companyName
   enable_support_uploads          = var.vfxtCache.support.enableLogUpload
@@ -144,19 +92,18 @@ resource avere_vfxt cache {
   rolling_trace_flag              = var.vfxtCache.support.rollingTraceFlag
   vserver_first_ip                = local.vfxtVServerFirstAddress
   vserver_ip_count                = local.vfxtVServerAddressCount
-  timezone                        = var.vfxtCache.localTimezone
-  node_size                       = var.vfxtCache.enableDevMode ? "unsupported_test_SKU" : "prod_sku"
+  timezone                        = var.vfxtCache.cluster.localTimezone
+  node_size                       = var.vfxtCache.cluster.enableDevMode ? "unsupported_test_SKU" : "prod_sku"
   dynamic core_filer {
     for_each = {
-      for storageTargetNfs in var.storageTargetsNfs : storageTargetNfs.name => storageTargetNfs if storageTargetNfs.enable
+      for storageTarget in var.storageTargets : storageTarget.name => storageTarget if storageTarget.enable
     }
     content {
-      name                      = core_filer.value["name"]
-      fqdn_or_primary_ip        = core_filer.value["storageHost"]
-      cache_policy              = core_filer.value["vfxtCache"].cachePolicy
-      nfs_connection_multiplier = core_filer.value["vfxtCache"].nfsConnections
+      name               = core_filer.value["name"]
+      fqdn_or_primary_ip = core_filer.value["hostName"]
+      cache_policy       = core_filer.value["usageModel"]
       dynamic junction {
-        for_each = core_filer.value["namespaceJunctions"]
+        for_each = core_filer.value["vfxtJunctions"]
         content {
           core_filer_export   = junction.value["storageExport"]
           export_subdirectory = junction.value["storagePath"]
@@ -176,32 +123,27 @@ resource avere_vfxt cache {
 
 resource azurerm_private_dns_a_record cache_vfxt {
   count               = var.enableHPCCache ? 0 : 1
-  name                = var.dnsARecord.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
-  zone_name           = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.terraform_remote_state.network.outputs.privateDns.zoneName
+  name                = lower(var.cacheName)
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.azurerm_private_dns_zone.studio.resource_group_name
+  zone_name           = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.azurerm_private_dns_zone.studio.name
   records             = avere_vfxt.cache[0].vserver_ip_addresses
-  ttl                 = var.dnsARecord.ttlSeconds
+  ttl                 = var.dnsRecord.ttlSeconds
 }
 
 output vfxtCacheControllerAddress {
-  value = var.enableHPCCache ? "" : length(avere_vfxt.cache) > 0 ? avere_vfxt.cache[0].controller_address : ""
+  value = var.enableHPCCache ? null : avere_vfxt.cache[0].controller_address
 }
 
 output vfxtCacheManagementAddress {
-  value = var.enableHPCCache ? "" : length(avere_vfxt.cache) > 0 ? avere_vfxt.cache[0].vfxt_management_ip : ""
+  value = var.enableHPCCache ? null : avere_vfxt.cache[0].vfxt_management_ip
 }
 
-output vfxtCacheMountAddresses {
-  value = var.enableHPCCache ? "" : length(avere_vfxt.cache) > 0 ? avere_vfxt.cache[0].vserver_ip_addresses : ""
-}
-
-output vfxtCacheDns {
+output vfxtCacheDNS {
   value = var.enableHPCCache ? null : [
     for dnsRecord in azurerm_private_dns_a_record.cache_vfxt : {
-      name              = dnsRecord.name
-      resourceGroupName = dnsRecord.resource_group_name
-      fqdn              = dnsRecord.fqdn
-      records           = dnsRecord.records
+      name    = dnsRecord.name
+      fqdn    = dnsRecord.fqdn
+      records = dnsRecord.records
     }
   ]
 }

@@ -32,6 +32,14 @@ keyVault = {
     {
       name  = "AdminPassword"
       value = "P@ssword1234"
+    },
+    {
+      name  = "DatabaseUsername"
+      value = "dbuser"
+    },
+    {
+      name  = "DatabasePassword"
+      value = "P@ssword1234"
     }
   ]
   keys = [
@@ -62,7 +70,7 @@ monitor = {
     sku = "PerGB2018"
   }
   insight = {
-    type = "Node.JS"
+    type = "web"
   }
   retentionDays = 90
 }

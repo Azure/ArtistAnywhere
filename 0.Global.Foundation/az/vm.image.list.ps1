@@ -14,7 +14,7 @@ az vm image list --publisher CIQ --offer Rocky --sku Rocky-8-6-Free --all
 
 az vm image list --publisher MicrosoftWindowsServer --offer WindowsServer --sku 2022-Datacenter-G2 --all
 az vm image list --publisher MicrosoftWindowsDesktop --offer Windows-10 --sku Win10-22H2-Pro-G2 --all
-az vm image list --publisher MicrosoftWindowsDesktop --offer Windows-11 --sku Win11-22H2-Pro --all
+az vm image list --publisher MicrosoftWindowsDesktop --offer Windows-11 --sku Win11-23H2-Pro --all
 
-az vm image list --publisher Microsoft-Avere --offer vFXT --sku Avere-vFXT-Controller --all
-az vm image list --publisher Microsoft-Avere --offer vFXT --sku Avere-vFXT-Node --all
+az vm image list --publisher Microsoft-Avere --offer vFXT --sku Avere-vFXT-Controller --all # 2023.09.0
+az vm image list --publisher Microsoft-Avere --offer vFXT --sku Avere-vFXT-Node --all       # 2023.09.1

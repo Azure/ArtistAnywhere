@@ -8,6 +8,7 @@ virtualNetworks = [
   {
     enable     = true
     name       = "Studio"
+    nameSuffix = "West"
     regionName = ""
     addressSpace = [
       "10.0.0.0/16"
@@ -24,8 +25,7 @@ virtualNetworks = [
           "Microsoft.Storage.Global",
           "Microsoft.ContainerRegistry"
         ]
-        serviceDelegation    = ""
-        denyOutboundInternet = false
+        serviceDelegation = ""
       },
       {
         name = "Workstation"
@@ -35,8 +35,7 @@ virtualNetworks = [
         serviceEndpoints = [
           "Microsoft.Storage.Global"
         ]
-        serviceDelegation    = ""
-        denyOutboundInternet = false
+        serviceDelegation = ""
       },
       {
         name = "Storage"
@@ -46,30 +45,45 @@ virtualNetworks = [
         serviceEndpoints = [
           "Microsoft.Storage.Global"
         ]
-        serviceDelegation    = "" # "Microsoft.Netapp/volumes"
-        denyOutboundInternet = false
+        serviceDelegation = ""
       },
       {
-        name = "Cache"
+        name = "StorageNetApp"
         addressSpace = [
           "10.0.193.0/24"
         ]
         serviceEndpoints = [
-          "Microsoft.Storage.Global"
         ]
-        serviceDelegation    = ""
-        denyOutboundInternet = false
+        serviceDelegation = "Microsoft.Netapp/volumes"
       },
       {
-        name = "AI"
+        name = "StorageQumulo"
         addressSpace = [
           "10.0.194.0/24"
         ]
         serviceEndpoints = [
+        ]
+        serviceDelegation = "Qumulo.Storage/fileSystems"
+      },
+      {
+        name = "Cache"
+        addressSpace = [
+          "10.0.195.0/24"
+        ]
+        serviceEndpoints = [
+          "Microsoft.Storage.Global"
+        ]
+        serviceDelegation = ""
+      },
+      {
+        name = "AI"
+        addressSpace = [
+          "10.0.196.0/24"
+        ]
+        serviceEndpoints = [
           "Microsoft.CognitiveServices"
         ]
-        serviceDelegation    = "Microsoft.Web/serverFarms"
-        denyOutboundInternet = false
+        serviceDelegation = "Microsoft.Web/serverFarms"
       },
       {
         name = "GatewaySubnet"
@@ -78,8 +92,7 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation    = ""
-        denyOutboundInternet = false
+        serviceDelegation = ""
       },
       {
         name = "AzureBastionSubnet"
@@ -88,19 +101,130 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation    = ""
-        denyOutboundInternet = false
+        serviceDelegation = ""
       }
     ]
-    subnetIndex = { # Must be in sync with corresponding subnet
-      farm        = 0
-      workstation = 1
-      storage     = 2
-      cache       = 3
-      ai          = 4
-    }
+  },
+  {
+    enable     = false
+    name       = "Studio"
+    nameSuffix = "East"
+    regionName = "EastUS"
+    addressSpace = [
+      "10.1.0.0/16"
+    ]
+    dnsAddresses = [
+    ]
+    subnets = [
+      {
+        name = "Farm"
+        addressSpace = [
+          "10.1.0.0/17"
+        ]
+        serviceEndpoints = [
+          "Microsoft.Storage.Global",
+          "Microsoft.ContainerRegistry"
+        ]
+        serviceDelegation = ""
+      },
+      {
+        name = "Workstation"
+        addressSpace = [
+          "10.1.128.0/18"
+        ]
+        serviceEndpoints = [
+          "Microsoft.Storage.Global"
+        ]
+        serviceDelegation = ""
+      },
+      {
+        name = "Storage"
+        addressSpace = [
+          "10.1.192.0/24"
+        ]
+        serviceEndpoints = [
+          "Microsoft.Storage.Global"
+        ]
+        serviceDelegation = ""
+      },
+      {
+        name = "StorageNetApp"
+        addressSpace = [
+          "10.1.193.0/24"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = "Microsoft.Netapp/volumes"
+      },
+      {
+        name = "StorageQumulo"
+        addressSpace = [
+          "10.1.194.0/24"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = "Qumulo.Storage/fileSystems"
+      },
+      {
+        name = "Cache"
+        addressSpace = [
+          "10.1.195.0/24"
+        ]
+        serviceEndpoints = [
+          "Microsoft.Storage.Global"
+        ]
+        serviceDelegation = ""
+      },
+      {
+        name = "AI"
+        addressSpace = [
+          "10.1.196.0/24"
+        ]
+        serviceEndpoints = [
+          "Microsoft.CognitiveServices"
+        ]
+        serviceDelegation = "Microsoft.Web/serverFarms"
+      },
+      {
+        name = "GatewaySubnet"
+        addressSpace = [
+          "10.1.255.0/26"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = ""
+      },
+      {
+        name = "AzureBastionSubnet"
+        addressSpace = [
+          "10.1.255.64/26"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = ""
+      }
+    ]
   }
 ]
+
+############################################################################
+# Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
+############################################################################
+
+privateDns = {
+  zoneName = "artist.studio"
+  autoRegistration = {
+    enable = true
+  }
+}
+
+##########################################################################################################################
+# Network Address Translation (NAT) Gateway (https://learn.microsoft.com/azure/virtual-network/nat-gateway/nat-overview) #
+##########################################################################################################################
+
+natGateway = {
+  enable = true
+}
 
 ################################################################################################################
 # Virtual Network Peering (https://learn.microsoft.com/azure/virtual-network/virtual-network-peering-overview) #
@@ -114,38 +238,19 @@ networkPeering = {
   useRemoteGateways           = false
 }
 
-##########################################################################################################################
-# Network Address Translation (NAT) Gateway (https://learn.microsoft.com/azure/virtual-network/nat-gateway/nat-overview) #
-##########################################################################################################################
-
-natGateway = {
-  enable = true
-}
-
-############################################################################
-# Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
-############################################################################
-
-privateDns = {
-  enable   = true
-  zoneName = "artist.studio"
-  autoRegistration = {
-    enable = true
-  }
-}
-
 ########################################################################
 # Bastion (https://learn.microsoft.com/azure/bastion/bastion-overview) #
 ########################################################################
 
 bastion = {
-  enable              = true
+  enable              = false
   sku                 = "Standard"
   scaleUnitCount      = 2
   enableFileCopy      = true
   enableCopyPaste     = true
   enableIpConnect     = true
   enableTunneling     = true
+  enablePerRegion     = false
   enableShareableLink = false
 }
 
@@ -187,15 +292,4 @@ vpnGatewayLocal = {
     peerWeight     = 0
     peeringAddress = ""
   }
-}
-
-#######################################################################
-# Resource dependency configuration for pre-existing deployments only #
-#######################################################################
-
-existingNetwork = {
-  enable            = false
-  name              = ""
-  regionName        = ""
-  resourceGroupName = ""
 }

@@ -1,13 +1,13 @@
 terraform {
-  required_version = ">= 1.6.5"
+  required_version = ">= 1.7.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.84.0"
+      version = "~>3.90.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.46.0"
+      version = "~>2.47.0"
     }
   }
   backend azurerm {
@@ -36,18 +36,18 @@ variable resourceGroupName {
   type = string
 }
 
+variable dnsRecord {
+  type = object({
+    name       = string
+    ttlSeconds = number
+  })
+}
+
 variable activeDirectory {
   type = object({
     enable        = bool
     domainName    = string
     adminPassword = string
-  })
-}
-
-variable dnsARecord {
-  type = object({
-    name       = string
-    ttlSeconds = number
   })
 }
 
@@ -67,21 +67,28 @@ data azurerm_user_assigned_identity studio {
 }
 
 data azurerm_key_vault studio {
-  count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
   resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret admin_username {
-  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault_secret admin_password {
-  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret database_username {
+  name         = module.global.keyVault.secretName.databaseUsername
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret database_password {
+  name         = module.global.keyVault.secretName.databasePassword
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_log_analytics_workspace monitor {
@@ -95,7 +102,7 @@ data terraform_remote_state network {
   config = {
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.rootStorage.accountName
-    container_name       = module.global.rootStorage.containerName.terraform
+    container_name       = module.global.rootStorage.containerName.terraformState
     key                  = "1.Virtual.Network"
   }
 }
@@ -105,15 +112,9 @@ data azurerm_virtual_network studio {
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
 }
 
-data azurerm_subnet farm {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.farm].name
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
-}
-
 data azurerm_private_dns_zone studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.terraform_remote_state.network.outputs.privateDns.zoneName
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
+  name                = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.terraform_remote_state.network.outputs.privateDns.name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
 }
 
 resource azurerm_resource_group scheduler {
@@ -125,26 +126,11 @@ resource azurerm_private_dns_a_record scheduler {
   for_each = {
     for virtualMachine in var.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable
   }
-  name                = var.dnsARecord.name
+  name                = var.dnsRecord.name
   resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = data.azurerm_private_dns_zone.studio.name
-  ttl                 = var.dnsARecord.ttlSeconds
+  ttl                 = var.dnsRecord.ttlSeconds
   records = [
     azurerm_network_interface.scheduler[each.value.name].private_ip_address
-  ]
-}
-
-output resourceGroupName {
-  value = azurerm_resource_group.scheduler.name
-}
-
-output schedulerDns {
-  value = [
-    for dnsRecord in azurerm_private_dns_a_record.scheduler : {
-      name              = dnsRecord.name
-      resourceGroupName = dnsRecord.resource_group_name
-      fqdn              = dnsRecord.fqdn
-      records           = dnsRecord.records
-    }
   ]
 }

@@ -79,9 +79,9 @@ if [ "${wekaClusterName}" != "" ]; then
     fi
     dnsRecordQuery="aRecords[?ipv4Address=='$(hostname -i)']"
     while [ -z "$dnsRecordAddress" ]; do
-      az network private-dns record-set a add-record --resource-group ${dnsResourceGroupName} --zone-name ${dnsZoneName} --record-set-name ${dnsARecordName} --ipv4-address $(hostname -i)
-      sleep 5s
-      dnsRecordAddress=$(az network private-dns record-set a show --resource-group ${dnsResourceGroupName} --zone-name ${dnsZoneName} --name ${dnsARecordName} --query $dnsRecordQuery --output tsv)
+      az network private-dns record-set a add-record --resource-group ${dnsResourceGroupName} --zone-name ${dnsZoneName} --record-set-name ${dnsRecordName} --ipv4-address $(hostname -i)
+      sleep 3s
+      dnsRecordAddress=$(az network private-dns record-set a show --resource-group ${dnsResourceGroupName} --zone-name ${dnsZoneName} --name ${dnsRecordName} --query $dnsRecordQuery --output tsv)
     done
   else
     weka local setup container --name $drivesContainerName --base-port 14000 --failure-domain $failureDomain --cores $coreCountDrives --drives-dedicated-cores $coreCountDrives --core-ids $coreIdsDrives --dedicate --no-frontends &> weka-container-setup-$drivesContainerName.log
@@ -101,7 +101,7 @@ if [ "${wekaClusterName}" != "" ]; then
   chmod +x $codeFilePath
 
   if [ ${wekaTerminateNotification.enable} == true ]; then
-    cronFilePath="/tmp/crontab"
+    cronFilePath="$binDirectory/crontab"
     echo "* * * * * $codeFilePath" > $cronFilePath
     crontab $cronFilePath
   fi

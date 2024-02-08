@@ -4,23 +4,28 @@
 
 variable functionApp {
   type = object({
-    enable = bool
-    name   = string
+    enable        = bool
+    name          = string
+    subnetName    = string
+    fileShareName = string
     servicePlan = object({
       computeTier = string
       workerCount = number
       alwaysOn    = bool
     })
-    monitor = object({
-      workspace = object({
-        sku = string
-      })
-      insight = object({
-        type = string
-      })
-      retentionDays = number
-    })
   })
+}
+
+data azurerm_application_insights studio {
+  count               = var.functionApp.enable ? 1 : 0
+  name                = module.global.monitor.name
+  resource_group_name = module.global.resourceGroupName
+}
+
+data azurerm_storage_share studio {
+  count                = var.functionApp.enable ? 1 : 0
+  name                 = var.existingStorage.enable ? var.existingStorage.fileShareName : var.functionApp.fileShareName
+  storage_account_name = data.azurerm_storage_account.studio.name
 }
 
 resource azurerm_private_dns_zone function_app {
@@ -42,7 +47,7 @@ resource azurerm_private_endpoint function_app {
   name                = "${azurerm_windows_function_app.studio[0].name}-functions"
   resource_group_name = azurerm_resource_group.farm.name
   location            = azurerm_resource_group.farm.location
-  subnet_id           = data.azurerm_subnet.farm.id
+  subnet_id           = "${data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : var.functionApp.subnetName}"
   private_service_connection {
     name                           = azurerm_windows_function_app.studio[0].name
     private_connection_resource_id = azurerm_windows_function_app.studio[0].id
@@ -62,29 +67,6 @@ resource azurerm_private_endpoint function_app {
   ]
 }
 
-resource azurerm_log_analytics_workspace studio {
-  count                      = var.functionApp.enable ? 1 : 0
-  name                       = var.functionApp.name
-  resource_group_name        = azurerm_resource_group.farm.name
-  location                   = azurerm_resource_group.farm.location
-  sku                        = var.functionApp.monitor.workspace.sku
-  retention_in_days          = var.functionApp.monitor.retentionDays
-  internet_ingestion_enabled = false
-  internet_query_enabled     = false
-}
-
-resource azurerm_application_insights studio {
-  count                      = var.functionApp.enable ? 1 : 0
-  name                       = var.functionApp.name
-  resource_group_name        = azurerm_resource_group.farm.name
-  location                   = azurerm_resource_group.farm.location
-  workspace_id               = azurerm_log_analytics_workspace.studio[0].id
-  application_type           = var.functionApp.monitor.insight.type
-  retention_in_days          = var.functionApp.monitor.retentionDays
-  internet_ingestion_enabled = false
-  internet_query_enabled     = false
-}
-
 resource azurerm_service_plan studio {
   count               = var.functionApp.enable ? 1 : 0
   name                = var.functionApp.name
@@ -101,7 +83,7 @@ resource azurerm_windows_function_app studio {
   resource_group_name           = azurerm_resource_group.farm.name
   location                      = azurerm_resource_group.farm.location
   service_plan_id               = azurerm_service_plan.studio[0].id
-  virtual_network_subnet_id     = data.azurerm_subnet.ai.id
+  virtual_network_subnet_id     = "${data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : var.functionApp.subnetName}"
   storage_account_name          = data.azurerm_storage_account.studio.name
   storage_uses_managed_identity = true
   public_network_access_enabled = false
@@ -117,13 +99,13 @@ resource azurerm_windows_function_app studio {
     name         = data.azurerm_storage_account.studio.name
     account_name = data.azurerm_storage_account.studio.name
     access_key   = data.azurerm_storage_account.studio.primary_access_key
-    share_name   = data.azurerm_storage_share.studio.name
+    share_name   = data.azurerm_storage_share.studio[0].name
     type         = "AzureFiles"
   }
   site_config {
     always_on                              = var.functionApp.servicePlan.alwaysOn
-    application_insights_connection_string = azurerm_application_insights.studio[0].connection_string
-    application_insights_key               = azurerm_application_insights.studio[0].instrumentation_key
+    application_insights_connection_string = data.azurerm_application_insights.studio[0].connection_string
+    application_insights_key               = data.azurerm_application_insights.studio[0].instrumentation_key
     health_check_path                      = "/"
     use_32_bit_worker                      = false
     http2_enabled                          = true
@@ -183,12 +165,5 @@ resource azurerm_function_app_function image_generate {
   file {
     name    = "run.csx"
     content = file("image.generate/run.csx")
-  }
-}
-
-output functionApp {
-  value = {
-    enable   = var.functionApp.enable
-    endpoint = var.functionApp.enable ? azurerm_windows_function_app.studio[0].default_hostname : ""
   }
 }

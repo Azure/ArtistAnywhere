@@ -1,9 +1,9 @@
 $binDirectory = "C:\Users\Public\Downloads"
 Set-Location -Path $binDirectory
 
-Start-Process -FilePath sc.exe -ArgumentList "start Deadline10DatabaseService"
+. C:\AzureData\functions.ps1
 
-$scriptFile = "C:\AzureData\aaaAutoScaler.ps1"
+$scriptFile = "$binDirectory\aaaAutoScaler.ps1"
 Copy-Item -Path "C:\AzureData\CustomData.bin" -Destination $scriptFile
 
 $taskName = "AAA Auto Scaler"
@@ -22,3 +22,6 @@ if ("${activeDirectory.enable}" -eq $true) {
   $securePassword = ConvertTo-SecureString ${activeDirectory.adminPassword} -AsPlainText -Force
   Install-ADDSForest -DomainName "${activeDirectory.domainName}" -SafeModeAdministratorPassword $securePassword -InstallDns -Force
 }
+
+sc start Deadline10DatabaseService
+InitializeClient $null C:\Deadline C:\Deadline\Deadline10Client.pfx

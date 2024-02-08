@@ -14,7 +14,7 @@ variable rootStorage {
   default = {
     accountName = "xstudio0" # Set to a globally unique name (lowercase alphanumeric)
     containerName = {
-      terraform = "terraform"
+      terraformState = "terraform-state"
     }
   }
 }
@@ -38,9 +38,11 @@ variable keyVault {
     enable = true
     name   = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
     secretName = {
-      gatewayConnection = "GatewayConnection"
       adminUsername     = "AdminUsername"
       adminPassword     = "AdminPassword"
+      databaseUsername  = "DatabaseUsername"
+      databasePassword  = "DatabasePassword"
+      gatewayConnection = "GatewayConnection"
     }
     keyName = {
       cacheEncryption = "CacheEncryption"

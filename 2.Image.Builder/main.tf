@@ -1,17 +1,17 @@
 terraform {
-  required_version = ">= 1.6.5"
+  required_version = ">= 1.7.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.84.0"
+      version = "~>3.90.0"
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>1.10.0"
+      version = "~>1.12.0"
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.0"
+      version = "~>3.4.1"
     }
   }
   backend azurerm {
@@ -32,7 +32,10 @@ module global {
 }
 
 variable resourceGroupName {
-  type = string
+  type = object({
+    database = string
+    image    = string
+  })
 }
 
 variable binStorage {
@@ -56,7 +59,8 @@ variable existingNetwork {
 }
 
 data http client_address {
-  url = "https://api.ipify.org?format=json"
+  count = var.containerRegistry.enable ? 1 : 0
+  url   = "https://api.ipify.org?format=json"
 }
 
 data azurerm_user_assigned_identity studio {
@@ -64,12 +68,37 @@ data azurerm_user_assigned_identity studio {
   resource_group_name = module.global.resourceGroupName
 }
 
+data azurerm_key_vault studio {
+  name                = module.global.keyVault.name
+  resource_group_name = module.global.resourceGroupName
+}
+
+data azurerm_key_vault_secret admin_username {
+  name         = module.global.keyVault.secretName.adminUsername
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret admin_password {
+  name         = module.global.keyVault.secretName.adminPassword
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret database_username {
+  name         = module.global.keyVault.secretName.databaseUsername
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret database_password {
+  name         = module.global.keyVault.secretName.databasePassword
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.rootStorage.accountName
-    container_name       = module.global.rootStorage.containerName.terraform
+    container_name       = module.global.rootStorage.containerName.terraformState
     key                  = "1.Virtual.Network"
   }
 }
@@ -80,7 +109,7 @@ data azurerm_virtual_network studio {
 }
 
 data azurerm_subnet farm {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameFarm : data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.farm].name
+  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Farm"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
@@ -89,11 +118,12 @@ data azurerm_resource_group network {
   name = data.azurerm_virtual_network.studio.resource_group_name
 }
 
-resource azurerm_resource_group image {
-  name     = var.resourceGroupName
+resource azurerm_resource_group database {
+  name     = var.resourceGroupName.database
   location = module.global.regionName
 }
 
-output resourceGroupName {
-  value = azurerm_resource_group.image.name
+resource azurerm_resource_group image {
+  name     = var.resourceGroupName.image
+  location = module.global.regionName
 }

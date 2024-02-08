@@ -1,20 +1,16 @@
 #!/bin/bash -x
 
-source /etc/profile.d/aaa.sh
-
 binDirectory="/usr/local/bin"
 cd $binDirectory
 
-functionsCode="functions.sh"
-functionsData="${filebase64("../0.Global.Foundation/functions.sh")}"
-echo $functionsData | base64 --decode > $functionsCode
-source $functionsCode
+source /etc/profile.d/aaa.sh
+
+source /tmp/functions.sh
 
 if [ "${pcoipLicenseKey}" != "" ]; then
-  StartProcess "/sbin/pcoip-register-host --registration-code=${pcoipLicenseKey}" $binDirectory/pcoip-agent-license
+  RunProcess "/sbin/pcoip-register-host --registration-code=${pcoipLicenseKey}" $binDirectory/pcoip-agent-license
 fi
 
 SetFileSystems '${jsonencode(fileSystems)}'
 
-enableWeka=false
-InitializeClient $binDirectory $enableWeka
+InitializeClient ${databaseUsername} ${databasePassword} null false

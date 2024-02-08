@@ -21,8 +21,7 @@ function FileExists ($filePath) {
   return Test-Path -PathType Leaf -Path $filePath
 }
 
-function SetFileSystems ($fileSystemsJson) {
-  $fileSystems = ConvertFrom-Json -InputObject $fileSystemsJson
+function SetFileSystems ($fileSystems) {
   foreach ($fileSystem in $fileSystems) {
     if ($fileSystem.enable) {
       SetFileSystemMount $fileSystem.mount
@@ -78,16 +77,9 @@ function JoinActiveDirectory ($domainName, $domainServerName, $orgUnitPath, $adm
   $securePassword = ConvertTo-SecureString $adminPassword -AsPlainText -Force
   $adminCredential = New-Object System.Management.Automation.PSCredential($adminUsername, $securePassword)
 
-  try {
-    $localComputerName = $(hostname)
-    $adComputer = Get-ADComputer -Identity $localComputerName -Server $domainServerName -Credential $adminCredential
+  $adComputer = Get-ADComputer -Identity $localComputerName -Server $domainServerName -Credential $adminCredential
+  if ($adComputer) {
     Remove-ADObject -Identity $adComputer -Server $domainServerName -Recursive -Confirm:$false
-    #Start-Sleep -Seconds 30
-    $adComputer = null
-  } catch {
-    if ($adComputer) {
-      Write-Error "Error occurred while trying to remove the $localComputerName computer AD object."
-    }
   }
 
   if ($orgUnitPath -ne "") {
@@ -97,10 +89,15 @@ function JoinActiveDirectory ($domainName, $domainServerName, $orgUnitPath, $adm
   }
 }
 
-function InitializeClient ($activeDirectoryJson) {
-  RunProcess deadlinecommand.exe "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx" deadline-repository
-  $activeDirectory = ConvertFrom-Json -InputObject $activeDirectoryJson
-  if ($activeDirectory.enable) {
+function InitializeClient ($activeDirectory, $repositoryRoot, $clientCertificate) {
+  if ($respositoryRoot -eq $null) {
+    $repositoryRoot = "S:\"
+  }
+  if ($clientCertificate -eq $null) {
+    $clientCertificate = "S:\Deadline10Client.pfx"
+  }
+  RunProcess deadlinecommand.exe "-ChangeRepository Direct $respositoryRoot $clientCertificate" deadline-repository
+  if ($activeDirectory -ne $null -and $activeDirectory.enable) {
     Retry 5 10 {
       JoinActiveDirectory $activeDirectory.domainName $activeDirectory.domainServerName $activeDirectory.orgUnitPath $activeDirectory.adminUsername $activeDirectory.adminPassword
     }

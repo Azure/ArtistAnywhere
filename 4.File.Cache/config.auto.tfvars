@@ -2,7 +2,6 @@ resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens,
 
 cacheName       = "Cache" # Set to a uniquely identifiable cache cluster name
 enableHPCCache  = true    # Enables HPC Cache (PaaS) instead of Avere vFXT (IaaS)
-enablePerRegion = false   # Enables HPC Cache (PaaS) per Azure Virtual Network region
 
 ##############################################################################
 # HPC Cache (https://learn.microsoft.com/azure/hpc-cache/hpc-cache-overview) #
@@ -42,6 +41,8 @@ vfxtCache = {
     adminUsername = ""
     adminPassword = ""
     sshPublicKey  = ""
+    localTimezone = "UTC"
+    enableDevMode = false
     imageId = {
       controller = ""
       node       = ""
@@ -53,16 +54,13 @@ vfxtCache = {
     enableProactive  = "Support" # https://github.com/Azure/Avere/tree/main/src/terraform/providers/terraform-provider-avere#enable_secure_proactive_support
     rollingTraceFlag = "0xe4001" # https://github.com/Azure/Avere/tree/main/src/terraform/providers/terraform-provider-avere#rolling_trace_flag
   }
-  localTimezone = "UTC"
-  enableDevMode = false
 }
 
 ############################################################################
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
 ############################################################################
 
-dnsARecord = {
-  name       = "cache"
+dnsRecord = {
   ttlSeconds = 300
 }
 
@@ -70,41 +68,26 @@ dnsARecord = {
 # Storage Targets (https://learn.microsoft.com/azure/hpc-cache/hpc-cache-add-storage) #
 #######################################################################################
 
-storageTargetsNfs = [
+storageTargets = [
   {
-    enable      = false
-    name        = "Content"
-    storageHost = ""
-    hpcCache = {
-      usageModel = "READ_ONLY" # https://learn.microsoft.com/azure/hpc-cache/cache-usage-models
+    enable            = false
+    name              = "Content"
+    clientPath        = "/content"
+    usageModel        = "READ_ONLY" # https://learn.microsoft.com/azure/hpc-cache/cache-usage-models
+    hostName          = "xstudio1"
+    containerName     = "content"
+    resourceGroupName = "ArtistAnywhere.Storage.West"
+    fileIntervals = {
+      verificationSeconds = 30
+      writeBackSeconds    = null
     }
-    vfxtCache = {
-      cachePolicy    = "Read Caching"
-      nfsConnections = 4
-      customSettings = [
-      ]
-    }
-    namespaceJunctions = [
+    vfxtJunctions = [
       {
         storageExport = ""
         storagePath   = ""
         clientPath    = ""
       }
     ]
-  }
-]
-
-storageTargetsNfsBlob = [
-  {
-    enable     = false
-    name       = "Content"
-    clientPath = "/content"
-    usageModel = "READ_ONLY" # https://learn.microsoft.com/azure/hpc-cache/cache-usage-models
-    storage = {
-      resourceGroupName = "ArtistAnywhere.Storage"
-      accountName       = "xstudio1"
-      containerName     = "content"
-    }
   }
 ]
 
@@ -118,4 +101,11 @@ existingNetwork = {
   subnetName         = ""
   resourceGroupName  = ""
   privateDnsZoneName = ""
+}
+
+existingStorageBlobNfs = {
+  enable            = false
+  accountName       = ""
+  containerName     = ""
+  resourceGroupName = ""
 }

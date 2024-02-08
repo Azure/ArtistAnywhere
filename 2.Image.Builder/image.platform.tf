@@ -4,7 +4,7 @@
 
 resource azapi_resource image_platform_linux {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && imageTemplate.source.imageDefinition.name == "Linux" && imageTemplate.build.imageVersion == "0.0.0"
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && var.computeGallery.platform.linux.enable && imageTemplate.enable && imageTemplate.source.imageDefinition.name == "Linux" && imageTemplate.build.imageVersion == "0.0.0"
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"
@@ -60,7 +60,7 @@ resource azapi_resource image_platform_linux {
         {
           type           = "SharedImage"
           runOutputName  = "${each.value.name}-${each.value.build.imageVersion}"
-          galleryImageId = "${azurerm_shared_image.studio[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
+          galleryImageId = "${azurerm_shared_image.linux[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
           versioning = {
             scheme = "Latest"
             major  = tonumber(split(".", each.value.build.imageVersion)[0])

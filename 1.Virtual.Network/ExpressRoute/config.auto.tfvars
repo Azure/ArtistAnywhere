@@ -1,11 +1,9 @@
-##########################################################################################
-# ExpressRoute (https://learn.microsoft.com/azure/expressroute/expressroute-introduction #
-##########################################################################################
+resourceGroupName = "ArtistAnywhere.Network" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
-regionName        = "WestUS3"
-resourceGroupName = "ArtistAnywhere.Network"
+regionName = "" # Set Azure region name from "az account list-locations --query [].name"
 
 #######################################################################################################
+# ExpressRoute         (https://learn.microsoft.com/azure/expressroute/expressroute-introduction      #
 # ExpressRoute Circuit (https://learn.microsoft.com/azure/expressroute/expressroute-circuit-peerings) #
 #######################################################################################################
 

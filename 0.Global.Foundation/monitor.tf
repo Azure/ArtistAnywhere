@@ -36,17 +36,3 @@ resource azurerm_application_insights monitor {
   internet_ingestion_enabled = false
   internet_query_enabled     = false
 }
-
-output monitor {
-  value = {
-    enable = module.global.monitor.enable
-    workspace = {
-      name = module.global.monitor.name
-      id   = module.global.monitor.enable ? azurerm_log_analytics_workspace.monitor[0].workspace_id : ""
-    }
-    insight = {
-      name = module.global.monitor.name
-      id   = module.global.monitor.enable ? azurerm_application_insights.monitor[0].app_id : ""
-    }
-  }
-}

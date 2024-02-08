@@ -1,13 +1,6 @@
-resourceGroupName = "ArtistAnywhere.Image" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
-
-######################################################################################################
-# Container Registry (https://learn.microsoft.com/azure/container-registry/container-registry-intro) #
-######################################################################################################
-
-containerRegistry = {
-  enable = true
-  name   = "xstudio"
-  sku    = "Premium"
+resourceGroupName = { # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+  database = "ArtistAnywhere.Database"
+  image    = "ArtistAnywhere.Image"
 }
 
 ###############################################################################################
@@ -15,8 +8,16 @@ containerRegistry = {
 ###############################################################################################
 
 computeGallery = {
-  enable = true
   name   = "xstudio"
+  enable = true
+  platform = {
+    linux = {
+      enable = true
+    }
+    windows = {
+      enable = true
+    }
+  }
   imageDefinitions = [
     {
       name       = "Linux"
@@ -48,7 +49,7 @@ computeGallery = {
       generation = "V2"
       publisher  = "MicrosoftWindowsDesktop"
       offer      = "Windows-11"
-      sku        = "Win11-22H2-Pro"
+      sku        = "Win11-23H2-Pro"
     }
   ]
 }
@@ -60,7 +61,8 @@ computeGallery = {
 imageBuilder = {
   templates = [
     {
-      name = "LnxPlatform"
+      name   = "LnxPlatform"
+      enable = true
       source = {
         imageDefinition = {
           name    = "Linux"
@@ -83,7 +85,9 @@ imageBuilder = {
           "systemctl --now disable firewalld",
           "sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config",
           "dnf -y install gcc gcc-c++ python3-devel perl cmake git jq nfs-utils",
-          "dnf -y upgrade"
+          "dnf -y upgrade",
+          "export AZNFS_NONINTERACTIVE_INSTALL=1",
+          "curl -L https://github.com/Azure/AZNFS-mount/releases/download/2.0.3/aznfs_install.sh | bash"
         ]
       }
       errorHandling = {
@@ -92,7 +96,8 @@ imageBuilder = {
       }
     },
     {
-      name = "LnxStorageC"
+      name   = "LnxStorage"
+      enable = true
       source = {
         imageDefinition = {
           name    = "Linux"
@@ -120,35 +125,8 @@ imageBuilder = {
       }
     },
     {
-      name = "LnxStorageG"
-      source = {
-        imageDefinition = {
-          name    = "Linux"
-          version = "Latest"
-        }
-        imageVersion = {
-          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
-        }
-      }
-      build = {
-        machineType    = "Storage"
-        machineSize    = "Standard_NG8ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = "AMD"                     # NVIDIA or AMD
-        imageVersion   = "0.2.0"
-        osDiskSizeGB   = 0
-        timeoutMinutes = 120
-        renderEngines = [
-        ]
-        customization = [
-        ]
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
-      }
-    },
-    {
-      name = "LnxScheduler"
+      name   = "LnxScheduler"
+      enable = true
       source = {
         imageDefinition = {
           name    = "Linux"
@@ -176,7 +154,8 @@ imageBuilder = {
       }
     },
     {
-      name = "LnxFarmC"
+      name   = "LnxFarmC"
+      enable = true
       source = {
         imageDefinition = {
           name    = "Linux"
@@ -206,7 +185,8 @@ imageBuilder = {
       }
     },
     {
-      name = "LnxFarmG"
+      name   = "LnxFarmG"
+      enable = true
       source = {
         imageDefinition = {
           name    = "Linux"
@@ -237,7 +217,8 @@ imageBuilder = {
       }
     },
     {
-      name = "LnxArtistN"
+      name   = "LnxArtistN"
+      enable = true
       source = {
         imageDefinition = {
           name    = "Linux"
@@ -267,39 +248,41 @@ imageBuilder = {
         customizationMode = "cleanup"
       }
     },
-    # {
-    #   name = "LnxArtistA"
-    #   source = {
-    #     imageDefinition = {
-    #       name    = "Linux"
-    #       version = "Latest"
-    #     }
-    #     imageVersion = {
-    #       id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
-    #     }
-    #   }
-    #   build = {
-    #     machineType    = "Workstation"
-    #     machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
-    #     gpuProvider    = "AMD"                      # NVIDIA or AMD
-    #     imageVersion   = "3.1.0"
-    #     osDiskSizeGB   = 360
-    #     timeoutMinutes = 240
-    #     renderEngines = [
-    #       "PBRT",
-    #       "Blender",
-    #       "RenderMan"
-    #     ]
-    #     customization = [
-    #     ]
-    #   }
-    #   errorHandling = {
-    #     validationMode    = "cleanup"
-    #     customizationMode = "cleanup"
-    #   }
-    # },
     {
-      name = "WinScheduler"
+      name   = "LnxArtistA"
+      enable = false
+      source = {
+        imageDefinition = {
+          name    = "Linux"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
+        }
+      }
+      build = {
+        machineType    = "Workstation"
+        machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "AMD"                      # NVIDIA or AMD
+        imageVersion   = "3.1.0"
+        osDiskSizeGB   = 360
+        timeoutMinutes = 240
+        renderEngines = [
+          "PBRT",
+          "Blender",
+          "RenderMan"
+        ]
+        customization = [
+        ]
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
+      }
+    },
+    {
+      name   = "WinScheduler"
+      enable = true
       source = {
         imageDefinition = {
           name    = "WinServer"
@@ -327,7 +310,8 @@ imageBuilder = {
       }
     },
     {
-      name = "WinFarmC"
+      name   = "WinFarmC"
+      enable = true
       source = {
         imageDefinition = {
           name    = "WinFarm"
@@ -357,7 +341,8 @@ imageBuilder = {
       }
     },
     {
-      name = "WinFarmG"
+      name   = "WinFarmG"
+      enable = true
       source = {
         imageDefinition = {
           name    = "WinFarm"
@@ -389,7 +374,8 @@ imageBuilder = {
       }
     },
     {
-      name = "WinArtistN"
+      name   = "WinArtistN"
+      enable = true
       source = {
         imageDefinition = {
           name    = "WinArtist"
@@ -420,42 +406,43 @@ imageBuilder = {
         customizationMode = "cleanup"
       }
     },
-    # {
-    #   name = "WinArtistA"
-    #   source = {
-    #     imageDefinition = {
-    #       name    = "WinArtist"
-    #       version = "Latest"
-    #     }
-    #     imageVersion = {
-    #       id = ""
-    #     }
-    #   }
-    #   build = {
-    #     machineType    = "Workstation"
-    #     machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
-    #     gpuProvider    = "AMD"                      # NVIDIA or AMD
-    #     imageVersion   = "3.1.0"
-    #     osDiskSizeGB   = 512
-    #     timeoutMinutes = 480
-    #     renderEngines = [
-    #       "PBRT",
-    #       "Blender",
-    #       "RenderMan",
-    #       # "Unreal+PixelStream"
-    #     ]
-    #     customization = [
-    #     ]
-    #   }
-    #   errorHandling = {
-    #     validationMode    = "cleanup"
-    #     customizationMode = "cleanup"
-    #   }
-    # }
+    {
+      name   = "WinArtistA"
+      enable = true
+      source = {
+        imageDefinition = {
+          name    = "WinArtist"
+          version = "Latest"
+        }
+        imageVersion = {
+          id = ""
+        }
+      }
+      build = {
+        machineType    = "Workstation"
+        machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "AMD"                      # NVIDIA or AMD
+        imageVersion   = "3.1.0"
+        osDiskSizeGB   = 512
+        timeoutMinutes = 480
+        renderEngines = [
+          "PBRT",
+          "Blender",
+          "RenderMan",
+          # "Unreal+PixelStream"
+        ]
+        customization = [
+        ]
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
+      }
+    }
   ]
 }
 
-binStorage = {
+binStorage = { # Required configuration for image building
   host = ""
   auth = ""
 }

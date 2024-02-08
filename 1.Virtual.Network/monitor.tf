@@ -3,44 +3,44 @@
 ######################################################################
 
 data azurerm_log_analytics_workspace studio {
-  count               = module.global.monitor.enable && !var.existingNetwork.enable ? 1 : 0
+  count               = module.global.monitor.enable ? 1 : 0
   name                = module.global.monitor.name
   resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_application_insights studio {
-  count               = module.global.monitor.enable && !var.existingNetwork.enable ? 1 : 0
+  count               = module.global.monitor.enable ? 1 : 0
   name                = module.global.monitor.name
   resource_group_name = module.global.resourceGroupName
 }
 
 resource azurerm_private_dns_zone monitor {
-  count               = module.global.monitor.enable && !var.existingNetwork.enable ? 1 : 0
+  count               = module.global.monitor.enable ? 1 : 0
   name                = "privatelink.monitor.azure.com"
   resource_group_name = azurerm_resource_group.network.name
 }
 
 resource azurerm_private_dns_zone monitor_opinsights_oms {
-  count               = module.global.monitor.enable && !var.existingNetwork.enable ? 1 : 0
+  count               = module.global.monitor.enable ? 1 : 0
   name                = "privatelink.oms.opinsights.azure.com"
   resource_group_name = azurerm_resource_group.network.name
 }
 
 resource azurerm_private_dns_zone monitor_opinsights_ods {
-  count               = module.global.monitor.enable && !var.existingNetwork.enable ? 1 : 0
+  count               = module.global.monitor.enable ? 1 : 0
   name                = "privatelink.ods.opinsights.azure.com"
   resource_group_name = azurerm_resource_group.network.name
 }
 
 resource azurerm_private_dns_zone monitor_automation {
-  count               = module.global.monitor.enable && !var.existingNetwork.enable ? 1 : 0
+  count               = module.global.monitor.enable ? 1 : 0
   name                = "privatelink.agentsvc.azure-automation.net"
   resource_group_name = azurerm_resource_group.network.name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link monitor {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.monitor.enable && !var.existingNetwork.enable
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.monitor.enable
   }
   name                  = "monitor-${lower(each.value.regionName)}"
   resource_group_name   = azurerm_resource_group.network.name
@@ -50,7 +50,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor {
 
 resource azurerm_private_dns_zone_virtual_network_link monitor_opinsights_oms {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.monitor.enable && !var.existingNetwork.enable
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.monitor.enable
   }
   name                  = "monitor-opinsights-oms-${lower(each.value.regionName)}"
   resource_group_name   = azurerm_resource_group.network.name
@@ -60,7 +60,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor_opinsights_oms {
 
 resource azurerm_private_dns_zone_virtual_network_link monitor_opinsights_ods {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.monitor.enable && !var.existingNetwork.enable
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.monitor.enable
   }
   name                  = "monitor-opinsights-ods-${lower(each.value.regionName)}"
   resource_group_name   = azurerm_resource_group.network.name
@@ -70,7 +70,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor_opinsights_ods {
 
 resource azurerm_private_dns_zone_virtual_network_link monitor_automation {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.monitor.enable && !var.existingNetwork.enable
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.monitor.enable
   }
   name                  = "monitor-automation-${lower(each.value.regionName)}"
   resource_group_name   = azurerm_resource_group.network.name
@@ -80,7 +80,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor_automation {
 
 resource azurerm_private_endpoint monitor {
   for_each = {
-    for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if module.global.monitor.enable && !var.existingNetwork.enable
+    for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if module.global.monitor.enable
   }
   name                = "${azurerm_monitor_private_link_scope.monitor[0].name}-monitor"
   resource_group_name = each.value.resourceGroupName
@@ -101,7 +101,7 @@ resource azurerm_private_endpoint monitor {
       azurerm_private_dns_zone.monitor_opinsights_oms[0].id,
       azurerm_private_dns_zone.monitor_opinsights_ods[0].id,
       azurerm_private_dns_zone.monitor_automation[0].id,
-      azurerm_private_dns_zone.storage_blob[0].id
+      azurerm_private_dns_zone.storage_blob.id
     ]
   }
   depends_on = [
@@ -115,13 +115,13 @@ resource azurerm_private_endpoint monitor {
 }
 
 resource azurerm_monitor_private_link_scope monitor {
-  count               = module.global.monitor.enable && !var.existingNetwork.enable ? 1 : 0
+  count               = module.global.monitor.enable ? 1 : 0
   name                = module.global.monitor.name
   resource_group_name = azurerm_resource_group.network.name
 }
 
 resource azurerm_monitor_private_link_scoped_service monitor_workspace {
-  count               = module.global.monitor.enable && !var.existingNetwork.enable ? 1 : 0
+  count               = module.global.monitor.enable ? 1 : 0
   name                = "${module.global.monitor.name}-workspace"
   resource_group_name = azurerm_resource_group.network.name
   linked_resource_id  = data.azurerm_log_analytics_workspace.studio[0].id
@@ -129,7 +129,7 @@ resource azurerm_monitor_private_link_scoped_service monitor_workspace {
 }
 
 resource azurerm_monitor_private_link_scoped_service monitor_insight {
-  count               = module.global.monitor.enable && !var.existingNetwork.enable ? 1 : 0
+  count               = module.global.monitor.enable ? 1 : 0
   name                = "${module.global.monitor.name}-insight"
   resource_group_name = azurerm_resource_group.network.name
   linked_resource_id  = data.azurerm_application_insights.studio[0].id

@@ -3,11 +3,12 @@
 ############
 
 $regionName        = "WestUS3"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network"
-  name              = "Studio"
+  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
+  name              = "Studio-$nameSuffix"
   subnetName        = "Storage"
 }
 $virtualMachine = @{
@@ -41,11 +42,12 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
 ###########
 
 $regionName        = "WestUS3"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network"
-  name              = "Studio"
+  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
+  name              = "Studio-$nameSuffix"
   subnetName        = "Storage"
 }
 $virtualMachine = @{
@@ -89,11 +91,12 @@ for ($i = 1; $i -le $virtualMachine.dataDisk.count; $i++) {
 #################
 
 $regionName        = "WestUS3"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network"
-  name              = "Studio"
+  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
+  name              = "Studio-$nameSuffix"
   subnetName        = "Farm"
 }
 $virtualMachine = @{
@@ -127,11 +130,12 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
 ###############
 
 $regionName        = "WestUS3"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network"
-  name              = "Studio"
+  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
+  name              = "Studio-$nameSuffix"
   subnetName        = "Farm"
 }
 $virtualMachine = @{
@@ -166,11 +170,12 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
 }
 
 $regionName        = "WestUS3"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network"
-  name              = "Studio"
+  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
+  name              = "Studio-$nameSuffix"
   subnetName        = "Farm"
 }
 $virtualMachine = @{
@@ -209,11 +214,12 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
 ######################
 
 $regionName        = "WestUS3"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network"
-  name              = "Studio"
+  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
+  name              = "Studio-$nameSuffix"
   subnetName        = "Workstation"
 }
 $virtualMachine = @{
@@ -246,11 +252,12 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
 }
 
 $regionName        = "WestUS3"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network"
-  name              = "Studio"
+  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
+  name              = "Studio-$nameSuffix"
   subnetName        = "Workstation"
 }
 $virtualMachine = @{

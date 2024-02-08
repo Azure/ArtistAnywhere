@@ -6,7 +6,8 @@ variable batch {
   type = object({
     enable = bool
     account = object({
-      name = string
+      name       = string
+      subnetName = string
       storage = object({
         accountName       = string
         resourceGroupName = string
@@ -22,13 +23,28 @@ variable batch {
         })
       })
       node = object({
-        imageId = string
-        agentId = string
+        container = object({
+          enable   = bool
+          id       = string
+          registry = string
+          image = object({
+            publisher = string
+            offer     = string
+            sku       = string
+            version   = string
+            agentId   = string
+          })
+        })
+        image = object({
+          id      = string
+          agentId = string
+        })
         machine = object({
           size  = string
           count = number
         })
         network = object({
+          subnetName = string
           acceleration = object({
             enable = bool
           })
@@ -68,7 +84,6 @@ data azuread_service_principal batch {
 }
 
 data azurerm_key_vault batch {
-  count               = module.global.keyVault.enable ? 1 : 0
   name                = "${module.global.keyVault.name}-batch"
   resource_group_name = module.global.resourceGroupName
 }
@@ -80,7 +95,7 @@ locals {
         value   = pool.name.suffix.enable ? "${pool.name.prefix}_${replace(plantimestamp(), ":", "-")}" : pool.name.prefix
         display = pool.name.display
       }
-    }) if pool.enable && strcontains(pool.node.agentId, "node.el")
+    }) if pool.enable && strcontains(pool.node.image.agentId, "node.el")
   ]
   batchPoolsWindows = [
     for pool in var.batch.pools : merge(pool, {
@@ -88,7 +103,7 @@ locals {
         value   = pool.name.suffix.enable ? "${pool.name.prefix}_${replace(plantimestamp(), ":", "-")}" : pool.name.prefix
         display = pool.name.display
       }
-    }) if pool.enable && strcontains(pool.node.agentId, "node.windows")
+    }) if pool.enable && strcontains(pool.node.image.agentId, "node.windows")
   ]
   batchFileSystemsLinux = [
     for fileSystem in local.fileSystemsLinux : fileSystem if !fileSystem.iaasOnly
@@ -121,7 +136,7 @@ resource azurerm_private_endpoint batch_account {
   name                = "${azurerm_batch_account.scheduler[0].name}-batchAccount"
   resource_group_name = azurerm_resource_group.farm.name
   location            = azurerm_resource_group.farm.location
-  subnet_id           = data.azurerm_subnet.farm.id
+  subnet_id           = "${data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : var.batch.account.subnetName}"
   private_service_connection {
     name                           = azurerm_batch_account.scheduler[0].name
     private_connection_resource_id = azurerm_batch_account.scheduler[0].id
@@ -146,7 +161,7 @@ resource azurerm_private_endpoint batch_node {
   name                = "${azurerm_batch_account.scheduler[0].name}-batchNode"
   resource_group_name = azurerm_resource_group.farm.name
   location            = azurerm_resource_group.farm.location
-  subnet_id           = data.azurerm_subnet.farm.id
+  subnet_id           = "${data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : var.batch.account.subnetName}"
   private_service_connection {
     name                           = azurerm_batch_account.scheduler[0].name
     private_connection_resource_id = azurerm_batch_account.scheduler[0].id
@@ -206,8 +221,8 @@ resource azurerm_batch_account scheduler {
     }
   }
   key_vault_reference {
-    id  = data.azurerm_key_vault.batch[0].id
-    url = data.azurerm_key_vault.batch[0].vault_uri
+    id  = data.azurerm_key_vault.batch.id
+    url = data.azurerm_key_vault.batch.vault_uri
   }
   storage_account_id                  = data.azurerm_storage_account.studio.id
   storage_account_node_identity       = data.azurerm_user_assigned_identity.studio.id
@@ -225,7 +240,7 @@ resource azurerm_batch_pool linux {
   display_name                   = each.value.name.display != "" ? each.value.name.display : each.value.name.value
   resource_group_name            = azurerm_resource_group.farm.name
   account_name                   = azurerm_batch_account.scheduler[0].name
-  node_agent_sku_id              = each.value.node.agentId
+  node_agent_sku_id              = each.value.node.container.enable ? each.value.node.container.image.agentId : each.value.node.image.agentId
   vm_size                        = each.value.node.machine.size
   max_tasks_per_node             = each.value.node.maxConcurrentTasks
   os_disk_placement              = each.value.node.osDisk.ephemeral.enable ? "CacheDisk" : null
@@ -237,11 +252,38 @@ resource azurerm_batch_pool linux {
       data.azurerm_user_assigned_identity.studio.id
     ]
   }
-  storage_image_reference {
-    id = each.value.node.imageId
+  dynamic storage_image_reference {
+    for_each = each.value.node.container.enable ? [] : [1]
+    content {
+      id = each.value.node.image.id
+    }
+  }
+  dynamic storage_image_reference {
+    for_each = each.value.node.container.enable ? [1] : []
+    content {
+      publisher = each.value.node.container.image.publisher
+      offer     = each.value.node.container.image.offer
+      sku       = each.value.node.container.image.sku
+      version   = each.value.node.container.image.version
+    }
+  }
+  dynamic container_configuration {
+    for_each = each.value.node.container.enable ? [1] : []
+    content {
+      type = "DockerCompatible"
+      container_registries = [{
+        registry_server           = each.value.node.container.registry
+        user_assigned_identity_id = data.azurerm_user_assigned_identity.studio.id
+        user_name                 = data.terraform_remote_state.image.outputs.containerRegistry.adminName
+        password                  = data.terraform_remote_state.image.outputs.containerRegistry.adminPassword
+      }]
+      container_image_names = [
+        each.value.node.container.id
+      ]
+    }
   }
   network_configuration {
-    subnet_id                        = data.azurerm_subnet.farm.id
+    subnet_id                        = "${data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : each.value.node.network.subnetName}"
     accelerated_networking_enabled   = each.value.node.network.acceleration.enable
     public_address_provisioning_type = "NoPublicIPAddresses"
   }
@@ -258,8 +300,8 @@ resource azurerm_batch_pool linux {
   }
   user_accounts {
     elevation_level = "Admin"
-    name            = each.value.node.adminLogin.userName != "" ? each.value.node.adminLogin.userName : try(data.azurerm_key_vault_secret.admin_username[0].value, "")
-    password        = each.value.node.adminLogin.userPassword != "" ? each.value.node.adminLogin.userPassword : try(data.azurerm_key_vault_secret.admin_password[0].value, "")
+    name            = each.value.node.adminLogin.userName != "" ? each.value.node.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+    password        = each.value.node.adminLogin.userPassword != "" ? each.value.node.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
   }
   dynamic mount {
     for_each = length(local.batchFileSystemsLinux) > 0 ? [1] : []
@@ -284,7 +326,7 @@ resource azurerm_batch_pool windows {
   display_name                   = each.value.name.display != "" ? each.value.name.display : each.value.name.value
   resource_group_name            = azurerm_resource_group.farm.name
   account_name                   = azurerm_batch_account.scheduler[0].name
-  node_agent_sku_id              = each.value.node.agentId
+  node_agent_sku_id              = each.value.node.container.enable ? each.value.node.container.image.agentId : each.value.node.image.agentId
   vm_size                        = each.value.node.machine.size
   max_tasks_per_node             = each.value.node.maxConcurrentTasks
   os_disk_placement              = each.value.node.osDisk.ephemeral.enable ? "CacheDisk" : null
@@ -296,11 +338,38 @@ resource azurerm_batch_pool windows {
       data.azurerm_user_assigned_identity.studio.id
     ]
   }
-  storage_image_reference {
-    id = each.value.node.imageId
+  dynamic storage_image_reference {
+    for_each = each.value.node.container.enable ? [] : [1]
+    content {
+      id = each.value.node.image.id
+    }
+  }
+  dynamic storage_image_reference {
+    for_each = each.value.node.container.enable ? [1] : []
+    content {
+      publisher = each.value.node.container.image.publisher
+      offer     = each.value.node.container.image.offer
+      sku       = each.value.node.container.image.sku
+      version   = each.value.node.container.image.version
+    }
+  }
+  dynamic container_configuration {
+    for_each = each.value.node.container.enable ? [1] : []
+    content {
+      type = "DockerCompatible"
+      container_registries = [{
+        registry_server           = each.value.node.container.registry
+        user_assigned_identity_id = data.azurerm_user_assigned_identity.studio.id
+        user_name                 = data.terraform_remote_state.image.outputs.containerRegistry.adminName
+        password                  = data.terraform_remote_state.image.outputs.containerRegistry.adminPassword
+      }]
+      container_image_names = [
+        each.value.node.container.id
+      ]
+    }
   }
   network_configuration {
-    subnet_id                        = data.azurerm_subnet.farm.id
+    subnet_id                        = "${data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : each.value.node.network.subnetName}"
     accelerated_networking_enabled   = each.value.node.network.acceleration.enable
     public_address_provisioning_type = "NoPublicIPAddresses"
   }
@@ -317,8 +386,8 @@ resource azurerm_batch_pool windows {
   }
   user_accounts {
     elevation_level = "Admin"
-    name            = each.value.node.adminLogin.userName != "" ? each.value.node.adminLogin.userName : try(data.azurerm_key_vault_secret.admin_username[0].value, "")
-    password        = each.value.node.adminLogin.userPassword != "" ? each.value.node.adminLogin.userPassword : try(data.azurerm_key_vault_secret.admin_password[0].value, "")
+    name            = each.value.node.adminLogin.userName != "" ? each.value.node.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+    password        = each.value.node.adminLogin.userPassword != "" ? each.value.node.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
   }
   dynamic mount {
     for_each = length(local.batchFileSystemsWindows) > 0 ? [1] : []
@@ -343,11 +412,4 @@ resource azurerm_batch_pool windows {
   #      }
   #   }
   # }
-}
-
-output batchAccount {
-  value = {
-    enable   = var.batch.enable
-    endpoint = var.batch.enable ? azurerm_batch_account.scheduler[0].account_endpoint : ""
-  }
 }

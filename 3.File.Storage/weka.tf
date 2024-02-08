@@ -27,7 +27,7 @@ variable weka {
       acceleration = object({
         enable = bool
       })
-      dnsARecord = object({
+      dnsRecord = object({
         name       = string
         ttlSeconds = number
       })
@@ -93,11 +93,10 @@ variable weka {
 }
 
 data azurerm_storage_account blob {
-  count               = var.weka.enable ? 1 : 0
   name                = local.blobStorageAccount.name
   resource_group_name = azurerm_resource_group.storage.name
   depends_on = [
-    azurerm_storage_account.storage
+    azurerm_storage_account.studio
   ]
 }
 
@@ -110,14 +109,14 @@ data azurerm_virtual_machine_scale_set weka {
 locals {
   weka = merge(var.weka, {
     adminLogin = {
-      userName     = var.weka.adminLogin.userName != "" ? var.weka.adminLogin.userName : try(data.azurerm_key_vault_secret.admin_username[0].value, "")
-      userPassword = var.weka.adminLogin.userPassword != "" ? var.weka.adminLogin.userPassword : try(data.azurerm_key_vault_secret.admin_password[0].value, "")
+      userName     = var.weka.adminLogin.userName != "" ? var.weka.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+      userPassword = var.weka.adminLogin.userPassword != "" ? var.weka.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
     }}
   )
   wekaObjectTier = merge(var.weka.objectTier, {
     storage = {
-      accountName   = var.weka.objectTier.storage.accountName != "" ? var.weka.objectTier.storage.accountName : try(data.azurerm_storage_account.blob[0].name, "")
-      accountKey    = var.weka.objectTier.storage.accountKey != "" ? var.weka.objectTier.storage.accountKey : try(data.azurerm_storage_account.blob[0].primary_access_key, "")
+      accountName   = var.weka.objectTier.storage.accountName != "" ? var.weka.objectTier.storage.accountName : data.azurerm_storage_account.blob.name
+      accountKey    = var.weka.objectTier.storage.accountKey != "" ? var.weka.objectTier.storage.accountKey : data.azurerm_storage_account.blob.primary_access_key
       containerName = var.weka.objectTier.storage.containerName != "" ? var.weka.objectTier.storage.containerName : "weka"
     }
   })
@@ -168,6 +167,7 @@ locals {
   wekaCoreIdsScript    = "${local.binDirectory}/weka-core-ids.sh"
   wekaDriveDisksScript = "${local.binDirectory}/weka-drive-disks.sh"
   wekaFileSystemScript = "${local.binDirectory}/weka-file-system.sh"
+  binDirectory = "/usr/local/bin"
 }
 
 resource azurerm_resource_group weka {
@@ -216,7 +216,7 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     wekaAdminPassword    = local.weka.adminLogin.userPassword
     dnsResourceGroupName = data.azurerm_private_dns_zone.studio.resource_group_name
     dnsZoneName          = data.azurerm_private_dns_zone.studio.name
-    dnsARecordName       = var.weka.network.dnsARecord.name
+    dnsRecordName        = var.weka.network.dnsRecord.name
     binDirectory         = local.binDirectory
   }))
   network_interface {
@@ -258,10 +258,10 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     type_handler_version       = "2.1"
     automatic_upgrade_enabled  = false
     auto_upgrade_minor_version = true
-    settings = jsonencode({
-      script = "${base64encode(
+    protected_settings = jsonencode({
+      script = base64encode(
         templatefile("initialize.sh", {
-          wekaVersion               = "4.2.6"
+          wekaVersion               = "4.2.7.64"
           wekaApiToken              = var.weka.apiToken
           wekaClusterName           = var.weka.name.resource
           wekaDataDiskSize          = var.weka.dataDisk.sizeGB
@@ -277,10 +277,10 @@ resource azurerm_linux_virtual_machine_scale_set weka {
           wekaResourceGroupName     = azurerm_resource_group.weka[0].name
           dnsResourceGroupName      = data.azurerm_private_dns_zone.studio.resource_group_name
           dnsZoneName               = data.azurerm_private_dns_zone.studio.name
-          dnsARecordName            = var.weka.network.dnsARecord.name
+          dnsRecordName             = var.weka.network.dnsRecord.name
           binDirectory              = local.binDirectory
         })
-      )}"
+      )
     })
   }
   dynamic extension {
@@ -297,6 +297,9 @@ resource azurerm_linux_virtual_machine_scale_set weka {
         port        = var.weka.healthExtension.port
         requestPath = var.weka.healthExtension.requestPath
       })
+      provision_after_extensions = [
+        "Initialize"
+      ]
     }
   }
   dynamic plan {
@@ -322,11 +325,11 @@ resource azurerm_linux_virtual_machine_scale_set weka {
 
 resource azurerm_private_dns_a_record weka_cluster {
   count               = var.weka.enable ? 1 : 0
-  name                = var.weka.network.dnsARecord.name
+  name                = var.weka.network.dnsRecord.name
   resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = data.azurerm_private_dns_zone.studio.name
   records             = [for vmInstance in data.azurerm_virtual_machine_scale_set.weka[0].instances : vmInstance.private_ip_address]
-  ttl                 = var.weka.network.dnsARecord.ttlSeconds
+  ttl                 = var.weka.network.dnsRecord.ttlSeconds
 }
 
 resource terraform_data weka_cluster_create {
@@ -455,17 +458,4 @@ resource terraform_data weka_load {
   depends_on = [
     terraform_data.weka_file_system
   ]
-}
-
-output resourceGroupNameWeka {
-  value = var.weka.enable ? azurerm_resource_group.weka[0].name : ""
-}
-
-output wekaClusterDns {
-  value = var.weka.enable ? {
-    name              = azurerm_private_dns_a_record.weka_cluster[0].name
-    resourceGroupName = azurerm_private_dns_a_record.weka_cluster[0].resource_group_name
-    fqdn              = azurerm_private_dns_a_record.weka_cluster[0].fqdn
-    records           = azurerm_private_dns_a_record.weka_cluster[0].records
-  } : null
 }

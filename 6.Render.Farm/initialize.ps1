@@ -1,9 +1,7 @@
 $binDirectory = "C:\Users\Public\Downloads"
 Set-Location -Path $binDirectory
 
-$scriptFile = "C:\AzureData\functions.ps1"
-Copy-Item -Path "C:\AzureData\CustomData.bin" -Destination $scriptFile
-. $scriptFile
+. C:\AzureData\functions.ps1
 
 if ("${terminateNotification.enable}" -eq $true) {
   $taskName = "AAA Terminate Event Handler"
@@ -13,6 +11,6 @@ if ("${terminateNotification.enable}" -eq $true) {
   Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -User System -Force
 }
 
-SetFileSystems $binDirectory '${jsonencode(fileSystems)}'
+SetFileSystems (ConvertFrom-Json -InputObject '${jsonencode(fileSystems)}')
 
-InitializeClient $binDirectory '${jsonencode(activeDirectory)}'
+InitializeClient (ConvertFrom-Json -InputObject '${jsonencode(activeDirectory)}') $null $null

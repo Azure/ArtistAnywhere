@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.6.5"
+  required_version = ">= 1.7.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.84.0"
+      version = "~>3.90.0"
     }
   }
   backend azurerm {
@@ -28,12 +28,33 @@ module global {
   source = "../0.Global.Foundation/module"
 }
 
-module farm {
-  source = "../6.Render.Farm/module"
-}
-
 variable resourceGroupName {
   type = string
+}
+
+variable fileSystems {
+  type = object({
+    linux = list(object({
+      enable   = bool
+      iaasOnly = bool
+      mount = object({
+        type    = string
+        path    = string
+        source  = string
+        options = string
+      })
+    }))
+    windows = list(object({
+      enable   = bool
+      iaasOnly = bool
+      mount = object({
+        type    = string
+        path    = string
+        source  = string
+        options = string
+      })
+    }))
+  })
 }
 
 variable activeDirectory {
@@ -44,21 +65,6 @@ variable activeDirectory {
     orgUnitPath      = string
     adminUsername    = string
     adminPassword    = string
-  })
-}
-
-variable trafficManager {
-  type = object({
-    enable  = bool
-    profile = object({
-      name              = string
-      routingMethod     = string
-      enableTrafficView = bool
-    })
-    dns = object({
-      name = string
-      ttl  = string
-    })
   })
 }
 
@@ -77,21 +83,28 @@ data azurerm_user_assigned_identity studio {
 }
 
 data azurerm_key_vault studio {
-  count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
   resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret admin_username {
-  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault_secret admin_password {
-  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret database_username {
+  name         = module.global.keyVault.secretName.databaseUsername
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret database_password {
+  name         = module.global.keyVault.secretName.databasePassword
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_log_analytics_workspace monitor {
@@ -105,7 +118,7 @@ data terraform_remote_state network {
   config = {
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.rootStorage.accountName
-    container_name       = module.global.rootStorage.containerName.terraform
+    container_name       = module.global.rootStorage.containerName.terraformState
     key                  = "1.Virtual.Network"
   }
 }
@@ -115,68 +128,14 @@ data azurerm_virtual_network studio {
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
 }
 
-data azurerm_subnet workstation {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : data.terraform_remote_state.network.outputs.virtualNetwork.subnets[data.terraform_remote_state.network.outputs.virtualNetwork.subnetIndex.workstation].name
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
+locals {
+  rootRegion = {
+    name       = var.existingNetwork.enable ? module.global.regionName : data.terraform_remote_state.network.outputs.virtualNetwork.regionName
+    nameSuffix = var.existingNetwork.enable ? "" : data.terraform_remote_state.network.outputs.virtualNetwork.nameSuffix
+  }
 }
 
 resource azurerm_resource_group workstation {
-  name     = var.resourceGroupName
-  location = module.global.regionName
-}
-
-###############################################################################################
-# Traffic Manager (https://learn.microsoft.comazure/traffic-manager/traffic-manager-overview) #
-###############################################################################################
-
-resource azurerm_traffic_manager_profile workstation {
-  count                  = var.trafficManager.enable ? 1 : 0
-  name                   = var.trafficManager.profile.name
-  resource_group_name    = azurerm_resource_group.workstation.name
-  traffic_routing_method = var.trafficManager.profile.routingMethod
-  traffic_view_enabled   = var.trafficManager.profile.enableTrafficView
-  dns_config {
-    relative_name = var.trafficManager.dns.name
-    ttl           = var.trafficManager.dns.ttl
-  }
-  monitor_config {
-    protocol = "HTTP"
-    port     = 80
-    path     = "/"
-  }
-}
-
-resource azurerm_traffic_manager_external_endpoint workstation {
-  for_each = {
-    for virtualMachine in var.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && var.trafficManager.enable
-  }
-  name       = each.value.name
-  target     = azurerm_public_ip.workstation[each.value.name].ip_address
-  profile_id = azurerm_traffic_manager_profile.workstation[0].id
-  depends_on = [
-    azurerm_linux_virtual_machine.workstation,
-    azurerm_windows_virtual_machine.workstation
-  ]
-}
-
-resource azurerm_public_ip workstation {
-  for_each = {
-    for virtualMachine in var.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && var.trafficManager.enable
-  }
-  name                = each.value.name
-  resource_group_name = azurerm_resource_group.workstation.name
-  location            = azurerm_resource_group.workstation.location
-  sku                 = "Standard"
-  allocation_method   = "Static"
-}
-
-output resourceGroupName {
-  value = azurerm_resource_group.workstation.name
-}
-
-output trafficManager {
-  value = {
-    fqdn = var.trafficManager.enable ? azurerm_traffic_manager_profile.workstation[0].fqdn : ""
-  }
+  name     = var.existingNetwork.enable || local.rootRegion.nameSuffix == "" ? var.resourceGroupName : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}"
+  location = local.rootRegion.name
 }

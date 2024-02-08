@@ -32,7 +32,3 @@ output serviceKey {
   value     = var.expressRouteCircuit.enable ? azurerm_express_route_circuit.render[0].service_key : ""
   sensitive = true
 }
-
-output serviceProviderProvisioningState {
-  value = var.expressRouteCircuit.enable ? azurerm_express_route_circuit.render[0].service_provider_provisioning_state : ""
-}
