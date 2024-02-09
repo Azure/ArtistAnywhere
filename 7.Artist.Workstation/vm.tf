@@ -17,18 +17,18 @@ variable virtualMachines {
         name      = string
       })
     })
-    network = object({
-      subnetName = string
-      acceleration = object({
-        enable = bool
-      })
-    })
     operatingSystem = object({
       type = string
       disk = object({
         storageType = string
         cachingType = string
         sizeGB      = number
+      })
+    })
+    network = object({
+      subnetName = string
+      acceleration = object({
+        enable = bool
       })
     })
     adminLogin = object({
@@ -147,6 +147,28 @@ resource azurerm_linux_virtual_machine workstation {
   ]
 }
 
+resource azurerm_virtual_machine_extension monitor_linux {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.monitor.enable && virtualMachine.operatingSystem.type == "Linux" && module.global.monitor.enable
+  }
+  name                       = "Monitor"
+  type                       = "AzureMonitorLinuxAgent"
+  publisher                  = "Microsoft.Azure.Monitor"
+  type_handler_version       = "1.29"
+  automatic_upgrade_enabled  = true
+  auto_upgrade_minor_version = true
+  virtual_machine_id         = "${azurerm_resource_group.workstation.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
+  settings = jsonencode({
+    workspaceId = data.azurerm_log_analytics_workspace.monitor[0].workspace_id
+  })
+  protected_settings = jsonencode({
+    workspaceKey = data.azurerm_log_analytics_workspace.monitor[0].primary_shared_key
+  })
+  depends_on = [
+    azurerm_linux_virtual_machine.workstation
+  ]
+}
+
 resource azurerm_virtual_machine_extension initialize_linux {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.initialize.enable && virtualMachine.operatingSystem.type == "Linux"
@@ -168,29 +190,7 @@ resource azurerm_virtual_machine_extension initialize_linux {
     )
   })
   depends_on = [
-    azurerm_linux_virtual_machine.workstation
-  ]
-}
-
-resource azurerm_virtual_machine_extension monitor_linux {
-  for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.monitor.enable && virtualMachine.operatingSystem.type == "Linux" && module.global.monitor.enable
-  }
-  name                       = "Monitor"
-  type                       = "AzureMonitorLinuxAgent"
-  publisher                  = "Microsoft.Azure.Monitor"
-  type_handler_version       = "1.29"
-  automatic_upgrade_enabled  = true
-  auto_upgrade_minor_version = true
-  virtual_machine_id         = "${azurerm_resource_group.workstation.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
-  settings = jsonencode({
-    workspaceId = data.azurerm_log_analytics_workspace.monitor[0].workspace_id
-  })
-  protected_settings = jsonencode({
-    workspaceKey = data.azurerm_log_analytics_workspace.monitor[0].primary_shared_key
-  })
-  depends_on = [
-    azurerm_virtual_machine_extension.initialize_linux
+    azurerm_virtual_machine_extension.monitor_linux
   ]
 }
 
@@ -224,6 +224,28 @@ resource azurerm_windows_virtual_machine workstation {
   ]
 }
 
+resource azurerm_virtual_machine_extension monitor_windows {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.monitor.enable && virtualMachine.operatingSystem.type == "Windows" && module.global.monitor.enable
+  }
+  name                       = "Monitor"
+  type                       = "AzureMonitorWindowsAgent"
+  publisher                  = "Microsoft.Azure.Monitor"
+  type_handler_version       = "1.23"
+  automatic_upgrade_enabled  = true
+  auto_upgrade_minor_version = true
+  virtual_machine_id         = "${azurerm_resource_group.workstation.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
+  settings = jsonencode({
+    workspaceId = data.azurerm_log_analytics_workspace.monitor[0].workspace_id
+  })
+  protected_settings = jsonencode({
+    workspaceKey = data.azurerm_log_analytics_workspace.monitor[0].primary_shared_key
+  })
+  depends_on = [
+    azurerm_windows_virtual_machine.workstation
+  ]
+}
+
 resource azurerm_virtual_machine_extension initialize_windows {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.initialize.enable && virtualMachine.operatingSystem.type == "Windows"
@@ -244,28 +266,6 @@ resource azurerm_virtual_machine_extension initialize_windows {
     )}"
   })
   depends_on = [
-    azurerm_windows_virtual_machine.workstation
-  ]
-}
-
-resource azurerm_virtual_machine_extension monitor_windows {
-  for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.monitor.enable && virtualMachine.operatingSystem.type == "Windows" && module.global.monitor.enable
-  }
-  name                       = "Monitor"
-  type                       = "AzureMonitorWindowsAgent"
-  publisher                  = "Microsoft.Azure.Monitor"
-  type_handler_version       = "1.23"
-  automatic_upgrade_enabled  = true
-  auto_upgrade_minor_version = true
-  virtual_machine_id         = "${azurerm_resource_group.workstation.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
-  settings = jsonencode({
-    workspaceId = data.azurerm_log_analytics_workspace.monitor[0].workspace_id
-  })
-  protected_settings = jsonencode({
-    workspaceKey = data.azurerm_log_analytics_workspace.monitor[0].primary_shared_key
-  })
-  depends_on = [
-    azurerm_virtual_machine_extension.initialize_windows
+    azurerm_virtual_machine_extension.monitor_windows
   ]
 }

@@ -7,7 +7,6 @@ variable cosmosDB {
     enable = bool
     account = object({
       name             = string
-      type             = string
       offerType        = string
       consistencyLevel = string
     })
@@ -19,12 +18,13 @@ variable cosmosDB {
 }
 
 resource azurerm_cosmosdb_account scheduler {
-  count               = var.cosmosDB.enable ? 1 : 0
-  name                = var.cosmosDB.account.name
-  resource_group_name = azurerm_resource_group.database.name
-  location            = azurerm_resource_group.database.location
-  offer_type          = var.cosmosDB.account.offerType
-  kind                = var.cosmosDB.account.type
+  count                = var.cosmosDB.enable ? 1 : 0
+  name                 = var.cosmosDB.account.name
+  resource_group_name  = azurerm_resource_group.database.name
+  location             = azurerm_resource_group.database.location
+  offer_type           = var.cosmosDB.account.offerType
+  kind                 = "MongoDB"
+  mongo_server_version = "4.2"
   identity {
     type = "UserAssigned"
     identity_ids = [

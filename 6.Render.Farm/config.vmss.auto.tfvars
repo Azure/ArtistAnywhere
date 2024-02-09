@@ -20,6 +20,18 @@ virtualMachineScaleSets = [
         }
       }
     }
+    operatingSystem = {
+      type = "Linux"
+      disk = {
+        storageType = "Standard_LRS"
+        cachingType = "ReadOnly"
+        sizeGB      = 0
+        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+          enable    = true
+          placement = "ResourceDisk"
+        }
+      }
+    }
     spot = {
       enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
@@ -32,18 +44,6 @@ virtualMachineScaleSets = [
       subnetName = "Farm"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
-      }
-    }
-    operatingSystem = {
-      type = "Linux"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
-          placement = "ResourceDisk"
-        }
       }
     }
     adminLogin = {
@@ -97,6 +97,18 @@ virtualMachineScaleSets = [
         }
       }
     }
+    operatingSystem = {
+      type = "Linux"
+      disk = {
+        storageType = "Standard_LRS"
+        cachingType = "ReadOnly"
+        sizeGB      = 0
+        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+          enable    = true
+          placement = "ResourceDisk"
+        }
+      }
+    }
     spot = {
       enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
@@ -109,18 +121,6 @@ virtualMachineScaleSets = [
       subnetName = "Farm"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
-      }
-    }
-    operatingSystem = {
-      type = "Linux"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
-          placement = "ResourceDisk"
-        }
       }
     }
     adminLogin = {
@@ -174,6 +174,18 @@ virtualMachineScaleSets = [
         }
       }
     }
+    operatingSystem = {
+      type = "Windows"
+      disk = {
+        storageType = "Standard_LRS"
+        cachingType = "ReadOnly"
+        sizeGB      = 0
+        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+          enable    = true
+          placement = "ResourceDisk"
+        }
+      }
+    }
     spot = {
       enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
@@ -186,18 +198,6 @@ virtualMachineScaleSets = [
       subnetName = "Farm"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
-      }
-    }
-    operatingSystem = {
-      type = "Windows"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
-          placement = "ResourceDisk"
-        }
       }
     }
     adminLogin = {
@@ -251,6 +251,18 @@ virtualMachineScaleSets = [
         }
       }
     }
+    operatingSystem = {
+      type = "Windows"
+      disk = {
+        storageType = "Standard_LRS"
+        cachingType = "ReadOnly"
+        sizeGB      = 0
+        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+          enable    = true
+          placement = "ResourceDisk"
+        }
+      }
+    }
     spot = {
       enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
@@ -263,18 +275,6 @@ virtualMachineScaleSets = [
       subnetName = "Farm"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
-      }
-    }
-    operatingSystem = {
-      type = "Windows"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
-          placement = "ResourceDisk"
-        }
       }
     }
     adminLogin = {

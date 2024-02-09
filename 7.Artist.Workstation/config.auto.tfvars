@@ -19,18 +19,18 @@ virtualMachines = [
         name      = ""
       }
     }
-    network = {
-      subnetName = "Workstation"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-    }
     operatingSystem = {
       type = "Linux"
       disk = {
         storageType = "Premium_LRS"
         cachingType = "ReadWrite"
         sizeGB      = 0
+      }
+    }
+    network = {
+      subnetName = "Workstation"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
       }
     }
     adminLogin = {
@@ -68,18 +68,18 @@ virtualMachines = [
         name      = ""
       }
     }
-    network = {
-      subnetName = "Workstation"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-    }
     operatingSystem = {
       type = "Linux"
       disk = {
         storageType = "Premium_LRS"
         cachingType = "ReadWrite"
         sizeGB      = 0
+      }
+    }
+    network = {
+      subnetName = "Workstation"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
       }
     }
     adminLogin = {
@@ -117,18 +117,18 @@ virtualMachines = [
         name      = ""
       }
     }
-    network = {
-      subnetName = "Workstation"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-    }
     operatingSystem = {
       type = "Windows"
       disk = {
         storageType = "Premium_LRS"
         cachingType = "ReadWrite"
         sizeGB      = 0
+      }
+    }
+    network = {
+      subnetName = "Workstation"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
       }
     }
     adminLogin = {
@@ -166,18 +166,18 @@ virtualMachines = [
         name      = ""
       }
     }
-    network = {
-      subnetName = "Workstation"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-    }
     operatingSystem = {
       type = "Windows"
       disk = {
         storageType = "Premium_LRS"
         cachingType = "ReadWrite"
         sizeGB      = 0
+      }
+    }
+    network = {
+      subnetName = "Workstation"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
       }
     }
     adminLogin = {

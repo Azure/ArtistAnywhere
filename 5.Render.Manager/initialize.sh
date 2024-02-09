@@ -7,8 +7,6 @@ source /etc/profile.d/aaa.sh
 
 source /tmp/functions.sh
 
-InitializeClient ${databaseUsername} ${databasePassword} /deadline false
-
 serviceFile="aaaAutoScaler"
 dataFilePath="/var/lib/waagent/ovf-env.xml"
 dataFileText=$(xmllint --xpath "//*[local-name()='Environment']/*[local-name()='ProvisioningSection']/*[local-name()='LinuxProvisioningConfigurationSet']/*[local-name()='CustomData']/text()" $dataFilePath)
@@ -45,3 +43,5 @@ echo "WantedBy=timers.target" >> $serviceTimerPath
 if [ ${autoScale.enable} == true ]; then
   systemctl --now enable $serviceFile
 fi
+
+InitializeClient ${databaseUsername} ${databasePassword} /deadline false

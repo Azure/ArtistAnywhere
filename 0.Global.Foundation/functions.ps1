@@ -83,9 +83,9 @@ function JoinActiveDirectory ($domainName, $domainServerName, $orgUnitPath, $adm
   }
 
   if ($orgUnitPath -ne "") {
-    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $adminCredential -OUPath $orgUnitPath -Force -PassThru -Verbose
+    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $adminCredential -OUPath $orgUnitPath -Force -PassThru -Verbose -Restart
   } else {
-    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $adminCredential -Force -PassThru -Verbose
+    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $adminCredential -Force -PassThru -Verbose -Restart
   }
 }
 
@@ -98,7 +98,7 @@ function InitializeClient ($activeDirectory, $repositoryRoot, $clientCertificate
   }
   RunProcess deadlinecommand.exe "-ChangeRepository Direct $respositoryRoot $clientCertificate" deadline-repository
   if ($activeDirectory -ne $null -and $activeDirectory.enable) {
-    Retry 5 10 {
+    Retry 3 10 {
       JoinActiveDirectory $activeDirectory.domainName $activeDirectory.domainServerName $activeDirectory.orgUnitPath $activeDirectory.adminUsername $activeDirectory.adminPassword
     }
   }

@@ -18,13 +18,6 @@ virtualMachines = [
         name      = ""
       }
     }
-    network = {
-      subnetName = "Farm"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-      staticIpAddress = ""
-    }
     operatingSystem = {
       type = "Linux"
       disk = {
@@ -32,6 +25,13 @@ virtualMachines = [
         cachingType = "ReadWrite"
         sizeGB      = 0
       }
+    }
+    network = {
+      subnetName = "Farm"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      staticIpAddress = ""
     }
     adminLogin = {
       userName     = ""
@@ -76,13 +76,6 @@ virtualMachines = [
         name      = ""
       }
     }
-    network = {
-      subnetName = "Farm"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-      staticIpAddress = "10.0.127.0"
-    }
     operatingSystem = {
       type = "Windows"
       disk = {
@@ -90,6 +83,13 @@ virtualMachines = [
         cachingType = "ReadWrite"
         sizeGB      = 0
       }
+    }
+    network = {
+      subnetName = "Farm"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      staticIpAddress = "10.0.127.0"
     }
     adminLogin = {
       userName     = ""

@@ -6,7 +6,6 @@ cosmosDB = {
   enable = false
   account = {
     name             = "xstudio"
-    type             = "MongoDB"
     offerType        = "Standard"
     consistencyLevel = "Strong"
   }
