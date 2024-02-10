@@ -68,7 +68,6 @@ variable weka {
       hotSpare    = number
     })
     healthExtension = object({
-      enable      = bool
       protocol    = string
       port        = number
       requestPath = string
@@ -251,21 +250,18 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     enabled = var.weka.terminateNotification.enable
     timeout = var.weka.terminateNotification.delayTimeout
   }
-  dynamic extension {
-    for_each = var.weka.healthExtension.enable ? [1] : []
-    content {
-      name                       = "Health"
-      type                       = "ApplicationHealthLinux"
-      publisher                  = "Microsoft.ManagedServices"
-      type_handler_version       = "1.0"
-      automatic_upgrade_enabled  = true
-      auto_upgrade_minor_version = true
-      settings = jsonencode({
-        protocol    = var.weka.healthExtension.protocol
-        port        = var.weka.healthExtension.port
-        requestPath = var.weka.healthExtension.requestPath
-      })
-    }
+  extension {
+    name                       = "Health"
+    type                       = "ApplicationHealthLinux"
+    publisher                  = "Microsoft.ManagedServices"
+    type_handler_version       = "1.0"
+    automatic_upgrade_enabled  = true
+    auto_upgrade_minor_version = true
+    settings = jsonencode({
+      protocol    = var.weka.healthExtension.protocol
+      port        = var.weka.healthExtension.port
+      requestPath = var.weka.healthExtension.requestPath
+    })
   }
   extension {
     name                       = "Initialize"

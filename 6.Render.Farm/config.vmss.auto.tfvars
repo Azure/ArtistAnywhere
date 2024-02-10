@@ -55,8 +55,14 @@ virtualMachineScaleSets = [
       }
     }
     extension = {
-      initialize = {
+      health = {
+        protocol    = "tcp"
+        port        = 111
+        requestPath = ""
+      }
+      custom = {
         enable   = true
+        name     = "Initialize"
         fileName = "initialize.sh"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
@@ -64,15 +70,6 @@ virtualMachineScaleSets = [
             delayTimeout = "PT5M"
           }
         }
-      }
-      health = {
-        enable      = true
-        protocol    = "tcp"
-        port        = 111
-        requestPath = ""
-      }
-      monitor = {
-        enable = false
       }
     }
     flexibleOrchestration = {
@@ -132,8 +129,14 @@ virtualMachineScaleSets = [
       }
     }
     extension = {
-      initialize = {
+      health = {
+        protocol    = "tcp"
+        port        = 111
+        requestPath = ""
+      }
+      custom = {
         enable   = true
+        name     = "Initialize"
         fileName = "initialize.sh"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
@@ -141,15 +144,6 @@ virtualMachineScaleSets = [
             delayTimeout = "PT5M"
           }
         }
-      }
-      health = {
-        enable      = true
-        protocol    = "tcp"
-        port        = 111
-        requestPath = ""
-      }
-      monitor = {
-        enable = false
       }
     }
     flexibleOrchestration = {
@@ -209,8 +203,14 @@ virtualMachineScaleSets = [
       }
     }
     extension = {
-      initialize = {
+      health = {
+        protocol    = "tcp"
+        port        = 445
+        requestPath = ""
+      }
+      custom = {
         enable   = true
+        name     = "Initialize"
         fileName = "initialize.ps1"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
@@ -218,15 +218,6 @@ virtualMachineScaleSets = [
             delayTimeout = "PT5M"
           }
         }
-      }
-      health = {
-        enable      = true
-        protocol    = "tcp"
-        port        = 445
-        requestPath = ""
-      }
-      monitor = {
-        enable = false
       }
     }
     flexibleOrchestration = {
@@ -286,8 +277,14 @@ virtualMachineScaleSets = [
       }
     }
     extension = {
-      initialize = {
+      health = {
+        protocol    = "tcp"
+        port        = 445
+        requestPath = ""
+      }
+      custom = {
         enable   = true
+        name     = "Initialize"
         fileName = "initialize.ps1"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
@@ -295,15 +292,6 @@ virtualMachineScaleSets = [
             delayTimeout = "PT5M"
           }
         }
-      }
-      health = {
-        enable      = true
-        protocol    = "tcp"
-        port        = 445
-        requestPath = ""
-      }
-      monitor = {
-        enable = false
       }
     }
     flexibleOrchestration = {

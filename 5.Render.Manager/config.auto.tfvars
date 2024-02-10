@@ -42,8 +42,9 @@ virtualMachines = [
       }
     }
     extension = {
-      initialize = {
+      custom = {
         enable   = true
+        name     = "Initialize"
         fileName = "initialize.sh"
         parameters = {
           autoScale = {
@@ -57,9 +58,6 @@ virtualMachines = [
             detectionIntervalSeconds = 60
           }
         }
-      }
-      monitor = {
-        enable = false
       }
     }
   },
@@ -100,8 +98,9 @@ virtualMachines = [
       }
     }
     extension = {
-      initialize = {
+      custom = {
         enable   = true
+        name     = "Initialize"
         fileName = "initialize.ps1"
         parameters = {
           autoScale = {
@@ -115,9 +114,6 @@ virtualMachines = [
             detectionIntervalSeconds = 60
           }
         }
-      }
-      monitor = {
-        enable = false
       }
     }
   }

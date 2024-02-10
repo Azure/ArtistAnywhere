@@ -92,7 +92,6 @@ data azurerm_key_vault_secret database_password {
 }
 
 data azurerm_log_analytics_workspace monitor {
-  count               = module.global.monitor.enable ? 1 : 0
   name                = module.global.monitor.name
   resource_group_name = module.global.resourceGroupName
 }

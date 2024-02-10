@@ -55,8 +55,14 @@ variable virtualMachineScaleSets {
       })
     })
     extension = object({
-      initialize = object({
+      health = object({
+        protocol    = string
+        port        = number
+        requestPath = string
+      })
+      custom = object({
         enable     = bool
+        name       = string
         fileName   = string
         parameters = object({
           terminateNotification = object({
@@ -64,15 +70,6 @@ variable virtualMachineScaleSets {
             delayTimeout = string
           })
         })
-      })
-      health = object({
-        enable      = bool
-        protocol    = string
-        port        = number
-        requestPath = string
-      })
-      monitor = object({
-        enable = bool
       })
     })
     flexibleOrchestration = object({
@@ -157,46 +154,40 @@ resource azurerm_linux_virtual_machine_scale_set farm {
       data.azurerm_user_assigned_identity.studio.id
     ]
   }
-  dynamic extension {
-    for_each = each.value.extension.health.enable ? [1] : []
-    content {
-      name                       = "Health"
-      type                       = "ApplicationHealthLinux"
-      publisher                  = "Microsoft.ManagedServices"
-      type_handler_version       = "1.0"
-      automatic_upgrade_enabled  = true
-      auto_upgrade_minor_version = true
-      settings = jsonencode({
-        protocol    = each.value.extension.health.protocol
-        port        = each.value.extension.health.port
-        requestPath = each.value.extension.health.requestPath
-      })
-    }
+  extension {
+    name                       = "Health"
+    type                       = "ApplicationHealthLinux"
+    publisher                  = "Microsoft.ManagedServices"
+    type_handler_version       = "1.0"
+    automatic_upgrade_enabled  = true
+    auto_upgrade_minor_version = true
+    settings = jsonencode({
+      protocol    = each.value.extension.health.protocol
+      port        = each.value.extension.health.port
+      requestPath = each.value.extension.health.requestPath
+    })
   }
+  # extension {
+  #   name                       = "Monitor"
+  #   type                       = "AzureMonitorLinuxAgent"
+  #   publisher                  = "Microsoft.Azure.Monitor"
+  #   type_handler_version       = module.global.monitor.agentVersion.linux
+  #   automatic_upgrade_enabled  = true
+  #   auto_upgrade_minor_version = true
+  #   settings = jsonencode({
+  #     workspaceId = data.azurerm_log_analytics_workspace.monitor.workspace_id
+  #   })
+  #   protected_settings = jsonencode({
+  #     workspaceKey = data.azurerm_log_analytics_workspace.monitor.primary_shared_key
+  #   })
+  #   provision_after_extensions = [
+  #     "Health"
+  #   ]
+  # }
   dynamic extension {
-    for_each = each.value.extension.monitor.enable ? [1] : []
+    for_each = each.value.extension.custom.enable ? [1] : []
     content {
-      name                       = "Monitor"
-      type                       = "AzureMonitorLinuxAgent"
-      publisher                  = "Microsoft.Azure.Monitor"
-      type_handler_version       = "1.29"
-      automatic_upgrade_enabled  = true
-      auto_upgrade_minor_version = true
-      settings = jsonencode({
-        workspaceId = data.azurerm_log_analytics_workspace.monitor[0].workspace_id
-      })
-      protected_settings = jsonencode({
-        workspaceKey = data.azurerm_log_analytics_workspace.monitor[0].primary_shared_key
-      })
-      provision_after_extensions = [
-        "Health"
-      ]
-    }
-  }
-  dynamic extension {
-    for_each = each.value.extension.initialize.enable ? [1] : []
-    content {
-      name                       = "Initialize"
+      name                       = each.value.extension.custom.name
       type                       = "CustomScript"
       publisher                  = "Microsoft.Azure.Extensions"
       type_handler_version       = "2.1"
@@ -204,7 +195,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
       auto_upgrade_minor_version = true
       protected_settings = jsonencode({
         script = base64encode(
-          templatefile(each.value.extension.initialize.fileName, merge(each.value.extension.initialize.parameters, {
+          templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
             fileSystems = local.fileSystemsLinux
             databaseUsername = data.azurerm_key_vault_secret.database_username.value
             databasePassword = data.azurerm_key_vault_secret.database_password.value
@@ -212,7 +203,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
         )
       })
       provision_after_extensions = [
-        "Monitor"
+        "Health"
       ]
     }
   }
@@ -232,10 +223,10 @@ resource azurerm_linux_virtual_machine_scale_set farm {
     }
   }
   dynamic termination_notification {
-    for_each = each.value.extension.initialize.parameters.terminateNotification.enable ? [1] : []
+    for_each = each.value.extension.custom.parameters.terminateNotification.enable ? [1] : []
     content {
-      enabled = each.value.extension.initialize.parameters.terminateNotification.enable
-      timeout = each.value.extension.initialize.parameters.terminateNotification.delayTimeout
+      enabled = each.value.extension.custom.parameters.terminateNotification.enable
+      timeout = each.value.extension.custom.parameters.terminateNotification.delayTimeout
     }
   }
   dynamic spot_restore {
@@ -292,46 +283,40 @@ resource azurerm_windows_virtual_machine_scale_set farm {
       data.azurerm_user_assigned_identity.studio.id
     ]
   }
-  dynamic extension {
-    for_each = each.value.extension.health.enable ? [1] : []
-    content {
-      name                       = "Health"
-      type                       = "ApplicationHealthWindows"
-      publisher                  = "Microsoft.ManagedServices"
-      type_handler_version       = "1.0"
-      automatic_upgrade_enabled  = true
-      auto_upgrade_minor_version = true
-      settings = jsonencode({
-        protocol    = each.value.extension.health.protocol
-        port        = each.value.extension.health.port
-        requestPath = each.value.extension.health.requestPath
-      })
-    }
+  extension {
+    name                       = "Health"
+    type                       = "ApplicationHealthWindows"
+    publisher                  = "Microsoft.ManagedServices"
+    type_handler_version       = "1.0"
+    automatic_upgrade_enabled  = true
+    auto_upgrade_minor_version = true
+    settings = jsonencode({
+      protocol    = each.value.extension.health.protocol
+      port        = each.value.extension.health.port
+      requestPath = each.value.extension.health.requestPath
+    })
+  }
+  extension {
+    name                       = "Monitor"
+    type                       = "AzureMonitorWindowsAgent"
+    publisher                  = "Microsoft.Azure.Monitor"
+    type_handler_version       = module.global.monitor.agentVersion.windows
+    automatic_upgrade_enabled  = true
+    auto_upgrade_minor_version = true
+    settings = jsonencode({
+      workspaceId = data.azurerm_log_analytics_workspace.monitor.workspace_id
+    })
+    protected_settings = jsonencode({
+      workspaceKey = data.azurerm_log_analytics_workspace.monitor.primary_shared_key
+    })
+    provision_after_extensions = [
+      "Health"
+    ]
   }
   dynamic extension {
-    for_each = each.value.extension.monitor.enable ? [1] : []
+    for_each = each.value.extension.custom.enable ? [1] : []
     content {
-      name                       = "Monitor"
-      type                       = "AzureMonitorWindowsAgent"
-      publisher                  = "Microsoft.Azure.Monitor"
-      type_handler_version       = "1.23"
-      automatic_upgrade_enabled  = true
-      auto_upgrade_minor_version = true
-      settings = jsonencode({
-        workspaceId = data.azurerm_log_analytics_workspace.monitor[0].workspace_id
-      })
-      protected_settings = jsonencode({
-        workspaceKey = data.azurerm_log_analytics_workspace.monitor[0].primary_shared_key
-      })
-      provision_after_extensions = [
-        "Health"
-      ]
-    }
-  }
-  dynamic extension {
-    for_each = each.value.extension.initialize.enable ? [1] : []
-    content {
-      name                       = "Initialize"
+      name                       = each.value.extension.custom.name
       type                       = "CustomScriptExtension"
       publisher                  = "Microsoft.Compute"
       type_handler_version       = "1.10"
@@ -339,7 +324,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
       auto_upgrade_minor_version = true
       protected_settings = jsonencode({
         commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
-          templatefile(each.value.extension.initialize.fileName, merge(each.value.extension.initialize.parameters, {
+          templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
             fileSystems     = local.fileSystemsWindows
             activeDirectory = each.value.activeDirectory
           })), "UTF-16LE"
@@ -351,10 +336,10 @@ resource azurerm_windows_virtual_machine_scale_set farm {
     }
   }
   dynamic termination_notification {
-    for_each = each.value.extension.initialize.parameters.terminateNotification.enable ? [1] : []
+    for_each = each.value.extension.custom.parameters.terminateNotification.enable ? [1] : []
     content {
-      enabled = each.value.extension.initialize.parameters.terminateNotification.enable
-      timeout = each.value.extension.initialize.parameters.terminateNotification.delayTimeout
+      enabled = each.value.extension.custom.parameters.terminateNotification.enable
+      timeout = each.value.extension.custom.parameters.terminateNotification.delayTimeout
     }
   }
   dynamic spot_restore {
@@ -433,56 +418,50 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
       }
     }
   }
-  dynamic extension {
-    for_each = each.value.extension.health.enable ? [1] : []
-    content {
-      name                               = "Health"
-      type                               = each.value.operatingSystem.type == "Windows" ? "ApplicationHealthWindows" : "ApplicationHealthLinux"
-      publisher                          = "Microsoft.ManagedServices"
-      type_handler_version               = "1.0"
-      auto_upgrade_minor_version_enabled = true
-      settings = jsonencode({
-        protocol    = each.value.extension.health.protocol
-        port        = each.value.extension.health.port
-        requestPath = each.value.extension.health.requestPath
-      })
-    }
+  extension {
+    name                               = "Health"
+    type                               = each.value.operatingSystem.type == "Windows" ? "ApplicationHealthWindows" : "ApplicationHealthLinux"
+    publisher                          = "Microsoft.ManagedServices"
+    type_handler_version               = "1.0"
+    auto_upgrade_minor_version_enabled = true
+    settings = jsonencode({
+      protocol    = each.value.extension.health.protocol
+      port        = each.value.extension.health.port
+      requestPath = each.value.extension.health.requestPath
+    })
+  }
+  extension {
+    name                               = "Monitor"
+    type                               = each.value.operatingSystem.type == "Windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
+    publisher                          = "Microsoft.Azure.Monitor"
+    type_handler_version               = each.value.operatingSystem.type == "Windows" ? module.global.monitor.agentVersion.windows : module.global.monitor.agentVersion.linux
+    auto_upgrade_minor_version_enabled = true
+    settings = jsonencode({
+      workspaceId = data.azurerm_log_analytics_workspace.monitor.workspace_id
+    })
+    protected_settings = jsonencode({
+      workspaceKey = data.azurerm_log_analytics_workspace.monitor.primary_shared_key
+    })
+    # extensions_to_provision_after_vm_creation = [
+    #   "Health"
+    # ]
   }
   dynamic extension {
-    for_each = each.value.extension.monitor.enable && module.global.monitor.enable ? [1] : []
+    for_each = each.value.extension.custom.enable ? [1] : []
     content {
-      name                               = "Monitor"
-      type                               = each.value.operatingSystem.type == "Windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
-      publisher                          = "Microsoft.Azure.Monitor"
-      type_handler_version               = each.value.operatingSystem.type == "Windows" ? "1.23" : "1.29"
-      auto_upgrade_minor_version_enabled = true
-      settings = jsonencode({
-        workspaceId = data.azurerm_log_analytics_workspace.monitor[0].workspace_id
-      })
-      protected_settings = jsonencode({
-        workspaceKey = data.azurerm_log_analytics_workspace.monitor[0].primary_shared_key
-      })
-      # extensions_to_provision_after_vm_creation = [
-      #   "Health"
-      # ]
-    }
-  }
-  dynamic extension {
-    for_each = each.value.extension.initialize.enable ? [1] : []
-    content {
-      name                               = "Initialize"
+      name                               = each.value.extension.custom.name
       type                               = each.value.operatingSystem.type == "Windows" ? "CustomScriptExtension" :"CustomScript"
       publisher                          = each.value.operatingSystem.type == "Windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
       type_handler_version               = each.value.operatingSystem.type == "Windows" ? "1.10" : "2.1"
       auto_upgrade_minor_version_enabled = true
       protected_settings = jsonencode({
         script = each.value.operatingSystem.type == "Windows" ? null : base64encode(
-          templatefile(each.value.extension.initialize.fileName, merge(each.value.extension.initialize.parameters, {
+          templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
             fileSystems = local.fileSystemsLinux
           }))
         )
         commandToExecute = each.value.operatingSystem.type == "Windows" ? "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
-          templatefile(each.value.extension.initialize.fileName, merge(each.value.extension.initialize.parameters, {
+          templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
             fileSystems     = local.fileSystemsWindows
             activeDirectory = each.value.activeDirectory
           })), "UTF-16LE"
@@ -502,10 +481,10 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
     }
   }
   dynamic termination_notification {
-    for_each = each.value.extension.initialize.parameters.terminateNotification.enable ? [1] : []
+    for_each = each.value.extension.custom.parameters.terminateNotification.enable ? [1] : []
     content {
-      enabled = each.value.extension.initialize.parameters.terminateNotification.enable
-      timeout = each.value.extension.initialize.parameters.terminateNotification.delayTimeout
+      enabled = each.value.extension.custom.parameters.terminateNotification.enable
+      timeout = each.value.extension.custom.parameters.terminateNotification.delayTimeout
     }
   }
 }

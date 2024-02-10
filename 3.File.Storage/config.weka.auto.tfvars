@@ -67,7 +67,6 @@ weka = {
     hotSpare    = 1
   }
   healthExtension = {
-    enable      = true
     protocol    = "http"
     port        = 14000
     requestPath = "/ui"

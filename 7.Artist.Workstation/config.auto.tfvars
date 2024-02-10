@@ -42,15 +42,13 @@ virtualMachines = [
       }
     }
     extension = {
-      initialize = {
+      custom = {
         enable   = true
+        name     = "Initialize"
         fileName = "initialize.sh"
         parameters = {
           pcoipLicenseKey = ""
         }
-      }
-      monitor = {
-        enable = false
       }
     }
   },
@@ -91,15 +89,13 @@ virtualMachines = [
       }
     }
     extension = {
-      initialize = {
+      custom = {
         enable   = true
+        name     = "Initialize"
         fileName = "initialize.sh"
         parameters = {
           pcoipLicenseKey = ""
         }
-      }
-      monitor = {
-        enable = false
       }
     }
   },
@@ -140,15 +136,13 @@ virtualMachines = [
       }
     }
     extension = {
-      initialize = {
+      custom = {
         enable   = true
+        name     = "Initialize"
         fileName = "initialize.ps1"
         parameters = {
           pcoipLicenseKey = ""
         }
-      }
-      monitor = {
-        enable = false
       }
     }
   },
@@ -189,15 +183,13 @@ virtualMachines = [
       }
     }
     extension = {
-      initialize = {
+      custom = {
         enable   = true
+        name     = "Initialize"
         fileName = "initialize.ps1"
         parameters = {
           pcoipLicenseKey = ""
         }
-      }
-      monitor = {
-        enable = false
       }
     }
   }

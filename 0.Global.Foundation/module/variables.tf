@@ -58,8 +58,11 @@ variable keyVault {
 
 variable monitor {
   default = {
-    enable = true
-    name   = "xstudio"
+    name = "xstudio"
+    agentVersion = {
+      linux   = "1.29"
+      windows = "1.22"
+    }
   }
 }
 

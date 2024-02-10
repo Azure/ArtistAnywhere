@@ -52,21 +52,23 @@ function RegisterFileSystemMounts {
 }
 
 function Retry ($delaySeconds, $maxCount, $scriptBlock) {
-  $count = 0
-  $exception = $null
+  $exOriginal = $null
+  $retryCount = 0
   do {
-    $count++
+    $retryCount++
     try {
       $scriptBlock.Invoke()
-      $exception = $null
+      $exOriginal = $null
       exit
     } catch {
-      $exception = $_.Exception
+      if ($exOriginal -eq $null) {
+        $exOriginal = $_.Exception.MembershipwiseClone
+      }
       Start-Sleep -Seconds $delaySeconds
     }
-  } while ($count -lt $maxCount)
-  if ($exception) {
-    throw $exception
+  } while ($retryCount -lt $maxCount)
+  if ($exOriginal -ne $null) {
+    throw $exOriginal
   }
 }
 
@@ -77,7 +79,7 @@ function JoinActiveDirectory ($domainName, $domainServerName, $orgUnitPath, $adm
   $securePassword = ConvertTo-SecureString $adminPassword -AsPlainText -Force
   $adminCredential = New-Object System.Management.Automation.PSCredential($adminUsername, $securePassword)
 
-  $adComputer = Get-ADComputer -Identity $localComputerName -Server $domainServerName -Credential $adminCredential
+  $adComputer = Get-ADComputer -Identity $(hostname) -Server $domainServerName -Credential $adminCredential
   if ($adComputer) {
     Remove-ADObject -Identity $adComputer -Server $domainServerName -Recursive -Confirm:$false
   }

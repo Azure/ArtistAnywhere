@@ -102,12 +102,6 @@ data azurerm_key_vault_secret admin_password {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
-data azurerm_log_analytics_workspace monitor {
-  count               = module.global.monitor.enable ? 1 : 0
-  name                = module.global.monitor.name
-  resource_group_name = module.global.resourceGroupName
-}
-
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
