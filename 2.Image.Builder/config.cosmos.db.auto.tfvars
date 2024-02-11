@@ -3,7 +3,7 @@
 ########################################################################
 
 cosmosDB = {
-  enable     = true
+  enable     = false
   name       = "xstudio"
   tier       = "M30"
   version    = "5.0"
