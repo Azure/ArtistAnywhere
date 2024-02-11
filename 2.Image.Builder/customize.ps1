@@ -388,7 +388,7 @@ if ($machineType -ne "Storage") {
     Write-Host "Customize (Start): Deadline Server"
     $processType = "deadline-repository"
     $installFile = "DeadlineRepository-$versionInfo-windows-installer.exe"
-    RunProcess .\$installFile "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --mongodir $databasePath --installmongodb true" "$binDirectory\$processType"
+    RunProcess .\$installFile "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbListeningPort $databasePort --mongodir $databasePath --installmongodb true" "$binDirectory\$processType"
     Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$processType.log
     Copy-Item -Path $databasePath\certs\$certificateFile -Destination $installRoot\$certificateFile
     New-NfsShare -Name "Deadline" -Path $installRoot -Permission ReadWrite

@@ -225,7 +225,7 @@ if [ $machineType != Storage ]; then
 
   if [ $machineType == Scheduler ]; then
     databaseSSL=true
-    if [ $cosmosDBPaaS -ne true ]; then
+    if [ $cosmosDBPaaS != true ]; then
       echo "Customize (Start): Mongo DB Service"
       if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
         echo never > /sys/kernel/mm/transparent_hugepage/enabled
