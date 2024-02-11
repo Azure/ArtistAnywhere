@@ -77,6 +77,13 @@ $processType = "7zip"
 RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
 Write-Host "Customize (End): 7-Zip"
 
+Write-Host "Customize (Start): Carbon"
+$processType = "carbon"
+RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
+Import-Module -Name $processType
+Grant-CPrivilege -Identity "System" -Privilege "SeServiceLogonRight"
+Write-Host "Customize (End): Carbon"
+
 Write-Host "Customize (End): Image Build Platform"
 
 if ($gpuProvider -eq "AMD") {

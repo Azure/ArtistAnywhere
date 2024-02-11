@@ -188,7 +188,7 @@ resource azurerm_virtual_machine_extension initialize_linux {
     )
   })
   depends_on = [
-    azurerm_virtual_machine_extension.health_linux
+    azurerm_linux_virtual_machine.workstation
   ]
 }
 
