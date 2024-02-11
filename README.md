@@ -31,17 +31,15 @@ The following installation process is required for local deployment orchestratio
 
 ## Module Configuration & Deployment
 
-For each module, here is the recommended configuration and deployment process.
+For each module, here is the recommended configuration and deployment process. **IMPORTANT**: [Key Vault](https://learn.microsoft.com/azure/key-vault/general/overview) is a core security service integrated throughout the Azure Artist Anywhere solution deployment framework. Therefore, the current user deploying the solution must have the [Key Vault Administrator](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#key-vault-administrator) role assigned via [Role-Based Access Control (RBAC)](https://learn.microsoft.com/azure/role-based-access-control/overview).
 
 1. Review and edit the config values in `config.\*.auto.tfvars` as needed for your target deployment.
-   * For module `0 Global Foundation`,
-       *  Review and edit the following config files.
-           * `module/backend.config`
-           * `module/variables.tf`
-       * If Key Vault is enabled [here](https://github.com/Azure/ArtistAnywhere/tree/main/0.Global.Foundation/module/variables.tf#L38), make sure the [Key Vault Administrator](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#key-vault-administrator) role is assigned to the current user via [Role-Based Access Control (RBAC)](https://learn.microsoft.com/azure/role-based-access-control/overview).
+   * For module `0 Global Foundation`, review and edit the following config files.
+      * `module/backend.config`
+      * `module/variables.tf`
    * For modules `2 Image Builder`, `5 Render Manager`, `6 Render Farm` and `7 Artist Workstation`,
-       * Make sure you have sufficient compute cores quota available on your Azure subscription for each configured virtual machine size.
-       * By default, [Spot](https://learn.microsoft.com/azure/virtual-machines/spot-vms) is enabled in module `6 Render Farm` configuration. Therefore, Spot cores quota should be approved for your Azure subscription and target region(s).
+      * Make sure you have sufficient compute cores quota available on your Azure subscription for each configured virtual machine size.
+      * By default, [Spot](https://learn.microsoft.com/azure/virtual-machines/spot-vms) is enabled in module `6 Render Farm` configuration. Therefore, Spot cores quota should be approved for your Azure subscription and target region(s).
    * For modules `5 Render Manager`, `6 Render Farm` and `7 Artist Workstation`, make sure each **image.id** config references the correct custom image in your Azure subscription.
 1. For module `0 Global Foundation`, run `terraform init` to initialize the module local directory (append `-upgrade` if older providers are detected).
 1. For all modules except `0 Global Foundation`, run `terraform init -backend-config ../0.Global.Foundation/module/backend.config` to initialize the module local directory (append `-upgrade` if older providers are detected).
