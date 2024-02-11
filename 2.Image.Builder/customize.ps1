@@ -27,9 +27,22 @@ $gpuProvider = $buildConfig.gpuProvider
 $renderEngines = $buildConfig.renderEngines
 $binStorageHost = $buildConfig.binStorage.host
 $binStorageAuth = $buildConfig.binStorage.auth
+$adminUsername = $buildConfig.dataPlatform.admin.username
+$adminPassword = $buildConfig.dataPlatform.admin.password
+$databaseUsername = $buildConfig.dataPlatform.database.username
+$databasePassword = $buildConfig.dataPlatform.database.password
+$cosmosDBPaaS = $buildConfig.dataPlatform.database.cosmosDB
+$databaseHost = $buildConfig.dataPlatform.database.host
+$databasePort = $buildConfig.dataPlatform.database.port
+if ($databaseHost -eq "") {
+  $databaseHost = $(hostname)
+}
 Write-Host "Machine Type: $machineType"
 Write-Host "GPU Provider: $gpuProvider"
 Write-Host "Render Engines: $renderEngines"
+Write-Host "CosmosDB PaaS: $cosmosDBPaaS"
+Write-Host "Database Host: $databaseHost"
+Write-Host "Database Port: $databasePort"
 Write-Host "Customize (End): Image Build Parameters"
 
 Write-Host "Customize (Start): Image Build Platform"
@@ -359,8 +372,6 @@ if ($machineType -eq "Scheduler") {
 if ($machineType -ne "Storage") {
   $versionInfo = "10.3.1.4"
   $installRoot = "C:\deadline"
-  $databaseHost = $(hostname)
-  $databasePort = 27100
   $databasePath = "C:\deadlineData"
   $certificateFile = "Deadline10Client.pfx"
   $binPathScheduler = "$installRoot\bin"
@@ -377,7 +388,7 @@ if ($machineType -ne "Storage") {
     Write-Host "Customize (Start): Deadline Server"
     $processType = "deadline-repository"
     $installFile = "DeadlineRepository-$versionInfo-windows-installer.exe"
-    RunProcess .\$installFile "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$binDirectory\$processType"
+    RunProcess .\$installFile "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --mongodir $databasePath --installmongodb true" "$binDirectory\$processType"
     Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$processType.log
     Copy-Item -Path $databasePath\certs\$certificateFile -Destination $installRoot\$certificateFile
     New-NfsShare -Name "Deadline" -Path $installRoot -Permission ReadWrite

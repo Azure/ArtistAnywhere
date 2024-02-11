@@ -22,10 +22,6 @@ keyVault = {
   softDeleteRetentionDays     = 90
   secrets = [
     {
-      name  = "GatewayConnection"
-      value = "ConnectionKey"
-    },
-    {
       name  = "AdminUsername"
       value = "xadmin"
     },
@@ -40,9 +36,26 @@ keyVault = {
     {
       name  = "DatabasePassword"
       value = "P@ssword1234"
+    },
+    {
+      name  = "GatewayConnection"
+      value = "ConnectionKey"
     }
   ]
   keys = [
+    {
+      name = "DataEncryption"
+      type = "RSA"
+      size = 2048
+      operations = [
+        "decrypt",
+        "encrypt",
+        "sign",
+        "unwrapKey",
+        "verify",
+        "wrapKey"
+      ]
+    },
     {
       name = "CacheEncryption"
       type = "RSA"

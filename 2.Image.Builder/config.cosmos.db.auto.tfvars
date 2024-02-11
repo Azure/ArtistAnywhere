@@ -3,14 +3,13 @@
 ########################################################################
 
 cosmosDB = {
-  enable = false
-  account = {
-    name             = "xstudio"
-    offerType        = "Standard"
-    consistencyLevel = "Strong"
-  }
-  database = {
-    name       = "Deadline"
-    throughput = 400
+  enable     = true
+  name       = "xstudio"
+  tier       = "M30"
+  version    = "5.0"
+  nodeCount  = 1
+  diskSizeGB = 128
+  highAvailability = {
+    enable = false
   }
 }

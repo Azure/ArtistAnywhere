@@ -2,7 +2,7 @@
 # Platform #
 ############
 
-$regionName        = "WestUS3"
+$regionName        = "WestUS2"
 $nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
@@ -41,7 +41,7 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
 # Storage #
 ###########
 
-$regionName        = "WestUS3"
+$regionName        = "WestUS2"
 $nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
@@ -90,7 +90,7 @@ for ($i = 1; $i -le $virtualMachine.dataDisk.count; $i++) {
 # Job Scheduler #
 #################
 
-$regionName        = "WestUS3"
+$regionName        = "WestUS2"
 $nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
@@ -129,7 +129,7 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
 # Render Farm #
 ###############
 
-$regionName        = "WestUS3"
+$regionName        = "WestUS2"
 $nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
@@ -169,7 +169,7 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
   az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-caching $virtualMachine.osDisk.caching --os-disk-size-gb $virtualMachine.osDisk.sizeGB --subnet $virtualMachine.subnetId --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --public-ip-address '""' --nsg '""' --security-type $virtualMachine.securityType --priority $virtualMachine.priorityMode --eviction-policy $virtualMachine.evictionPolicy --enable-hibernation $virtualMachine.hibernation.enable
 }
 
-$regionName        = "WestUS3"
+$regionName        = "WestUS2"
 $nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
@@ -213,7 +213,7 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
 # Artist Workstation #
 ######################
 
-$regionName        = "WestUS3"
+$regionName        = "WestUS2"
 $nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
@@ -251,7 +251,7 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
   az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-caching $virtualMachine.osDisk.caching --os-disk-size-gb $virtualMachine.osDisk.sizeGB --subnet $virtualMachine.subnetId --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --public-ip-address '""' --nsg '""' --security-type $virtualMachine.securityType --enable-hibernation $virtualMachine.hibernation.enable
 }
 
-$regionName        = "WestUS3"
+$regionName        = "WestUS2"
 $nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{

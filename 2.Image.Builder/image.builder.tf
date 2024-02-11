@@ -53,6 +53,9 @@ locals {
     database = {
       username = data.azurerm_key_vault_secret.database_username.value
       password = data.azurerm_key_vault_secret.database_password.value
+      cosmosDB = var.cosmosDB.enable
+      host     = var.cosmosDB.enable ? "${var.cosmosDB.name}.mongocluster.cosmos.azure.com" : ""
+      port     = var.cosmosDB.enable ? 10255 : 27017
     }
   }
 }

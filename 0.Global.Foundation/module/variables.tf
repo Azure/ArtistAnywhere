@@ -1,5 +1,5 @@
 variable regionName {
-  default = "WestUS3" # Set Azure region name from "az account list-locations --query [].name"
+  default = "WestUS2" # Set Azure region name from "az account list-locations --query [].name"
 }
 
 variable resourceGroupName {
@@ -35,8 +35,7 @@ variable managedIdentity {
 
 variable keyVault {
   default = {
-    enable = true
-    name   = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
+    name = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
     secretName = {
       adminUsername     = "AdminUsername"
       adminPassword     = "AdminPassword"
@@ -45,6 +44,7 @@ variable keyVault {
       gatewayConnection = "GatewayConnection"
     }
     keyName = {
+      dataEncryption  = "DataEncryption"
       cacheEncryption = "CacheEncryption"
     }
     certificateName = {

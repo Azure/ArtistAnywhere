@@ -4,49 +4,44 @@
 
 variable cosmosDB {
   type = object({
-    enable = bool
-    account = object({
-      name             = string
-      offerType        = string
-      consistencyLevel = string
-    })
-    database = object({
-      name       = string
-      throughput = number
+    enable     = bool
+    name       = string
+    tier       = string
+    version    = string
+    nodeCount  = number
+    diskSizeGB = number
+    highAvailability = object({
+      enable = bool
     })
   })
 }
 
-resource azurerm_cosmosdb_account scheduler {
-  count                = var.cosmosDB.enable ? 1 : 0
-  name                 = var.cosmosDB.account.name
-  resource_group_name  = azurerm_resource_group.database.name
-  location             = azurerm_resource_group.database.location
-  offer_type           = var.cosmosDB.account.offerType
-  kind                 = "MongoDB"
-  mongo_server_version = "4.2"
-  identity {
-    type = "UserAssigned"
-    identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
-    ]
-  }
-  consistency_policy {
-    consistency_level = var.cosmosDB.account.consistencyLevel
-  }
-  geo_location {
-    location          = azurerm_resource_group.database.location
-    failover_priority = 0
-  }
-  capabilities {
-    name = "EnableMongo"
-  }
-}
+# data azurerm_key_vault_key data_encryption {
+#   count        = var.cosmosDB.enable ? 1 : 0
+#   name         = module.global.keyVault.keyName.dataEncryption
+#   key_vault_id = data.azurerm_key_vault.studio.id
+# }
 
-resource azurerm_cosmosdb_mongo_database scheduler {
-  count               = var.cosmosDB.enable ? 1 : 0
-  name                = var.cosmosDB.database.name
-  resource_group_name = azurerm_resource_group.database.name
-  account_name        = azurerm_cosmosdb_account.scheduler[0].name
-  throughput          = var.cosmosDB.database.throughput
+resource azapi_resource mongo_cluster {
+  count     = var.cosmosDB.enable ? 1 : 0
+  name      = var.cosmosDB.name
+  type      = "Microsoft.DocumentDB/mongoClusters@2023-11-15-preview"
+  parent_id = azurerm_resource_group.database.id
+  location  = azurerm_resource_group.database.location
+  body = jsonencode({
+    properties = {
+      nodeGroupSpecs = [
+        {
+          kind       = "Shard"
+          sku        = var.cosmosDB.tier
+          nodeCount  = var.cosmosDB.nodeCount
+          diskSizeGB = var.cosmosDB.diskSizeGB
+          enableHa   = var.cosmosDB.highAvailability.enable
+        }
+      ]
+      serverVersion              = var.cosmosDB.version
+      administratorLogin         = data.azurerm_key_vault_secret.admin_username.value
+      administratorLoginPassword = data.azurerm_key_vault_secret.admin_password.value
+    }
+  })
 }

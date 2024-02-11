@@ -1,4 +1,4 @@
-$regionName = "WestUS3"
+$regionName = "WestUS2"
 az batch location list-skus --location $regionName --output table
 
 $queryFilter = "[? imageReference.publisher == 'almalinux' && nodeAgentSkuId=='batch.node.el 8']"
@@ -13,7 +13,7 @@ az batch pool supported-images list --query $queryFilter
 $queryFilter = "[? capabilities != null] | [? contains(capabilities, 'DockerCompatible')]"
 az batch pool supported-images list --query $queryFilter
 
-$resourceGroupName = "ArtistAnywhere.Farm"
+$resourceGroupName = "ArtistAnywhere.Farm.West"
 $accountName       = "xstudio"
 az batch account login --resource-group $resourceGroupName --name $accountName
 
