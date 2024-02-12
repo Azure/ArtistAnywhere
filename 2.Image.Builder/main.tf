@@ -119,6 +119,7 @@ data azurerm_resource_group network {
 }
 
 resource azurerm_resource_group database {
+  count    = var.cosmosDB.enable ? 1 : 0
   name     = var.resourceGroupName.database
   location = module.global.regionName
 }

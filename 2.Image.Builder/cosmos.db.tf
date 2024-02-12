@@ -26,8 +26,8 @@ resource azapi_resource mongo_cluster {
   count     = var.cosmosDB.enable ? 1 : 0
   name      = var.cosmosDB.name
   type      = "Microsoft.DocumentDB/mongoClusters@2023-11-15-preview"
-  parent_id = azurerm_resource_group.database.id
-  location  = azurerm_resource_group.database.location
+  parent_id = azurerm_resource_group.database[0].id
+  location  = azurerm_resource_group.database[0].location
   body = jsonencode({
     properties = {
       nodeGroupSpecs = [

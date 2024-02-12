@@ -33,7 +33,7 @@ $databaseUsername = $buildConfig.dataPlatform.database.username
 $databasePassword = $buildConfig.dataPlatform.database.password
 $cosmosDBPaaS = $buildConfig.dataPlatform.database.cosmosDB
 $databaseHost = $buildConfig.dataPlatform.database.host
-$databasePort = $buildConfig.dataPlatform.database.port
+# $databasePort = $buildConfig.dataPlatform.database.port
 if ($databaseHost -eq "") {
   $databaseHost = $(hostname)
 }
@@ -42,7 +42,7 @@ Write-Host "GPU Provider: $gpuProvider"
 Write-Host "Render Engines: $renderEngines"
 Write-Host "CosmosDB PaaS: $cosmosDBPaaS"
 Write-Host "Database Host: $databaseHost"
-Write-Host "Database Port: $databasePort"
+# Write-Host "Database Port: $databasePort"
 Write-Host "Customize (End): Image Build Parameters"
 
 Write-Host "Customize (Start): Image Build Platform"
@@ -388,7 +388,7 @@ if ($machineType -ne "Storage") {
     Write-Host "Customize (Start): Deadline Server"
     $processType = "deadline-repository"
     $installFile = "DeadlineRepository-$versionInfo-windows-installer.exe"
-    RunProcess .\$installFile "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbListeningPort $databasePort --mongodir $databasePath --installmongodb true" "$binDirectory\$processType"
+    RunProcess .\$installFile "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$binDirectory\$processType"
     Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$processType.log
     Copy-Item -Path $databasePath\certs\$certificateFile -Destination $installRoot\$certificateFile
     New-NfsShare -Name "Deadline" -Path $installRoot -Permission ReadWrite

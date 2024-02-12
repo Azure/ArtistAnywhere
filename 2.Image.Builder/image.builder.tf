@@ -286,7 +286,7 @@ resource azapi_resource image_builder_windows {
           {
             type = "PowerShell"
             inline = [
-              "C:\\AzureData\\customize.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {binStorage = var.binStorage})))}"
+              "C:\\AzureData\\customize.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {binStorage = var.binStorage}, {dataPlatform = local.dataPlatform})))}"
             ]
             runElevated = true
             runAsSystem = true

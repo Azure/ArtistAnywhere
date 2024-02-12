@@ -36,7 +36,7 @@ resource azurerm_application_insights monitor {
 }
 
 # resource azapi_resource monitor_storage {
-#   name      = "${azurerm_application_insights.monitor.name}/${azurerm_storage_account.studio.name}"
+#   name      = azurerm_storage_account.studio.name
 #   type      = "Microsoft.Insights/components/linkedStorageAccounts@2020-03-01-preview"
 #   parent_id = azurerm_application_insights.monitor.id
 #   body = jsonencode({

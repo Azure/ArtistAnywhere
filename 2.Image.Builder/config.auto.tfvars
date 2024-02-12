@@ -408,7 +408,7 @@ imageBuilder = {
     },
     {
       name   = "WinArtistA"
-      enable = true
+      enable = false
       source = {
         imageDefinition = {
           name    = "WinArtist"
