@@ -14,6 +14,16 @@ variable monitor {
   })
 }
 
+data azuread_service_principal diagnostic_services {
+  display_name = "Diagnostic Services Trusted Storage Access"
+}
+
+resource azurerm_role_assignment diagnostic_services {
+  role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor
+  principal_id         = data.azuread_service_principal.diagnostic_services.object_id
+  scope                = azurerm_storage_account.studio.id
+}
+
 resource azurerm_log_analytics_workspace monitor {
   name                       = module.global.monitor.name
   resource_group_name        = azurerm_resource_group.studio.name
@@ -33,15 +43,17 @@ resource azurerm_application_insights monitor {
   retention_in_days          = var.monitor.retentionDays
   internet_ingestion_enabled = false
   internet_query_enabled     = false
+  depends_on = [
+    azurerm_role_assignment.diagnostic_services
+  ]
 }
 
-# resource azapi_resource monitor_storage {
-#   name      = azurerm_storage_account.studio.name
-#   type      = "Microsoft.Insights/components/linkedStorageAccounts@2020-03-01-preview"
-#   parent_id = azurerm_application_insights.monitor.id
-#   body = jsonencode({
-#     properties = {
-#       linkedStorageAccount = azurerm_storage_account.studio.id
-#     }
-#   })
-# }
+resource terraform_data monitor_storage {
+  provisioner local-exec {
+    command = "az monitor app-insights component linked-storage link --id ${azurerm_application_insights.monitor.id} --storage-account ${azurerm_storage_account.studio.id}"
+  }
+  depends_on = [
+    azurerm_application_insights.monitor,
+    azurerm_storage_account.studio
+  ]
+}

@@ -61,7 +61,7 @@ variable monitor {
     name = "xstudio"
     agentVersion = {
       linux   = "1.29"
-      windows = "1.22"
+      windows = "1.23"
     }
   }
 }

@@ -22,6 +22,10 @@ variable computeGallery {
       offer      = string
       sku        = string
     }))
+    appDefinitions = list(object({
+      name = string
+      type = string
+    }))
   })
 }
 
@@ -32,9 +36,9 @@ resource azurerm_shared_image_gallery studio {
   location            = azurerm_resource_group.image.location
 }
 
-resource azurerm_shared_image linux {
+resource azurerm_shared_image studio {
   for_each = {
-    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if imageDefinition.type == "Linux" && var.computeGallery.enable && var.computeGallery.platform.linux.enable
+    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if var.computeGallery.enable && ((var.computeGallery.platform.linux.enable && imageDefinition.type == "Linux") || (var.computeGallery.platform.windows.enable && imageDefinition.type == "Windows"))
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.image.name
@@ -49,19 +53,12 @@ resource azurerm_shared_image linux {
   }
 }
 
-resource azurerm_shared_image windows {
+resource azurerm_gallery_application studio {
   for_each = {
-    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if imageDefinition.type == "Windows" && var.computeGallery.enable && var.computeGallery.platform.windows.enable
+    for appDefinition in var.computeGallery.appDefinitions : appDefinition.name => appDefinition if var.computeGallery.enable && ((var.computeGallery.platform.linux.enable && appDefinition.type == "Linux") || (var.computeGallery.platform.windows.enable && appDefinition.type == "Windows"))
   }
-  name                = each.value.name
-  resource_group_name = azurerm_resource_group.image.name
-  location            = azurerm_resource_group.image.location
-  gallery_name        = azurerm_shared_image_gallery.studio[0].name
-  hyper_v_generation  = each.value.generation
-  os_type             = each.value.type
-  identifier {
-    publisher = each.value.publisher
-    offer     = each.value.offer
-    sku       = each.value.sku
-  }
+  name              = each.value.name
+  location          = azurerm_resource_group.image.location
+  gallery_id        = azurerm_shared_image_gallery.studio[0].id
+  supported_os_type = each.value.type
 }

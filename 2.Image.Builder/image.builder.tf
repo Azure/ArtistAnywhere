@@ -26,6 +26,10 @@ variable imageBuilder {
         renderEngines  = list(string)
         customization  = list(string)
       })
+      distribute = object({
+        replicaCount       = number
+        storageAccountType = string
+      })
       errorHandling = object({
         validationMode    = string
         customizationMode = string
@@ -35,27 +39,22 @@ variable imageBuilder {
 }
 
 locals {
-  regionNames = var.existingNetwork.enable ? [module.global.regionName] : [
-    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
-  ]
-  targetRegions = [
-    for regionName in local.regionNames : {
-      name               = regionName
-      replicaCount       = 1
-      storageAccountType = "Standard_LRS"
-    }
-  ]
   dataPlatform = {
     admin = {
       username = data.azurerm_key_vault_secret.admin_username.value
       password = data.azurerm_key_vault_secret.admin_password.value
     }
-    database = {
-      username = data.azurerm_key_vault_secret.database_username.value
+    mongoDB = {
+      username = var.cosmosMongoDB.enable ? azurerm_cosmosdb_account.mongo_db[0].name : data.azurerm_key_vault_secret.database_username.value
+      password = var.cosmosMongoDB.enable ? azurerm_cosmosdb_account.mongo_db[0].secondary_key : data.azurerm_key_vault_secret.database_password.value
+      host     = var.cosmosMongoDB.enable ? "${azurerm_cosmosdb_account.mongo_db[0].name}.mongo.cosmos.azure.com" : var.cosmosMongoDB.vCore.enable ? "${azapi_resource.mongo_cluster[0].name}.mongocluster.cosmos.azure.com" : ""
+      port     = var.cosmosMongoDB.enable ? 10255 : 27017
+    }
+    postgreSQL = {
+      username = "citus"
       password = data.azurerm_key_vault_secret.database_password.value
-      cosmosDB = var.cosmosDB.enable
-      host     = var.cosmosDB.enable ? "${var.cosmosDB.name}.mongocluster.cosmos.azure.com" : ""
-      port     = var.cosmosDB.enable ? 10255 : 27017
+      host     = ""
+      port     = 5432
     }
   }
 }
@@ -166,12 +165,16 @@ resource azapi_resource image_builder_linux {
         {
           type           = "SharedImage"
           runOutputName  = "${each.value.name}-${each.value.build.imageVersion}"
-          galleryImageId = "${azurerm_shared_image.linux[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
+          galleryImageId = "${azurerm_shared_image.studio[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
+          targetRegions = [
+            for regionName in local.regionNames : merge(each.value.distribute, {
+              name = regionName
+            })
+          ]
           versioning = {
             scheme = "Latest"
             major  = tonumber(split(".", each.value.build.imageVersion)[0])
           }
-          targetRegions = local.targetRegions
           artifactTags = {
             imageTemplateName = each.value.name
           }
@@ -180,6 +183,11 @@ resource azapi_resource image_builder_linux {
     }
   })
   schema_validation_enabled = false
+  lifecycle {
+    ignore_changes = [
+      body
+    ]
+  }
   depends_on = [
     azurerm_role_assignment.identity,
     azurerm_role_assignment.network,
@@ -303,12 +311,16 @@ resource azapi_resource image_builder_windows {
         {
           type           = "SharedImage"
           runOutputName  = "${each.value.name}-${each.value.build.imageVersion}"
-          galleryImageId = "${azurerm_shared_image.windows[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
+          galleryImageId = "${azurerm_shared_image.studio[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
+          targetRegions = [
+            for regionName in local.regionNames : merge(each.value.distribute, {
+              name = regionName
+            })
+          ]
           versioning = {
             scheme = "Latest"
             major  = tonumber(split(".", each.value.build.imageVersion)[0])
           }
-          targetRegions = local.targetRegions
           artifactTags = {
             imageTemplateName = each.value.name
           }
@@ -317,6 +329,11 @@ resource azapi_resource image_builder_windows {
     }
   })
   schema_validation_enabled = false
+  lifecycle {
+    ignore_changes = [
+      body
+    ]
+  }
   depends_on = [
     azurerm_role_assignment.identity,
     azurerm_role_assignment.network,

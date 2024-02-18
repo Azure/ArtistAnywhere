@@ -13,25 +13,27 @@ echo "Customize (Start): Image Build Parameters"
 buildConfig=$(echo $buildConfigEncoded | base64 -d)
 machineType=$(echo $buildConfig | jq -r .machineType)
 gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
-renderEngines=$(echo $buildConfig | jq -c .renderEngines)
 binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
 binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
 adminUsername=$(echo $buildConfig | jq -r .dataPlatform.admin.username)
 adminPassword=$(echo $buildConfig | jq -r .dataPlatform.admin.password)
 databaseUsername=$(echo $buildConfig | jq -r .dataPlatform.database.username)
 databasePassword=$(echo $buildConfig | jq -r .dataPlatform.database.password)
-cosmosDBPaaS=$(echo $buildConfig | jq -r .dataPlatform.database.cosmosDB)
 databaseHost=$(echo $buildConfig | jq -r .dataPlatform.database.host)
 databasePort=$(echo $buildConfig | jq -r .dataPlatform.database.port)
+renderEngines=$(echo $buildConfig | jq -c .renderEngines)
+enableCosmos=false
 if [ "$databaseHost" == "" ]; then
   databaseHost=$(hostname)
+else
+  enableCosmos=true
 fi
 echo "Machine Type: $machineType"
 echo "GPU Provider: $gpuProvider"
-echo "Render Engines: $renderEngines"
-echo "CosmosDB PaaS: $cosmosDBPaaS"
+echo "Enable Cosmos: $enableCosmos"
 echo "Database Host: $databaseHost"
 echo "Database Port: $databasePort"
+echo "Render Engines: $renderEngines"
 echo "Customize (End): Image Build Parameters"
 
 echo "Customize (Start): Image Build Platform"
@@ -142,17 +144,6 @@ if [[ $renderEngines == *Blender* ]]; then
   echo "Customize (End): Blender"
 fi
 
-if [[ $renderEngines == *RenderMan* ]]; then
-  echo "Customize (Start): RenderMan"
-  versionInfo="25.2.0"
-  processType="renderman"
-  installFile="RenderMan-InstallerNCR-${versionInfo}_2282810-linuxRHEL7_gcc93icc219.x86_64.rpm"
-  downloadUrl="$binStorageHost/RenderMan/$versionInfo/$installFile$binStorageAuth"
-  curl -o $installFile -L $downloadUrl
-  RunProcess "rpm -i $installFile" $binDirectory/$processType
-  echo "Customize (End): RenderMan"
-fi
-
 if [[ $renderEngines == *Maya* ]]; then
   echo "Customize (Start): Maya"
   versionInfo="2024_0_1"
@@ -209,7 +200,7 @@ if [ $machineType == Scheduler ]; then
 fi
 
 if [ $machineType != Storage ]; then
-  versionInfo="10.3.1.4"
+  versionInfo="10.2.0.10"
   installRoot="/deadline"
   databaseName="deadline10db"
   binPathScheduler="$installRoot/bin"
@@ -224,8 +215,7 @@ if [ $machineType != Storage ]; then
   echo "Customize (End): Deadline Download"
 
   if [ $machineType == Scheduler ]; then
-    databaseSSL=true
-    if [ $cosmosDBPaaS != true ]; then
+    if [ $enableCosmos != true ]; then
       echo "Customize (Start): Mongo DB Service"
       if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
         echo never > /sys/kernel/mm/transparent_hugepage/enabled
@@ -243,7 +233,6 @@ if [ $machineType != Storage ]; then
       sed -i "/bindIp: 0.0.0.0/a\  tls:" $configFile
       sed -i "/tls:/a\    mode: disabled" $configFile
       systemctl --now enable mongod
-      databaseSSL=false
       echo "Customize (End): Mongo DB Service"
 
       echo "Customize (Start): Mongo DB Users"
@@ -283,7 +272,14 @@ if [ $machineType != Storage ]; then
     processType="deadline-repository"
     installFile="DeadlineRepository-$versionInfo-linux-x64-installer.run"
     export DB_PASSWORD=$databasePassword
-    RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbssl $databaseSSL --dbauth true --installmongodb false" $binDirectory/$processType
+    if [ $enableCosmos == true ]; then
+      databaseCertFile=cosmos-mongo-db
+      openssl s_client -connect $databaseHost:$databasePort < /dev/null | openssl x509 -outform pem > $databaseCertFile.pem
+      openssl pkcs12 -export -nokeys -passout pass:$databasePassword -in $databaseCertFile.pem -out $databaseCertFile.pfx
+      RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false --dbreplicaset globaldb --dbssl true --dbclientcert $(pwd)/$databaseCertFile.pfx --dbcertpass env:DB_CERT_PASSWORD" $binDirectory/$processType
+    else
+      RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
+    fi
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
     echo "$installRoot *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
     exportfs -r

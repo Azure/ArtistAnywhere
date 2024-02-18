@@ -18,10 +18,10 @@ if ("${autoScale.enable}" -ne $false) {
 }
 Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -User System -Force
 
+sc start Deadline10DatabaseService
+InitializeClient $null C:\deadline C:\deadline\Deadline10Client.pfx
+
 if ("${activeDirectory.enable}" -eq $true) {
   $securePassword = ConvertTo-SecureString ${activeDirectory.adminPassword} -AsPlainText -Force
   Install-ADDSForest -DomainName "${activeDirectory.domainName}" -SafeModeAdministratorPassword $securePassword -InstallDns -Force
 }
-
-sc start Deadline10DatabaseService
-InitializeClient $null C:\Deadline C:\Deadline\Deadline10Client.pfx

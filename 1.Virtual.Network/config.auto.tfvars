@@ -66,9 +66,18 @@ virtualNetworks = [
         serviceDelegation = "Qumulo.Storage/fileSystems"
       },
       {
-        name = "Cache"
+        name = "Data"
         addressSpace = [
           "10.0.195.0/24"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = "Microsoft.DocumentDB/cassandraClusters"
+      },
+      {
+        name = "Cache"
+        addressSpace = [
+          "10.0.196.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.Storage.Global"
@@ -78,7 +87,7 @@ virtualNetworks = [
       {
         name = "AI"
         addressSpace = [
-          "10.0.196.0/24"
+          "10.0.197.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.CognitiveServices"
@@ -166,9 +175,18 @@ virtualNetworks = [
         serviceDelegation = "Qumulo.Storage/fileSystems"
       },
       {
-        name = "Cache"
+        name = "Data"
         addressSpace = [
           "10.1.195.0/24"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = "Microsoft.DocumentDB/cassandraClusters"
+      },
+      {
+        name = "Cache"
+        addressSpace = [
+          "10.1.196.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.Storage.Global"
@@ -178,7 +196,7 @@ virtualNetworks = [
       {
         name = "AI"
         addressSpace = [
-          "10.1.196.0/24"
+          "10.1.197.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.CognitiveServices"

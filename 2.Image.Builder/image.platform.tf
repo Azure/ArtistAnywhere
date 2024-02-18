@@ -60,12 +60,16 @@ resource azapi_resource image_platform_linux {
         {
           type           = "SharedImage"
           runOutputName  = "${each.value.name}-${each.value.build.imageVersion}"
-          galleryImageId = "${azurerm_shared_image.linux[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
+          galleryImageId = "${azurerm_shared_image.studio[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
+          targetRegions = [
+            for regionName in local.regionNames : merge(each.value.distribute, {
+              name = regionName
+            })
+          ]
           versioning = {
             scheme = "Latest"
             major  = tonumber(split(".", each.value.build.imageVersion)[0])
           }
-          targetRegions = local.targetRegions
           artifactTags = {
             imageTemplateName = each.value.name
           }

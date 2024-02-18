@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.91.0"
+      version = "~>3.92.0"
     }
     azapi = {
       source = "azure/azapi"
@@ -49,11 +49,20 @@ variable binStorage {
   }
 }
 
+variable existingKeyVault {
+  type = object({
+    enable            = bool
+    name              = string
+    resourceGroupName = string
+  })
+}
+
 variable existingNetwork {
   type = object({
     enable            = bool
     name              = string
-    subnetName        = string
+    subnetNameData    = string
+    subnetNameFarm    = string
     resourceGroupName = string
   })
 }
@@ -69,8 +78,8 @@ data azurerm_user_assigned_identity studio {
 }
 
 data azurerm_key_vault studio {
-  name                = module.global.keyVault.name
-  resource_group_name = module.global.resourceGroupName
+  name                = var.existingKeyVault.enable ? var.existingKeyVault.name : module.global.keyVault.name
+  resource_group_name = var.existingKeyVault.enable ? var.existingKeyVault.resourceGroupName : module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret admin_username {
@@ -108,8 +117,14 @@ data azurerm_virtual_network studio {
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
 }
 
+data azurerm_subnet data {
+  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameData : "Data"
+  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio.name
+}
+
 data azurerm_subnet farm {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Farm"
+  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameFarm : "Farm"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
@@ -118,8 +133,14 @@ data azurerm_resource_group network {
   name = data.azurerm_virtual_network.studio.resource_group_name
 }
 
+locals {
+  regionNames = var.existingNetwork.enable ? [module.global.regionName] : [
+    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
+  ]
+}
+
 resource azurerm_resource_group database {
-  count    = var.cosmosDB.enable ? 1 : 0
+  count    = var.cosmosNoSQL.enable || var.cosmosMongoDB.enable || var.cosmosMongoDB.vCore.enable || var.cosmosPostgreSQL.enable || var.cosmosCassandra.enable || var.cosmosCassandra.managedInstance.enable || var.cosmosGremlin.enable || var.cosmosTable.enable ? 1 : 0
   name     = var.resourceGroupName.database
   location = module.global.regionName
 }

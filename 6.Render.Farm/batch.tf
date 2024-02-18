@@ -395,11 +395,11 @@ resource azurerm_batch_pool windows {
       dynamic cifs_mount {
         for_each = local.batchFileSystemsWindows
         content {
-          relative_mount_path = nfs_mount.value["mount"].path
-          source              = nfs_mount.value["mount"].source
-          mount_options       = nfs_mount.value["mount"].options
-          user_name           = nfs_mount.value["mount"].userName
-          password            = nfs_mount.value["mount"].password
+          relative_mount_path = cifs_mount.value["mount"].path
+          source              = cifs_mount.value["mount"].source
+          mount_options       = cifs_mount.value["mount"].options
+          user_name           = cifs_mount.value["mount"].userName
+          password            = cifs_mount.value["mount"].password
         }
       }
     }

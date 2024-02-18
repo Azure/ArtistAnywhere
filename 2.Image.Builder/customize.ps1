@@ -24,25 +24,29 @@ $buildConfigBytes = [System.Convert]::FromBase64String($buildConfigEncoded)
 $buildConfig = [System.Text.Encoding]::UTF8.GetString($buildConfigBytes) | ConvertFrom-Json
 $machineType = $buildConfig.machineType
 $gpuProvider = $buildConfig.gpuProvider
-$renderEngines = $buildConfig.renderEngines
 $binStorageHost = $buildConfig.binStorage.host
 $binStorageAuth = $buildConfig.binStorage.auth
 $adminUsername = $buildConfig.dataPlatform.admin.username
 $adminPassword = $buildConfig.dataPlatform.admin.password
 $databaseUsername = $buildConfig.dataPlatform.database.username
 $databasePassword = $buildConfig.dataPlatform.database.password
-$cosmosDBPaaS = $buildConfig.dataPlatform.database.cosmosDB
+$enableCosmos = $buildConfig.dataPlatform.database.enableCosmos
 $databaseHost = $buildConfig.dataPlatform.database.host
-# $databasePort = $buildConfig.dataPlatform.database.port
+$databasePort = $buildConfig.dataPlatform.database.port
+$renderEngines = $buildConfig.renderEngines
+$enableCosmos = $false
 if ($databaseHost -eq "") {
   $databaseHost = $(hostname)
+  $databasePort = 27100
+} else {
+  $enableCosmos = $true
 }
 Write-Host "Machine Type: $machineType"
 Write-Host "GPU Provider: $gpuProvider"
-Write-Host "Render Engines: $renderEngines"
-Write-Host "CosmosDB PaaS: $cosmosDBPaaS"
+Write-Host "Enable Cosmos: $enableCosmos"
 Write-Host "Database Host: $databaseHost"
-# Write-Host "Database Port: $databasePort"
+Write-Host "Database Port: $databasePort"
+Write-Host "Render Engines: $renderEngines"
 Write-Host "Customize (End): Image Build Parameters"
 
 Write-Host "Customize (Start): Image Build Platform"
@@ -57,6 +61,13 @@ RunProcess PowerShell.exe "-ExecutionPolicy Unrestricted -File .\$installFile" "
 $binPathChoco = "C:\ProgramData\chocolatey"
 $binPaths += ";$binPathChoco"
 Write-Host "Customize (End): Chocolatey"
+
+Write-Host "Customize (Start): OpenSSL"
+$processType = "openssl"
+RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
+$binPathOpenSSL = "C:\Program Files\OpenSSL-Win64\bin"
+$binPaths += ";$binPathOpenSSL"
+Write-Host "Customize (End): OpenSSL"
 
 Write-Host "Customize (Start): Python"
 $processType = "python"
@@ -89,13 +100,6 @@ Write-Host "Customize (Start): 7-Zip"
 $processType = "7zip"
 RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
 Write-Host "Customize (End): 7-Zip"
-
-Write-Host "Customize (Start): Carbon"
-$processType = "carbon"
-RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
-Import-Module -Name $processType
-Grant-CPrivilege -Identity "System" -Privilege "SeServiceLogonRight"
-Write-Host "Customize (End): Carbon"
 
 Write-Host "Customize (End): Image Build Platform"
 
@@ -184,17 +188,6 @@ if ($renderEngines -contains "Blender") {
   RunProcess $installFile "/quiet /norestart /log $processType.log" $null
   $binPaths += ";C:\Program Files\Blender Foundation\Blender 4.0"
   Write-Host "Customize (End): Blender"
-}
-
-if ($renderEngines -contains "RenderMan") {
-  Write-Host "Customize (Start): RenderMan"
-  $versionInfo = "25.2.0"
-  $processType = "renderman"
-  $installFile = "RenderMan-InstallerNCR-${versionInfo}_2282810-windows10_vc15icc216.x86_64.msi"
-  $downloadUrl = "$binStorageHost/RenderMan/$versionInfo/$installFile$binStorageAuth"
-  (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
-  RunProcess $installFile "/quiet /norestart /log $processType.log" $null
-  Write-Host "Customize (End): RenderMan"
 }
 
 if ($renderEngines -contains "Unreal" -or $renderEngines -contains "Unreal+PixelStream") {
@@ -370,7 +363,7 @@ if ($machineType -eq "Scheduler") {
 }
 
 if ($machineType -ne "Storage") {
-  $versionInfo = "10.3.1.4"
+  $versionInfo = "10.2.0.10"
   $installRoot = "C:\deadline"
   $databasePath = "C:\deadlineData"
   $certificateFile = "Deadline10Client.pfx"

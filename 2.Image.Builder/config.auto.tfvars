@@ -52,6 +52,32 @@ computeGallery = {
       sku        = "Win11-23H2-Pro"
     }
   ]
+  appDefinitions = [
+    {
+      name = "LnxPBRT"
+      type = "Linux"
+    },
+    {
+      name = "LnxBlender"
+      type = "Linux"
+    },
+    {
+      name = "LnxMoonRay"
+      type = "Linux"
+    },
+    {
+      name = "WinPBRT"
+      type = "Windows"
+    },
+    {
+      name = "WinBlender"
+      type = "Windows"
+    },
+    {
+      name = "WinUnreal"
+      type = "Windows"
+    }
+  ]
 }
 
 #############################################################################################
@@ -84,11 +110,15 @@ imageBuilder = {
         customization = [
           "systemctl --now disable firewalld",
           "sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config",
-          "dnf -y install gcc gcc-c++ python3-devel perl cmake git jq nfs-utils",
+          "dnf -y install gcc gcc-c++ python3-devel perl openssl cmake git jq nfs-utils",
           "dnf -y upgrade",
           "export AZNFS_NONINTERACTIVE_INSTALL=1",
           "curl -L https://github.com/Azure/AZNFS-mount/releases/download/2.0.3/aznfs_install.sh | bash"
         ]
+      }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -119,6 +149,10 @@ imageBuilder = {
         customization = [
         ]
       }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Premium_LRS"
+      }
       errorHandling = {
         validationMode    = "cleanup"
         customizationMode = "cleanup"
@@ -148,6 +182,10 @@ imageBuilder = {
         customization = [
         ]
       }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Premium_LRS"
+      }
       errorHandling = {
         validationMode    = "cleanup"
         customizationMode = "cleanup"
@@ -174,10 +212,14 @@ imageBuilder = {
         timeoutMinutes = 240
         renderEngines = [
           "PBRT",
-          "RenderMan"
+          "MoonRay"
         ]
         customization = [
         ]
+      }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -206,10 +248,14 @@ imageBuilder = {
         renderEngines = [
           "PBRT",
           "Blender",
-          "RenderMan"
+          "MoonRay"
         ]
         customization = [
         ]
+      }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -238,10 +284,14 @@ imageBuilder = {
         renderEngines = [
           "PBRT",
           "Blender",
-          "RenderMan"
+          "MoonRay"
         ]
         customization = [
         ]
+      }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -270,10 +320,14 @@ imageBuilder = {
         renderEngines = [
           "PBRT",
           "Blender",
-          "RenderMan"
+          "MoonRay"
         ]
         customization = [
         ]
+      }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -304,6 +358,10 @@ imageBuilder = {
         customization = [
         ]
       }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Premium_LRS"
+      }
       errorHandling = {
         validationMode    = "cleanup"
         customizationMode = "cleanup"
@@ -329,11 +387,14 @@ imageBuilder = {
         osDiskSizeGB   = 360
         timeoutMinutes = 360
         renderEngines = [
-          "PBRT",
-          "RenderMan"
+          "PBRT"
         ]
         customization = [
         ]
+      }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -362,11 +423,14 @@ imageBuilder = {
         renderEngines = [
           "PBRT",
           "Blender",
-          "RenderMan",
           # "Unreal"
         ]
         customization = [
         ]
+      }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -395,11 +459,14 @@ imageBuilder = {
         renderEngines = [
           "PBRT",
           "Blender",
-          "RenderMan",
           # "Unreal+PixelStream"
         ]
         customization = [
         ]
+      }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -428,11 +495,14 @@ imageBuilder = {
         renderEngines = [
           "PBRT",
           "Blender",
-          "RenderMan",
           # "Unreal+PixelStream"
         ]
         customization = [
         ]
+      }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -451,9 +521,16 @@ binStorage = { # Required configuration for image building
 # Resource dependency configuration for pre-existing deployments only #
 #######################################################################
 
+existingKeyVault = {
+  enable            = false
+  name              = ""
+  resourceGroupName = ""
+}
+
 existingNetwork = {
   enable            = false
   name              = ""
-  subnetName        = ""
+  subnetNameData    = ""
+  subnetNameFarm    = ""
   resourceGroupName = ""
 }

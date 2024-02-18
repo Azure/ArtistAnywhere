@@ -9,7 +9,10 @@ dnf -y upgrade
 
 https://download.rockylinux.org/vault/
 
-az vm image list --publisher CIQ --offer Rocky --sku Rocky-8-6-Free --all
+az vm image list --publisher CIQ --offer Rocky --sku Rocky-8 --all
+az vm image list --publisher CIQ --offer Rocky --sku Rocky-9 --all
+
+az vm image list --publisher CIQ --offer Rocky --sku Rocky-8-6 --all
 4.18.0-372.16.1.el8_6.0.1.x86_64
 
 az vm image list --publisher MicrosoftWindowsServer --offer WindowsServer --sku 2022-Datacenter-G2 --all

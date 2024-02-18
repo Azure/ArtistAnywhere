@@ -28,7 +28,7 @@ data azurerm_storage_share studio {
   storage_account_name = data.azurerm_storage_account.studio.name
 }
 
-resource azurerm_private_dns_zone function_app {
+resource azurerm_private_dns_zone functions {
   count               = var.functionApp.enable ? 1 : 0
   name                = "privatelink.azurewebsites.net"
   resource_group_name = azurerm_resource_group.farm.name
@@ -36,15 +36,15 @@ resource azurerm_private_dns_zone function_app {
 
 resource azurerm_private_dns_zone_virtual_network_link function_app {
   count                 = var.functionApp.enable ? 1 : 0
-  name                  = "functions-${lower(data.azurerm_virtual_network.studio.location)}"
+  name                  = "functions"
   resource_group_name   = azurerm_resource_group.farm.name
-  private_dns_zone_name = azurerm_private_dns_zone.function_app[0].name
+  private_dns_zone_name = azurerm_private_dns_zone.functions[0].name
   virtual_network_id    = data.azurerm_virtual_network.studio.id
 }
 
 resource azurerm_private_endpoint function_app {
   count               = var.functionApp.enable ? 1 : 0
-  name                = "${azurerm_windows_function_app.studio[0].name}-functions"
+  name                = "${azurerm_windows_function_app.studio[0].name}-${azurerm_private_dns_zone_virtual_network_link.functions[0].name}"
   resource_group_name = azurerm_resource_group.farm.name
   location            = azurerm_resource_group.farm.location
   subnet_id           = "${data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : var.functionApp.subnetName}"
@@ -59,11 +59,11 @@ resource azurerm_private_endpoint function_app {
   private_dns_zone_group {
     name = azurerm_windows_function_app.studio[0].name
     private_dns_zone_ids = [
-      azurerm_private_dns_zone.function_app[0].id
+      azurerm_private_dns_zone.functions[0].id
     ]
   }
   depends_on = [
-    azurerm_private_dns_zone_virtual_network_link.function_app
+    azurerm_private_dns_zone_virtual_network_link.functions
   ]
 }
 
