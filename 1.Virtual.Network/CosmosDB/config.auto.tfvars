@@ -1,17 +1,19 @@
+resourceGroupName = "ArtistAnywhere.Database" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+
 ########################################################################
 # Cosmos DB (https://learn.microsoft.com/azure/cosmos-db/introduction) #
 ########################################################################
 
 cosmosDB = {
-  tier = "Standard"
+  namePrefix = "xstudio"
+  offerType  = "Standard"
   consistency = {
-    policyLevel        = "Strong"
+    policyLevel        = "Session"
     maxIntervalSeconds = 5
     maxStalenessPrefix = 100
   }
-  customEncryption = {
-    enable  = false
-    keyName = ""
+  serverless = {
+    enable = true
   }
   partitionMerge = {
     enable = false
@@ -21,6 +23,10 @@ cosmosDB = {
   }
   automaticFailover = {
     enable = false
+  }
+  customEncryption = {
+    enable  = false
+    keyName = ""
   }
   analytics = {
     enable     = false
@@ -35,18 +41,21 @@ cosmosDB = {
 cosmosNoSQL = {
   enable = false
   name   = "xstudio"
-  dedicatedGateway = {
+  gateway = {
     enable = false
     size   = "Cosmos.D4s"
     count  = 1
   }
+  database = {
+    name       = ""
+    throughput = 400
+  }
 }
 
-#####################################################################################################
-# Cosmos DB Mongo DB       (https://learn.microsoft.com/azure/cosmos-db/mongodb/introduction)       #
-# Cosmos DB Mongo DB RU    (https://learn.microsoft.com/azure/cosmos-db/mongodb/ru/introduction)    #
-# Cosmos DB Mongo DB vCore (https://learn.microsoft.com/azure/cosmos-db/mongodb/vcore/introduction) #
-#####################################################################################################
+###############################################################################################
+# Cosmos DB Mongo DB    (https://learn.microsoft.com/azure/cosmos-db/mongodb/introduction)    #
+# Cosmos DB Mongo DB RU (https://learn.microsoft.com/azure/cosmos-db/mongodb/ru/introduction) #
+###############################################################################################
 
 cosmosMongoDB = {
   enable  = false
@@ -56,31 +65,54 @@ cosmosMongoDB = {
     name       = "deadline10db"
     throughput = 400
   }
-  vCore = {
-    enable     = false
-    name       = "xstudio"
-    tier       = "M30"
-    version    = "5.0"
-    nodeCount  = 1
-    diskSizeGB = 128
-    highAvailability = {
-      enable = false
-    }
+}
+
+#####################################################################################################
+# Cosmos DB Mongo DB vCore (https://learn.microsoft.com/azure/cosmos-db/mongodb/vcore/introduction) #
+#####################################################################################################
+
+cosmosMongoDBvCore = {
+  enable     = false
+  name       = "xstudio"
+  tier       = "M30"
+  version    = "5.0"
+  nodeCount  = 1
+  diskSizeGB = 128
+  highAvailability = {
+    enable = false
   }
 }
 
+###################################################################################################
+# Cosmos DB Apache Cassandra (https://learn.microsoft.com/azure/cosmos-db/cassandra/introduction) #
+###################################################################################################
+
+cosmosCassandra = {
+  enable = false
+  name   = "xstudio"
+}
+
 ########################################################################################################################
-# Cosmos DB Apache Cassandra RU     (https://learn.microsoft.com/azure/cosmos-db/cassandra/introduction)               #
 # Apache Cassandra Managed Instance (https://learn.microsoft.com/azure/managed-instance-apache-cassandra/introduction) #
 ########################################################################################################################
 
-cosmosCassandra = {
+apacheCassandra = {
   enable  = false
   name    = "xstudio"
-  managedInstance = {
-    enable  = false
-    name    = "xstudio"
-    version = "4.0"
+  version = "4.0"
+  datacenter = {
+    name = "dc0"
+    node = {
+      type  = "Standard_E16s_v5"
+      count = 3
+      disk = {
+        type  = "P30"
+        count = 2
+      }
+    }
+  }
+  backup = {
+    intervalHours = 24
   }
 }
 
@@ -125,6 +157,10 @@ cosmosPostgreSQL = {
 cosmosGremlin = {
   enable = false
   name   = "xstudio"
+  database = {
+    name       = ""
+    throughput = 400
+  }
 }
 
 ####################################################################################
@@ -134,4 +170,22 @@ cosmosGremlin = {
 cosmosTable = {
   enable = false
   name   = "xstudio"
+}
+
+#######################################################################
+# Resource dependency configuration for pre-existing deployments only #
+#######################################################################
+
+existingKeyVault = {
+  enable            = false
+  name              = ""
+  resourceGroupName = ""
+}
+
+existingNetwork = {
+  enable            = false
+  name              = ""
+  subnetNameData    = ""
+  subnetNameFarm    = ""
+  resourceGroupName = ""
 }

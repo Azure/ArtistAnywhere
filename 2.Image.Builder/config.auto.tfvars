@@ -1,7 +1,4 @@
-resourceGroupName = { # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
-  database = "ArtistAnywhere.Database"
-  image    = "ArtistAnywhere.Image"
-}
+resourceGroupName = "ArtistAnywhere.Image" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
 ###############################################################################################
 # Compute Gallery (https://learn.microsoft.com/azure/virtual-machines/shared-image-galleries) #
@@ -530,7 +527,6 @@ existingKeyVault = {
 existingNetwork = {
   enable            = false
   name              = ""
-  subnetNameData    = ""
-  subnetNameFarm    = ""
+  subnetName        = ""
   resourceGroupName = ""
 }

@@ -1,0 +1,15 @@
+FROM xstudio.azurecr.io/lnx-farm-c:cmake
+
+WORKDIR /usr/local/src
+
+RUN dnf -y install mesa-libGL-devel &&\
+    dnf -y install libXrandr-devel &&\
+    dnf -y install libXinerama-devel &&\
+    dnf -y install libXcursor-devel &&\
+    dnf -y install libXi-devel
+
+RUN git clone --recursive https://github.com/mmp/pbrt-v4.git &&\
+    cmake -S pbrt-v4 -B /usr/local/pbrt &&\
+    make -C /usr/local/pbrt
+
+ENV PATH=$PATH:/usr/local/pbrt

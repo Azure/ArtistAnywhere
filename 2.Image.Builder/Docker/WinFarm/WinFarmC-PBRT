@@ -1,0 +1,9 @@
+FROM xstudio.azurecr.io/win-farm-c:cmake
+
+WORKDIR C:\\Users\\Public\\Downloads
+
+RUN git clone --recursive https://github.com/mmp/pbrt-v4.git &&\
+    cmake -S pbrt-v4 -B "C:\\Program Files\\PBRT" &&\
+    msbuild "C:\\Program Files\\PBRT\\PBRT-v4.sln" -p:Configuration=Release
+
+RUN setx PATH "%PATH%;C:\\Program Files\\PBRT\\Release" /m

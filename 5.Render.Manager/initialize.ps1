@@ -1,7 +1,7 @@
 $binDirectory = "C:\Users\Public\Downloads"
 Set-Location -Path $binDirectory
 
-. C:\AzureData\functions.ps1
+sc start Deadline10DatabaseService
 
 $scriptFile = "$binDirectory\aaaAutoScaler.ps1"
 Copy-Item -Path "C:\AzureData\CustomData.bin" -Destination $scriptFile
@@ -17,9 +17,6 @@ if ("${autoScale.enable}" -ne $false) {
   $taskSettings = New-ScheduledTaskSettingsSet -Disable
 }
 Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -User System -Force
-
-sc start Deadline10DatabaseService
-InitializeClient $null C:\deadline C:\deadline\Deadline10Client.pfx
 
 if ("${activeDirectory.enable}" -eq $true) {
   $securePassword = ConvertTo-SecureString ${activeDirectory.adminPassword} -AsPlainText -Force

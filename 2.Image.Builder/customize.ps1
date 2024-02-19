@@ -374,9 +374,9 @@ if ($machineType -eq "Scheduler") {
 }
 
 if ($machineType -ne "Storage") {
-  $versionInfo = "10.2.0.10"
-  $installRoot = "C:\deadline"
-  $databasePath = "C:\deadlineData"
+  $versionInfo = "10.3.1.4"
+  $installRoot = "C:\Deadline"
+  $databasePath = "C:\DeadlineData"
   $certificateFile = "Deadline10Client.pfx"
   $binPathScheduler = "$installRoot\bin"
 

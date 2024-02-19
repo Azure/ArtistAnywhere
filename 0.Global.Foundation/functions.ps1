@@ -92,13 +92,13 @@ function JoinActiveDirectory ($domainName, $domainServerName, $orgUnitPath, $adm
 }
 
 function InitializeClient ($activeDirectory, $repositoryRoot, $clientCertificate) {
-  if ($respositoryRoot -eq $null) {
-    $repositoryRoot = "S:\"
-  }
-  if ($clientCertificate -eq $null) {
-    $clientCertificate = "S:\Deadline10Client.pfx"
-  }
-  RunProcess deadlinecommand.exe "-ChangeRepository Direct $respositoryRoot $clientCertificate" deadline-repository
+  # if ($respositoryRoot -eq $null) {
+  #   $repositoryRoot = "S:\"
+  # }
+  # if ($clientCertificate -eq $null) {
+  #   $clientCertificate = "S:\Deadline10Client.pfx"
+  # }
+  # RunProcess deadlinecommand.exe "-ChangeRepository Direct $respositoryRoot $clientCertificate" deadline-repository
   if ($activeDirectory -ne $null -and $activeDirectory.enable) {
     Retry 3 10 {
       JoinActiveDirectory $activeDirectory.domainName $activeDirectory.domainServerName $activeDirectory.orgUnitPath $activeDirectory.adminUsername $activeDirectory.adminPassword

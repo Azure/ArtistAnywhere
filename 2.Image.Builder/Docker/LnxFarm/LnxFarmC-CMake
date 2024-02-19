@@ -1,0 +1,14 @@
+FROM rockylinux:9.3
+
+WORKDIR /usr/local/src
+
+RUN dnf -y install gcc gcc-c++ git make openssl-devel &&\
+    curl -o cmake.tar.gz -L https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1.tar.gz &&\
+    mkdir /usr/local/cmake &&\
+    tar -xzf cmake.tar.gz --strip-components=1 -C /usr/local/cmake
+
+WORKDIR /usr/local/cmake
+
+RUN ./bootstrap &&\
+    make &&\
+    make install

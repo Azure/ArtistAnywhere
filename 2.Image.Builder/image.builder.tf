@@ -45,10 +45,10 @@ locals {
       password = data.azurerm_key_vault_secret.admin_password.value
     }
     mongoDB = {
-      username = var.cosmosMongoDB.enable ? azurerm_cosmosdb_account.mongo_db[0].name : data.azurerm_key_vault_secret.database_username.value
-      password = var.cosmosMongoDB.enable ? azurerm_cosmosdb_account.mongo_db[0].secondary_key : data.azurerm_key_vault_secret.database_password.value
-      host     = var.cosmosMongoDB.enable ? "${azurerm_cosmosdb_account.mongo_db[0].name}.mongo.cosmos.azure.com" : var.cosmosMongoDB.vCore.enable ? "${azapi_resource.mongo_cluster[0].name}.mongocluster.cosmos.azure.com" : ""
-      port     = var.cosmosMongoDB.enable ? 10255 : 27017
+      username = data.azurerm_key_vault_secret.database_username.value
+      password = data.azurerm_key_vault_secret.database_password.value
+      host     = ""
+      port     = 27017
     }
     postgreSQL = {
       username = "citus"

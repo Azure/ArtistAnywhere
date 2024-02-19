@@ -212,7 +212,7 @@ if [ $machineType == Scheduler ]; then
 fi
 
 if [ $machineType != Storage ]; then
-  versionInfo="10.2.0.10"
+  versionInfo="10.3.1.4"
   installRoot="/deadline"
   databaseName="deadline10db"
   binPathScheduler="$installRoot/bin"

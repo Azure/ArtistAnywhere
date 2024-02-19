@@ -1,0 +1,21 @@
+FROM xstudio.azurecr.io/lnx-farm-c:cmake
+
+WORKDIR /usr/local/src
+
+RUN git clone --recurse-submodules https://github.com/dreamworksanimation/openmoonray.git &&\
+    source openmoonray/building/Rocky9/install_packages.sh --nocuda
+
+WORKDIR openmoonray/build
+
+RUN cmake ../building/Rocky9  &&\
+    cmake --build . -- -j $(nproc)
+
+RUN rm -rf * &&\
+    cmake .. -DPYTHON_EXECUTABLE=python3 -DBOOST_PYTHON_COMPONENT_NAME=python39 -DABI_VERSION=0 -DMOONRAY_USE_CUDA=NO &&\
+    cmake --build . -- -j $(nproc) &&\
+    mkdir /usr/local/openmoonray &&\
+    cmake --install . --prefix /usr/local/openmoonray
+
+ENV PATH=$PATH:/usr/local/openmoonray
+
+CMD source /usr/local/openmoonray/scripts/setup.sh

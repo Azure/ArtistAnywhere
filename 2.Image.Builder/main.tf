@@ -9,10 +9,6 @@ terraform {
       source = "azure/azapi"
       version = "~>1.12.0"
     }
-    http = {
-      source  = "hashicorp/http"
-      version = "~>3.4.1"
-    }
   }
   backend azurerm {
     key = "2.Image.Builder"
@@ -28,14 +24,11 @@ provider azurerm {
 }
 
 module global {
-  source = "../0.Global.Foundation/module"
+  source = "../0.Global.Foundation/config"
 }
 
 variable resourceGroupName {
-  type = object({
-    database = string
-    image    = string
-  })
+  type = string
 }
 
 variable binStorage {
@@ -61,15 +54,9 @@ variable existingNetwork {
   type = object({
     enable            = bool
     name              = string
-    subnetNameData    = string
-    subnetNameFarm    = string
+    subnetName        = string
     resourceGroupName = string
   })
-}
-
-data http client_address {
-  count = var.containerRegistry.enable ? 1 : 0
-  url   = "https://api.ipify.org?format=json"
 }
 
 data azurerm_user_assigned_identity studio {
@@ -117,14 +104,8 @@ data azurerm_virtual_network studio {
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
 }
 
-data azurerm_subnet data {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameData : "Data"
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
-}
-
 data azurerm_subnet farm {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameFarm : "Farm"
+  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Farm"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
@@ -139,13 +120,7 @@ locals {
   ]
 }
 
-resource azurerm_resource_group database {
-  count    = var.cosmosNoSQL.enable || var.cosmosMongoDB.enable || var.cosmosMongoDB.vCore.enable || var.cosmosPostgreSQL.enable || var.cosmosCassandra.enable || var.cosmosCassandra.managedInstance.enable || var.cosmosGremlin.enable || var.cosmosTable.enable ? 1 : 0
-  name     = var.resourceGroupName.database
-  location = module.global.regionName
-}
-
 resource azurerm_resource_group image {
-  name     = var.resourceGroupName.image
+  name     = var.resourceGroupName
   location = module.global.regionName
 }
