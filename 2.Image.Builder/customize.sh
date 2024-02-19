@@ -310,7 +310,9 @@ if [ $machineType != Storage ]; then
   fi
   RunProcess "$installPath/$installFile $installArgs" $binDirectory/$processType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
+  [ $machineType == Scheduler ] && repositoryPath=$installRoot || repositoryPath="/mnt/deadline"
   echo "$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $mongoDBUsername $mongoDBPassword" >> $aaaProfile
+  echo "$binPathScheduler/deadlinecommand -ChangeRepository Direct $repositoryPath" >> $aaaProfile
   echo "Customize (End): Deadline Client"
 
   binPaths="$binPaths:$binPathScheduler"
