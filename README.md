@@ -42,7 +42,7 @@ For each module, here is the recommended configuration and deployment process. *
       * By default, [Spot](https://learn.microsoft.com/azure/virtual-machines/spot-vms) is enabled in module `6 Render Farm` configuration. Therefore, Spot cores quota should be approved for your Azure subscription and target region(s).
    * For modules `5 Render Manager`, `6 Render Farm` and `7 Artist Workstation`, make sure each **image.id** config references the correct custom image in your Azure subscription.
 1. For module `0 Global Foundation`, run `terraform init` to initialize the module local directory (append `-upgrade` if older providers are detected).
-1. For all modules except `0 Global Foundation`, run `terraform init -backend-config ../0.Global.Foundation/module/backend.config` to initialize the module local directory (append `-upgrade` if older providers are detected).
+1. For all modules except `0 Global Foundation`, run `terraform init -backend-config ../0.Global.Foundation/config/backend.config` to initialize the module local directory (append `-upgrade` if older providers are detected).
 1. Run `terraform apply` to generate the Terraform deployment [Plan](https://www.terraform.io/docs/cli/run/index.html#planning) (append `-destroy` to delete Azure resources).
 1. Review the Terraform deployment Plan *before* confirming to add, change and/or destroy Azure resources.
    * For module `2 Image Builder` to build virtual machine images, use the Azure portal or [Image Builder CLI](https://learn.microsoft.com/cli/azure/image/builder#az-image-builder-run) to start image build runs as needed.
