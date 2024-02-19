@@ -17,22 +17,34 @@ binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
 binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
 adminUsername=$(echo $buildConfig | jq -r .dataPlatform.admin.username)
 adminPassword=$(echo $buildConfig | jq -r .dataPlatform.admin.password)
-databaseUsername=$(echo $buildConfig | jq -r .dataPlatform.database.username)
-databasePassword=$(echo $buildConfig | jq -r .dataPlatform.database.password)
-databaseHost=$(echo $buildConfig | jq -r .dataPlatform.database.host)
-databasePort=$(echo $buildConfig | jq -r .dataPlatform.database.port)
+mongoDBUsername=$(echo $buildConfig | jq -r .dataPlatform.mongoDB.username)
+mongoDBPassword=$(echo $buildConfig | jq -r .dataPlatform.mongoDB.password)
+mongoDBHost=$(echo $buildConfig | jq -r .dataPlatform.mongoDB.host)
+mongoDBPort=$(echo $buildConfig | jq -r .dataPlatform.mongoDB.port)
+postgreSQLUsername=$(echo $buildConfig | jq -r .dataPlatform.postgreSQL.username)
+postgreSQLPassword=$(echo $buildConfig | jq -r .dataPlatform.postgreSQL.password)
+postgreSQLHost=$(echo $buildConfig | jq -r .dataPlatform.postgreSQL.host)
+postgreSQLPort=$(echo $buildConfig | jq -r .dataPlatform.postgreSQL.port)
 renderEngines=$(echo $buildConfig | jq -c .renderEngines)
-enableCosmos=false
-if [ "$databaseHost" == "" ]; then
-  databaseHost=$(hostname)
+enableCosmosDB=false
+if [ "$mongoDBHost" == "" ]; then
+  mongoDBHost=$(hostname)
 else
-  enableCosmos=true
+  enableCosmosDB=true
 fi
 echo "Machine Type: $machineType"
 echo "GPU Provider: $gpuProvider"
-echo "Enable Cosmos: $enableCosmos"
-echo "Database Host: $databaseHost"
-echo "Database Port: $databasePort"
+echo "Admin Username: $adminUsername"
+echo "Admin Password: $adminPassword"
+echo "Enable Cosmos DB: $enableCosmosDB"
+echo "MongoDB Username: $mongoDBUsername"
+echo "MongoDB Password: $mongoDBPassword"
+echo "MongoDB Host: $mongoDBHost"
+echo "MongoDB Port: $mongoDBPort"
+echo "PostgreSQL Host: $postgreSQLHost"
+echo "PostgreSQL Port: $postgreSQLPort"
+echo "PostgreSQL Username: $postgreSQLUsername"
+echo "PostgreSQL Password: $postgreSQLPassword"
 echo "Render Engines: $renderEngines"
 echo "Customize (End): Image Build Parameters"
 
@@ -215,7 +227,7 @@ if [ $machineType != Storage ]; then
   echo "Customize (End): Deadline Download"
 
   if [ $machineType == Scheduler ]; then
-    if [ $enableCosmos != true ]; then
+    if [ $enableCosmosDB != true ]; then
       echo "Customize (Start): Mongo DB Service"
       if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
         echo never > /sys/kernel/mm/transparent_hugepage/enabled
@@ -257,8 +269,8 @@ if [ $machineType != Storage ]; then
       mongoScript="$processType.js"
       echo "db = db.getSiblingDB(\"$databaseName\");" > $mongoScript
       echo "db.createUser({" >> $mongoScript
-      echo "  user: \"$databaseUsername\"," >> $mongoScript
-      echo "  pwd: \"$databasePassword\"," >> $mongoScript
+      echo "  user: \"$mongoDBUsername\"," >> $mongoScript
+      echo "  pwd: \"$mongoDBPassword\"," >> $mongoScript
       echo "  roles: [" >> $mongoScript
       echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $mongoScript
       echo "  ]" >> $mongoScript
@@ -271,14 +283,14 @@ if [ $machineType != Storage ]; then
     echo "Customize (Start): Deadline Server"
     processType="deadline-repository"
     installFile="DeadlineRepository-$versionInfo-linux-x64-installer.run"
-    export DB_PASSWORD=$databasePassword
-    if [ $enableCosmos == true ]; then
-      databaseCertFile=cosmos-mongo-db
-      openssl s_client -connect $databaseHost:$databasePort < /dev/null | openssl x509 -outform pem > $databaseCertFile.pem
-      openssl pkcs12 -export -nokeys -passout pass:$databasePassword -in $databaseCertFile.pem -out $databaseCertFile.pfx
-      RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false --dbreplicaset globaldb --dbssl true --dbclientcert $(pwd)/$databaseCertFile.pfx --dbcertpass env:DB_CERT_PASSWORD" $binDirectory/$processType
+    export DB_PASSWORD=$mongoDBPassword
+    if [ $enableCosmosDB == true ]; then
+      mongoDBCertFile=cosmos-mongo-db
+      openssl s_client -connect $mongoDBHost:$mongoDBPort < /dev/null | openssl x509 -outform pem > $mongoDBCertFile.pem
+      openssl pkcs12 -export -nokeys -passout pass:$mongoDBPassword -in $mongoDBCertFile.pem -out $mongoDBCertFile.pfx
+      RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $mongoDBHost --dbport $mongoDBPort --dbname $databaseName --dbuser $mongoDBUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false --dbreplicaset globaldb --dbssl true --dbclientcert $(pwd)/$mongoDBCertFile.pfx --dbcertpass env:DB_CERT_PASSWORD" $binDirectory/$processType
     else
-      RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
+      RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $mongoDBHost --dbport $mongoDBPort --dbname $databaseName --dbuser $mongoDBUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
     fi
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
     echo "$installRoot *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
@@ -298,7 +310,7 @@ if [ $machineType != Storage ]; then
   fi
   RunProcess "$installPath/$installFile $installArgs" $binDirectory/$processType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
-  echo "$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" >> $aaaProfile
+  echo "$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $mongoDBUsername $mongoDBPassword" >> $aaaProfile
   echo "Customize (End): Deadline Client"
 
   binPaths="$binPaths:$binPathScheduler"

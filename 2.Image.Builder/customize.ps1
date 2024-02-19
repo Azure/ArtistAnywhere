@@ -28,24 +28,35 @@ $binStorageHost = $buildConfig.binStorage.host
 $binStorageAuth = $buildConfig.binStorage.auth
 $adminUsername = $buildConfig.dataPlatform.admin.username
 $adminPassword = $buildConfig.dataPlatform.admin.password
-$databaseUsername = $buildConfig.dataPlatform.database.username
-$databasePassword = $buildConfig.dataPlatform.database.password
-$enableCosmos = $buildConfig.dataPlatform.database.enableCosmos
-$databaseHost = $buildConfig.dataPlatform.database.host
-$databasePort = $buildConfig.dataPlatform.database.port
+$mongoDBUsername = $buildConfig.dataPlatform.MongoDB.username
+$mongoDBPassword = $buildConfig.dataPlatform.MongoDB.password
+$mongoDBHost = $buildConfig.dataPlatform.MongoDB.host
+$mongoDBPort = $buildConfig.dataPlatform.MongoDB.port
+$postgreSQLUsername = $buildConfig.dataPlatform.PostgreSQL.username
+$postgreSQLPassword = $buildConfig.dataPlatform.PostgreSQL.password
+$postgreSQLHost = $buildConfig.dataPlatform.PostgreSQL.host
+$postgreSQLPort = $buildConfig.dataPlatform.PostgreSQL.port
 $renderEngines = $buildConfig.renderEngines
-$enableCosmos = $false
-if ($databaseHost -eq "") {
-  $databaseHost = $(hostname)
-  $databasePort = 27100
+$enableCosmosDB = $false
+if ($mongoDBHost -eq "") {
+  $mongoDBHost = $(hostname)
+  $mongoDBPort = 27100
 } else {
-  $enableCosmos = $true
+  $enableCosmosDB = $true
 }
 Write-Host "Machine Type: $machineType"
 Write-Host "GPU Provider: $gpuProvider"
-Write-Host "Enable Cosmos: $enableCosmos"
-Write-Host "Database Host: $databaseHost"
-Write-Host "Database Port: $databasePort"
+Write-Host "Admin Username: $adminUsername"
+Write-Host "Admin Password: $adminPassword"
+Write-Host "Enable CosmosDB: $enableCosmosDB"
+Write-Host "MongoDB Username: $mongoDBUsername"
+Write-Host "MongoDB Password: $mongoDBPassword"
+Write-Host "MongoDB Host: $mongoDBHost"
+Write-Host "MongoDB Port: $mongoDBPort"
+Write-Host "PostgreSQL Username: $postgreSQLUsername"
+Write-Host "PostgreSQL Password: $postgreSQLPassword"
+Write-Host "PostgreSQL Host: $postgreSQLHost"
+Write-Host "PostgreSQL Port: $postgreSQLPort"
 Write-Host "Render Engines: $renderEngines"
 Write-Host "Customize (End): Image Build Parameters"
 
@@ -381,7 +392,7 @@ if ($machineType -ne "Storage") {
     Write-Host "Customize (Start): Deadline Server"
     $processType = "deadline-repository"
     $installFile = "DeadlineRepository-$versionInfo-windows-installer.exe"
-    RunProcess .\$installFile "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$binDirectory\$processType"
+    RunProcess .\$installFile "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $mongoDBHost --mongodir $databasePath --installmongodb true" "$binDirectory\$processType"
     Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$processType.log
     Copy-Item -Path $databasePath\certs\$certificateFile -Destination $installRoot\$certificateFile
     New-NfsShare -Name "Deadline" -Path $installRoot -Permission ReadWrite
@@ -406,6 +417,16 @@ if ($machineType -ne "Storage") {
   Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$processType.log
   Set-Location -Path $binDirectory
   Write-Host "Customize (End): Deadline Client"
+
+  Write-Host "Customize (Start): Deadline Login Task"
+  $taskName = "AAA Deadline Login"
+  $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
+  $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx"
+  if ($machineType -eq "Scheduler") {
+    $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct $installRoot $installRoot\$certificateFile"
+  }
+  Register-ScheduledTask -TaskName $taskName -Trigger $taskTrigger -Action $taskAction -Force
+  Write-Host "Customize (End): Deadline Login Task"
 
   Write-Host "Customize (Start): Deadline Monitor"
   $shortcutPath = "$env:AllUsersProfile\Desktop\Deadline Monitor.lnk"
