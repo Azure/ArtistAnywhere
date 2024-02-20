@@ -3,8 +3,6 @@
 binDirectory="/usr/local/bin"
 cd $binDirectory
 
-source /etc/profile.d/aaa.sh
-
 source /tmp/functions.sh
 
 if [ ${terminateNotification.enable} == true ]; then
@@ -15,4 +13,4 @@ fi
 
 SetFileSystems '${jsonencode(fileSystems)}'
 
-InitializeClient ${databaseUsername} ${databasePassword} null false
+source /etc/profile.d/aaa.sh

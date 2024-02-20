@@ -181,10 +181,7 @@ resource azurerm_virtual_machine_extension initialize_linux {
   virtual_machine_id         = "${azurerm_resource_group.scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
   protected_settings = jsonencode({
     script = base64encode(
-      templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
-        databaseUsername = data.azurerm_key_vault_secret.database_username.value
-        databasePassword = data.azurerm_key_vault_secret.database_password.value
-      }))
+      templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {}))
     )
   })
   depends_on = [

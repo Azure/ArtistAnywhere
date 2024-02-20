@@ -181,9 +181,7 @@ resource azurerm_virtual_machine_extension initialize_linux {
   protected_settings = jsonencode({
     script = base64encode(
       templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
-        fileSystems      = local.fileSystemsLinux
-        databaseUsername = data.azurerm_key_vault_secret.database_username.value
-        databasePassword = data.azurerm_key_vault_secret.database_password.value
+        fileSystems = local.fileSystemsLinux
       }))
     )
   })

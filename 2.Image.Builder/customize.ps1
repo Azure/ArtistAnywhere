@@ -420,7 +420,7 @@ if ($machineType -ne "Storage") {
 
   Write-Host "Customize (Start): Deadline Login Task"
   $taskName = "AAA Deadline Login"
-  $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
+  $taskTrigger = New-ScheduledTaskTrigger -AtStartup -AtLogOn
   $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx"
   if ($machineType -eq "Scheduler") {
     $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct $installRoot $installRoot\$certificateFile"

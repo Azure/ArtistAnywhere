@@ -18,19 +18,25 @@ cosmosDB = {
   partitionMerge = {
     enable = false
   }
+  multiRegionWrite = {
+    enable = false
+  }
   aggregationPipeline = {
     enable = false
   }
   automaticFailover = {
     enable = false
   }
-  customEncryption = {
-    enable  = false
-    keyName = ""
+  freeTier = {
+    enable = false
   }
   analytics = {
     enable     = false
     schemaType = "FullFidelity"
+  }
+  secondaryEncryption = {
+    enable  = false
+    keyName = ""
   }
 }
 

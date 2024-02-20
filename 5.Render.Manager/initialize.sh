@@ -3,8 +3,6 @@
 binDirectory="/usr/local/bin"
 cd $binDirectory
 
-source /etc/profile.d/aaa.sh
-
 serviceFile="aaaAutoScaler"
 dataFilePath="/var/lib/waagent/ovf-env.xml"
 dataFileText=$(xmllint --xpath "//*[local-name()='Environment']/*[local-name()='ProvisioningSection']/*[local-name()='LinuxProvisioningConfigurationSet']/*[local-name()='CustomData']/text()" $dataFilePath)
@@ -41,3 +39,5 @@ echo "WantedBy=timers.target" >> $serviceTimerPath
 if [ ${autoScale.enable} == true ]; then
   systemctl --now enable $serviceFile
 fi
+
+source /etc/profile.d/aaa.sh

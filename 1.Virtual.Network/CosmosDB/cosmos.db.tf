@@ -17,19 +17,25 @@ variable cosmosDB {
     partitionMerge = object({
       enable = bool
     })
+    multiRegionWrite = object({
+      enable = bool
+    })
     aggregationPipeline = object({
       enable = bool
     })
     automaticFailover = object({
       enable = bool
     })
-    customEncryption = object({
-      enable  = bool
-      keyName = string
+    freeTier = object({
+      enable = bool
     })
     analytics = object({
       enable     = bool
       schemaType = string
+    })
+    secondaryEncryption = object({
+      enable  = bool
+      keyName = string
     })
   })
 }
@@ -39,8 +45,8 @@ data azuread_service_principal cosmos_db {
 }
 
 data azurerm_key_vault_key data_encryption {
-  count        = var.cosmosDB.customEncryption.enable ? 1 : 0
-  name         = var.cosmosDB.customEncryption.keyName != "" ? var.cosmosDB.customEncryption.keyName : module.global.keyVault.keyName.dataEncryption
+  count        = var.cosmosDB.secondaryEncryption.enable ? 1 : 0
+  name         = var.cosmosDB.secondaryEncryption.keyName != "" ? var.cosmosDB.secondaryEncryption.keyName : module.global.keyVault.keyName.dataEncryption
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
@@ -55,19 +61,21 @@ locals {
 }
 
 resource azurerm_cosmosdb_account studio {
-  for_each                   = local.cosmosAccountTypes
-  name                       = "${var.cosmosDB.namePrefix}-${each.value}"
-  resource_group_name        = azurerm_resource_group.database.name
-  location                   = azurerm_resource_group.database.location
-  kind                       = each.value == "mongo" ? "MongoDB" : "GlobalDocumentDB"
-  mongo_server_version       = each.value == "mongo" ? var.cosmosMongoDB.version : null
-  offer_type                 = var.cosmosDB.offerType
-  partition_merge_enabled    = var.cosmosDB.partitionMerge.enable
-  enable_automatic_failover  = var.cosmosDB.automaticFailover.enable
-  analytical_storage_enabled = var.cosmosDB.analytics.enable
-  key_vault_key_id           = var.cosmosDB.customEncryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
-  ip_range_filter            = "104.42.195.92,40.76.54.131,52.176.6.30,52.169.50.45,52.187.184.26" # Azure Portal
-  default_identity_type      = "UserAssignedIdentity=${data.azurerm_user_assigned_identity.studio.id}"
+  for_each                        = local.cosmosAccountTypes
+  name                            = "${var.cosmosDB.namePrefix}-${each.value}"
+  resource_group_name             = azurerm_resource_group.database.name
+  location                        = azurerm_resource_group.database.location
+  kind                            = each.value == "mongo" ? "MongoDB" : "GlobalDocumentDB"
+  mongo_server_version            = each.value == "mongo" ? var.cosmosMongoDB.version : null
+  offer_type                      = var.cosmosDB.offerType
+  partition_merge_enabled         = var.cosmosDB.partitionMerge.enable
+  enable_automatic_failover       = var.cosmosDB.automaticFailover.enable
+  analytical_storage_enabled      = var.cosmosDB.analytics.enable
+  enable_multiple_write_locations = var.cosmosDB.multiRegionWrite.enable
+  enable_free_tier                = var.cosmosDB.freeTier.enable
+  key_vault_key_id                = var.cosmosDB.secondaryEncryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
+  ip_range_filter                 = "104.42.195.92,40.76.54.131,52.176.6.30,52.169.50.45,52.187.184.26" # Azure Portal
+  default_identity_type           = "UserAssignedIdentity=${data.azurerm_user_assigned_identity.studio.id}"
   identity {
     type = "UserAssigned"
     identity_ids = [

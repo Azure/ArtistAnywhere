@@ -10,4 +10,4 @@ if ("${pcoipLicenseKey}" -ne "") {
 
 SetFileSystems (ConvertFrom-Json -InputObject '${jsonencode(fileSystems)}')
 
-InitializeClient (ConvertFrom-Json -InputObject '${jsonencode(activeDirectory)}') $null $null
+SetActiveDirectory (ConvertFrom-Json -InputObject '${jsonencode(activeDirectory)}')

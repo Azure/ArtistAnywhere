@@ -124,16 +124,6 @@ data azurerm_key_vault_secret admin_password {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
-data azurerm_key_vault_secret database_username {
-  name         = module.global.keyVault.secretName.databaseUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
-data azurerm_key_vault_secret database_password {
-  name         = module.global.keyVault.secretName.databasePassword
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
 data azurerm_log_analytics_workspace monitor {
   name                = module.global.monitor.name
   resource_group_name = module.global.resourceGroupName
