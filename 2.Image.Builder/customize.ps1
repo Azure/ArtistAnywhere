@@ -426,7 +426,7 @@ if ($machineType -ne "Storage") {
   if ($machineType -eq "Scheduler") {
     $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct $installRoot $installRoot\$certificateFile"
   }
-  Register-ScheduledTask -TaskName $taskName -Trigger $taskTrigger1 -Trigger $taskTrigger2 -Action $taskAction -User System -Force
+  Register-ScheduledTask -TaskName $taskName -Trigger $taskTrigger1,$taskTrigger2 -Action $taskAction -User System -Force
   Write-Host "Customize (End): Deadline Login Task"
 
   Write-Host "Customize (Start): Deadline Monitor"
