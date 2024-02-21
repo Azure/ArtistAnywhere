@@ -1,4 +1,5 @@
-$fileSystemsPath = "C:\Users\Public\Downloads\fileSystems.bat"
+$fileSystemsMountPath = "C:\Users\Public\Downloads\fileSystems.bat"
+$jobSchedulerTaskName = "AAA Job Scheduler Initialize"
 
 function RunProcess ($filePath, $argumentList, $logFile) {
   if ($logFile) {
@@ -31,21 +32,21 @@ function SetFileSystems ($fileSystems) {
 }
 
 function SetFileSystemMount ($fileSystemMount) {
-  if (!(FileExists $fileSystemsPath)) {
-    New-Item -ItemType File -Path $fileSystemsPath
+  if (!(FileExists $fileSystemsMountPath)) {
+    New-Item -ItemType File -Path $fileSystemsMountPath
   }
-  $mountScript = Get-Content -Path $fileSystemsPath
+  $mountScript = Get-Content -Path $fileSystemsMountPath
   if ($mountScript -eq $null -or $mountScript -notlike "*$($fileSystemMount.path)*") {
     $mount = "mount $($fileSystemMount.options) $($fileSystemMount.source) $($fileSystemMount.path)"
-    Add-Content -Path $fileSystemsPath -Value $mount
+    Add-Content -Path $fileSystemsMountPath -Value $mount
   }
 }
 
 function RegisterFileSystemMounts {
-  if (FileExists $fileSystemsPath) {
-    RunProcess $fileSystemsPath $null file-system-mount
+  if (FileExists $fileSystemsMountPath) {
+    RunProcess $fileSystemsMountPath $null file-system-mount
     $taskName = "AAA File System Mount"
-    $taskAction = New-ScheduledTaskAction -Execute $fileSystemsPath
+    $taskAction = New-ScheduledTaskAction -Execute $fileSystemsMountPath
     $taskTrigger = New-ScheduledTaskTrigger -AtStartup
     Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -User System -Force
   }

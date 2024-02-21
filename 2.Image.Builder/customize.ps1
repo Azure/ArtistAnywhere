@@ -418,16 +418,14 @@ if ($machineType -ne "Storage") {
   Set-Location -Path $binDirectory
   Write-Host "Customize (End): Deadline Client"
 
-  Write-Host "Customize (Start): Deadline Login Task"
-  $taskName = "AAA Deadline Login"
-  $taskTrigger1 = New-ScheduledTaskTrigger -AtStartup
-  $taskTrigger2 = New-ScheduledTaskTrigger -AtLogOn
+  Write-Host "Customize (Start): Deadline Scheduled Task"
+  $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
   $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx"
   if ($machineType -eq "Scheduler") {
     $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct $installRoot $installRoot\$certificateFile"
   }
-  Register-ScheduledTask -TaskName $taskName -Trigger $taskTrigger1,$taskTrigger2 -Action $taskAction -User System -Force
-  Write-Host "Customize (End): Deadline Login Task"
+  Register-ScheduledTask -TaskName $jobSchedulerTaskName -Trigger $taskTrigger -Action $taskAction -User System -Force
+  Write-Host "Customize (End): Deadline Scheduled Task"
 
   Write-Host "Customize (Start): Deadline Monitor"
   $shortcutPath = "$env:AllUsersProfile\Desktop\Deadline Monitor.lnk"
