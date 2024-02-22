@@ -10,4 +10,6 @@ if ("${pcoipLicenseKey}" -ne "") {
 
 SetFileSystems (ConvertFrom-Json -InputObject '${jsonencode(fileSystems)}')
 
+Start-ScheduledTask -TaskName $jobSchedulerTaskName
+
 SetActiveDirectory (ConvertFrom-Json -InputObject '${jsonencode(activeDirectory)}')

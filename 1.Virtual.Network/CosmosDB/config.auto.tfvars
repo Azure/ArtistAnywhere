@@ -5,8 +5,8 @@ resourceGroupName = "ArtistAnywhere.Database" # Alphanumeric, underscores, hyphe
 ########################################################################
 
 cosmosDB = {
-  namePrefix = "xstudio"
-  offerType  = "Standard"
+  accountName = "xstudio"
+  offerType   = "Standard"
   consistency = {
     policyLevel        = "Session"
     maxIntervalSeconds = 5
@@ -15,28 +15,25 @@ cosmosDB = {
   serverless = {
     enable = true
   }
+  aggregationPipeline = {
+    enable = true
+  }
+  analyticalStorage = {
+    enable     = true
+    schemaType = ""
+  }
+  secondaryEncryption = {
+    enable  = false
+    keyName = ""
+  }
+  automaticFailover = {
+    enable = true
+  }
   partitionMerge = {
     enable = false
   }
   multiRegionWrite = {
     enable = false
-  }
-  aggregationPipeline = {
-    enable = false
-  }
-  automaticFailover = {
-    enable = false
-  }
-  freeTier = {
-    enable = false
-  }
-  analytics = {
-    enable     = false
-    schemaType = "FullFidelity"
-  }
-  secondaryEncryption = {
-    enable  = false
-    keyName = ""
   }
 }
 
@@ -47,14 +44,25 @@ cosmosDB = {
 cosmosNoSQL = {
   enable = false
   name   = "xstudio"
+  database = {
+    enable     = false
+    name       = "Studio"
+    throughput = 400
+    containers = [
+      {
+        name       = ""
+        throughput = 400
+        partitionKey = {
+          path    = ""
+          version = 2
+        }
+      }
+    ]
+  }
   gateway = {
     enable = false
     size   = "Cosmos.D4s"
     count  = 1
-  }
-  database = {
-    name       = ""
-    throughput = 400
   }
 }
 
@@ -68,7 +76,8 @@ cosmosMongoDB = {
   name    = "xstudio"
   version = "4.2"
   database = {
-    name       = "deadline10db"
+    enable     = false
+    name       = "Studio"
     throughput = 400
   }
 }
@@ -164,7 +173,8 @@ cosmosGremlin = {
   enable = false
   name   = "xstudio"
   database = {
-    name       = ""
+    enable     = false
+    name       = "Studio"
     throughput = 400
   }
 }

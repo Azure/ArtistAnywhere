@@ -17,18 +17,14 @@ binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
 binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
 adminUsername=$(echo $buildConfig | jq -r .dataPlatform.admin.username)
 adminPassword=$(echo $buildConfig | jq -r .dataPlatform.admin.password)
-mongoDBUsername=$(echo $buildConfig | jq -r .dataPlatform.mongoDB.username)
-mongoDBPassword=$(echo $buildConfig | jq -r .dataPlatform.mongoDB.password)
-mongoDBHost=$(echo $buildConfig | jq -r .dataPlatform.mongoDB.host)
-mongoDBPort=$(echo $buildConfig | jq -r .dataPlatform.mongoDB.port)
-postgreSQLUsername=$(echo $buildConfig | jq -r .dataPlatform.postgreSQL.username)
-postgreSQLPassword=$(echo $buildConfig | jq -r .dataPlatform.postgreSQL.password)
-postgreSQLHost=$(echo $buildConfig | jq -r .dataPlatform.postgreSQL.host)
-postgreSQLPort=$(echo $buildConfig | jq -r .dataPlatform.postgreSQL.port)
+databaseUsername=$(echo $buildConfig | jq -r .dataPlatform.database.username)
+databasePassword=$(echo $buildConfig | jq -r .dataPlatform.database.password)
+databaseHost=$(echo $buildConfig | jq -r .dataPlatform.database.host)
+databasePort=$(echo $buildConfig | jq -r .dataPlatform.database.port)
 renderEngines=$(echo $buildConfig | jq -c .renderEngines)
 enableCosmosDB=false
-if [ "$mongoDBHost" == "" ]; then
-  mongoDBHost=$(hostname)
+if [ "$databaseHost" == "" ]; then
+  databaseHost=$(hostname)
 else
   enableCosmosDB=true
 fi
@@ -37,14 +33,10 @@ echo "GPU Provider: $gpuProvider"
 echo "Admin Username: $adminUsername"
 echo "Admin Password: $adminPassword"
 echo "Enable Cosmos DB: $enableCosmosDB"
-echo "MongoDB Username: $mongoDBUsername"
-echo "MongoDB Password: $mongoDBPassword"
-echo "MongoDB Host: $mongoDBHost"
-echo "MongoDB Port: $mongoDBPort"
-echo "PostgreSQL Host: $postgreSQLHost"
-echo "PostgreSQL Port: $postgreSQLPort"
-echo "PostgreSQL Username: $postgreSQLUsername"
-echo "PostgreSQL Password: $postgreSQLPassword"
+echo "Database Username: $databaseUsername"
+echo "Database Password: $databasePassword"
+echo "Database Host: $databaseHost"
+echo "Database Port: $databasePort"
 echo "Render Engines: $renderEngines"
 echo "Customize (End): Image Build Parameters"
 
@@ -87,13 +79,13 @@ if [ "$gpuProvider" == NVIDIA ]; then
   echo "Customize (End): NVIDIA GPU (CUDA)"
 
   echo "Customize (Start): NVIDIA OptiX"
-  versionInfo="8.0.0"
+  versionPath=$(echo $buildConfig | jq -r .versionPath.nvidiaOptiX)
   processType="nvidia-optix"
-  installFile="NVIDIA-OptiX-SDK-$versionInfo-linux64-x86_64.sh"
-  downloadUrl="$binStorageHost/NVIDIA/OptiX/$versionInfo/$installFile$binStorageAuth"
+  installFile="NVIDIA-OptiX-SDK-$versionPath-linux64-x86_64.sh"
+  downloadUrl="$binStorageHost/NVIDIA/OptiX/$versionPath/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   chmod +x $installFile
-  installPath="$binDirectory/$processType/$versionInfo"
+  installPath="$binDirectory/$processType/$versionPath"
   mkdir -p $installPath
   RunProcess "./$installFile --skip-license --prefix=$installPath" $binDirectory/$processType-1
   buildDirectory="$installPath/build"
@@ -119,7 +111,7 @@ fi
 
 if [[ $renderEngines == *PBRT* ]]; then
   echo "Customize (Start): PBRT"
-  versionInfo="v4"
+  versionPath=$(echo $buildConfig | jq -r .versionPath.renderPBRT)
   processType="pbrt"
   installPath="/usr/local/pbrt"
   mkdir -p $installPath
@@ -128,8 +120,8 @@ if [[ $renderEngines == *PBRT* ]]; then
   dnf -y install libXinerama-devel
   dnf -y install libXcursor-devel
   dnf -y install libXi-devel
-  RunProcess "git clone --recursive https://github.com/mmp/$processType-$versionInfo.git" $binDirectory/$processType-1
-  RunProcess "cmake -B $installPath -S $binDirectory/$processType-$versionInfo" $binDirectory/$processType-2
+  RunProcess "git clone --recursive https://github.com/mmp/$processType-$versionPath.git" $binDirectory/$processType-1
+  RunProcess "cmake -B $installPath -S $binDirectory/$processType-$versionPath" $binDirectory/$processType-2
   RunProcess "make -C $installPath" $binDirectory/$processType-3
   binPaths="$binPaths:$installPath"
   echo "Customize (End): PBRT"
@@ -137,12 +129,12 @@ fi
 
 if [[ $renderEngines == *Blender* ]]; then
   echo "Customize (Start): Blender"
-  versionInfo="4.0.2"
+  versionPath=$(echo $buildConfig | jq -r .versionPath.renderBlender)
   versionType="linux-x64"
   processType="blender"
   installPath="/usr/local/$processType"
-  installFile="$processType-$versionInfo-$versionType.tar.xz"
-  downloadUrl="$binStorageHost/Blender/$versionInfo/$installFile$binStorageAuth"
+  installFile="$processType-$versionPath-$versionType.tar.xz"
+  downloadUrl="$binStorageHost/Blender/$versionPath/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xJf $installFile
   dnf -y install mesa-libGL
@@ -151,17 +143,17 @@ if [[ $renderEngines == *Blender* ]]; then
   dnf -y install libXi
   dnf -y install libSM
   mkdir -p $installPath
-  mv $processType-$versionInfo-$versionType/* $installPath
+  mv $processType-$versionPath-$versionType/* $installPath
   binPaths="$binPaths:$installPath"
   echo "Customize (End): Blender"
 fi
 
 if [[ $renderEngines == *Maya* ]]; then
   echo "Customize (Start): Maya"
-  versionInfo="2024_0_1"
+  versionPath=$(echo $buildConfig | jq -r .versionPath.renderMaya)
   processType="autodesk-maya"
-  installFile="Autodesk_Maya_${versionInfo}_Update_Linux_64bit.tgz"
-  downloadUrl="$binStorageHost/Maya/$versionInfo/$installFile$binStorageAuth"
+  installFile="Autodesk_Maya_${versionPath}_Update_Linux_64bit.tgz"
+  downloadUrl="$binStorageHost/Maya/$versionPath/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   mkdir -p $processType
   tar -xzf $installFile -C $processType
@@ -180,11 +172,11 @@ fi
 
 if [[ $renderEngines == *Houdini* ]]; then
   echo "Customize (Start): Houdini"
-  versionInfo="20.0.506"
+  versionPath=$(echo $buildConfig | jq -r .versionPath.renderHoudini)
   versionEULA="2021-10-13"
   processType="houdini"
-  installFile="$processType-$versionInfo-linux_x86_64_gcc11.2.tar.gz"
-  downloadUrl="$binStorageHost/Houdini/$versionInfo/$installFile$binStorageAuth"
+  installFile="$processType-$versionPath-linux_x86_64_gcc11.2.tar.gz"
+  downloadUrl="$binStorageHost/Houdini/$versionPath/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xzf $installFile
   [ $machineType == Workstation ] && desktopMenus="--install-menus" || desktopMenus="--no-install-menus"
@@ -201,7 +193,7 @@ if [[ $renderEngines == *Houdini* ]]; then
   dnf -y install libnsl
   dnf -y install avahi
   RunProcess "./houdini*/houdini.install --auto-install --make-dir --no-install-license --accept-EULA $versionEULA $desktopMenus $mayaPlugIn" $binDirectory/$processType
-  binPaths="$binPaths:/opt/hfs$versionInfo/bin"
+  binPaths="$binPaths:/opt/hfs$versionPath/bin"
   echo "Customize (End): Houdini"
 fi
 
@@ -212,15 +204,15 @@ if [ $machineType == Scheduler ]; then
 fi
 
 if [ $machineType != Storage ]; then
-  versionInfo="10.3.1.4"
+  versionPath=$(echo $buildConfig | jq -r .versionPath.jobScheduler)
   installRoot="/deadline"
   databaseName="deadline10db"
   binPathScheduler="$installRoot/bin"
 
   echo "Customize (Start): Deadline Download"
-  installFile="Deadline-$versionInfo-linux-installers.tar"
+  installFile="Deadline-$versionPath-linux-installers.tar"
   installPath=$(echo ${installFile%.tar})
-  downloadUrl="$binStorageHost/Deadline/$versionInfo/$installFile$binStorageAuth"
+  downloadUrl="$binStorageHost/Deadline/$versionPath/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   mkdir -p $installPath
   tar -xzf $installFile -C $installPath
@@ -269,8 +261,8 @@ if [ $machineType != Storage ]; then
       mongoScript="$processType.js"
       echo "db = db.getSiblingDB(\"$databaseName\");" > $mongoScript
       echo "db.createUser({" >> $mongoScript
-      echo "  user: \"$mongoDBUsername\"," >> $mongoScript
-      echo "  pwd: \"$mongoDBPassword\"," >> $mongoScript
+      echo "  user: \"$databaseUsername\"," >> $mongoScript
+      echo "  pwd: \"$databasePassword\"," >> $mongoScript
       echo "  roles: [" >> $mongoScript
       echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $mongoScript
       echo "  ]" >> $mongoScript
@@ -282,15 +274,14 @@ if [ $machineType != Storage ]; then
 
     echo "Customize (Start): Deadline Server"
     processType="deadline-repository"
-    installFile="DeadlineRepository-$versionInfo-linux-x64-installer.run"
-    export DB_PASSWORD=$mongoDBPassword
+    installFile="DeadlineRepository-$versionPath-linux-x64-installer.run"
+    export DB_PASSWORD=$databasePassword
     if [ $enableCosmosDB == true ]; then
-      mongoDBCertFile=cosmos-mongo-db
-      openssl s_client -connect $mongoDBHost:$mongoDBPort < /dev/null | openssl x509 -outform pem > $mongoDBCertFile.pem
-      openssl pkcs12 -export -nokeys -passout pass:$mongoDBPassword -in $mongoDBCertFile.pem -out $mongoDBCertFile.pfx
-      RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $mongoDBHost --dbport $mongoDBPort --dbname $databaseName --dbuser $mongoDBUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false --dbreplicaset globaldb --dbssl true --dbclientcert $(pwd)/$mongoDBCertFile.pfx --dbcertpass env:DB_CERT_PASSWORD" $binDirectory/$processType
+      sslFileName=cosmos.mongo.db
+      openssl pkcs12 -export -nokeys -passout pass:$mongoDBPassword -in /tmp/$sslFileName.pem -out $sslFileName.pfx
+      RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false --dbreplicaset globaldb --dbssl true --dbclientcert $(pdw)/$sslFileName.pfx --dbcertpass env:DB_CERT_PASSWORD" $binDirectory/$processType
     else
-      RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $mongoDBHost --dbport $mongoDBPort --dbname $databaseName --dbuser $mongoDBUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
+      RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
     fi
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
     echo "$installRoot *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
@@ -300,7 +291,7 @@ if [ $machineType != Storage ]; then
 
   echo "Customize (Start): Deadline Client"
   processType="deadline-client"
-  installFile="DeadlineClient-$versionInfo-linux-x64-installer.run"
+  installFile="DeadlineClient-$versionPath-linux-x64-installer.run"
   installArgs="--mode unattended --prefix $installRoot"
   if [ $machineType == Scheduler ]; then
     installArgs="$installArgs --slavestartup false --launcherdaemon false"
@@ -311,7 +302,7 @@ if [ $machineType != Storage ]; then
   RunProcess "$installPath/$installFile $installArgs" $binDirectory/$processType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
   [ $machineType == Scheduler ] && repositoryPath=$installRoot || repositoryPath="/mnt/deadline"
-  echo "$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $mongoDBUsername $mongoDBPassword" >> $aaaProfile
+  echo "$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" >> $aaaProfile
   echo "$binPathScheduler/deadlinecommand -ChangeRepository Direct $repositoryPath" >> $aaaProfile
   echo "Customize (End): Deadline Client"
 
@@ -320,10 +311,10 @@ fi
 
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): HP Anyware"
-  versionInfo="23.12"
+  versionPath=$(echo $buildConfig | jq -r .versionPath.pcoipAgent)
   [ "$gpuProvider" == "" ] && processType="pcoip-agent-standard" || processType="pcoip-agent-graphics"
-  installFile="pcoip-agent-offline-rocky8.8_$versionInfo.2-1.el8.x86_64.tar.gz"
-  downloadUrl="$binStorageHost/Teradici/$versionInfo/$installFile$binStorageAuth"
+  installFile="pcoip-agent-offline-rocky8.8_$versionPath.2-1.el8.x86_64.tar.gz"
+  downloadUrl="$binStorageHost/Teradici/$versionPath/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   mkdir -p $processType
   tar -xzf $installFile -C $processType

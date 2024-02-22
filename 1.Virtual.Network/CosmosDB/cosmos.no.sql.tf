@@ -5,14 +5,23 @@
 variable cosmosNoSQL {
   type = object({
     enable = bool
+    database = object({
+      enable     = bool
+      name       = string
+      throughput = number
+      containers = list(object({
+        name       = string
+        throughput = number
+        partitionKey = object({
+          path    = string
+          version = number
+        })
+      }))
+    })
     gateway = object({
       enable = bool
       size   = string
       count  = number
-    })
-    database = object({
-      name       = string
-      throughput = number
     })
   })
 }
@@ -64,9 +73,22 @@ resource azurerm_cosmosdb_sql_dedicated_gateway no_sql {
 }
 
 resource azurerm_cosmosdb_sql_database no_sql {
-  count               = var.cosmosNoSQL.enable && var.cosmosNoSQL.database.name != "" ? 1 : 0
+  count               = var.cosmosNoSQL.enable && var.cosmosNoSQL.database.enable ? 1 : 0
   name                = var.cosmosNoSQL.database.name
   resource_group_name = azurerm_resource_group.database.name
   account_name        = azurerm_cosmosdb_account.studio["sql"].name
   throughput          = var.cosmosDB.serverless.enable ? null : var.cosmosNoSQL.database.throughput
+}
+
+resource azurerm_cosmosdb_sql_container no_sql {
+  for_each = {
+    for sqlContainer in var.cosmosNoSQL.database.containers : sqlContainer.name => sqlContainer if var.cosmosNoSQL.enable && var.cosmosNoSQL.database.enable && sqlContainer.name != ""
+  }
+  name                  = each.value.name
+  resource_group_name   = azurerm_cosmosdb_sql_database.no_sql[0].resource_group_name
+  account_name          = azurerm_cosmosdb_sql_database.no_sql[0].account_name
+  database_name         = azurerm_cosmosdb_sql_database.no_sql[0].name
+  throughput            = var.cosmosDB.serverless.enable ? null : each.value.throughput
+  partition_key_path    = each.value.partitionKey.path
+  partition_key_version = each.value.partitionKey.version
 }

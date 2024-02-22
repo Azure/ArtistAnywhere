@@ -7,6 +7,7 @@ variable cosmosMongoDB {
     enable  = bool
     version = string
     database = object({
+      enable     = bool
       name       = string
       throughput = number
     })
@@ -71,7 +72,7 @@ resource azurerm_private_endpoint mongo_db {
 }
 
 resource azurerm_cosmosdb_mongo_database mongo_db {
-  count               = var.cosmosMongoDB.enable && var.cosmosMongoDB.database.name != "" ? 1 : 0
+  count               = var.cosmosMongoDB.enable && var.cosmosMongoDB.database.enable ? 1 : 0
   name                = var.cosmosMongoDB.database.name
   resource_group_name = azurerm_resource_group.database.name
   account_name        = azurerm_cosmosdb_account.studio["mongo"].name

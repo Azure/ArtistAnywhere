@@ -13,4 +13,6 @@ if ("${terminateNotification.enable}" -eq $true) {
 
 SetFileSystems (ConvertFrom-Json -InputObject '${jsonencode(fileSystems)}')
 
+Start-ScheduledTask -TaskName $jobSchedulerTaskName
+
 SetActiveDirectory (ConvertFrom-Json -InputObject '${jsonencode(activeDirectory)}')

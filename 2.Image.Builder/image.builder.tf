@@ -38,23 +38,52 @@ variable imageBuilder {
   })
 }
 
+variable versionPath {
+  type = object({
+    nvidiaCUDA        = string
+    nvidiaCUDAToolkit = string
+    nvidiaOptiX       = string
+    renderPBRT        = string
+    renderBlender     = string
+    renderMaya        = string
+    renderHoudini     = string
+    renderUnrealVS    = string
+    renderUnreal      = string
+    renderUnrealPixel = string
+    jobScheduler      = string
+    pcoipAgent        = string
+  })
+}
+
+variable jobDatabase {
+  type = object({
+    host = string
+    port = number
+  })
+}
+
+variable binStorage {
+  type = object({
+    host = string
+    auth = string
+  })
+  validation {
+    condition     = var.binStorage.host != "" && var.binStorage.auth != ""
+    error_message = "Missing required deployment configuration."
+  }
+}
+
 locals {
   dataPlatform = {
     admin = {
       username = data.azurerm_key_vault_secret.admin_username.value
       password = data.azurerm_key_vault_secret.admin_password.value
     }
-    mongoDB = {
+    database = {
       username = data.azurerm_key_vault_secret.database_username.value
       password = data.azurerm_key_vault_secret.database_password.value
-      host     = ""
-      port     = 27017
-    }
-    postgreSQL = {
-      username = "citus"
-      password = data.azurerm_key_vault_secret.database_password.value
-      host     = ""
-      port     = 5432
+      host     = var.jobDatabase.host
+      port     = var.jobDatabase.port
     }
   }
 }
@@ -124,6 +153,12 @@ resource azapi_resource image_builder_linux {
         [
           {
             type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/1.Virtual.Network/CosmosDB/cosmos.mongo.db.pem"
+            destination = "/tmp/cosmos.mongo.db.pem"
+            inline      = null
+          },
+          {
+            type        = "File"
             sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.sh"
             destination = "/tmp/functions.sh"
             inline      = null
@@ -156,7 +191,7 @@ resource azapi_resource image_builder_linux {
           {
             type = "Shell"
             inline = [
-              "cat /tmp/customize.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {binStorage = var.binStorage}, {dataPlatform = local.dataPlatform})))} /bin/bash"
+              "cat /tmp/customize.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = var.versionPath}, {dataPlatform = local.dataPlatform}, {binStorage = var.binStorage})))} /bin/bash"
             ]
           }
         ]
@@ -294,7 +329,7 @@ resource azapi_resource image_builder_windows {
           {
             type = "PowerShell"
             inline = [
-              "C:\\AzureData\\customize.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {binStorage = var.binStorage}, {dataPlatform = local.dataPlatform})))}"
+              "C:\\AzureData\\customize.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = var.versionPath}, {dataPlatform = local.dataPlatform}, {binStorage = var.binStorage})))}"
             ]
             runElevated = true
             runAsSystem = true

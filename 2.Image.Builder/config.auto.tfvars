@@ -59,10 +59,6 @@ computeGallery = {
       type = "Linux"
     },
     {
-      name = "LnxMoonRay"
-      type = "Linux"
-    },
-    {
       name = "WinPBRT"
       type = "Windows"
     },
@@ -208,8 +204,7 @@ imageBuilder = {
         osDiskSizeGB   = 360
         timeoutMinutes = 240
         renderEngines = [
-          "PBRT",
-          "MoonRay"
+          "PBRT"
         ]
         customization = [
         ]
@@ -244,8 +239,7 @@ imageBuilder = {
         timeoutMinutes = 240
         renderEngines = [
           "PBRT",
-          "Blender",
-          "MoonRay"
+          "Blender"
         ]
         customization = [
         ]
@@ -280,8 +274,7 @@ imageBuilder = {
         timeoutMinutes = 240
         renderEngines = [
           "PBRT",
-          "Blender",
-          "MoonRay"
+          "Blender"
         ]
         customization = [
         ]
@@ -316,8 +309,7 @@ imageBuilder = {
         timeoutMinutes = 240
         renderEngines = [
           "PBRT",
-          "Blender",
-          "MoonRay"
+          "Blender"
         ]
         customization = [
         ]
@@ -507,6 +499,26 @@ imageBuilder = {
       }
     }
   ]
+}
+
+versionPath = {
+  nvidiaCUDA        = "12.3.2"
+  nvidiaCUDAToolkit = "v12.3"
+  nvidiaOptiX       = "8.0.0"
+  renderPBRT        = "v4"
+  renderBlender     = "4.0.2"
+  renderMaya        = "2024_0_1"
+  renderHoudini     = "20.0.506"
+  renderUnrealVS    = "2022"
+  renderUnreal      = "5.3.2"
+  renderUnrealPixel = "5.3-1.0.1"
+  jobScheduler      = "10.2.0.10"
+  pcoipAgent        = "23.12"
+}
+
+jobDatabase = {
+  host = ""
+  port = 27017 # 10255
 }
 
 binStorage = { # Required configuration for image building

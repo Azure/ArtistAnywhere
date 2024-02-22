@@ -28,19 +28,15 @@ $binStorageHost = $buildConfig.binStorage.host
 $binStorageAuth = $buildConfig.binStorage.auth
 $adminUsername = $buildConfig.dataPlatform.admin.username
 $adminPassword = $buildConfig.dataPlatform.admin.password
-$mongoDBUsername = $buildConfig.dataPlatform.MongoDB.username
-$mongoDBPassword = $buildConfig.dataPlatform.MongoDB.password
-$mongoDBHost = $buildConfig.dataPlatform.MongoDB.host
-$mongoDBPort = $buildConfig.dataPlatform.MongoDB.port
-$postgreSQLUsername = $buildConfig.dataPlatform.PostgreSQL.username
-$postgreSQLPassword = $buildConfig.dataPlatform.PostgreSQL.password
-$postgreSQLHost = $buildConfig.dataPlatform.PostgreSQL.host
-$postgreSQLPort = $buildConfig.dataPlatform.PostgreSQL.port
+$databaseUsername = $buildConfig.dataPlatform.database.username
+$databasePassword = $buildConfig.dataPlatform.database.password
+$databaseHost = $buildConfig.dataPlatform.database.host
+$databasePort = $buildConfig.dataPlatform.database.port
 $renderEngines = $buildConfig.renderEngines
 $enableCosmosDB = $false
-if ($mongoDBHost -eq "") {
-  $mongoDBHost = $(hostname)
-  $mongoDBPort = 27100
+if ($databaseHost -eq "") {
+  $databaseHost = $(hostname)
+  $databasePort = 27100
 } else {
   $enableCosmosDB = $true
 }
@@ -49,14 +45,10 @@ Write-Host "GPU Provider: $gpuProvider"
 Write-Host "Admin Username: $adminUsername"
 Write-Host "Admin Password: $adminPassword"
 Write-Host "Enable CosmosDB: $enableCosmosDB"
-Write-Host "MongoDB Username: $mongoDBUsername"
-Write-Host "MongoDB Password: $mongoDBPassword"
-Write-Host "MongoDB Host: $mongoDBHost"
-Write-Host "MongoDB Port: $mongoDBPort"
-Write-Host "PostgreSQL Username: $postgreSQLUsername"
-Write-Host "PostgreSQL Password: $postgreSQLPassword"
-Write-Host "PostgreSQL Host: $postgreSQLHost"
-Write-Host "PostgreSQL Port: $postgreSQLPort"
+Write-Host "Database Username: $databaseUsername"
+Write-Host "Database Password: $databasePassword"
+Write-Host "Database Host: $databaseHost"
+Write-Host "Database Port: $databasePort"
 Write-Host "Render Engines: $renderEngines"
 Write-Host "Customize (End): Image Build Parameters"
 
@@ -141,26 +133,26 @@ if ($gpuProvider -eq "AMD") {
   Write-Host "Customize (End): NVIDIA GPU (GRID)"
 
   Write-Host "Customize (Start): NVIDIA GPU (CUDA)"
-  $versionInfo = "12.3.2"
+  $versionPath = $buildConfig.versionPath.nvidiaCUDA
   $processType = "nvidia-gpu-cuda"
-  $installFile = "cuda_${versionInfo}_windows_network.exe"
-  $downloadUrl = "$binStorageHost/NVIDIA/CUDA/$versionInfo/$installFile$binStorageAuth"
+  $installFile = "cuda_${versionPath}_windows_network.exe"
+  $downloadUrl = "$binStorageHost/NVIDIA/CUDA/$versionPath/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   RunProcess .\$installFile "-s -n -log:$binDirectory\$processType" $null
   Write-Host "Customize (End): NVIDIA GPU (CUDA)"
 
   Write-Host "Customize (Start): NVIDIA OptiX"
-  $versionInfo = "8.0.0"
+  $versionPath = $buildConfig.versionPath.nvidiaOptiX
   $processType = "nvidia-optix"
-  $installFile = "NVIDIA-OptiX-SDK-$versionInfo-win64.exe"
-  $downloadUrl = "$binStorageHost/NVIDIA/OptiX/$versionInfo/$installFile$binStorageAuth"
+  $installFile = "NVIDIA-OptiX-SDK-$versionPath-win64.exe"
+  $downloadUrl = "$binStorageHost/NVIDIA/OptiX/$versionPath/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   RunProcess .\$installFile "/S" $null
-  $sdkDirectory = "C:\ProgramData\NVIDIA Corporation\OptiX SDK $versionInfo\SDK"
+  $sdkDirectory = "C:\ProgramData\NVIDIA Corporation\OptiX SDK $versionPath\SDK"
   $buildDirectory = "$sdkDirectory\build"
   New-Item -ItemType Directory $buildDirectory
-  $versionInfo = "v12.3"
-  RunProcess "$binPathCMake\cmake.exe" "-B ""$buildDirectory"" -S ""$sdkDirectory"" -D CUDA_TOOLKIT_ROOT_DIR=""C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\$versionInfo""" "$binDirectory\$processType-1"
+  $versionPath = $buildConfig.versionPath.nvidiaCUDAToolkit
+  RunProcess "$binPathCMake\cmake.exe" "-B ""$buildDirectory"" -S ""$sdkDirectory"" -D CUDA_TOOLKIT_ROOT_DIR=""C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\$versionPath""" "$binDirectory\$processType-1"
   RunProcess "$binPathMSBuild\MSBuild.exe" """$buildDirectory\OptiX-Samples.sln"" -p:Configuration=Release" "$binDirectory\$processType-2"
   $binPaths += ";$buildDirectory\bin\Release"
   Write-Host "Customize (End): NVIDIA OptiX"
@@ -178,23 +170,23 @@ if ($machineType -eq "Storage" -or $machineType -eq "Scheduler") {
 
 if ($renderEngines -contains "PBRT") {
   Write-Host "Customize (Start): PBRT"
-  $versionInfo = "v4"
+  $versionPath = $buildConfig.versionPath.renderPBRT
   $processType = "pbrt"
   $installPath = "C:\Program Files\PBRT"
   New-Item -ItemType Directory -Path "$installPath" -Force
-  RunProcess "$binPathGit\git.exe" "clone --recursive https://github.com/mmp/$processType-$versionInfo.git" "$binDirectory\$processType-1"
-  RunProcess "$binPathCMake\cmake.exe" "-B ""$installPath"" -S $binDirectory\$processType-$versionInfo" "$binDirectory\$processType-2"
-  RunProcess "$binPathMSBuild\MSBuild.exe" """$installPath\PBRT-$versionInfo.sln"" -p:Configuration=Release" "$binDirectory\$processType-3"
+  RunProcess "$binPathGit\git.exe" "clone --recursive https://github.com/mmp/$processType-$versionPath.git" "$binDirectory\$processType-1"
+  RunProcess "$binPathCMake\cmake.exe" "-B ""$installPath"" -S $binDirectory\$processType-$versionPath" "$binDirectory\$processType-2"
+  RunProcess "$binPathMSBuild\MSBuild.exe" """$installPath\PBRT-$versionPath.sln"" -p:Configuration=Release" "$binDirectory\$processType-3"
   $binPaths += ";$installPath\Release"
   Write-Host "Customize (End): PBRT"
 }
 
 if ($renderEngines -contains "Blender") {
   Write-Host "Customize (Start): Blender"
-  $versionInfo = "4.0.2"
+  $versionPath = $buildConfig.versionPath.renderBlender
   $processType = "blender"
-  $installFile = "$processType-$versionInfo-windows-x64.msi"
-  $downloadUrl = "$binStorageHost/Blender/$versionInfo/$installFile$binStorageAuth"
+  $installFile = "$processType-$versionPath-windows-x64.msi"
+  $downloadUrl = "$binStorageHost/Blender/$versionPath/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   RunProcess $installFile "/quiet /norestart /log $processType.log" $null
   $binPaths += ";C:\Program Files\Blender Foundation\Blender 4.0"
@@ -203,10 +195,10 @@ if ($renderEngines -contains "Blender") {
 
 if ($renderEngines -contains "Unreal" -or $renderEngines -contains "Unreal+PixelStream") {
   Write-Host "Customize (Start): Visual Studio Workloads"
-  $versionInfo = "2022"
+  $versionPath = $buildConfig.versionPath.renderUnrealVS
   $processType = "unreal-visual-studio"
   $installFile = "VisualStudioSetup.exe"
-  $downloadUrl = "$binStorageHost/VS/$versionInfo/$installFile$binStorageAuth"
+  $downloadUrl = "$binStorageHost/VS/$versionPath/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   $componentIds = "--add Microsoft.Net.Component.4.8.SDK"
   $componentIds += " --add Microsoft.Net.Component.4.6.2.TargetingPack"
@@ -224,10 +216,10 @@ if ($renderEngines -contains "Unreal" -or $renderEngines -contains "Unreal+Pixel
   $processType = "dotnet-fx3"
   dism /Online /NoRestart /LogPath:"$binDirectory\$processType" /Enable-Feature /FeatureName:NetFX3 /All
   Set-Location -Path C:\
-  $versionInfo = "5.3.2"
+  $versionPath = $buildConfig.versionPath.renderUnreal
   $processType = "unreal-engine"
-  $installFile = "UnrealEngine-$versionInfo-release.zip"
-  $downloadUrl = "$binStorageHost/Unreal/$versionInfo/$installFile$binStorageAuth"
+  $installFile = "UnrealEngine-$versionPath-release.zip"
+  $downloadUrl = "$binStorageHost/Unreal/$versionPath/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   Expand-Archive -Path $installFile
 
@@ -276,17 +268,17 @@ if ($renderEngines -contains "Unreal" -or $renderEngines -contains "Unreal+Pixel
 
   if ($renderEngines -contains "Unreal+PixelStream") {
     Write-Host "Customize (Start): Unreal Pixel Streaming"
-    $versionInfo = "5.3-1.0.1"
+    $versionPath = $buildConfig.versionPath.renderUnrealPixel
     $processType = "unreal-stream"
-    $installFile = "UE$versionInfo.zip"
-    $downloadUrl = "$binStorageHost/Unreal/PixelStream/$versionInfo/$installFile$binStorageAuth"
+    $installFile = "UE$versionPath.zip"
+    $downloadUrl = "$binStorageHost/Unreal/PixelStream/$versionPath/$installFile$binStorageAuth"
     (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
     Expand-Archive -Path $installFile
-    $installFile = "UE$versionInfo\PixelStreamingInfrastructure-UE$versionInfo\SignallingWebServer\platform_scripts\cmd\setup.bat"
+    $installFile = "UE$versionPath\PixelStreamingInfrastructure-UE$versionPath\SignallingWebServer\platform_scripts\cmd\setup.bat"
     RunProcess .\$installFile $null "$binDirectory\$processType-signalling"
-    $installFile = "UE$versionInfo\PixelStreamingInfrastructure-UE$versionInfo\Matchmaker\platform_scripts\cmd\setup.bat"
+    $installFile = "UE$versionPath\PixelStreamingInfrastructure-UE$versionPath\Matchmaker\platform_scripts\cmd\setup.bat"
     RunProcess .\$installFile $null "$binDirectory\$processType-matchmaker"
-    $installFile = "UE$versionInfo\PixelStreamingInfrastructure-UE$versionInfo\SFU\platform_scripts\cmd\setup.bat"
+    $installFile = "UE$versionPath\PixelStreamingInfrastructure-UE$versionPath\SFU\platform_scripts\cmd\setup.bat"
     RunProcess .\$installFile $null "$binDirectory\$processType-sfu"
     Write-Host "Customize (End): Unreal Pixel Streaming"
   }
@@ -308,10 +300,10 @@ if ($renderEngines -contains "Unreal" -or $renderEngines -contains "Unreal+Pixel
 
 if ($renderEngines -contains "Maya") {
   Write-Host "Customize (Start): Maya"
-  $versionInfo = "2024_0_1"
+  $versionPath = $buildConfig.versionPath.renderMaya
   $processType = "maya"
-  $installFile = "Autodesk_Maya_${versionInfo}_Update_Windows_64bit_dlm.zip"
-  $downloadUrl = "$binStorageHost/Maya/$versionInfo/$installFile$binStorageAuth"
+  $installFile = "Autodesk_Maya_${versionPath}_Update_Windows_64bit_dlm.zip"
+  $downloadUrl = "$binStorageHost/Maya/$versionPath/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   Expand-Archive -Path $installFile
   Start-Process -FilePath .\Autodesk_Maya*\Autodesk_Maya*\Setup.exe -ArgumentList "--silent" -RedirectStandardOutput $processType-out -RedirectStandardError $processType-err
@@ -322,11 +314,11 @@ if ($renderEngines -contains "Maya") {
 
 if ($renderEngines -contains "Houdini") {
   Write-Host "Customize (Start): Houdini"
-  $versionInfo = "20.0.506"
+  $versionPath = $buildConfig.versionPath.renderHoudini
   $versionEULA = "2021-10-13"
   $processType = "houdini"
-  $installFile = "$processType-$versionInfo-win64-vc143.exe"
-  $downloadUrl = "$binStorageHost/Houdini/$versionInfo/$installFile$binStorageAuth"
+  $installFile = "$processType-$versionPath-win64-vc143.exe"
+  $downloadUrl = "$binStorageHost/Houdini/$versionPath/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   if ($machineType -eq "Workstation") {
     $installArgs = "/MainApp=Yes"
@@ -340,7 +332,7 @@ if ($renderEngines -contains "Houdini") {
     $installArgs += " /EngineUnreal=Yes"
   }
   RunProcess .\$installFile "/S /AcceptEULA=$versionEULA $installArgs" "$binDirectory\$processType"
-  $binPaths += ";C:\Program Files\Side Effects Software\Houdini $versionInfo\bin"
+  $binPaths += ";C:\Program Files\Side Effects Software\Houdini $versionPath\bin"
   Write-Host "Customize (End): Houdini"
 }
 
@@ -374,15 +366,15 @@ if ($machineType -eq "Scheduler") {
 }
 
 if ($machineType -ne "Storage") {
-  $versionInfo = "10.3.1.4"
+  $versionPath = $buildConfig.versionPath.jobScheduler
   $installRoot = "C:\Deadline"
   $databasePath = "C:\DeadlineData"
   $certificateFile = "Deadline10Client.pfx"
   $binPathScheduler = "$installRoot\bin"
 
   Write-Host "Customize (Start): Deadline Download"
-  $installFile = "Deadline-$versionInfo-windows-installers.zip"
-  $downloadUrl = "$binStorageHost/Deadline/$versionInfo/$installFile$binStorageAuth"
+  $installFile = "Deadline-$versionPath-windows-installers.zip"
+  $downloadUrl = "$binStorageHost/Deadline/$versionPath/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   Expand-Archive -Path $installFile
   Write-Host "Customize (End): Deadline Download"
@@ -391,8 +383,8 @@ if ($machineType -ne "Storage") {
   if ($machineType -eq "Scheduler") {
     Write-Host "Customize (Start): Deadline Server"
     $processType = "deadline-repository"
-    $installFile = "DeadlineRepository-$versionInfo-windows-installer.exe"
-    RunProcess .\$installFile "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $mongoDBHost --mongodir $databasePath --installmongodb true" "$binDirectory\$processType"
+    $installFile = "DeadlineRepository-$versionPath-windows-installer.exe"
+    RunProcess .\$installFile "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost -dbport $databasePort --mongodir $databasePath --installmongodb true" "$binDirectory\$processType"
     Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$processType.log
     Copy-Item -Path $databasePath\certs\$certificateFile -Destination $installRoot\$certificateFile
     New-NfsShare -Name "Deadline" -Path $installRoot -Permission ReadWrite
@@ -401,7 +393,7 @@ if ($machineType -ne "Storage") {
 
   Write-Host "Customize (Start): Deadline Client"
   $processType = "deadline-client"
-  $installFile = "DeadlineClient-$versionInfo-windows-installer.exe"
+  $installFile = "DeadlineClient-$versionPath-windows-installer.exe"
   $installArgs = "--mode unattended --prefix $installRoot"
   if ($machineType -eq "Scheduler") {
     $installArgs = "$installArgs --slavestartup false --launcherservice false"
@@ -449,10 +441,10 @@ if ($machineType -eq "Farm") {
 
 if ($machineType -eq "Workstation") {
   Write-Host "Customize (Start): HP Anyware"
-  $versionInfo = "23.12"
+  $versionPath = $buildConfig.versionPath.pcoipAgent
   $processType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
-  $installFile = "${processType}_$versionInfo.2.exe"
-  $downloadUrl = "$binStorageHost/Teradici/$versionInfo/$installFile$binStorageAuth"
+  $installFile = "${processType}_$versionPath.2.exe"
+  $downloadUrl = "$binStorageHost/Teradici/$versionPath/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   RunProcess .\$installFile "/S /NoPostReboot /Force" "$binDirectory\$processType"
   Write-Host "Customize (End): HP Anyware"

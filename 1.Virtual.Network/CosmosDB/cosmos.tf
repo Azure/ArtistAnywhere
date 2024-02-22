@@ -4,8 +4,8 @@
 
 variable cosmosDB {
   type = object({
-    namePrefix = string
-    offerType  = string
+    accountName = string
+    offerType   = string
     consistency = object({
       policyLevel        = string
       maxIntervalSeconds = number
@@ -14,28 +14,25 @@ variable cosmosDB {
     serverless = object({
       enable = bool
     })
-    partitionMerge = object({
-      enable = bool
-    })
-    multiRegionWrite = object({
-      enable = bool
-    })
     aggregationPipeline = object({
       enable = bool
     })
-    automaticFailover = object({
-      enable = bool
-    })
-    freeTier = object({
-      enable = bool
-    })
-    analytics = object({
+    analyticalStorage = object({
       enable     = bool
       schemaType = string
     })
     secondaryEncryption = object({
       enable  = bool
       keyName = string
+    })
+    automaticFailover = object({
+      enable = bool
+    })
+    partitionMerge = object({
+      enable = bool
+    })
+    multiRegionWrite = object({
+      enable = bool
     })
   })
 }
@@ -62,18 +59,17 @@ locals {
 
 resource azurerm_cosmosdb_account studio {
   for_each                        = local.cosmosAccountTypes
-  name                            = "${var.cosmosDB.namePrefix}-${each.value}"
+  name                            = var.cosmosDB.accountName
   resource_group_name             = azurerm_resource_group.database.name
   location                        = azurerm_resource_group.database.location
   kind                            = each.value == "mongo" ? "MongoDB" : "GlobalDocumentDB"
   mongo_server_version            = each.value == "mongo" ? var.cosmosMongoDB.version : null
   offer_type                      = var.cosmosDB.offerType
-  partition_merge_enabled         = var.cosmosDB.partitionMerge.enable
-  enable_automatic_failover       = var.cosmosDB.automaticFailover.enable
-  analytical_storage_enabled      = var.cosmosDB.analytics.enable
-  enable_multiple_write_locations = var.cosmosDB.multiRegionWrite.enable
-  enable_free_tier                = var.cosmosDB.freeTier.enable
   key_vault_key_id                = var.cosmosDB.secondaryEncryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
+  analytical_storage_enabled      = var.cosmosDB.analyticalStorage.enable
+  partition_merge_enabled         = var.cosmosDB.partitionMerge.enable
+  enable_multiple_write_locations = var.cosmosDB.multiRegionWrite.enable
+  enable_automatic_failover       = var.cosmosDB.automaticFailover.enable
   ip_range_filter                 = "104.42.195.92,40.76.54.131,52.176.6.30,52.169.50.45,52.187.184.26" # Azure Portal
   default_identity_type           = "UserAssignedIdentity=${data.azurerm_user_assigned_identity.studio.id}"
   identity {
@@ -87,14 +83,17 @@ resource azurerm_cosmosdb_account studio {
     max_interval_in_seconds = var.cosmosDB.consistency.maxIntervalSeconds
     max_staleness_prefix    = var.cosmosDB.consistency.maxStalenessPrefix
   }
-  analytical_storage {
-    schema_type = var.cosmosDB.analytics.schemaType
-  }
   dynamic geo_location {
     for_each = local.regionNames
     content {
       location          = geo_location.value
       failover_priority = index(local.regionNames, geo_location.value)
+    }
+  }
+  dynamic analytical_storage {
+    for_each = var.cosmosDB.analyticalStorage.schemaType != "" ? [1] : []
+    content {
+      schema_type = var.cosmosDB.analyticalStorage.schemaType
     }
   }
   dynamic capabilities {

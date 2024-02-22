@@ -6,6 +6,7 @@ variable cosmosGremlin {
   type = object({
     enable = bool
     database = object({
+      enable     = bool
       name       = string
       throughput = number
     })
@@ -77,7 +78,7 @@ resource azurerm_private_endpoint gremlin_sql {
 }
 
 resource azurerm_cosmosdb_gremlin_database gremlin {
-  count               = var.cosmosGremlin.enable && var.cosmosGremlin.database.name != "" ? 1 : 0
+  count               = var.cosmosGremlin.enable && var.cosmosGremlin.database.enable ? 1 : 0
   name                = var.cosmosGremlin.database.name
   resource_group_name = azurerm_resource_group.database.name
   account_name        = azurerm_cosmosdb_account.studio["gremlin"].name

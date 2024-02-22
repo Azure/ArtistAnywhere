@@ -31,17 +31,6 @@ variable resourceGroupName {
   type = string
 }
 
-variable binStorage {
-  type = object({
-    host = string
-    auth = string
-  })
-  validation {
-    condition     = var.binStorage.host != "" && var.binStorage.auth != ""
-    error_message = "Missing required deployment configuration."
-  }
-}
-
 variable existingKeyVault {
   type = object({
     enable            = bool
