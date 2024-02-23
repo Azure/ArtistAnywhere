@@ -146,27 +146,37 @@ resource azurerm_linux_virtual_machine scheduler {
   ]
 }
 
-# resource azurerm_virtual_machine_extension monitor_linux {
-#   for_each = {
-#     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.operatingSystem.type == "Linux"
-#   }
-#   name                       = "Monitor"
-#   type                       = "AzureMonitorLinuxAgent"
-#   publisher                  = "Microsoft.Azure.Monitor"
-#   type_handler_version       = module.global.monitor.agentVersion.linux
-#   automatic_upgrade_enabled  = true
-#   auto_upgrade_minor_version = true
-#   virtual_machine_id         = "${azurerm_resource_group.scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
-#   settings = jsonencode({
-#     workspaceId = data.azurerm_log_analytics_workspace.monitor.workspace_id
-#   })
-#   protected_settings = jsonencode({
-#     workspaceKey = data.azurerm_log_analytics_workspace.monitor.primary_shared_key
-#   })
-#   depends_on = [
-#     azurerm_linux_virtual_machine.scheduler
-#   ]
-# }
+resource azurerm_virtual_machine_extension monitor_linux {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.operatingSystem.type == "Linux"
+  }
+  name                       = "Monitor"
+  type                       = "AzureMonitorLinuxAgent"
+  publisher                  = "Microsoft.Azure.Monitor"
+  type_handler_version       = module.global.monitor.agentVersion.linux
+  automatic_upgrade_enabled  = true
+  auto_upgrade_minor_version = true
+  virtual_machine_id         = "${azurerm_resource_group.scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
+  settings = jsonencode({
+    authentication = {
+      managedIdentity = {
+        identifier-name  = "mi_res_id"
+        identifier-value = data.azurerm_user_assigned_identity.studio.id
+      }
+    }
+  })
+  depends_on = [
+    azurerm_linux_virtual_machine.scheduler
+  ]
+}
+
+resource azurerm_monitor_data_collection_rule_association scheduler_linux {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.operatingSystem.type == "Linux"
+  }
+  target_resource_id          = azurerm_linux_virtual_machine.scheduler[each.value.name].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+}
 
 resource azurerm_virtual_machine_extension initialize_linux {
   for_each = {
@@ -185,7 +195,7 @@ resource azurerm_virtual_machine_extension initialize_linux {
     )
   })
   depends_on = [
-    azurerm_linux_virtual_machine.scheduler
+    azurerm_virtual_machine_extension.monitor_linux
   ]
 }
 
@@ -234,14 +244,24 @@ resource azurerm_virtual_machine_extension monitor_windows {
   auto_upgrade_minor_version = true
   virtual_machine_id         = "${azurerm_resource_group.scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
   settings = jsonencode({
-    workspaceId = data.azurerm_log_analytics_workspace.monitor.workspace_id
-  })
-  protected_settings = jsonencode({
-    workspaceKey = data.azurerm_log_analytics_workspace.monitor.primary_shared_key
+    authentication = {
+      managedIdentity = {
+        identifier-name  = "mi_res_id"
+        identifier-value = data.azurerm_user_assigned_identity.studio.id
+      }
+    }
   })
   depends_on = [
     azurerm_windows_virtual_machine.scheduler
   ]
+}
+
+resource azurerm_monitor_data_collection_rule_association scheduler_windows {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.operatingSystem.type == "Windows"
+  }
+  target_resource_id          = azurerm_windows_virtual_machine.scheduler[each.value.name].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }
 
 resource azurerm_virtual_machine_extension initialize_windows {

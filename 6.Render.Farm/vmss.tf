@@ -167,23 +167,25 @@ resource azurerm_linux_virtual_machine_scale_set farm {
       requestPath = each.value.extension.health.requestPath
     })
   }
-  # extension {
-  #   name                       = "Monitor"
-  #   type                       = "AzureMonitorLinuxAgent"
-  #   publisher                  = "Microsoft.Azure.Monitor"
-  #   type_handler_version       = module.global.monitor.agentVersion.linux
-  #   automatic_upgrade_enabled  = true
-  #   auto_upgrade_minor_version = true
-  #   settings = jsonencode({
-  #     workspaceId = data.azurerm_log_analytics_workspace.monitor.workspace_id
-  #   })
-  #   protected_settings = jsonencode({
-  #     workspaceKey = data.azurerm_log_analytics_workspace.monitor.primary_shared_key
-  #   })
-  #   provision_after_extensions = [
-  #     "Health"
-  #   ]
-  # }
+  extension {
+    name                       = "Monitor"
+    type                       = "AzureMonitorLinuxAgent"
+    publisher                  = "Microsoft.Azure.Monitor"
+    type_handler_version       = module.global.monitor.agentVersion.linux
+    automatic_upgrade_enabled  = true
+    auto_upgrade_minor_version = true
+    settings = jsonencode({
+      authentication = {
+        managedIdentity = {
+          identifier-name  = "mi_res_id"
+          identifier-value = data.azurerm_user_assigned_identity.studio.id
+        }
+      }
+    })
+    provision_after_extensions = [
+      "Health"
+    ]
+  }
   dynamic extension {
     for_each = each.value.extension.custom.enable ? [1] : []
     content {
@@ -201,7 +203,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
         )
       })
       provision_after_extensions = [
-        "Health"
+        "Monitor"
       ]
     }
   }
@@ -234,6 +236,14 @@ resource azurerm_linux_virtual_machine_scale_set farm {
       timeout = each.value.spot.tryRestore.timeout
     }
   }
+}
+
+resource azurerm_monitor_data_collection_rule_association farm_linux {
+  for_each = {
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.operatingSystem.type == "Linux" && !virtualMachineScaleSet.flexibleOrchestration.enable
+  }
+  target_resource_id          = azurerm_linux_virtual_machine_scale_set.farm[each.value.name].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }
 
 resource azurerm_windows_virtual_machine_scale_set farm {
@@ -302,10 +312,12 @@ resource azurerm_windows_virtual_machine_scale_set farm {
     automatic_upgrade_enabled  = true
     auto_upgrade_minor_version = true
     settings = jsonencode({
-      workspaceId = data.azurerm_log_analytics_workspace.monitor.workspace_id
-    })
-    protected_settings = jsonencode({
-      workspaceKey = data.azurerm_log_analytics_workspace.monitor.primary_shared_key
+      authentication = {
+        managedIdentity = {
+          identifier-name  = "mi_res_id"
+          identifier-value = data.azurerm_user_assigned_identity.studio.id
+        }
+      }
     })
     provision_after_extensions = [
       "Health"
@@ -347,6 +359,14 @@ resource azurerm_windows_virtual_machine_scale_set farm {
       timeout = each.value.spot.tryRestore.timeout
     }
   }
+}
+
+resource azurerm_monitor_data_collection_rule_association farm_windows {
+  for_each = {
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.operatingSystem.type == "Windows" && !virtualMachineScaleSet.flexibleOrchestration.enable
+  }
+  target_resource_id          = azurerm_windows_virtual_machine_scale_set.farm[each.value.name].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }
 
 resource azurerm_orchestrated_virtual_machine_scale_set farm {
@@ -435,10 +455,12 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
     type_handler_version               = each.value.operatingSystem.type == "Windows" ? module.global.monitor.agentVersion.windows : module.global.monitor.agentVersion.linux
     auto_upgrade_minor_version_enabled = true
     settings = jsonencode({
-      workspaceId = data.azurerm_log_analytics_workspace.monitor.workspace_id
-    })
-    protected_settings = jsonencode({
-      workspaceKey = data.azurerm_log_analytics_workspace.monitor.primary_shared_key
+      authentication = {
+        managedIdentity = {
+          identifier-name  = "mi_res_id"
+          identifier-value = data.azurerm_user_assigned_identity.studio.id
+        }
+      }
     })
     # extensions_to_provision_after_vm_creation = [
     #   "Health"
@@ -485,4 +507,12 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
       timeout = each.value.extension.custom.parameters.terminateNotification.delayTimeout
     }
   }
+}
+
+resource azurerm_monitor_data_collection_rule_association farm {
+  for_each = {
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexibleOrchestration.enable
+  }
+  target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.farm[each.value.name].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }

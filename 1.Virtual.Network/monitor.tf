@@ -12,6 +12,11 @@ data azurerm_application_insights studio {
   resource_group_name = module.global.resourceGroupName
 }
 
+data azurerm_monitor_data_collection_endpoint studio {
+  name                = module.global.monitor.name
+  resource_group_name = module.global.resourceGroupName
+}
+
 resource azurerm_private_dns_zone monitor {
   name                = "privatelink.monitor.azure.com"
   resource_group_name = azurerm_resource_group.network.name
@@ -124,5 +129,12 @@ resource azurerm_monitor_private_link_scoped_service monitor_insight {
   name                = "${module.global.monitor.name}-insight"
   resource_group_name = azurerm_resource_group.network.name
   linked_resource_id  = data.azurerm_application_insights.studio.id
+  scope_name          = azurerm_monitor_private_link_scope.monitor.name
+}
+
+resource azurerm_monitor_private_link_scoped_service monitor_endpoint {
+  name                = "${module.global.monitor.name}-data"
+  resource_group_name = azurerm_resource_group.network.name
+  linked_resource_id  = data.azurerm_monitor_data_collection_endpoint.studio.id
   scope_name          = azurerm_monitor_private_link_scope.monitor.name
 }

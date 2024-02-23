@@ -261,7 +261,7 @@ networkPeering = {
 ########################################################################
 
 bastion = {
-  enable              = false
+  enable              = true
   sku                 = "Standard"
   scaleUnitCount      = 2
   enableFileCopy      = true
