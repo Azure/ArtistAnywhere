@@ -59,7 +59,7 @@ locals {
 
 resource azurerm_role_assignment key_vault {
   count                = var.cosmosDB.secondaryEncryption.enable ? 1 : 0
-  role_definition_name = "Key Vault Crypto User" # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#key-vault-crypto-user
+  role_definition_name = "Key Vault Crypto Service Encryption User" # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#key-vault-crypto-service-encryption-user
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_key_vault.studio.id
 }

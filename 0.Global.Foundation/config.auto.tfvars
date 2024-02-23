@@ -46,7 +46,7 @@ keyVault = {
     {
       name = "DataEncryption"
       type = "RSA"
-      size = 3072
+      size = 4096
       operations = [
         "decrypt",
         "encrypt",
@@ -59,7 +59,7 @@ keyVault = {
     {
       name = "CacheEncryption"
       type = "RSA"
-      size = 3072
+      size = 4096
       operations = [
         "decrypt",
         "encrypt",
