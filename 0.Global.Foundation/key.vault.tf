@@ -109,37 +109,3 @@ resource azurerm_key_vault_certificate studio {
     }
   }
 }
-
-resource azurerm_key_vault batch {
-  name                            = "${module.global.keyVault.name}-batch"
-  resource_group_name             = azurerm_resource_group.studio.name
-  location                        = azurerm_resource_group.studio.location
-  tenant_id                       = data.azurerm_client_config.studio.tenant_id
-  sku_name                        = var.keyVault.type
-  enabled_for_deployment          = var.keyVault.enableForDeployment
-  enabled_for_disk_encryption     = var.keyVault.enableForDiskEncryption
-  enabled_for_template_deployment = var.keyVault.enableForTemplateDeployment
-  purge_protection_enabled        = var.keyVault.enablePurgeProtection
-  soft_delete_retention_days      = var.keyVault.softDeleteRetentionDays
-  enable_rbac_authorization       = false
-  network_acls {
-    bypass         = var.keyVault.enableTrustedServices ? "AzureServices" : "None"
-    default_action = "Deny"
-    ip_rules = [
-      jsondecode(data.http.client_address.response_body).ip
-    ]
-  }
-}
-
-resource azurerm_key_vault_access_policy batch {
-  key_vault_id = azurerm_key_vault.batch.id
-  tenant_id    = data.azurerm_client_config.studio.tenant_id
-  object_id    = data.azuread_service_principal.batch.object_id
-  secret_permissions = [
-    "Get",
-    "Set",
-    "List",
-    "Delete",
-    "Recover"
-  ]
-}

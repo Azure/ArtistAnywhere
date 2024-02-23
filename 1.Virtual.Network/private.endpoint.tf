@@ -85,35 +85,6 @@ resource azurerm_private_endpoint key_vault {
   ]
 }
 
-resource azurerm_private_endpoint key_vault_batch {
-  for_each = {
-    for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet
-  }
-  name                = "${data.azurerm_key_vault.batch.name}-vault-batch"
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
-  subnet_id           = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
-  private_service_connection {
-    name                           = data.azurerm_key_vault.batch.name
-    private_connection_resource_id = data.azurerm_key_vault.batch.id
-    is_manual_connection           = false
-    subresource_names = [
-      "vault"
-    ]
-  }
-  private_dns_zone_group {
-    name = data.azurerm_key_vault.batch.name
-    private_dns_zone_ids = [
-      azurerm_private_dns_zone.key_vault.id
-    ]
-  }
-  depends_on = [
-    azurerm_subnet.studio,
-    azurerm_private_dns_zone_virtual_network_link.key_vault,
-    azurerm_private_endpoint.key_vault
-  ]
-}
-
 resource azurerm_private_endpoint storage_blob {
   for_each = {
     for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet
@@ -138,8 +109,8 @@ resource azurerm_private_endpoint storage_blob {
   }
   depends_on = [
     azurerm_subnet.studio,
-    azurerm_private_dns_zone_virtual_network_link.storage_blob,
-    azurerm_private_endpoint.key_vault_batch
+    azurerm_private_endpoint.key_vault,
+    azurerm_private_dns_zone_virtual_network_link.storage_blob
  ]
 }
 

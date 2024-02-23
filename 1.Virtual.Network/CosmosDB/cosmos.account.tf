@@ -6,7 +6,7 @@ variable cosmosDB {
   type = object({
     accountName = string
     offerType   = string
-    consistency = object({
+    dataConsistency = object({
       policyLevel        = string
       maxIntervalSeconds = number
       maxStalenessPrefix = number
@@ -57,6 +57,13 @@ locals {
   ]))
 }
 
+resource azurerm_role_assignment key_vault {
+  count                = var.cosmosDB.secondaryEncryption.enable ? 1 : 0
+  role_definition_name = "Key Vault Crypto User" # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#key-vault-crypto-user
+  principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
+  scope                = data.azurerm_key_vault.studio.id
+}
+
 resource azurerm_cosmosdb_account studio {
   for_each                        = local.cosmosAccountTypes
   name                            = var.cosmosDB.accountName
@@ -79,9 +86,9 @@ resource azurerm_cosmosdb_account studio {
     ]
   }
   consistency_policy {
-    consistency_level       = var.cosmosDB.consistency.policyLevel
-    max_interval_in_seconds = var.cosmosDB.consistency.maxIntervalSeconds
-    max_staleness_prefix    = var.cosmosDB.consistency.maxStalenessPrefix
+    consistency_level       = var.cosmosDB.dataConsistency.policyLevel
+    max_interval_in_seconds = var.cosmosDB.dataConsistency.maxIntervalSeconds
+    max_staleness_prefix    = var.cosmosDB.dataConsistency.maxStalenessPrefix
   }
   dynamic geo_location {
     for_each = local.regionNames
@@ -132,4 +139,7 @@ resource azurerm_cosmosdb_account studio {
       name = capabilities.value
     }
   }
+  depends_on = [
+    azurerm_role_assignment.key_vault
+  ]
 }

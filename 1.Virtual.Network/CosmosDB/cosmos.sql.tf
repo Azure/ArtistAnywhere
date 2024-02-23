@@ -77,7 +77,7 @@ resource azurerm_cosmosdb_sql_database no_sql {
   name                = var.cosmosNoSQL.database.name
   resource_group_name = azurerm_resource_group.database.name
   account_name        = azurerm_cosmosdb_account.studio["sql"].name
-  throughput          = var.cosmosDB.serverless.enable ? null : var.cosmosNoSQL.database.throughput
+  throughput          = var.cosmosNoSQL.database.throughput
 }
 
 resource azurerm_cosmosdb_sql_container no_sql {
@@ -88,7 +88,7 @@ resource azurerm_cosmosdb_sql_container no_sql {
   resource_group_name   = azurerm_cosmosdb_sql_database.no_sql[0].resource_group_name
   account_name          = azurerm_cosmosdb_sql_database.no_sql[0].account_name
   database_name         = azurerm_cosmosdb_sql_database.no_sql[0].name
-  throughput            = var.cosmosDB.serverless.enable ? null : each.value.throughput
+  throughput            = each.value.throughput
   partition_key_path    = each.value.partitionKey.path
   partition_key_version = each.value.partitionKey.version
 }

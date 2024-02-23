@@ -76,7 +76,7 @@ resource azurerm_cosmosdb_mongo_database mongo_db {
   name                = var.cosmosMongoDB.database.name
   resource_group_name = azurerm_resource_group.database.name
   account_name        = azurerm_cosmosdb_account.studio["mongo"].name
-  throughput          = var.cosmosDB.serverless.enable ? null : var.cosmosMongoDB.database.throughput
+  throughput          = var.cosmosMongoDB.database.throughput
 }
 
 #####################################################################################################

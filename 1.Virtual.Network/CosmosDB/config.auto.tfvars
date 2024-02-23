@@ -7,7 +7,7 @@ resourceGroupName = "ArtistAnywhere.Database" # Alphanumeric, underscores, hyphe
 cosmosDB = {
   accountName = "xstudio"
   offerType   = "Standard"
-  consistency = {
+  dataConsistency = {
     policyLevel        = "Session"
     maxIntervalSeconds = 5
     maxStalenessPrefix = 100
@@ -23,7 +23,7 @@ cosmosDB = {
     schemaType = ""
   }
   secondaryEncryption = {
-    enable  = false
+    enable  = true
     keyName = ""
   }
   automaticFailover = {
@@ -42,16 +42,16 @@ cosmosDB = {
 ########################################################################
 
 cosmosNoSQL = {
-  enable = false
+  enable = true
   name   = "xstudio"
   database = {
     enable     = false
     name       = "Studio"
-    throughput = 400
+    throughput = null
     containers = [
       {
         name       = ""
-        throughput = 400
+        throughput = null
         partitionKey = {
           path    = ""
           version = 2
@@ -78,7 +78,7 @@ cosmosMongoDB = {
   database = {
     enable     = false
     name       = "Studio"
-    throughput = 400
+    throughput = null
   }
 }
 
@@ -175,7 +175,7 @@ cosmosGremlin = {
   database = {
     enable     = false
     name       = "Studio"
-    throughput = 400
+    throughput = null
   }
 }
 

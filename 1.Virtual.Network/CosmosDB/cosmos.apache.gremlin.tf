@@ -82,5 +82,5 @@ resource azurerm_cosmosdb_gremlin_database gremlin {
   name                = var.cosmosGremlin.database.name
   resource_group_name = azurerm_resource_group.database.name
   account_name        = azurerm_cosmosdb_account.studio["gremlin"].name
-  throughput          = var.cosmosDB.serverless.enable ? null : var.cosmosGremlin.database.throughput
+  throughput          = var.cosmosGremlin.database.throughput
 }

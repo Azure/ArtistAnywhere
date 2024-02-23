@@ -17,7 +17,7 @@ keyVault = {
   enableForDeployment         = true
   enableForDiskEncryption     = true
   enableForTemplateDeployment = true
-  enablePurgeProtection       = false
+  enablePurgeProtection       = true
   enableTrustedServices       = true
   softDeleteRetentionDays     = 90
   secrets = [
@@ -46,7 +46,7 @@ keyVault = {
     {
       name = "DataEncryption"
       type = "RSA"
-      size = 2048
+      size = 3072
       operations = [
         "decrypt",
         "encrypt",
@@ -59,7 +59,7 @@ keyVault = {
     {
       name = "CacheEncryption"
       type = "RSA"
-      size = 2048
+      size = 3072
       operations = [
         "decrypt",
         "encrypt",

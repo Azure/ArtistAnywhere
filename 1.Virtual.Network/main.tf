@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.92.0"
+      version = "~>3.93.0"
     }
   }
   backend azurerm {
@@ -37,11 +37,6 @@ data azurerm_key_vault studio {
 data azurerm_key_vault_secret gateway_connection {
   name         = module.global.keyVault.secretName.gatewayConnection
   key_vault_id = data.azurerm_key_vault.studio.id
-}
-
-data azurerm_key_vault batch {
-  name                = "${module.global.keyVault.name}-batch"
-  resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_storage_account studio {

@@ -83,11 +83,6 @@ data azuread_service_principal batch {
   display_name = "Microsoft Azure Batch"
 }
 
-data azurerm_key_vault batch {
-  name                = "${module.global.keyVault.name}-batch"
-  resource_group_name = module.global.resourceGroupName
-}
-
 locals {
   batchPoolsLinux = [
     for pool in var.batch.pools : merge(pool, {
@@ -221,8 +216,8 @@ resource azurerm_batch_account scheduler {
     }
   }
   key_vault_reference {
-    id  = data.azurerm_key_vault.batch.id
-    url = data.azurerm_key_vault.batch.vault_uri
+    id  = data.azurerm_key_vault.studio.id
+    url = data.azurerm_key_vault.studio.vault_uri
   }
   storage_account_id                  = data.azurerm_storage_account.studio.id
   storage_account_node_identity       = data.azurerm_user_assigned_identity.studio.id
