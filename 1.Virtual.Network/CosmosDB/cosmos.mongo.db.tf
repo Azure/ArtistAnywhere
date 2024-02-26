@@ -5,7 +5,10 @@
 variable cosmosMongoDB {
   type = object({
     enable  = bool
-    version = string
+    account = object({
+      name    = string
+      version = string
+    })
     database = object({
       enable     = bool
       name       = string
@@ -16,12 +19,16 @@ variable cosmosMongoDB {
 
 variable cosmosMongoDBvCore {
   type = object({
-    enable     = bool
-    name       = string
-    tier       = string
-    version    = string
-    nodeCount  = number
-    diskSizeGB = number
+    enable = bool
+    cluster = object({
+      name    = string
+      tier    = string
+      version = string
+    })
+    node = object({
+      count      = number
+      diskSizeGB = number
+    })
     highAvailability = object({
       enable = bool
     })
@@ -124,7 +131,7 @@ resource azurerm_private_endpoint mongo_cluster {
 
 resource azapi_resource mongo_cluster {
   count     = var.cosmosMongoDBvCore.enable ? 1 : 0
-  name      = var.cosmosMongoDBvCore.name
+  name      = var.cosmosMongoDBvCore.cluster.name
   type      = "Microsoft.DocumentDB/mongoClusters@2023-11-15-preview"
   parent_id = azurerm_resource_group.database.id
   location  = azurerm_resource_group.database.location
@@ -133,13 +140,13 @@ resource azapi_resource mongo_cluster {
       nodeGroupSpecs = [
         {
           kind       = "Shard"
-          sku        = var.cosmosMongoDBvCore.tier
-          nodeCount  = var.cosmosMongoDBvCore.nodeCount
-          diskSizeGB = var.cosmosMongoDBvCore.diskSizeGB
+          sku        = var.cosmosMongoDBvCore.cluster.tier
+          nodeCount  = var.cosmosMongoDBvCore.node.count
+          diskSizeGB = var.cosmosMongoDBvCore.node.diskSizeGB
           enableHa   = var.cosmosMongoDBvCore.highAvailability.enable
         }
       ]
-      serverVersion              = var.cosmosMongoDBvCore.version
+      serverVersion              = var.cosmosMongoDBvCore.cluster.version
       administratorLogin         = data.azurerm_key_vault_secret.admin_username.value
       administratorLoginPassword = data.azurerm_key_vault_secret.admin_password.value
     }

@@ -5,6 +5,9 @@
 variable cosmosGremlin {
   type = object({
     enable = bool
+    account = object({
+      name = string
+    })
     database = object({
       enable     = bool
       name       = string

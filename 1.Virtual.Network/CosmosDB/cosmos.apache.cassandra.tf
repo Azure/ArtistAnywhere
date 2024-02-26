@@ -1,14 +1,19 @@
 variable cosmosCassandra {
   type = object({
     enable = bool
+    account = object({
+      name = string
+    })
   })
 }
 
 variable apacheCassandra {
   type = object({
-    enable  = bool
-    name    = string
-    version = string
+    enable = bool
+    cluster = object({
+      name    = string
+      version = string
+    })
     datacenter = object({
       name = string
       node = object({
@@ -82,11 +87,11 @@ resource azurerm_role_assignment cassandra {
 
 resource azurerm_cosmosdb_cassandra_cluster cassandra {
   count                          = var.apacheCassandra.enable ? 1 : 0
-  name                           = var.apacheCassandra.name
+  name                           = var.apacheCassandra.cluster.name
   resource_group_name            = azurerm_resource_group.database.name
   location                       = azurerm_resource_group.database.location
   delegated_management_subnet_id = data.azurerm_subnet.data.id
-  version                        = var.apacheCassandra.version
+  version                        = var.apacheCassandra.cluster.version
   hours_between_backups          = var.apacheCassandra.backup.intervalHours
   default_admin_password         = data.azurerm_key_vault_secret.admin_password.value
   identity {

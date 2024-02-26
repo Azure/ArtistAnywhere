@@ -5,8 +5,7 @@ resourceGroupName = "ArtistAnywhere.Database" # Alphanumeric, underscores, hyphe
 ########################################################################
 
 cosmosDB = {
-  accountName = "xstudio"
-  offerType   = "Standard"
+  offerType = "Standard"
   dataConsistency = {
     policyLevel        = "Session"
     maxIntervalSeconds = 5
@@ -42,8 +41,10 @@ cosmosDB = {
 ########################################################################
 
 cosmosNoSQL = {
-  enable = true
-  name   = "xstudio"
+  enable = false
+  account = {
+    name = "xstudio"
+  }
   database = {
     enable     = false
     name       = "Studio"
@@ -63,9 +64,9 @@ cosmosNoSQL = {
             name   = "helloCosmos"
             body   = <<BODY
               function () {
-                var context = getContext()
-                var response = context.getResponse()
-                response.setBody("Hello Cosmos!")
+                var context = getContext();
+                var response = context.getResponse();
+                response.setBody("Hello Cosmos!");
               }
             BODY
           }
@@ -82,8 +83,14 @@ cosmosNoSQL = {
         functions = [
           {
             enable = false
-            name   = ""
-            body   = ""
+            name   = "helloCosmos"
+            body   = <<BODY
+              function () {
+                var context = getContext();
+                var response = context.getResponse();
+                response.setBody("Hello Cosmos!");
+              }
+            BODY
           }
         ]
       }
@@ -102,9 +109,11 @@ cosmosNoSQL = {
 ###############################################################################################
 
 cosmosMongoDB = {
-  enable  = false
-  name    = "xstudio"
-  version = "4.2"
+  enable = false
+  account = {
+    name    = "xstudio"
+    version = "4.2"
+  }
   database = {
     enable     = false
     name       = "Studio"
@@ -117,12 +126,16 @@ cosmosMongoDB = {
 #####################################################################################################
 
 cosmosMongoDBvCore = {
-  enable     = false
-  name       = "xstudio"
-  tier       = "M30"
-  version    = "5.0"
-  nodeCount  = 1
-  diskSizeGB = 128
+  enable = false
+  cluster = {
+    name    = "xstudio"
+    tier    = "M30"
+    version = "5.0"
+  }
+  node = {
+    count      = 1
+    diskSizeGB = 128
+  }
   highAvailability = {
     enable = false
   }
@@ -134,7 +147,9 @@ cosmosMongoDBvCore = {
 
 cosmosCassandra = {
   enable = false
-  name   = "xstudio"
+  account = {
+    name = "xstudio"
+  }
 }
 
 ########################################################################################################################
@@ -142,9 +157,11 @@ cosmosCassandra = {
 ########################################################################################################################
 
 apacheCassandra = {
-  enable  = false
-  name    = "xstudio"
-  version = "4.0"
+  enable = false
+  cluster = {
+    name    = "xstudio"
+    version = "4.0"
+  }
   datacenter = {
     name = "dc0"
     node = {
@@ -166,10 +183,12 @@ apacheCassandra = {
 ##############################################################################################
 
 cosmosPostgreSQL = {
-  enable       = false
-  name         = "xstudio"
-  version      = "16"
-  versionCitus = "12.1"
+  enable = false
+  cluster = {
+    name         = "xstudio"
+    version      = "16"
+    versionCitus = "12.1"
+  }
   worker = {
     serverEdition = "MemoryOptimized"
     storageMB     = 524288
@@ -201,7 +220,9 @@ cosmosPostgreSQL = {
 
 cosmosGremlin = {
   enable = false
-  name   = "xstudio"
+  account = {
+    name = "xstudio"
+  }
   database = {
     enable     = false
     name       = "Studio"
@@ -215,7 +236,9 @@ cosmosGremlin = {
 
 cosmosTable = {
   enable = false
-  name   = "xstudio"
+  account = {
+    name = "xstudio"
+  }
 }
 
 #######################################################################

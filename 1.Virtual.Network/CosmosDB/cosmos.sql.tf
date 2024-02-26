@@ -5,6 +5,9 @@
 variable cosmosNoSQL {
   type = object({
     enable = bool
+    account = object({
+      name = string
+    })
     database = object({
       enable     = bool
       name       = string
@@ -61,9 +64,9 @@ locals {
   ])
   triggers = flatten([
     for container in var.cosmosNoSQL.database.containers : [
-      for trigger in container.functions : merge(trigger, {
+      for trigger in container.triggers : merge(trigger, {
         key         = "${container.name}-${trigger.name}"
-        containerId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosNoSQL.name}/colls/${container.name}"
+        containerId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosNoSQL.account.name}/sqlDatabases/${var.cosmosNoSQL.database.name}/containers/${container.name}"
       }) if trigger.enable
     ] if container.enable
   ])
@@ -71,7 +74,7 @@ locals {
     for container in var.cosmosNoSQL.database.containers : [
       for function in container.functions : merge(function, {
         key         = "${container.name}-${function.name}"
-        containerId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosNoSQL.name}/colls/${container.name}"
+        containerId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosNoSQL.account.name}/sqlDatabases/${var.cosmosNoSQL.database.name}/containers/${container.name}"
       }) if function.enable
     ] if container.enable
   ])
@@ -150,7 +153,7 @@ resource azurerm_cosmosdb_sql_stored_procedure no_sql {
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.database.name
-  account_name        = var.cosmosDB.accountName
+  account_name        = var.cosmosNoSQL.account.name
   database_name       = var.cosmosNoSQL.database.name
   container_name      = each.value.containerName
   body                = each.value.body

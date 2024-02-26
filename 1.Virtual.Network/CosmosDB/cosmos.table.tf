@@ -5,6 +5,9 @@
 variable cosmosTable {
   type = object({
     enable = bool
+    account = object({
+      name = string
+    })
   })
 }
 

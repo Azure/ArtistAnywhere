@@ -4,8 +4,7 @@
 
 variable cosmosDB {
   type = object({
-    accountName = string
-    offerType   = string
+    offerType = string
     dataConsistency = object({
       policyLevel        = string
       maxIntervalSeconds = number
@@ -48,13 +47,28 @@ data azurerm_key_vault_key data_encryption {
 }
 
 locals {
-  cosmosAccountTypes = toset(compact([
-    var.cosmosNoSQL.enable ? "sql" : null,
-    var.cosmosMongoDB.enable ? "mongo" : null,
-    var.cosmosCassandra.enable ? "cassandra" : null,
-    var.cosmosGremlin.enable ? "gremlin" : null,
-    var.cosmosTable.enable ? "table" : null
-  ]))
+  cosmosAccounts = [
+    {
+      name = var.cosmosNoSQL.enable ? var.cosmosNoSQL.account.name : ""
+      type = "sql"
+    },
+    {
+      name = var.cosmosMongoDB.enable ? var.cosmosMongoDB.account.name : ""
+      type = "mongo"
+    },
+    {
+      name = var.cosmosCassandra.enable ? var.cosmosCassandra.account.name : ""
+      type = "cassandra"
+    },
+    {
+      name = var.cosmosGremlin.enable ? var.cosmosGremlin.account.name : ""
+      type = "gremlin"
+    },
+    {
+      name = var.cosmosTable.enable ? var.cosmosTable.account.name : ""
+      type = "table"
+    }
+  ]
 }
 
 resource azurerm_role_assignment key_vault {
@@ -65,12 +79,14 @@ resource azurerm_role_assignment key_vault {
 }
 
 resource azurerm_cosmosdb_account studio {
-  for_each                        = local.cosmosAccountTypes
-  name                            = var.cosmosDB.accountName
+  for_each = {
+    for cosmosAccount in local.cosmosAccounts : cosmosAccount.type => cosmosAccount if cosmosAccount.name != ""
+  }
+  name                            = each.value.name
   resource_group_name             = azurerm_resource_group.database.name
   location                        = azurerm_resource_group.database.location
   kind                            = each.value == "mongo" ? "MongoDB" : "GlobalDocumentDB"
-  mongo_server_version            = each.value == "mongo" ? var.cosmosMongoDB.version : null
+  mongo_server_version            = each.value == "mongo" ? var.cosmosMongoDB.account.version : null
   offer_type                      = var.cosmosDB.offerType
   key_vault_key_id                = var.cosmosDB.secondaryEncryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
   analytical_storage_enabled      = var.cosmosDB.analyticalStorage.enable

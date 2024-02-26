@@ -4,10 +4,12 @@
 
 variable cosmosPostgreSQL {
   type = object({
-    enable       = bool
-    name         = string
-    version      = string
-    versionCitus = string
+    enable = bool
+    cluster = object({
+      name         = string
+      version      = string
+      versionCitus = string
+    })
     worker = object({
       serverEdition = string
       storageMB     = number
@@ -75,11 +77,11 @@ resource azurerm_private_endpoint postgre_sql {
 
 resource azurerm_cosmosdb_postgresql_cluster postgre_sql {
   count                                = var.cosmosPostgreSQL.enable ? 1 : 0
-  name                                 = var.cosmosPostgreSQL.name
+  name                                 = var.cosmosPostgreSQL.cluster.name
   resource_group_name                  = azurerm_resource_group.database.name
   location                             = azurerm_resource_group.database.location
-  sql_version                          = var.cosmosPostgreSQL.version
-  citus_version                        = var.cosmosPostgreSQL.versionCitus
+  sql_version                          = var.cosmosPostgreSQL.cluster.version
+  citus_version                        = var.cosmosPostgreSQL.cluster.versionCitus
   node_server_edition                  = var.cosmosPostgreSQL.worker.serverEdition
   node_storage_quota_in_mb             = var.cosmosPostgreSQL.worker.storageMB
   node_vcores                          = var.cosmosPostgreSQL.worker.coreCount
