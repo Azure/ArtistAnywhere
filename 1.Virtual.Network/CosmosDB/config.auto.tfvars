@@ -83,14 +83,8 @@ cosmosNoSQL = {
         functions = [
           {
             enable = false
-            name   = "helloCosmos"
-            body   = <<BODY
-              function () {
-                var context = getContext();
-                var response = context.getResponse();
-                response.setBody("Hello Cosmos!");
-              }
-            BODY
+            name   = ""
+            body   = ""
           }
         ]
       }
