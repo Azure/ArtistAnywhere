@@ -57,25 +57,18 @@ locals {
   ])
   blobContainers = flatten([
     for storageAccount in var.storageAccounts : [
-      for blobContainer in storageAccount.blobContainers : {
-        name               = blobContainer.name
-        loadFiles          = blobContainer.loadFiles
-        fileSystemEnable   = blobContainer.fileSystem.enable
-        fileSystemRootAcl  = blobContainer.fileSystem.rootAcl
+      for blobContainer in storageAccount.blobContainers : merge(blobContainer, {
+        key                = "${storageAccount.name}-${blobContainer.name}"
         storageAccountName = storageAccount.name
-      } if blobContainer.enable
+      }) if blobContainer.enable
     ] if storageAccount.enable
   ])
   fileShares = flatten([
     for storageAccount in var.storageAccounts : [
-      for fileShare in storageAccount.fileShares : {
-        name               = fileShare.name
-        size               = fileShare.sizeGB
-        accessTier         = fileShare.accessTier
-        accessProtocol     = fileShare.accessProtocol
-        loadFiles          = fileShare.loadFiles
+      for fileShare in storageAccount.fileShares : merge(fileShare, {
+        key                = "${storageAccount.name}-${fileShare.name}"
         storageAccountName = storageAccount.name
-      } if fileShare.enable
+      }) if fileShare.enable
     ] if storageAccount.enable
   ])
 }
@@ -160,7 +153,7 @@ resource azurerm_role_assignment storage_blob_data_owner {
 
 resource azurerm_storage_container core {
   for_each = {
-    for blobContainer in local.blobContainers : "${blobContainer.storageAccountName}-${blobContainer.name}" => blobContainer
+    for blobContainer in local.blobContainers : blobContainer.key => blobContainer
   }
   name                 = each.value.name
   storage_account_name = each.value.storageAccountName
@@ -171,10 +164,10 @@ resource azurerm_storage_container core {
 
 resource terraform_data blob_container_file_system_access_default {
   for_each = {
-    for blobContainer in local.blobContainers : "${blobContainer.storageAccountName}-${blobContainer.name}" => blobContainer if blobContainer.fileSystemEnable
+    for blobContainer in local.blobContainers : blobContainer.key => blobContainer if blobContainer.fileSystem.enable
   }
   provisioner local-exec {
-    command = "az storage fs access update-recursive --auth-mode login --account-name ${each.value.storageAccountName} --file-system ${each.value.name} --path / --acl default:${each.value.fileSystemRootAcl}"
+    command = "az storage fs access update-recursive --auth-mode login --account-name ${each.value.storageAccountName} --file-system ${each.value.name} --path / --acl default:${each.value.fileSystem.rootAcl}"
   }
   depends_on = [
     azurerm_storage_container.core
@@ -183,10 +176,10 @@ resource terraform_data blob_container_file_system_access_default {
 
 resource terraform_data blob_container_file_system_access_pre_load {
   for_each = {
-    for blobContainer in local.blobContainers : "${blobContainer.storageAccountName}-${blobContainer.name}" => blobContainer if blobContainer.fileSystemEnable
+    for blobContainer in local.blobContainers : blobContainer.key => blobContainer if blobContainer.fileSystem.enable
   }
   provisioner local-exec {
-    command = "az storage fs access update-recursive --auth-mode login --account-name ${each.value.storageAccountName} --file-system ${each.value.name} --path / --acl ${each.value.fileSystemRootAcl}"
+    command = "az storage fs access update-recursive --auth-mode login --account-name ${each.value.storageAccountName} --file-system ${each.value.name} --path / --acl ${each.value.fileSystem.rootAcl}"
   }
   depends_on = [
     azurerm_storage_container.core
@@ -195,7 +188,7 @@ resource terraform_data blob_container_file_system_access_pre_load {
 
 resource terraform_data blob_container_load_root {
   for_each = {
-    for blobContainer in local.blobContainers : "${blobContainer.storageAccountName}-${blobContainer.name}" => blobContainer if blobContainer.loadFiles && var.fileLoadSource.enable && var.fileLoadSource.blobName == ""
+    for blobContainer in local.blobContainers : blobContainer.key => blobContainer if blobContainer.loadFiles && var.fileLoadSource.enable && var.fileLoadSource.blobName == ""
   }
   provisioner local-exec {
     environment = {
@@ -211,7 +204,7 @@ resource terraform_data blob_container_load_root {
 
 resource terraform_data blob_container_load_blob {
   for_each = {
-    for blobContainer in local.blobContainers : "${blobContainer.storageAccountName}-${blobContainer.name}" => blobContainer if blobContainer.loadFiles && var.fileLoadSource.enable && var.fileLoadSource.blobName != ""
+    for blobContainer in local.blobContainers : blobContainer.key => blobContainer if blobContainer.loadFiles && var.fileLoadSource.enable && var.fileLoadSource.blobName != ""
   }
   provisioner local-exec {
     environment = {
@@ -227,10 +220,10 @@ resource terraform_data blob_container_load_blob {
 
 resource terraform_data blob_container_file_system_access_post_load {
   for_each = {
-    for blobContainer in local.blobContainers : "${blobContainer.storageAccountName}-${blobContainer.name}" => blobContainer if blobContainer.fileSystemEnable && blobContainer.loadFiles
+    for blobContainer in local.blobContainers : blobContainer.key => blobContainer if blobContainer.fileSystem.enable && blobContainer.loadFiles
   }
   provisioner local-exec {
-    command = "az storage fs access update-recursive --auth-mode login --account-name ${each.value.storageAccountName} --file-system ${each.value.name} --path / --acl ${each.value.fileSystemRootAcl}"
+    command = "az storage fs access update-recursive --auth-mode login --account-name ${each.value.storageAccountName} --file-system ${each.value.name} --path / --acl ${each.value.fileSystem.rootAcl}"
   }
   depends_on = [
     azurerm_storage_container.core,
@@ -241,13 +234,13 @@ resource terraform_data blob_container_file_system_access_post_load {
 
 resource azurerm_storage_share core {
   for_each = {
-    for fileShare in local.fileShares : "${fileShare.storageAccountName}-${fileShare.name}" => fileShare
+    for fileShare in local.fileShares : fileShare.key => fileShare
   }
   name                 = each.value.name
   access_tier          = each.value.accessTier
   enabled_protocol     = each.value.accessProtocol
   storage_account_name = each.value.storageAccountName
-  quota                = each.value.size
+  quota                = each.value.sizeGB
   depends_on = [
     azurerm_private_endpoint.storage
   ]
@@ -255,7 +248,7 @@ resource azurerm_storage_share core {
 
 resource terraform_data file_share_load_root {
   for_each = {
-    for fileShare in local.fileShares : "${fileShare.storageAccountName}-${fileShare.name}" => fileShare if fileShare.loadFiles && var.fileLoadSource.enable && var.fileLoadSource.blobName == ""
+    for fileShare in local.fileShares : fileShare.key => fileShare if fileShare.loadFiles && var.fileLoadSource.enable && var.fileLoadSource.blobName == ""
   }
   provisioner local-exec {
     environment = {
@@ -270,7 +263,7 @@ resource terraform_data file_share_load_root {
 
 resource terraform_data file_share_load_blob {
   for_each = {
-    for fileShare in local.fileShares : "${fileShare.storageAccountName}-${fileShare.name}" => fileShare if fileShare.loadFiles && var.fileLoadSource.enable && var.fileLoadSource.blobName != ""
+    for fileShare in local.fileShares : fileShare.key => fileShare if fileShare.loadFiles && var.fileLoadSource.enable && var.fileLoadSource.blobName != ""
   }
   provisioner local-exec {
     environment = {

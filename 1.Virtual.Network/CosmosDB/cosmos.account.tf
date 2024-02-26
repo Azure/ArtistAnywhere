@@ -77,7 +77,7 @@ resource azurerm_cosmosdb_account studio {
   partition_merge_enabled         = var.cosmosDB.partitionMerge.enable
   enable_multiple_write_locations = var.cosmosDB.multiRegionWrite.enable
   enable_automatic_failover       = var.cosmosDB.automaticFailover.enable
-  ip_range_filter                 = "104.42.195.92,40.76.54.131,52.176.6.30,52.169.50.45,52.187.184.26" # Azure Portal
+  ip_range_filter                 = "${jsondecode(data.http.client_address.response_body).ip},104.42.195.92,40.76.54.131,52.176.6.30,52.169.50.45,52.187.184.26" # Azure Portal
   default_identity_type           = "UserAssignedIdentity=${data.azurerm_user_assigned_identity.studio.id}"
   identity {
     type = "UserAssigned"

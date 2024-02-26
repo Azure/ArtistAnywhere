@@ -50,12 +50,42 @@ cosmosNoSQL = {
     throughput = null
     containers = [
       {
+        enable     = false
         name       = ""
         throughput = null
         partitionKey = {
           path    = ""
           version = 2
         }
+        storedProcedures = [
+          {
+            enable = false
+            name   = "helloCosmos"
+            body   = <<BODY
+              function () {
+                var context = getContext()
+                var response = context.getResponse()
+                response.setBody("Hello Cosmos!")
+              }
+            BODY
+          }
+        ]
+        triggers = [
+          {
+            enable    = false
+            name      = ""
+            type      = "" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_trigger#type
+            operation = "" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_trigger#operation
+            body      = ""
+          }
+        ]
+        functions = [
+          {
+            enable = false
+            name   = ""
+            body   = ""
+          }
+        ]
       }
     ]
   }

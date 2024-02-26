@@ -512,7 +512,7 @@ versionPath = {
   renderUnrealVS    = "2022"
   renderUnreal      = "5.3.2"
   renderUnrealPixel = "5.3-1.0.1"
-  jobScheduler      = "10.2.0.10"
+  jobScheduler      = "10.3.1.4"
   pcoipAgent        = "23.12"
 }
 

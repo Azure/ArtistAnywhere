@@ -13,6 +13,10 @@ terraform {
       source = "azure/azapi"
       version = "~>1.12.1"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = "~>3.4.1"
+    }
   }
   backend azurerm {
     key = "1.Virtual.Network.CosmosDB"
@@ -51,6 +55,10 @@ variable existingNetwork {
     subnetNameFarm    = string
     resourceGroupName = string
   })
+}
+
+data http client_address {
+  url = "https://api.ipify.org?format=json"
 }
 
 data azurerm_user_assigned_identity studio {
