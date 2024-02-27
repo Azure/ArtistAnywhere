@@ -34,6 +34,11 @@ cosmosDB = {
   multiRegionWrite = {
     enable = false
   }
+  dedicatedGateway = {
+    enable = false
+    size   = "Cosmos.D4s"
+    count  = 1
+  }
 }
 
 ########################################################################
@@ -47,7 +52,7 @@ cosmosNoSQL = {
   }
   database = {
     enable     = false
-    name       = "Studio"
+    name       = "Media"
     throughput = null
     containers = [
       {
@@ -90,11 +95,6 @@ cosmosNoSQL = {
       }
     ]
   }
-  gateway = {
-    enable = false
-    size   = "Cosmos.D4s"
-    count  = 1
-  }
 }
 
 ###############################################################################################
@@ -110,7 +110,7 @@ cosmosMongoDB = {
   }
   database = {
     enable     = false
-    name       = "Studio"
+    name       = "Media"
     throughput = null
   }
 }
@@ -124,7 +124,7 @@ cosmosMongoDBvCore = {
   cluster = {
     name    = "xstudio"
     tier    = "M30"
-    version = "5.0"
+    version = "6.0"
   }
   node = {
     count      = 1
@@ -143,6 +143,11 @@ cosmosCassandra = {
   enable = false
   account = {
     name = "xstudio"
+  }
+  database = {
+    enable     = false
+    name       = "Media"
+    throughput = null
   }
 }
 
@@ -219,7 +224,7 @@ cosmosGremlin = {
   }
   database = {
     enable     = false
-    name       = "Studio"
+    name       = "Media"
     throughput = null
   }
 }
@@ -233,6 +238,13 @@ cosmosTable = {
   account = {
     name = "xstudio"
   }
+  tables = [
+    {
+      enable     = false
+      name       = ""
+      throughput = null
+    }
+  ]
 }
 
 #######################################################################

@@ -45,11 +45,6 @@ variable cosmosNoSQL {
         ))
       }))
     })
-    gateway = object({
-      enable = bool
-      size   = string
-      count  = number
-    })
   })
 }
 
@@ -82,7 +77,7 @@ locals {
 
 resource azurerm_private_dns_zone no_sql {
   count               = var.cosmosNoSQL.enable || var.cosmosGremlin.enable || var.cosmosTable.enable ? 1 : 0
-  name                = var.cosmosNoSQL.gateway.enable ? "privatelink.sqlx.cosmos.azure.com" : "privatelink.documents.azure.com"
+  name                = var.cosmosDB.dedicatedGateway.enable ? "privatelink.sqlx.cosmos.azure.com" : "privatelink.documents.azure.com"
   resource_group_name = azurerm_resource_group.database.name
 }
 
@@ -105,7 +100,7 @@ resource azurerm_private_endpoint no_sql {
     private_connection_resource_id = azurerm_cosmosdb_account.studio["sql"].id
     is_manual_connection           = false
     subresource_names = [
-      var.cosmosNoSQL.gateway.enable ? "SqlDedicated" : "Sql"
+      var.cosmosDB.dedicatedGateway.enable ? "SqlDedicated" : "Sql"
     ]
   }
   private_dns_zone_group {
@@ -117,13 +112,6 @@ resource azurerm_private_endpoint no_sql {
   depends_on = [
     azurerm_private_dns_zone_virtual_network_link.no_sql
   ]
-}
-
-resource azurerm_cosmosdb_sql_dedicated_gateway no_sql {
-  count               = var.cosmosNoSQL.enable && var.cosmosNoSQL.gateway.enable ? 1 : 0
-  cosmosdb_account_id = azurerm_cosmosdb_account.studio["sql"].id
-  instance_size       = var.cosmosNoSQL.gateway.size
-  instance_count      = var.cosmosNoSQL.gateway.count
 }
 
 resource azurerm_cosmosdb_sql_database no_sql {

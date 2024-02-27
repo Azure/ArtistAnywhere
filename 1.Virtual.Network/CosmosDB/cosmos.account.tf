@@ -33,6 +33,11 @@ variable cosmosDB {
     multiRegionWrite = object({
       enable = bool
     })
+    dedicatedGateway = object({
+      enable = bool
+      size   = string
+      count  = number
+    })
   })
 }
 
@@ -49,22 +54,27 @@ data azurerm_key_vault_key data_encryption {
 locals {
   cosmosAccounts = [
     {
+      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosNoSQL.account.name}"
       name = var.cosmosNoSQL.enable ? var.cosmosNoSQL.account.name : ""
       type = "sql"
     },
     {
+      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosMongoDB.account.name}"
       name = var.cosmosMongoDB.enable ? var.cosmosMongoDB.account.name : ""
       type = "mongo"
     },
     {
+      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosCassandra.account.name}"
       name = var.cosmosCassandra.enable ? var.cosmosCassandra.account.name : ""
       type = "cassandra"
     },
     {
+      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosGremlin.account.name}"
       name = var.cosmosGremlin.enable ? var.cosmosGremlin.account.name : ""
       type = "gremlin"
     },
     {
+      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosTable.account.name}"
       name = var.cosmosTable.enable ? var.cosmosTable.account.name : ""
       type = "table"
     }
@@ -85,8 +95,8 @@ resource azurerm_cosmosdb_account studio {
   name                            = each.value.name
   resource_group_name             = azurerm_resource_group.database.name
   location                        = azurerm_resource_group.database.location
-  kind                            = each.value == "mongo" ? "MongoDB" : "GlobalDocumentDB"
-  mongo_server_version            = each.value == "mongo" ? var.cosmosMongoDB.account.version : null
+  kind                            = each.value.type == "mongo" ? "MongoDB" : "GlobalDocumentDB"
+  mongo_server_version            = each.value.type == "mongo" ? var.cosmosMongoDB.account.version : null
   offer_type                      = var.cosmosDB.offerType
   key_vault_key_id                = var.cosmosDB.secondaryEncryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
   analytical_storage_enabled      = var.cosmosDB.analyticalStorage.enable
@@ -132,25 +142,25 @@ resource azurerm_cosmosdb_account studio {
     }
   }
   dynamic capabilities {
-    for_each = each.value == "mongo" ? ["EnableMongo", "EnableMongoRoleBasedAccessControl"] : []
+    for_each = each.value.type == "mongo" ? ["EnableMongo", "EnableMongoRoleBasedAccessControl"] : []
     content {
       name = capabilities.value
     }
   }
   dynamic capabilities {
-    for_each = each.value == "cassandra" ? ["EnableCassandra"] : []
+    for_each = each.value.type == "cassandra" ? ["EnableCassandra"] : []
     content {
       name = capabilities.value
     }
   }
   dynamic capabilities {
-    for_each = each.value == "gremlin" ? ["EnableGremlin"] : []
+    for_each = each.value.type == "gremlin" ? ["EnableGremlin"] : []
     content {
       name = capabilities.value
     }
   }
   dynamic capabilities {
-    for_each = each.value == "table" ? ["EnableTable"] : []
+    for_each = each.value.type == "table" ? ["EnableTable"] : []
     content {
       name = capabilities.value
     }
@@ -158,4 +168,13 @@ resource azurerm_cosmosdb_account studio {
   depends_on = [
     azurerm_role_assignment.key_vault
   ]
+}
+
+resource azurerm_cosmosdb_sql_dedicated_gateway no_sql {
+  for_each = {
+    for cosmosAccount in local.cosmosAccounts : cosmosAccount.type => cosmosAccount if cosmosAccount.name != "" && var.cosmosDB.dedicatedGateway.enable
+  }
+  cosmosdb_account_id = each.value.id
+  instance_size       = var.cosmosDB.dedicatedGateway.size
+  instance_count      = var.cosmosDB.dedicatedGateway.count
 }

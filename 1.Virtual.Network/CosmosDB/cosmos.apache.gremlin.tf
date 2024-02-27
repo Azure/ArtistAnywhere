@@ -83,7 +83,7 @@ resource azurerm_private_endpoint gremlin_sql {
 resource azurerm_cosmosdb_gremlin_database gremlin {
   count               = var.cosmosGremlin.enable && var.cosmosGremlin.database.enable ? 1 : 0
   name                = var.cosmosGremlin.database.name
-  resource_group_name = azurerm_resource_group.database.name
+  resource_group_name = azurerm_cosmosdb_account.studio["gremlin"].resource_group_name
   account_name        = azurerm_cosmosdb_account.studio["gremlin"].name
   throughput          = var.cosmosGremlin.database.throughput
 }

@@ -81,7 +81,7 @@ resource azurerm_private_endpoint mongo_db {
 resource azurerm_cosmosdb_mongo_database mongo_db {
   count               = var.cosmosMongoDB.enable && var.cosmosMongoDB.database.enable ? 1 : 0
   name                = var.cosmosMongoDB.database.name
-  resource_group_name = azurerm_resource_group.database.name
+  resource_group_name = azurerm_cosmosdb_account.studio["mongo"].resource_group_name
   account_name        = azurerm_cosmosdb_account.studio["mongo"].name
   throughput          = var.cosmosMongoDB.database.throughput
 }
@@ -132,7 +132,7 @@ resource azurerm_private_endpoint mongo_cluster {
 resource azapi_resource mongo_cluster {
   count     = var.cosmosMongoDBvCore.enable ? 1 : 0
   name      = var.cosmosMongoDBvCore.cluster.name
-  type      = "Microsoft.DocumentDB/mongoClusters@2023-11-15-preview"
+  type      = "Microsoft.DocumentDB/mongoClusters@2024-02-15-preview"
   parent_id = azurerm_resource_group.database.id
   location  = azurerm_resource_group.database.location
   body = jsonencode({
@@ -151,4 +151,5 @@ resource azapi_resource mongo_cluster {
       administratorLoginPassword = data.azurerm_key_vault_secret.admin_password.value
     }
   })
+  schema_validation_enabled = false
 }

@@ -8,6 +8,11 @@ variable cosmosTable {
     account = object({
       name = string
     })
+    tables = list(object({
+      enable     = bool
+      name       = string
+      throughput = number
+    }))
   })
 }
 
@@ -73,4 +78,14 @@ resource azurerm_private_endpoint table_sql {
   depends_on = [
     azurerm_private_dns_zone_virtual_network_link.no_sql
   ]
+}
+
+resource azurerm_cosmosdb_table tables {
+  for_each = {
+    for table in var.cosmosTable.tables : table.name => table
+  }
+  name                = each.value.name
+  resource_group_name = azurerm_cosmosdb_account.studio["table"].resource_group_name
+  account_name        = azurerm_cosmosdb_account.studio["table"].name
+  throughput          = each.value.throughput
 }

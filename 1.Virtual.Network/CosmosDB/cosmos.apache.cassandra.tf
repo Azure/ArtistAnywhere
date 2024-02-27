@@ -4,6 +4,11 @@ variable cosmosCassandra {
     account = object({
       name = string
     })
+    database = object({
+      enable     = bool
+      name       = string
+      throughput = number
+    })
   })
 }
 
@@ -72,6 +77,14 @@ resource azurerm_private_endpoint cassandra {
   depends_on = [
     azurerm_private_dns_zone_virtual_network_link.cassandra
   ]
+}
+
+resource azurerm_cosmosdb_cassandra_keyspace cassandra {
+  count               = var.cosmosCassandra.enable && var.cosmosCassandra.database.enable ? 1 : 0
+  name                = var.cosmosCassandra.database.name
+  resource_group_name = azurerm_cosmosdb_account.studio["cassandra"].resource_group_name
+  account_name        = azurerm_cosmosdb_account.studio["cassandra"].name
+  throughput          = var.cosmosCassandra.database.throughput
 }
 
 ########################################################################################################################
