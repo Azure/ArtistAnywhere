@@ -12,6 +12,15 @@ variable cosmosGremlin {
       enable     = bool
       name       = string
       throughput = number
+      graphs = list(object({
+        enable     = bool
+        name       = string
+        throughput = number
+        partitionKey = object({
+          path    = string
+          version = number
+        })
+      }))
     })
   })
 }
@@ -86,4 +95,17 @@ resource azurerm_cosmosdb_gremlin_database gremlin {
   resource_group_name = azurerm_cosmosdb_account.studio["gremlin"].resource_group_name
   account_name        = azurerm_cosmosdb_account.studio["gremlin"].name
   throughput          = var.cosmosGremlin.database.throughput
+}
+
+resource azurerm_cosmosdb_gremlin_graph gremlin {
+  for_each = {
+    for graph in var.cosmosGremlin.database.graphs : graph.name => graph if var.cosmosGremlin.enable && var.cosmosGremlin.database.enable && graph.enable
+  }
+  name                  = each.value.name
+  resource_group_name   = azurerm_cosmosdb_gremlin_database.gremlin[0].resource_group_name
+  account_name          = azurerm_cosmosdb_gremlin_database.gremlin[0].account_name
+  database_name         = azurerm_cosmosdb_gremlin_database.gremlin[0].name
+  throughput            = each.value.throughput
+  partition_key_path    = each.value.partitionKey.path
+  partition_key_version = each.value.partitionKey.version
 }

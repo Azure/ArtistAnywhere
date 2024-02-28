@@ -8,6 +8,27 @@ variable cosmosCassandra {
       enable     = bool
       name       = string
       throughput = number
+      tables = list(object({
+        enable     = bool
+        name       = string
+        throughput = number
+        schema = object({
+          partitionKeys = list(object({
+            enable = bool
+            name   = string
+          }))
+          clusterKeys = list(object({
+            enable  = bool
+            name    = string
+            orderBy = string
+          }))
+          columns = list(object({
+            enable = bool
+            name   = string
+            type   = string
+          }))
+        })
+      }))
     })
   })
 }
@@ -85,6 +106,42 @@ resource azurerm_cosmosdb_cassandra_keyspace cassandra {
   resource_group_name = azurerm_cosmosdb_account.studio["cassandra"].resource_group_name
   account_name        = azurerm_cosmosdb_account.studio["cassandra"].name
   throughput          = var.cosmosCassandra.database.throughput
+}
+
+resource azurerm_cosmosdb_cassandra_table cassandra {
+  for_each = {
+    for table in var.cosmosCassandra.database.tables : table.name => table if var.cosmosCassandra.enable && var.cosmosCassandra.database.enable && table.enable
+  }
+  name                  = each.value.name
+  cassandra_keyspace_id = azurerm_cosmosdb_cassandra_keyspace.cassandra[0].id
+  schema {
+    dynamic partition_key {
+      for_each = {
+        for partitionKey in each.value.schema.partitionKeys : partitionKey.name => partitionKey if partitionKey.enable
+      }
+      content {
+        name = partition_key.value["name"]
+      }
+    }
+    dynamic cluster_key {
+      for_each = {
+        for clusterKey in each.value.schema.clusterKeys : clusterKey.name => clusterKey if clusterKey.enable
+      }
+      content {
+        name     = cluster_key.value["name"]
+        order_by = cluster_key.value["orderBy"]
+      }
+    }
+    dynamic column {
+      for_each = {
+        for column in each.value.schema.columns : column.name => column if column.enable
+      }
+      content {
+        name = column.value["name"]
+        type = column.value["type"]
+      }
+    }
+  }
 }
 
 ########################################################################################################################

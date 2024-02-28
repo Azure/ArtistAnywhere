@@ -13,6 +13,36 @@ variable cosmosMongoDB {
       enable     = bool
       name       = string
       throughput = number
+      collections = list(object({
+        enable     = bool
+        name       = string
+        shardKey   = string
+        throughput = number
+        indices = list(object({
+          enable = bool
+          unique = bool
+          keys   = list(string)
+        }))
+      }))
+      roles = list(object({
+        enable    = bool
+        name      = string
+        roleNames = list(string)
+        privileges = list(object({
+          enable = bool
+          resource = object({
+            databaseName   = string
+            collectionName = string
+          })
+          actions = list(string)
+        }))
+      }))
+      users = list(object({
+        enable    = bool
+        username  = string
+        password  = string
+        roleNames = list(string)
+      }))
     })
   })
 }
@@ -84,6 +114,61 @@ resource azurerm_cosmosdb_mongo_database mongo_db {
   resource_group_name = azurerm_cosmosdb_account.studio["mongo"].resource_group_name
   account_name        = azurerm_cosmosdb_account.studio["mongo"].name
   throughput          = var.cosmosMongoDB.database.throughput
+}
+
+resource azurerm_cosmosdb_mongo_collection mongo_db {
+  for_each = {
+    for collection in var.cosmosMongoDB.database.collections : collection.name => collection if var.cosmosMongoDB.enable && var.cosmosMongoDB.database.enable && collection.enable
+  }
+  name                = each.value.name
+  resource_group_name = azurerm_cosmosdb_mongo_database.mongo_db[0].resource_group_name
+  account_name        = azurerm_cosmosdb_mongo_database.mongo_db[0].account_name
+  database_name       = azurerm_cosmosdb_mongo_database.mongo_db[0].name
+  throughput          = each.value.throughput
+  shard_key           = each.value.shardKey
+  dynamic index {
+    for_each = {
+      for index in each.value.indices : join("-", index.keys) => index if index.enable
+    }
+    content {
+      unique = index.value["unique"]
+      keys   = index.value["keys"]
+    }
+  }
+}
+
+resource azurerm_cosmosdb_mongo_role_definition mongo_db {
+  for_each = {
+    for role in var.cosmosMongoDB.database.roles : role.name => role if var.cosmosMongoDB.enable && var.cosmosMongoDB.database.enable && role.enable
+  }
+  role_name                = each.value.name
+  cosmos_mongo_database_id = azurerm_cosmosdb_mongo_database.mongo_db[0].id
+  inherited_role_names     = each.value.roleNames
+  dynamic privilege {
+    for_each = {
+      for privilege in each.value.privileges : "${privilege.resource.databaseName}-${privilege.resource.collectionName}" => privilege if privilege.enable
+    }
+    content {
+      resource {
+        db_name         = privilege.value["resource"].databaseName
+        collection_name = privilege.value["resource"].collectionName
+      }
+      actions = privilege.value["actions"]
+    }
+  }
+}
+
+resource azurerm_cosmosdb_mongo_user_definition mongo_db {
+  for_each = {
+    for user in var.cosmosMongoDB.database.users : user.username => user if var.cosmosMongoDB.enable && var.cosmosMongoDB.database.enable && user.enable
+  }
+  cosmos_mongo_database_id = azurerm_cosmosdb_mongo_database.mongo_db[0].id
+  username                 = each.value.username
+  password                 = each.value.password
+  inherited_role_names     = each.value.roleNames
+  depends_on = [
+    azurerm_cosmosdb_mongo_role_definition.mongo_db
+  ]
 }
 
 #####################################################################################################

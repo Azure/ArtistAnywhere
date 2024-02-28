@@ -82,7 +82,7 @@ resource azurerm_private_endpoint table_sql {
 
 resource azurerm_cosmosdb_table tables {
   for_each = {
-    for table in var.cosmosTable.tables : table.name => table
+    for table in var.cosmosTable.tables : table.name => table if table.enable
   }
   name                = each.value.name
   resource_group_name = azurerm_cosmosdb_account.studio["table"].resource_group_name

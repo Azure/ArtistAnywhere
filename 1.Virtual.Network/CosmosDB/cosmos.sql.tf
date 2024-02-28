@@ -124,7 +124,7 @@ resource azurerm_cosmosdb_sql_database no_sql {
 
 resource azurerm_cosmosdb_sql_container no_sql {
   for_each = {
-    for sqlContainer in var.cosmosNoSQL.database.containers : sqlContainer.name => sqlContainer if var.cosmosNoSQL.enable && var.cosmosNoSQL.database.enable && sqlContainer.enable
+    for container in var.cosmosNoSQL.database.containers : container.name => container if var.cosmosNoSQL.enable && var.cosmosNoSQL.database.enable && container.enable
   }
   name                  = each.value.name
   resource_group_name   = azurerm_cosmosdb_sql_database.no_sql[0].resource_group_name

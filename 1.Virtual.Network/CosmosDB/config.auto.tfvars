@@ -112,6 +112,51 @@ cosmosMongoDB = {
     enable     = false
     name       = "Media"
     throughput = null
+    collections = [
+      {
+        enable     = false
+        name       = ""
+        shardKey   = null
+        throughput = null
+        indices = [
+          {
+            enable = true
+            unique = true
+            keys = [
+              "_id"
+            ]
+          }
+        ]
+      }
+    ]
+    roles = [
+      {
+        enable    = false
+        name      = ""
+        roleNames = [
+        ]
+        privileges = [
+          {
+            enable = false
+            resource = {
+              databaseName   = ""
+              collectionName = ""
+            }
+            actions = [
+            ]
+          }
+        ]
+      }
+    ]
+    users = [
+      {
+        enable    = false
+        username  = ""
+        password  = ""
+        roleNames = [
+        ]
+      }
+    ]
   }
 }
 
@@ -148,6 +193,35 @@ cosmosCassandra = {
     enable     = false
     name       = "Media"
     throughput = null
+    tables = [
+      {
+        enable     = false
+        name       = ""
+        throughput = null
+        schema = {
+          partitionKeys = [
+            {
+              enable = false
+              name   = ""
+            }
+          ]
+          clusterKeys = [
+            {
+              enable  = false
+              name    = ""
+              orderBy = "" # Asc or Desc
+            }
+          ]
+          columns = [
+            {
+              enable = false
+              name   = ""
+              type   = ""
+            }
+          ]
+        }
+      }
+    ]
   }
 }
 
@@ -226,6 +300,17 @@ cosmosGremlin = {
     enable     = false
     name       = "Media"
     throughput = null
+    graphs = [
+      {
+        enable     = false
+        name       = ""
+        throughput = null
+        partitionKey = {
+          path    = ""
+          version = 2
+        }
+      }
+    ]
   }
 }
 
