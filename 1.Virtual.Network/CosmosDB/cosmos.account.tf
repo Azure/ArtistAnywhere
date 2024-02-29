@@ -10,9 +10,6 @@ variable cosmosDB {
       maxIntervalSeconds = number
       maxStalenessPrefix = number
     })
-    serverless = object({
-      enable = bool
-    })
     aggregationPipeline = object({
       enable = bool
     })
@@ -20,18 +17,21 @@ variable cosmosDB {
       enable     = bool
       schemaType = string
     })
-    secondaryEncryption = object({
-      enable  = bool
-      keyName = string
-    })
     automaticFailover = object({
+      enable = bool
+    })
+    multiRegionWrite = object({
       enable = bool
     })
     partitionMerge = object({
       enable = bool
     })
-    multiRegionWrite = object({
+    serverless = object({
       enable = bool
+    })
+    secondaryEncryption = object({
+      enable  = bool
+      keyName = string
     })
     dedicatedGateway = object({
       enable = bool

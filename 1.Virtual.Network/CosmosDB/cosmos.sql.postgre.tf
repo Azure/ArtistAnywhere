@@ -9,21 +9,33 @@ variable cosmosPostgreSQL {
       name         = string
       version      = string
       versionCitus = string
+      firewallRules = list(object({
+        enable       = bool
+        startAddress = string
+        endAddress   = string
+      }))
     })
-    worker = object({
+    node = object({
       serverEdition = string
       storageMB     = number
       coreCount     = number
-      nodeCount     = number
+      count         = number
+      configuration = map(string)
     })
     coordinator = object({
       serverEdition = string
       storageMB     = number
       coreCount     = number
+      configuration = map(string)
       shards = object({
         enable = bool
       })
     })
+    roles = list(object({
+      enable   = bool
+      name     = string
+      password = string
+    }))
     highAvailability = object({
       enable = bool
     })
@@ -82,10 +94,10 @@ resource azurerm_cosmosdb_postgresql_cluster postgre_sql {
   location                             = azurerm_resource_group.database.location
   sql_version                          = var.cosmosPostgreSQL.cluster.version
   citus_version                        = var.cosmosPostgreSQL.cluster.versionCitus
-  node_server_edition                  = var.cosmosPostgreSQL.worker.serverEdition
-  node_storage_quota_in_mb             = var.cosmosPostgreSQL.worker.storageMB
-  node_vcores                          = var.cosmosPostgreSQL.worker.coreCount
-  node_count                           = var.cosmosPostgreSQL.worker.nodeCount
+  node_server_edition                  = var.cosmosPostgreSQL.node.serverEdition
+  node_storage_quota_in_mb             = var.cosmosPostgreSQL.node.storageMB
+  node_vcores                          = var.cosmosPostgreSQL.node.coreCount
+  node_count                           = var.cosmosPostgreSQL.node.count
   coordinator_server_edition           = var.cosmosPostgreSQL.coordinator.serverEdition
   coordinator_storage_quota_in_mb      = var.cosmosPostgreSQL.coordinator.storageMB
   coordinator_vcore_count              = var.cosmosPostgreSQL.coordinator.coreCount
@@ -102,4 +114,37 @@ resource azurerm_cosmosdb_postgresql_cluster postgre_sql {
       start_minute = var.cosmosPostgreSQL.maintenanceWindow.startMinute
     }
   }
+}
+
+resource azurerm_cosmosdb_postgresql_firewall_rule postgre_sql {
+  for_each = {
+    for firewallRule in var.cosmosPostgreSQL.cluster.firewallRules : firewallRule.name => firewallRule if var.cosmosPostgreSQL.enable && firewallRule.enable
+  }
+  name             = each.value.name
+  start_ip_address = each.value.startAddress
+  end_ip_address   = each.value.endAddress
+  cluster_id       = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].id
+}
+
+resource azurerm_cosmosdb_postgresql_node_configuration postgre_sql {
+  for_each   = var.cosmosPostgreSQL.enable ? var.cosmosPostgreSQL.node.configuration : {}
+  name       = each.key
+  value      = each.value
+  cluster_id = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].id
+}
+
+resource azurerm_cosmosdb_postgresql_coordinator_configuration postgre_sql {
+  for_each   = var.cosmosPostgreSQL.enable ? var.cosmosPostgreSQL.coordinator.configuration : {}
+  name       = each.key
+  value      = each.value
+  cluster_id = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].id
+}
+
+resource azurerm_cosmosdb_postgresql_role postgre_sql {
+  for_each = {
+    for role in var.cosmosPostgreSQL.roles : role.name => role if var.cosmosPostgreSQL.enable && role.enable
+  }
+  name       = each.value.name
+  password   = each.value.password
+  cluster_id = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].id
 }

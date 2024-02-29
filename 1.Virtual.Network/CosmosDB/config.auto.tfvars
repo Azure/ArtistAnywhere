@@ -11,9 +11,6 @@ cosmosDB = {
     maxIntervalSeconds = 5
     maxStalenessPrefix = 100
   }
-  serverless = {
-    enable = true
-  }
   aggregationPipeline = {
     enable = true
   }
@@ -21,18 +18,21 @@ cosmosDB = {
     enable     = true
     schemaType = ""
   }
-  secondaryEncryption = {
-    enable  = true
-    keyName = ""
-  }
   automaticFailover = {
     enable = true
+  }
+  multiRegionWrite = {
+    enable = false
   }
   partitionMerge = {
     enable = false
   }
-  multiRegionWrite = {
+  serverless = {
     enable = false
+  }
+  secondaryEncryption = {
+    enable  = false
+    keyName = ""
   }
   dedicatedGateway = {
     enable = false
@@ -46,7 +46,7 @@ cosmosDB = {
 ########################################################################
 
 cosmosNoSQL = {
-  enable = false
+  enable = true
   account = {
     name = "xstudio"
   }
@@ -261,21 +261,39 @@ cosmosPostgreSQL = {
     name         = "xstudio"
     version      = "16"
     versionCitus = "12.1"
+    firewallRules = [
+      {
+        enable       = false
+        startAddress = ""
+        endAddress   = ""
+      }
+    ]
   }
-  worker = {
+  node = {
     serverEdition = "MemoryOptimized"
     storageMB     = 524288
     coreCount     = 2
-    nodeCount     = 0
+    count         = 0
+    configuration = {
+    }
   }
   coordinator = {
     serverEdition = "GeneralPurpose"
     storageMB     = 131072
     coreCount     = 2
+    configuration = {
+    }
     shards = {
       enable = true
     }
   }
+  roles = [
+    {
+      enable   = false
+      name     = ""
+      password = ""
+    }
+  ]
   highAvailability = {
     enable = false
   }
