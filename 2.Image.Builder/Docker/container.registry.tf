@@ -22,7 +22,7 @@ resource azurerm_private_dns_zone container_registry {
 
 resource azurerm_private_dns_zone_virtual_network_link container_registry {
   name                  = "registry"
-  resource_group_name   = azurerm_resource_group.docker.name
+  resource_group_name   = azurerm_private_dns_zone.container_registry.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.container_registry.name
   virtual_network_id    = data.azurerm_virtual_network.studio.id
 }

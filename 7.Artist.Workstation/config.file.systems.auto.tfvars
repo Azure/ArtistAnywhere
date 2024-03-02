@@ -6,7 +6,7 @@ fileSystems = {
       mount = {
         type    = "aznfs"
         path    = "/mnt/content"
-        source  = "xstudio1.blob.core.windows.net:/xstudio1/content"
+        source  = "xstudio2.blob.core.windows.net:/xstudio2/content"
         options = "sec=sys,proto=tcp,vers=3,nolock"
       }
     },
@@ -38,7 +38,7 @@ fileSystems = {
       mount = {
         type    = ""
         path    = "X:"
-        source  = "\\\\xstudio1.blob.core.windows.net\\xstudio1\\content"
+        source  = "\\\\xstudio2.blob.core.windows.net\\xstudio2\\content"
         options = "-o anon nolock"
         userName = ""
         password = ""

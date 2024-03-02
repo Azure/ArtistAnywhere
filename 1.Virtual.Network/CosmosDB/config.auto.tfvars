@@ -7,19 +7,35 @@ resourceGroupName = "ArtistAnywhere.Database" # Alphanumeric, underscores, hyphe
 cosmosDB = {
   offerType = "Standard"
   dataConsistency = {
-    policyLevel        = "Session"
+    policyLevel        = "Session" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#consistency_level
     maxIntervalSeconds = 5
     maxStalenessPrefix = 100
   }
-  aggregationPipeline = {
-    enable = true
+  dataAnalytics = {
+    enable     = false
+    schemaType = "WellDefined" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#schema_type
+    workspace = {
+      name = "xstudio"
+      authentication = {
+        azureADOnly = false
+      }
+      storageAccount = {
+        name        = "xstudio1"
+        type        = "StorageV2"
+        redundancy  = "LRS"
+        performance = "Standard"
+      }
+      doubleEncryption = {
+        enable  = false
+        keyName = ""
+      }
+    }
   }
-  analyticalStorage = {
-    enable     = true
-    schemaType = ""
+  aggregationPipeline = {
+    enable = false
   }
   automaticFailover = {
-    enable = true
+    enable = false
   }
   multiRegionWrite = {
     enable = false
@@ -30,14 +46,9 @@ cosmosDB = {
   serverless = {
     enable = false
   }
-  secondaryEncryption = {
+  doubleEncryption = {
     enable  = false
     keyName = ""
-  }
-  dedicatedGateway = {
-    enable = false
-    size   = "Cosmos.D4s"
-    count  = 1
   }
 }
 
@@ -49,6 +60,11 @@ cosmosNoSQL = {
   enable = true
   account = {
     name = "xstudio"
+    dedicatedGateway = {
+      enable = false
+      size   = "Cosmos.D4s"
+      count  = 1
+    }
   }
   database = {
     enable     = false
@@ -62,6 +78,9 @@ cosmosNoSQL = {
         partitionKey = {
           path    = ""
           version = 2
+        }
+        dataAnalytics = {
+          ttl = -1 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_container#analytical_storage_ttl
         }
         storedProcedures = [
           {
@@ -363,7 +382,6 @@ existingKeyVault = {
 existingNetwork = {
   enable            = false
   name              = ""
-  subnetNameData    = ""
-  subnetNameFarm    = ""
+  subnetName        = ""
   resourceGroupName = ""
 }

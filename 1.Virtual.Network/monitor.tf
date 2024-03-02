@@ -42,7 +42,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
   }
   name                  = "monitor-${lower(each.value.regionName)}"
-  resource_group_name   = azurerm_resource_group.network.name
+  resource_group_name   = azurerm_private_dns_zone.monitor.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.monitor.name
   virtual_network_id    = each.value.id
 }
@@ -52,7 +52,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor_opinsights_oms {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
   }
   name                  = "monitor-opinsights-oms-${lower(each.value.regionName)}"
-  resource_group_name   = azurerm_resource_group.network.name
+  resource_group_name   = azurerm_private_dns_zone.monitor_opinsights_oms.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.monitor_opinsights_oms.name
   virtual_network_id    = each.value.id
 }
@@ -62,7 +62,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor_opinsights_ods {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
   }
   name                  = "monitor-opinsights-ods-${lower(each.value.regionName)}"
-  resource_group_name   = azurerm_resource_group.network.name
+  resource_group_name   = azurerm_private_dns_zone.monitor_opinsights_ods.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.monitor_opinsights_ods.name
   virtual_network_id    = each.value.id
 }
@@ -72,7 +72,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor_automation {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
   }
   name                  = "monitor-automation-${lower(each.value.regionName)}"
-  resource_group_name   = azurerm_resource_group.network.name
+  resource_group_name   = azurerm_private_dns_zone.monitor_automation.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.monitor_automation.name
   virtual_network_id    = each.value.id
 }

@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.93.0"
+      version = "~>3.94.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -15,7 +15,7 @@ terraform {
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.1"
+      version = "~>3.4.2"
     }
   }
   backend azurerm {
@@ -51,8 +51,7 @@ variable existingNetwork {
   type = object({
     enable            = bool
     name              = string
-    subnetNameData    = string
-    subnetNameFarm    = string
+    subnetName        = string
     resourceGroupName = string
   })
 }
@@ -107,13 +106,13 @@ data azurerm_virtual_network studio {
 }
 
 data azurerm_subnet data {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameData : "Data"
+  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Data"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
-data azurerm_subnet farm {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameFarm : "Farm"
+data azurerm_subnet data_cassandra {
+  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "DataCassandra"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }

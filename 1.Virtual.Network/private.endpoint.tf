@@ -22,7 +22,7 @@ resource azurerm_private_dns_zone_virtual_network_link key_vault {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
   }
   name                  = "key-vault-${lower(each.value.regionName)}"
-  resource_group_name   = azurerm_resource_group.network.name
+  resource_group_name   = azurerm_private_dns_zone.key_vault.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.key_vault.name
   virtual_network_id    = each.value.id
   depends_on = [
@@ -35,7 +35,7 @@ resource azurerm_private_dns_zone_virtual_network_link storage_blob {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
   }
   name                  = "storage-blob-${lower(each.value.regionName)}"
-  resource_group_name   = azurerm_resource_group.network.name
+  resource_group_name   = azurerm_private_dns_zone.storage_blob.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.storage_blob.name
   virtual_network_id    = each.value.id
   depends_on = [
@@ -48,7 +48,7 @@ resource azurerm_private_dns_zone_virtual_network_link storage_file {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
   }
   name                  = "storage-file-${lower(each.value.regionName)}"
-  resource_group_name   = azurerm_resource_group.network.name
+  resource_group_name   = azurerm_private_dns_zone.storage_file.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.storage_file.name
   virtual_network_id    = each.value.id
   depends_on = [

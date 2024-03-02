@@ -78,7 +78,7 @@ resource azurerm_private_dns_zone mongo_db {
 resource azurerm_private_dns_zone_virtual_network_link mongo_db {
   count                 = var.cosmosMongoDB.enable ? 1 : 0
   name                  = "mongo"
-  resource_group_name   = azurerm_resource_group.database.name
+  resource_group_name   = azurerm_private_dns_zone.mongo_db[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.mongo_db[0].name
   virtual_network_id    = data.azurerm_virtual_network.studio.id
 }
@@ -88,7 +88,7 @@ resource azurerm_private_endpoint mongo_db {
   name                = azurerm_cosmosdb_account.studio["mongo"].name
   resource_group_name = azurerm_resource_group.database.name
   location            = azurerm_resource_group.database.location
-  subnet_id           = data.azurerm_subnet.farm.id
+  subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azurerm_cosmosdb_account.studio["mongo"].name
     private_connection_resource_id = azurerm_cosmosdb_account.studio["mongo"].id
@@ -184,7 +184,7 @@ resource azurerm_private_dns_zone mongo_cluster {
 resource azurerm_private_dns_zone_virtual_network_link mongo_cluster {
   count                 = var.cosmosMongoDBvCore.enable ? 1 : 0
   name                  = "mongo-cluster"
-  resource_group_name   = azurerm_resource_group.database.name
+  resource_group_name   = azurerm_private_dns_zone.mongo_cluster[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.mongo_cluster[0].name
   virtual_network_id    = data.azurerm_virtual_network.studio.id
 }
@@ -194,7 +194,7 @@ resource azurerm_private_endpoint mongo_cluster {
   name                = "${azapi_resource.mongo_cluster[0].name}-${azurerm_private_dns_zone_virtual_network_link.mongo_cluster[0].name}"
   resource_group_name = azurerm_resource_group.database.name
   location            = azurerm_resource_group.database.location
-  subnet_id           = data.azurerm_subnet.farm.id
+  subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azapi_resource.mongo_cluster[0].name
     private_connection_resource_id = azapi_resource.mongo_cluster[0].id

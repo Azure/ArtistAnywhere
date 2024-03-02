@@ -7,6 +7,11 @@ variable cosmosNoSQL {
     enable = bool
     account = object({
       name = string
+      dedicatedGateway = object({
+        enable = bool
+        size   = string
+        count  = number
+      })
     })
     database = object({
       enable     = bool
@@ -19,6 +24,9 @@ variable cosmosNoSQL {
         partitionKey = object({
           path    = string
           version = number
+        })
+        dataAnalytics = object({
+          ttl = number
         })
         storedProcedures = list(object(
           {
@@ -77,14 +85,14 @@ locals {
 
 resource azurerm_private_dns_zone no_sql {
   count               = var.cosmosNoSQL.enable || var.cosmosGremlin.enable || var.cosmosTable.enable ? 1 : 0
-  name                = var.cosmosDB.dedicatedGateway.enable ? "privatelink.sqlx.cosmos.azure.com" : "privatelink.documents.azure.com"
+  name                = var.cosmosNoSQL.account.dedicatedGateway.enable ? "privatelink.sqlx.cosmos.azure.com" : "privatelink.documents.azure.com"
   resource_group_name = azurerm_resource_group.database.name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link no_sql {
   count                 = var.cosmosNoSQL.enable || var.cosmosGremlin.enable || var.cosmosTable.enable ? 1 : 0
   name                  = "no-sql"
-  resource_group_name   = azurerm_resource_group.database.name
+  resource_group_name   = azurerm_private_dns_zone.no_sql[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.no_sql[0].name
   virtual_network_id    = data.azurerm_virtual_network.studio.id
 }
@@ -94,13 +102,13 @@ resource azurerm_private_endpoint no_sql {
   name                = azurerm_cosmosdb_account.studio["sql"].name
   resource_group_name = azurerm_resource_group.database.name
   location            = azurerm_resource_group.database.location
-  subnet_id           = data.azurerm_subnet.farm.id
+  subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azurerm_cosmosdb_account.studio["sql"].name
     private_connection_resource_id = azurerm_cosmosdb_account.studio["sql"].id
     is_manual_connection           = false
     subresource_names = [
-      var.cosmosDB.dedicatedGateway.enable ? "SqlDedicated" : "Sql"
+      var.cosmosNoSQL.account.dedicatedGateway.enable ? "SqlDedicated" : "Sql"
     ]
   }
   private_dns_zone_group {
@@ -112,6 +120,13 @@ resource azurerm_private_endpoint no_sql {
   depends_on = [
     azurerm_private_dns_zone_virtual_network_link.no_sql
   ]
+}
+
+resource azurerm_cosmosdb_sql_dedicated_gateway no_sql {
+  count               = var.cosmosNoSQL.enable && var.cosmosNoSQL.account.dedicatedGateway.enable ? 1 : 0
+  cosmosdb_account_id = azurerm_cosmosdb_account.studio["sql"].id
+  instance_size       = var.cosmosNoSQL.account.dedicatedGateway.size
+  instance_count      = var.cosmosNoSQL.account.dedicatedGateway.count
 }
 
 resource azurerm_cosmosdb_sql_database no_sql {
@@ -126,13 +141,14 @@ resource azurerm_cosmosdb_sql_container no_sql {
   for_each = {
     for container in var.cosmosNoSQL.database.containers : container.name => container if var.cosmosNoSQL.enable && var.cosmosNoSQL.database.enable && container.enable
   }
-  name                  = each.value.name
-  resource_group_name   = azurerm_cosmosdb_sql_database.no_sql[0].resource_group_name
-  account_name          = azurerm_cosmosdb_sql_database.no_sql[0].account_name
-  database_name         = azurerm_cosmosdb_sql_database.no_sql[0].name
-  throughput            = each.value.throughput
-  partition_key_path    = each.value.partitionKey.path
-  partition_key_version = each.value.partitionKey.version
+  name                   = each.value.name
+  resource_group_name    = azurerm_cosmosdb_sql_database.no_sql[0].resource_group_name
+  account_name           = azurerm_cosmosdb_sql_database.no_sql[0].account_name
+  database_name          = azurerm_cosmosdb_sql_database.no_sql[0].name
+  throughput             = each.value.throughput
+  partition_key_path     = each.value.partitionKey.path
+  partition_key_version  = each.value.partitionKey.version
+  analytical_storage_ttl = each.value.dataAnalytics.ttl
 }
 
 resource azurerm_cosmosdb_sql_stored_procedure no_sql {

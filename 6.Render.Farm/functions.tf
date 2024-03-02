@@ -37,7 +37,7 @@ resource azurerm_private_dns_zone functions {
 resource azurerm_private_dns_zone_virtual_network_link functions {
   count                 = var.functionApp.enable ? 1 : 0
   name                  = "functions"
-  resource_group_name   = azurerm_resource_group.farm.name
+  resource_group_name   = azurerm_private_dns_zone.functions[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.functions[0].name
   virtual_network_id    = data.azurerm_virtual_network.studio.id
 }

@@ -10,12 +10,28 @@ variable cosmosDB {
       maxIntervalSeconds = number
       maxStalenessPrefix = number
     })
-    aggregationPipeline = object({
-      enable = bool
-    })
-    analyticalStorage = object({
+    dataAnalytics = object({
       enable     = bool
       schemaType = string
+      workspace = object({
+        name = string
+        authentication = object({
+          azureADOnly = bool
+        })
+        storageAccount = object({
+          name        = string
+          type        = string
+          redundancy  = string
+          performance = string
+        })
+        doubleEncryption = object({
+          enable  = bool
+          keyName = string
+        })
+      })
+    })
+    aggregationPipeline = object({
+      enable = bool
     })
     automaticFailover = object({
       enable = bool
@@ -29,14 +45,9 @@ variable cosmosDB {
     serverless = object({
       enable = bool
     })
-    secondaryEncryption = object({
+    doubleEncryption = object({
       enable  = bool
       keyName = string
-    })
-    dedicatedGateway = object({
-      enable = bool
-      size   = string
-      count  = number
     })
   })
 }
@@ -46,8 +57,8 @@ data azuread_service_principal cosmos_db {
 }
 
 data azurerm_key_vault_key data_encryption {
-  count        = var.cosmosDB.secondaryEncryption.enable ? 1 : 0
-  name         = var.cosmosDB.secondaryEncryption.keyName != "" ? var.cosmosDB.secondaryEncryption.keyName : module.global.keyVault.keyName.dataEncryption
+  count        = var.cosmosDB.doubleEncryption.enable ? 1 : 0
+  name         = var.cosmosDB.doubleEncryption.keyName != "" ? var.cosmosDB.doubleEncryption.keyName : module.global.keyVault.keyName.dataEncryption
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
@@ -82,7 +93,7 @@ locals {
 }
 
 resource azurerm_role_assignment key_vault {
-  count                = var.cosmosDB.secondaryEncryption.enable ? 1 : 0
+  count                = var.cosmosDB.doubleEncryption.enable ? 1 : 0
   role_definition_name = "Key Vault Crypto Service Encryption User" # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#key-vault-crypto-service-encryption-user
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_key_vault.studio.id
@@ -98,8 +109,8 @@ resource azurerm_cosmosdb_account studio {
   kind                            = each.value.type == "mongo" ? "MongoDB" : "GlobalDocumentDB"
   mongo_server_version            = each.value.type == "mongo" ? var.cosmosMongoDB.account.version : null
   offer_type                      = var.cosmosDB.offerType
-  key_vault_key_id                = var.cosmosDB.secondaryEncryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
-  analytical_storage_enabled      = var.cosmosDB.analyticalStorage.enable
+  key_vault_key_id                = var.cosmosDB.doubleEncryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
+  analytical_storage_enabled      = var.cosmosDB.dataAnalytics.enable
   partition_merge_enabled         = var.cosmosDB.partitionMerge.enable
   enable_multiple_write_locations = var.cosmosDB.multiRegionWrite.enable
   enable_automatic_failover       = var.cosmosDB.automaticFailover.enable
@@ -124,9 +135,9 @@ resource azurerm_cosmosdb_account studio {
     }
   }
   dynamic analytical_storage {
-    for_each = var.cosmosDB.analyticalStorage.schemaType != "" ? [1] : []
+    for_each = var.cosmosDB.dataAnalytics.enable ? [1] : []
     content {
-      schema_type = var.cosmosDB.analyticalStorage.schemaType
+      schema_type = var.cosmosDB.dataAnalytics.schemaType
     }
   }
   dynamic capabilities {
@@ -168,13 +179,4 @@ resource azurerm_cosmosdb_account studio {
   depends_on = [
     azurerm_role_assignment.key_vault
   ]
-}
-
-resource azurerm_cosmosdb_sql_dedicated_gateway no_sql {
-  for_each = {
-    for cosmosAccount in local.cosmosAccounts : cosmosAccount.type => cosmosAccount if cosmosAccount.name != "" && var.cosmosDB.dedicatedGateway.enable
-  }
-  cosmosdb_account_id = each.value.id
-  instance_size       = var.cosmosDB.dedicatedGateway.size
-  instance_count      = var.cosmosDB.dedicatedGateway.count
 }

@@ -57,7 +57,7 @@ resource azurerm_private_dns_zone postgre_sql {
 resource azurerm_private_dns_zone_virtual_network_link postgre_sql {
   count                 = var.cosmosPostgreSQL.enable ? 1 : 0
   name                  = "postgre-sql"
-  resource_group_name   = azurerm_resource_group.database.name
+  resource_group_name   = azurerm_private_dns_zone.postgre_sql[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.postgre_sql[0].name
   virtual_network_id    = data.azurerm_virtual_network.studio.id
 }
@@ -67,7 +67,7 @@ resource azurerm_private_endpoint postgre_sql {
   name                = "${azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].name}-${azurerm_private_dns_zone_virtual_network_link.postgre_sql[0].name}"
   resource_group_name = azurerm_resource_group.database.name
   location            = azurerm_resource_group.database.location
-  subnet_id           = data.azurerm_subnet.farm.id
+  subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].name
     private_connection_resource_id = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].id

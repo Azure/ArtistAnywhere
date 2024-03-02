@@ -72,12 +72,21 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
+        serviceDelegation = ""
+      },
+      {
+        name = "DataCassandra"
+        addressSpace = [
+          "10.0.196.0/24"
+        ]
+        serviceEndpoints = [
+        ]
         serviceDelegation = "Microsoft.DocumentDB/cassandraClusters"
       },
       {
         name = "Cache"
         addressSpace = [
-          "10.0.196.0/24"
+          "10.0.197.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.Storage.Global"
@@ -87,7 +96,7 @@ virtualNetworks = [
       {
         name = "AI"
         addressSpace = [
-          "10.0.197.0/24"
+          "10.0.198.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.CognitiveServices"
@@ -181,12 +190,21 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
+        serviceDelegation = ""
+      },
+      {
+        name = "DataCassandra"
+        addressSpace = [
+          "10.1.196.0/24"
+        ]
+        serviceEndpoints = [
+        ]
         serviceDelegation = "Microsoft.DocumentDB/cassandraClusters"
       },
       {
         name = "Cache"
         addressSpace = [
-          "10.1.196.0/24"
+          "10.1.197.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.Storage.Global"
@@ -196,7 +214,7 @@ virtualNetworks = [
       {
         name = "AI"
         addressSpace = [
-          "10.1.197.0/24"
+          "10.1.198.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.CognitiveServices"
