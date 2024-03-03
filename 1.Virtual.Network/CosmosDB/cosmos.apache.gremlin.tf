@@ -8,7 +8,7 @@ variable cosmosGremlin {
     account = object({
       name = string
     })
-    database = object({
+    databases = list(object({
       enable     = bool
       name       = string
       throughput = number
@@ -21,8 +21,19 @@ variable cosmosGremlin {
           version = number
         })
       }))
-    })
+    }))
   })
+}
+
+locals {
+  graphs = flatten([
+    for database in var.cosmosGremlin.databases : [
+      for graph in database.graphs : merge(graph, {
+        key          = "${database.name}-${graph.name}"
+        databaseName = database.name
+       }) if graph.enable
+    ] if database.enable
+  ])
 }
 
 resource azurerm_private_dns_zone gremlin {
@@ -90,21 +101,23 @@ resource azurerm_private_endpoint gremlin_sql {
 }
 
 resource azurerm_cosmosdb_gremlin_database gremlin {
-  count               = var.cosmosGremlin.enable && var.cosmosGremlin.database.enable ? 1 : 0
-  name                = var.cosmosGremlin.database.name
+  for_each = {
+    for database in var.cosmosGremlin.databases : database.name => database if var.cosmosGremlin.enable && database.enable
+  }
+  name                = each.value.name
   resource_group_name = azurerm_cosmosdb_account.studio["gremlin"].resource_group_name
   account_name        = azurerm_cosmosdb_account.studio["gremlin"].name
-  throughput          = var.cosmosGremlin.database.throughput
+  throughput          = each.value.throughput
 }
 
 resource azurerm_cosmosdb_gremlin_graph gremlin {
   for_each = {
-    for graph in var.cosmosGremlin.database.graphs : graph.name => graph if var.cosmosGremlin.enable && var.cosmosGremlin.database.enable && graph.enable
+    for graph in local.graphs : graph.name => graph if var.cosmosGremlin.enable
   }
   name                  = each.value.name
   resource_group_name   = azurerm_cosmosdb_gremlin_database.gremlin[0].resource_group_name
   account_name          = azurerm_cosmosdb_gremlin_database.gremlin[0].account_name
-  database_name         = azurerm_cosmosdb_gremlin_database.gremlin[0].name
+  database_name         = each.value.databaseName
   throughput            = each.value.throughput
   partition_key_path    = each.value.partitionKey.path
   partition_key_version = each.value.partitionKey.version

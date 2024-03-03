@@ -13,7 +13,7 @@ cosmosDB = {
   }
   dataAnalytics = {
     enable     = false
-    schemaType = "WellDefined" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#schema_type
+    schemaType = "FullFidelity" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#schema_type
     workspace = {
       name = "xstudio"
       authentication = {
@@ -66,54 +66,56 @@ cosmosNoSQL = {
       count  = 1
     }
   }
-  database = {
-    enable     = false
-    name       = "Media"
-    throughput = null
-    containers = [
-      {
-        enable     = false
-        name       = ""
-        throughput = null
-        partitionKey = {
-          path    = ""
-          version = 2
+  databases = [
+    {
+      enable     = false
+      name       = "Media1"
+      throughput = null
+      containers = [
+        {
+          enable     = false
+          name       = ""
+          throughput = null
+          partitionKey = {
+            path    = ""
+            version = 2
+          }
+          dataAnalytics = {
+            ttl = -1 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_container#analytical_storage_ttl
+          }
+          storedProcedures = [
+            {
+              enable = false
+              name   = "helloCosmos"
+              body   = <<BODY
+                function () {
+                  var context = getContext();
+                  var response = context.getResponse();
+                  response.setBody("Hello Cosmos!");
+                }
+              BODY
+            }
+          ]
+          triggers = [
+            {
+              enable    = false
+              name      = ""
+              type      = "" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_trigger#type
+              operation = "" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_trigger#operation
+              body      = ""
+            }
+          ]
+          functions = [
+            {
+              enable = false
+              name   = ""
+              body   = ""
+            }
+          ]
         }
-        dataAnalytics = {
-          ttl = -1 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_container#analytical_storage_ttl
-        }
-        storedProcedures = [
-          {
-            enable = false
-            name   = "helloCosmos"
-            body   = <<BODY
-              function () {
-                var context = getContext();
-                var response = context.getResponse();
-                response.setBody("Hello Cosmos!");
-              }
-            BODY
-          }
-        ]
-        triggers = [
-          {
-            enable    = false
-            name      = ""
-            type      = "" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_trigger#type
-            operation = "" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_trigger#operation
-            body      = ""
-          }
-        ]
-        functions = [
-          {
-            enable = false
-            name   = ""
-            body   = ""
-          }
-        ]
-      }
-    ]
-  }
+      ]
+    }
+  ]
 }
 
 ###############################################################################################
@@ -127,56 +129,58 @@ cosmosMongoDB = {
     name    = "xstudio"
     version = "4.2"
   }
-  database = {
-    enable     = false
-    name       = "Media"
-    throughput = null
-    collections = [
-      {
-        enable     = false
-        name       = ""
-        shardKey   = null
-        throughput = null
-        indices = [
-          {
-            enable = true
-            unique = true
-            keys = [
-              "_id"
-            ]
-          }
-        ]
-      }
-    ]
-    roles = [
-      {
-        enable    = false
-        name      = ""
-        roleNames = [
-        ]
-        privileges = [
-          {
-            enable = false
-            resource = {
-              databaseName   = ""
-              collectionName = ""
+  databases = [
+    {
+      enable     = false
+      name       = "Media1"
+      throughput = null
+      collections = [
+        {
+          enable     = false
+          name       = ""
+          shardKey   = null
+          throughput = null
+          indices = [
+            {
+              enable = true
+              unique = true
+              keys = [
+                "_id"
+              ]
             }
-            actions = [
-            ]
-          }
-        ]
-      }
-    ]
-    users = [
-      {
-        enable    = false
-        username  = ""
-        password  = ""
-        roleNames = [
-        ]
-      }
-    ]
-  }
+          ]
+        }
+      ]
+      roles = [
+        {
+          enable    = false
+          name      = ""
+          roleNames = [
+          ]
+          privileges = [
+            {
+              enable = false
+              resource = {
+                databaseName   = ""
+                collectionName = ""
+              }
+              actions = [
+              ]
+            }
+          ]
+        }
+      ]
+      users = [
+        {
+          enable    = false
+          username  = ""
+          password  = ""
+          roleNames = [
+          ]
+        }
+      ]
+    }
+  ]
 }
 
 #####################################################################################################
@@ -208,40 +212,42 @@ cosmosCassandra = {
   account = {
     name = "xstudio"
   }
-  database = {
-    enable     = false
-    name       = "Media"
-    throughput = null
-    tables = [
-      {
-        enable     = false
-        name       = ""
-        throughput = null
-        schema = {
-          partitionKeys = [
-            {
-              enable = false
-              name   = ""
-            }
-          ]
-          clusterKeys = [
-            {
-              enable  = false
-              name    = ""
-              orderBy = "" # Asc or Desc
-            }
-          ]
-          columns = [
-            {
-              enable = false
-              name   = ""
-              type   = ""
-            }
-          ]
+  databases = [
+    {
+      enable     = false
+      name       = "Media1"
+      throughput = null
+      tables = [
+        {
+          enable     = false
+          name       = ""
+          throughput = null
+          schema = {
+            partitionKeys = [
+              {
+                enable = false
+                name   = ""
+              }
+            ]
+            clusterKeys = [
+              {
+                enable  = false
+                name    = ""
+                orderBy = "" # Asc or Desc
+              }
+            ]
+            columns = [
+              {
+                enable = false
+                name   = ""
+                type   = ""
+              }
+            ]
+          }
         }
-      }
-    ]
-  }
+      ]
+    }
+  ]
 }
 
 ########################################################################################################################
@@ -333,22 +339,24 @@ cosmosGremlin = {
   account = {
     name = "xstudio"
   }
-  database = {
-    enable     = false
-    name       = "Media"
-    throughput = null
-    graphs = [
-      {
-        enable     = false
-        name       = ""
-        throughput = null
-        partitionKey = {
-          path    = ""
-          version = 2
+  databases = [
+    {
+      enable     = false
+      name       = "Media1"
+      throughput = null
+      graphs = [
+        {
+          enable     = false
+          name       = ""
+          throughput = null
+          partitionKey = {
+            path    = ""
+            version = 2
+          }
         }
-      }
-    ]
-  }
+      ]
+    }
+  ]
 }
 
 ####################################################################################

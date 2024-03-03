@@ -13,7 +13,7 @@ variable cosmosNoSQL {
         count  = number
       })
     })
-    database = object({
+    databases = list(object({
       enable     = bool
       name       = string
       throughput = number
@@ -52,34 +52,48 @@ variable cosmosNoSQL {
           }
         ))
       }))
-    })
+    }))
   })
 }
 
 locals {
+  containers = flatten([
+    for database in var.cosmosNoSQL.databases : [
+      for container in database.containers : merge(container, {
+        key          = "${database.name}-${container.name}"
+        databaseName = database.name
+       }) if container.enable
+    ] if database.enable
+  ])
   storedProcedures = flatten([
-    for container in var.cosmosNoSQL.database.containers : [
-      for storedProcedure in container.storedProcedures : merge(storedProcedure, {
-        key           = "${container.name}-${storedProcedure.name}"
-        containerName = container.name
-      }) if storedProcedure.enable
-    ] if container.enable
+    for database in var.cosmosNoSQL.databases : [
+      for container in var.cosmosNoSQL.database.containers : [
+        for storedProcedure in container.storedProcedures : merge(storedProcedure, {
+          key           = "${container.name}-${storedProcedure.name}"
+          containerName = container.name
+        }) if storedProcedure.enable
+      ] if container.enable
+    ] if database.enable
   ])
   triggers = flatten([
-    for container in var.cosmosNoSQL.database.containers : [
-      for trigger in container.triggers : merge(trigger, {
-        key         = "${container.name}-${trigger.name}"
-        containerId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosNoSQL.account.name}/sqlDatabases/${var.cosmosNoSQL.database.name}/containers/${container.name}"
-      }) if trigger.enable
-    ] if container.enable
+    for database in var.cosmosNoSQL.databases : [
+      for container in database.containers : [
+        for trigger in container.triggers : merge(trigger, {
+          key         = "${database.name}-${container.name}-${trigger.name}"
+          containerId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosNoSQL.account.name}/sqlDatabases/${database.name}/containers/${container.name}"
+        }) if trigger.enable
+      ] if container.enable
+    ] if database.enable
   ])
   functions = flatten([
-    for container in var.cosmosNoSQL.database.containers : [
-      for function in container.functions : merge(function, {
-        key         = "${container.name}-${function.name}"
-        containerId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosNoSQL.account.name}/sqlDatabases/${var.cosmosNoSQL.database.name}/containers/${container.name}"
-      }) if function.enable
-    ] if container.enable
+    for database in var.cosmosNoSQL.databases : [
+      for container in database.containers : [
+        for function in container.functions : merge(function, {
+          key         = "${database.name}-${container.name}-${function.name}"
+          containerId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosNoSQL.account.name}/sqlDatabases/${database.name}/containers/${container.name}"
+        }) if function.enable
+      ] if container.enable
+    ] if database.enable
   ])
 }
 
@@ -130,21 +144,23 @@ resource azurerm_cosmosdb_sql_dedicated_gateway no_sql {
 }
 
 resource azurerm_cosmosdb_sql_database no_sql {
-  count               = var.cosmosNoSQL.enable && var.cosmosNoSQL.database.enable ? 1 : 0
-  name                = var.cosmosNoSQL.database.name
+  for_each = {
+    for database in var.cosmosNoSQL.databases : database.name => database if var.cosmosNoSQL.enable && database.enable
+  }
+  name                = each.value.name
   resource_group_name = azurerm_cosmosdb_account.studio["sql"].resource_group_name
   account_name        = azurerm_cosmosdb_account.studio["sql"].name
-  throughput          = var.cosmosNoSQL.database.throughput
+  throughput          = each.value.throughput
 }
 
 resource azurerm_cosmosdb_sql_container no_sql {
   for_each = {
-    for container in var.cosmosNoSQL.database.containers : container.name => container if var.cosmosNoSQL.enable && var.cosmosNoSQL.database.enable && container.enable
+    for container in local.containers : container.name => container if var.cosmosNoSQL.enable
   }
   name                   = each.value.name
   resource_group_name    = azurerm_cosmosdb_sql_database.no_sql[0].resource_group_name
   account_name           = azurerm_cosmosdb_sql_database.no_sql[0].account_name
-  database_name          = azurerm_cosmosdb_sql_database.no_sql[0].name
+  database_name          = each.value.databaseName
   throughput             = each.value.throughput
   partition_key_path     = each.value.partitionKey.path
   partition_key_version  = each.value.partitionKey.version
@@ -153,12 +169,12 @@ resource azurerm_cosmosdb_sql_container no_sql {
 
 resource azurerm_cosmosdb_sql_stored_procedure no_sql {
   for_each = {
-    for storedProcedure in local.storedProcedures : storedProcedure.key => storedProcedure
+    for storedProcedure in local.storedProcedures : storedProcedure.key => storedProcedure if var.cosmosNoSQL.enable
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.database.name
   account_name        = var.cosmosNoSQL.account.name
-  database_name       = var.cosmosNoSQL.database.name
+  database_name       = each.value.databaseName
   container_name      = each.value.containerName
   body                = each.value.body
   depends_on = [
@@ -168,7 +184,7 @@ resource azurerm_cosmosdb_sql_stored_procedure no_sql {
 
 resource azurerm_cosmosdb_sql_trigger no_sql {
   for_each = {
-    for trigger in local.triggers : trigger.key => trigger
+    for trigger in local.triggers : trigger.key => trigger if var.cosmosNoSQL.enable
   }
   name         = each.value.name
   container_id = each.value.containerId
@@ -182,7 +198,7 @@ resource azurerm_cosmosdb_sql_trigger no_sql {
 
 resource azurerm_cosmosdb_sql_function no_sql {
   for_each = {
-    for function in local.functions : function.key => function
+    for function in local.functions : function.key => function if var.cosmosNoSQL.enable
   }
   name         = each.value.name
   container_id = each.value.containerId

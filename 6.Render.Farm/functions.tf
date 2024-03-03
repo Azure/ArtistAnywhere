@@ -98,7 +98,7 @@ resource azurerm_windows_function_app studio {
   storage_account {
     name         = data.azurerm_storage_account.studio.name
     account_name = data.azurerm_storage_account.studio.name
-    access_key   = data.azurerm_storage_account.studio.secondary_access_key
+    access_key   = data.azurerm_storage_account.studio.primary_access_key
     share_name   = data.azurerm_storage_share.studio[0].name
     type         = "AzureFiles"
   }
@@ -117,9 +117,9 @@ resource azurerm_windows_function_app studio {
     }
   }
   app_settings = {
-    AzureWebJobsStorage     = "DefaultEndpointsProtocol=https;AccountName=${data.azurerm_storage_account.studio.name};AccountKey=${data.azurerm_storage_account.studio.secondary_access_key}"
+    AzureWebJobsStorage     = "DefaultEndpointsProtocol=https;AccountName=${data.azurerm_storage_account.studio.name};AccountKey=${data.azurerm_storage_account.studio.primary_access_key}"
     AzureOpenAI_ApiEndpoint = azurerm_cognitive_account.open_ai[0].endpoint
-    AzureOpenAI_ApiKey      = azurerm_cognitive_account.open_ai[0].secondary_access_key
+    AzureOpenAI_ApiKey      = azurerm_cognitive_account.open_ai[0].primary_access_key
   }
 }
 

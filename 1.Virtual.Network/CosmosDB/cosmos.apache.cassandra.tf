@@ -4,7 +4,7 @@ variable cosmosCassandra {
     account = object({
       name = string
     })
-    database = object({
+    databases = list(object({
       enable     = bool
       name       = string
       throughput = number
@@ -29,7 +29,7 @@ variable cosmosCassandra {
           }))
         })
       }))
-    })
+    }))
   })
 }
 
@@ -57,6 +57,17 @@ variable apacheCassandra {
   })
 }
 
+locals {
+  tables = flatten([
+    for database in var.cosmosCassandra.databases : [
+      for table in database.tables : merge(table, {
+        key        = "${database.name}-${table.name}"
+        databaseId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosCassandra.account.name}/cassandraKeyspaces/${database.name}"
+       }) if table.enable
+    ] if database.enable
+  ])
+}
+
 ###################################################################################################
 # Cosmos DB Apache Cassandra (https://learn.microsoft.com/azure/cosmos-db/cassandra/introduction) #
 ###################################################################################################
@@ -80,7 +91,7 @@ resource azurerm_private_endpoint cassandra {
   name                = azurerm_cosmosdb_account.studio["cassandra"].name
   resource_group_name = azurerm_resource_group.database.name
   location            = azurerm_resource_group.database.location
-  subnet_id           = data.azurerm_subnet.data_cassandra.id
+  subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azurerm_cosmosdb_account.studio["cassandra"].name
     private_connection_resource_id = azurerm_cosmosdb_account.studio["cassandra"].id
@@ -101,19 +112,21 @@ resource azurerm_private_endpoint cassandra {
 }
 
 resource azurerm_cosmosdb_cassandra_keyspace cassandra {
-  count               = var.cosmosCassandra.enable && var.cosmosCassandra.database.enable ? 1 : 0
-  name                = var.cosmosCassandra.database.name
+  for_each = {
+    for database in var.cosmosCassandra.databases : database.name => database if var.cosmosCassandra.enable && database.enable
+  }
+  name                = each.value.name
   resource_group_name = azurerm_cosmosdb_account.studio["cassandra"].resource_group_name
   account_name        = azurerm_cosmosdb_account.studio["cassandra"].name
-  throughput          = var.cosmosCassandra.database.throughput
+  throughput          = each.value.throughput
 }
 
 resource azurerm_cosmosdb_cassandra_table cassandra {
   for_each = {
-    for table in var.cosmosCassandra.database.tables : table.name => table if var.cosmosCassandra.enable && var.cosmosCassandra.database.enable && table.enable
+    for table in local.tables : table.name => table if var.cosmosCassandra.enable
   }
   name                  = each.value.name
-  cassandra_keyspace_id = azurerm_cosmosdb_cassandra_keyspace.cassandra[0].id
+  cassandra_keyspace_id = each.value.databaseId
   schema {
     dynamic partition_key {
       for_each = {
@@ -160,7 +173,7 @@ resource azurerm_cosmosdb_cassandra_cluster cassandra {
   name                           = var.apacheCassandra.cluster.name
   resource_group_name            = azurerm_resource_group.database.name
   location                       = azurerm_resource_group.database.location
-  delegated_management_subnet_id = data.azurerm_subnet.data.id
+  delegated_management_subnet_id = data.azurerm_subnet.data_cassandra.id
   version                        = var.apacheCassandra.cluster.version
   hours_between_backups          = var.apacheCassandra.backup.intervalHours
   default_admin_password         = data.azurerm_key_vault_secret.admin_password.value
@@ -177,7 +190,7 @@ resource azurerm_cosmosdb_cassandra_datacenter cassandra {
   name                           = var.apacheCassandra.datacenter.name
   location                       = azurerm_cosmosdb_cassandra_cluster.cassandra[0].location
   cassandra_cluster_id           = azurerm_cosmosdb_cassandra_cluster.cassandra[0].id
-  delegated_management_subnet_id = data.azurerm_subnet.data.id
+  delegated_management_subnet_id = data.azurerm_subnet.data_cassandra.id
   sku_name                       = var.apacheCassandra.datacenter.node.type
   node_count                     = var.apacheCassandra.datacenter.node.count
   disk_sku                       = var.apacheCassandra.datacenter.node.disk.type

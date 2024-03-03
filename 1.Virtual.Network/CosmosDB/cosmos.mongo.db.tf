@@ -9,7 +9,7 @@ variable cosmosMongoDB {
       name    = string
       version = string
     })
-    database = object({
+    databases = list(object({
       enable     = bool
       name       = string
       throughput = number
@@ -43,7 +43,7 @@ variable cosmosMongoDB {
         password  = string
         roleNames = list(string)
       }))
-    })
+    }))
   })
 }
 
@@ -63,6 +63,33 @@ variable cosmosMongoDBvCore {
       enable = bool
     })
   })
+}
+
+locals {
+  collections = flatten([
+    for database in var.cosmosMongoDB.databases : [
+      for collection in database.collections : merge(collection, {
+        key          = "${database.name}-${collection.name}"
+        databaseName = database.name
+       }) if collection.enable
+    ] if database.enable
+  ])
+  roles = flatten([
+    for database in var.cosmosMongoDB.databases : [
+      for role in database.roles : merge(role, {
+        key        = "${database.name}-${role.name}"
+        databaseId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosMongoDB.account.name}/sqlDatabases/${database.name}"
+       }) if role.enable
+    ] if database.enable
+  ])
+  users = flatten([
+    for database in var.cosmosMongoDB.databases : [
+      for user in database.users : merge(user, {
+        key        = "${database.name}-${user.name}"
+        databaseId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosMongoDB.account.name}/sqlDatabases/${database.name}"
+       }) if user.enable
+    ] if database.enable
+  ])
 }
 
 ###############################################################################################
@@ -109,21 +136,23 @@ resource azurerm_private_endpoint mongo_db {
 }
 
 resource azurerm_cosmosdb_mongo_database mongo_db {
-  count               = var.cosmosMongoDB.enable && var.cosmosMongoDB.database.enable ? 1 : 0
-  name                = var.cosmosMongoDB.database.name
+  for_each = {
+    for database in var.cosmosMongoDB.databases : database.name => database if var.cosmosMongoDB.enable && database.enable
+  }
+  name                = each.value.name
   resource_group_name = azurerm_cosmosdb_account.studio["mongo"].resource_group_name
   account_name        = azurerm_cosmosdb_account.studio["mongo"].name
-  throughput          = var.cosmosMongoDB.database.throughput
+  throughput          = each.value.throughput
 }
 
 resource azurerm_cosmosdb_mongo_collection mongo_db {
   for_each = {
-    for collection in var.cosmosMongoDB.database.collections : collection.name => collection if var.cosmosMongoDB.enable && var.cosmosMongoDB.database.enable && collection.enable
+    for collection in local.collections : collection.name => collection if var.cosmosMongoDB.enable
   }
   name                = each.value.name
-  resource_group_name = azurerm_cosmosdb_mongo_database.mongo_db[0].resource_group_name
-  account_name        = azurerm_cosmosdb_mongo_database.mongo_db[0].account_name
-  database_name       = azurerm_cosmosdb_mongo_database.mongo_db[0].name
+  resource_group_name = azurerm_cosmosdb_account.studio["mongo"].resource_group_name
+  account_name        = azurerm_cosmosdb_account.studio["mongo"].name
+  database_name       = each.value.databaseName
   throughput          = each.value.throughput
   shard_key           = each.value.shardKey
   dynamic index {
@@ -139,10 +168,10 @@ resource azurerm_cosmosdb_mongo_collection mongo_db {
 
 resource azurerm_cosmosdb_mongo_role_definition mongo_db {
   for_each = {
-    for role in var.cosmosMongoDB.database.roles : role.name => role if var.cosmosMongoDB.enable && var.cosmosMongoDB.database.enable && role.enable
+    for role in local.roles : role.name => role if var.cosmosMongoDB.enable
   }
   role_name                = each.value.name
-  cosmos_mongo_database_id = azurerm_cosmosdb_mongo_database.mongo_db[0].id
+  cosmos_mongo_database_id = each.value.databaseId
   inherited_role_names     = each.value.roleNames
   dynamic privilege {
     for_each = {
@@ -160,9 +189,9 @@ resource azurerm_cosmosdb_mongo_role_definition mongo_db {
 
 resource azurerm_cosmosdb_mongo_user_definition mongo_db {
   for_each = {
-    for user in var.cosmosMongoDB.database.users : user.username => user if var.cosmosMongoDB.enable && var.cosmosMongoDB.database.enable && user.enable
+    for user in local.users : user.username => user if var.cosmosMongoDB.enable
   }
-  cosmos_mongo_database_id = azurerm_cosmosdb_mongo_database.mongo_db[0].id
+  cosmos_mongo_database_id = each.value.databaseId
   username                 = each.value.username
   password                 = each.value.password
   inherited_role_names     = each.value.roleNames
