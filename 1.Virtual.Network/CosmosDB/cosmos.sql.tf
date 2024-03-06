@@ -53,7 +53,27 @@ variable cosmosNoSQL {
         ))
       }))
     }))
+    roles = list(object({
+      enable      = bool
+      name        = string
+      scopePaths  = list(string)
+      permissions = list(string)
+    }))
+    roleAssignments = list(object({
+      enable            = bool
+      name              = string
+      roleName          = string
+      scopePath         = string
+      userPrincipalName = string
+    }))
   })
+}
+
+data azuread_user role_assignment {
+  for_each = {
+    for roleAssignment in var.cosmosNoSQL.roleAssignments : roleAssignment.name => roleAssignment if var.cosmosNoSQL.enable && roleAssignment.enable
+  }
+  user_principal_name = each.value.userPrincipalName
 }
 
 locals {
@@ -172,8 +192,8 @@ resource azurerm_cosmosdb_sql_stored_procedure no_sql {
     for storedProcedure in local.storedProcedures : storedProcedure.key => storedProcedure if var.cosmosNoSQL.enable
   }
   name                = each.value.name
-  resource_group_name = azurerm_resource_group.database.name
-  account_name        = var.cosmosNoSQL.account.name
+  resource_group_name = azurerm_cosmosdb_account.studio["sql"].resource_group_name
+  account_name        = azurerm_cosmosdb_account.studio["sql"].name
   database_name       = each.value.databaseName
   container_name      = each.value.containerName
   body                = each.value.body
@@ -206,4 +226,31 @@ resource azurerm_cosmosdb_sql_function no_sql {
   depends_on = [
     azurerm_cosmosdb_sql_container.no_sql
   ]
+}
+
+resource azurerm_cosmosdb_sql_role_definition no_sql {
+  for_each = {
+    for role in var.cosmosNoSQL.roles : role.name => role if var.cosmosNoSQL.enable && role.enable
+  }
+  name                = each.value.name
+  resource_group_name = azurerm_cosmosdb_account.studio["sql"].resource_group_name
+  account_name        = azurerm_cosmosdb_account.studio["sql"].name
+  assignable_scopes = [
+    for scopePath in each.value.scopePaths :
+      "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosNoSQL.account.name}${scopePath}"
+  ]
+  permissions {
+    data_actions = each.value.permissions
+  }
+}
+
+resource azurerm_cosmosdb_sql_role_assignment no_sql {
+  for_each = {
+    for roleAssignment in var.cosmosNoSQL.roleAssignments : roleAssignment.name => roleAssignment if var.cosmosNoSQL.enable && roleAssignment.enable
+  }
+  resource_group_name = azurerm_cosmosdb_account.studio["sql"].resource_group_name
+  account_name        = azurerm_cosmosdb_account.studio["sql"].name
+  role_definition_id  = each.value.roleName
+  scope               = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosNoSQL.account.name}${each.value.scopePath}"
+  principal_id        = data.azuread_user.role_assignment[each.value.userPrincipalName].object_id
 }

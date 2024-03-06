@@ -116,6 +116,82 @@ cosmosNoSQL = {
       ]
     }
   ]
+  roles = [
+    {
+      enable = false
+      name   = "Execute SQL Query"
+      scopePaths = [
+        "/dbs/Media1",
+        "/dbs/Media2"
+      ]
+      permissions = [
+        "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/executeQuery"
+      ]
+    }
+  ]
+  roleAssignments = [
+    {
+      enable            = false
+      name              = ""
+      roleName          = "Execute SQL Query"
+      scopePath         = "/dbs/Media1"
+      userPrincipalName = "ricksha@microsoft.com"
+    }
+  ]
+}
+
+##############################################################################################
+# Cosmos DB PostgreSQL (https://learn.microsoft.com/azure/cosmos-db/postgresql/introduction) #
+##############################################################################################
+
+cosmosPostgreSQL = {
+  enable = false
+  cluster = {
+    name         = "xstudio"
+    version      = "16"
+    versionCitus = "12.1"
+    firewallRules = [
+      {
+        enable       = false
+        startAddress = ""
+        endAddress   = ""
+      }
+    ]
+  }
+  node = {
+    serverEdition = "MemoryOptimized"
+    storageMB     = 524288
+    coreCount     = 2
+    count         = 0
+    configuration = {
+    }
+  }
+  coordinator = {
+    serverEdition = "GeneralPurpose"
+    storageMB     = 131072
+    coreCount     = 2
+    configuration = {
+    }
+    shards = {
+      enable = true
+    }
+  }
+  roles = [
+    {
+      enable   = false
+      name     = ""
+      password = ""
+    }
+  ]
+  highAvailability = {
+    enable = false
+  }
+  maintenanceWindow = {
+    enable      = false
+    dayOfWeek   = 0
+    startHour   = 0
+    startMinute = 0
+  }
 }
 
 ###############################################################################################
@@ -273,60 +349,6 @@ apacheCassandra = {
   }
   backup = {
     intervalHours = 24
-  }
-}
-
-##############################################################################################
-# Cosmos DB PostgreSQL (https://learn.microsoft.com/azure/cosmos-db/postgresql/introduction) #
-##############################################################################################
-
-cosmosPostgreSQL = {
-  enable = false
-  cluster = {
-    name         = "xstudio"
-    version      = "16"
-    versionCitus = "12.1"
-    firewallRules = [
-      {
-        enable       = false
-        startAddress = ""
-        endAddress   = ""
-      }
-    ]
-  }
-  node = {
-    serverEdition = "MemoryOptimized"
-    storageMB     = 524288
-    coreCount     = 2
-    count         = 0
-    configuration = {
-    }
-  }
-  coordinator = {
-    serverEdition = "GeneralPurpose"
-    storageMB     = 131072
-    coreCount     = 2
-    configuration = {
-    }
-    shards = {
-      enable = true
-    }
-  }
-  roles = [
-    {
-      enable   = false
-      name     = ""
-      password = ""
-    }
-  ]
-  highAvailability = {
-    enable = false
-  }
-  maintenanceWindow = {
-    enable      = false
-    dayOfWeek   = 0
-    startHour   = 0
-    startMinute = 0
   }
 }
 

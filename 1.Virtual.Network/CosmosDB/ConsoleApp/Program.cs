@@ -7,18 +7,19 @@ namespace ConsoleApp
 {
   public partial class Program
   {
-    private static readonly IConfigurationRoot _configSettings;
+    private static readonly IConfigurationRoot _appConfig;
 
     private static readonly CosmosClient _cosmosClient;
 
     static Program()
     {
       ConfigurationBuilder configBuilder = new();
-      configBuilder.AddUserSecrets("93e3f543-4dd8-46b5-b24e-2c03ba48b294");
-      _configSettings = configBuilder.Build();
+      configBuilder.AddJsonFile("AppSettings.json");
+      configBuilder.AddUserSecrets("f566a291-96ac-4cc3-8016-fb34a0c7b975");
+      _appConfig = configBuilder.Build();
 
-      string? accountEndpoint = _configSettings["accountEndpoint"];
-      string? accountAuthKey = _configSettings["accountAuthKey"];
+      string? accountEndpoint = _appConfig["accountEndpoint"];
+      string? accountAuthKey = _appConfig["accountAuthKey"];
 
       CosmosClientOptions cosmosOptions = new();
       //cosmosOptions.ConnectionMode = ConnectionMode.Direct;
@@ -33,8 +34,9 @@ namespace ConsoleApp
 
     public static async Task Main(string[] args)
     {
-      JsonSerializerOptions jsonOptions = new();
-      jsonOptions.WriteIndented = true;
+      JsonSerializerOptions jsonOptions = new() {
+        WriteIndented = true
+      };
 
       AccountProperties account = await _cosmosClient.ReadAccountAsync();
       Console.WriteLine("Account: {0}", JsonSerializer.Serialize(account, jsonOptions));
@@ -42,5 +44,30 @@ namespace ConsoleApp
       Database[] databases = await Program.CreateDatabasesAsync();
       Console.WriteLine("Databases: {0}", JsonSerializer.Serialize(databases, jsonOptions));
     }
+  }
+
+  public class CosmosThroughput
+  {
+      public int RequestUnits { get; set; }
+
+      public bool AutoScale { get; set; }
+  }
+
+  public class CosmosDatabase
+  {
+      public string? Name { get; set; }
+
+      public CosmosThroughput? Throughput { get; set; }
+
+      public CosmosContainer[]? Containers { get; set; }
+  }
+
+  public class CosmosContainer
+  {
+      public string? Name { get; set; }
+
+      public CosmosThroughput? Throughput { get; set; }
+
+      public string? PartitionKeyPath { get; set; }
   }
 }

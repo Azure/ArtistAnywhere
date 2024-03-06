@@ -276,13 +276,7 @@ if [ $machineType != Storage ]; then
     processType="deadline-repository"
     installFile="DeadlineRepository-$versionPath-linux-x64-installer.run"
     export DB_PASSWORD=$databasePassword
-    if [ $enableCosmosDB == true ]; then
-      sslFileName=cosmos.mongo.db
-      openssl pkcs12 -export -nokeys -passout pass:$mongoDBPassword -in /tmp/$sslFileName.pem -out $sslFileName.pfx
-      RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false --dbreplicaset globaldb --dbssl true --dbclientcert $(pdw)/$sslFileName.pfx --dbcertpass env:DB_CERT_PASSWORD" $binDirectory/$processType
-    else
-      RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
-    fi
+    RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
     echo "$installRoot *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
     exportfs -r

@@ -153,12 +153,6 @@ resource azapi_resource image_builder_linux {
         [
           {
             type        = "File"
-            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/1.Virtual.Network/CosmosDB/cosmos.mongo.db.pem"
-            destination = "/tmp/cosmos.mongo.db.pem"
-            inline      = null
-          },
-          {
-            type        = "File"
             sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.sh"
             destination = "/tmp/functions.sh"
             inline      = null

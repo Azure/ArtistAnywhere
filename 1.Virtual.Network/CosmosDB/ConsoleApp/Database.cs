@@ -1,9 +1,5 @@
-using ConfigException = System.Configuration.ConfigurationErrorsException;
-
-using System.Text.Json;
-using System.Text.Json.Nodes;
-
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Configuration;
 
 namespace ConsoleApp
 {
@@ -12,12 +8,12 @@ namespace ConsoleApp
     public static async Task<Database[]> CreateDatabasesAsync()
     {
       List<Database> databases = [];
-      string? jsonConfig = _configSettings["databases"] ?? throw new ConfigException("databases config");
-      JsonArray? databaseNodes = JsonSerializer.Deserialize<JsonArray>(jsonConfig) ?? throw new ConfigException("databases json");
-      foreach (JsonNode? databaseNode in databaseNodes) {
-        if (databaseNode != null) {
-          Database? database = await CreateDatabaseAsync(databaseNode);
-          if (database != null) {
+      CosmosDatabase[]? databasesConfig = _appConfig.GetSection("databases").Get<CosmosDatabase[]>();
+      if (databasesConfig != null) {
+        foreach (CosmosDatabase? databaseConfig in databasesConfig) {
+          if (databaseConfig != null) {
+            Database database = await CreateDatabaseAsync(databaseConfig);
+            await Program.CreateContainersAsync(database, databaseConfig);
             databases.Add(database);
           }
         }
@@ -25,45 +21,22 @@ namespace ConsoleApp
       return [.. databases];
     }
 
-    private static async Task<Database?> CreateDatabaseAsync(JsonNode databaseNode)
+    private static async Task<Database> CreateDatabaseAsync(CosmosDatabase databaseConfig)
     {
-      DatabaseResponse? databaseResponse = null;
-      databaseNode.AsObject().TryGetPropertyValue("name", out JsonNode? jsonProperty);
-      if (jsonProperty != null) {
-        jsonProperty.AsValue().TryGetValue<string>(out string? databaseName);
-        if (databaseName != null) {
-          databaseNode.AsObject().TryGetPropertyValue("throughput", out JsonNode? jsonObject);
-          if (jsonObject == null) {
-            databaseResponse = await _cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName);
-          } else {
-            jsonObject.AsObject().TryGetPropertyValue("requestUnits", out jsonProperty);
-            if (jsonProperty == null) {
-              databaseResponse = await _cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName);
-            } else {
-              bool isValid = jsonProperty.AsValue().TryGetValue<int>(out int requestUnits);
-              if (!isValid) {
-                databaseResponse = await _cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName);
-              } else {
-                ThroughputProperties throughputProperties;
-                jsonObject.AsObject().TryGetPropertyValue("autoScale", out jsonProperty);
-                if (jsonProperty == null) {
-                  throughputProperties = ThroughputProperties.CreateManualThroughput(requestUnits);
-                } else {
-                  isValid = jsonProperty.AsValue().TryGetValue<bool>(out bool autoScale);
-                  if (!isValid || !autoScale) {
-                    throughputProperties = ThroughputProperties.CreateManualThroughput(requestUnits);
-                  } else {
-                    throughputProperties = ThroughputProperties.CreateAutoscaleThroughput(requestUnits);
-                  }
-                }
-                databaseResponse = await _cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName, throughputProperties);
-              }
-            }
-          }
+      DatabaseResponse databaseResponse;
+      int? requestUnits = databaseConfig.Throughput?.RequestUnits;
+      if (requestUnits == null || databaseConfig.Throughput == null) {
+        databaseResponse = await _cosmosClient.CreateDatabaseIfNotExistsAsync(databaseConfig.Name);
+      } else {
+        ThroughputProperties throughputProperties;
+        if (databaseConfig.Throughput.AutoScale) {
+          throughputProperties = ThroughputProperties.CreateAutoscaleThroughput(requestUnits.Value);
+        } else {
+          throughputProperties = ThroughputProperties.CreateManualThroughput(requestUnits.Value);
         }
+        databaseResponse = await _cosmosClient.CreateDatabaseIfNotExistsAsync(databaseConfig.Name, throughputProperties);
       }
-      await Program.CreateContainersAsync(databaseNode);
-      return databaseResponse?.Database;
+      return databaseResponse.Database;
     }
   }
 }
