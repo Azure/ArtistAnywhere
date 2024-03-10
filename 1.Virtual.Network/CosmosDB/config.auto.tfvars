@@ -7,9 +7,11 @@ resourceGroupName = "ArtistAnywhere.Database" # Alphanumeric, underscores, hyphe
 cosmosDB = {
   offerType = "Standard"
   dataConsistency = {
-    policyLevel        = "Session" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#consistency_level
-    maxIntervalSeconds = 5
-    maxStalenessPrefix = 100
+    policyLevel = "Session" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#consistency_level
+    maxStaleness = {
+      intervalSeconds = 5
+      itemUpdateCount = 100
+    }
   }
   dataAnalytics = {
     enable     = false
@@ -56,10 +58,13 @@ cosmosDB = {
 # Cosmos DB NoSQL (https://learn.microsoft.com/azure/cosmos-db/nosql/) #
 ########################################################################
 
-cosmosNoSQL = {
+noSQL = {
   enable = true
   account = {
     name = "xstudio"
+    accessKeys = {
+      enable = true
+    }
     dedicatedGateway = {
       enable = false
       size   = "Cosmos.D4s"
@@ -68,20 +73,88 @@ cosmosNoSQL = {
   }
   databases = [
     {
-      enable     = false
-      name       = "Media1"
-      throughput = null
+      enable = true
+      name   = "Media1"
+      throughput = {
+        requestUnits = 1000
+        autoScale = {
+          enable = true
+        }
+      }
       containers = [
         {
-          enable     = false
-          name       = ""
-          throughput = null
+          enable = true
+          name   = "image"
+          throughput = {
+            requestUnits = 1000
+            autoScale = {
+              enable = true
+            }
+          }
           partitionKey = {
-            path    = ""
+            path    = "/type"
             version = 2
           }
           dataAnalytics = {
-            ttl = -1 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_container#analytical_storage_ttl
+            ttl = null
+          }
+          storedProcedures = [
+            {
+              enable = false
+              name   = "helloCosmos"
+              body   = <<BODY
+                function () {
+                  var context = getContext();
+                  var response = context.getResponse();
+                  response.setBody("Hello Cosmos!");
+                }
+              BODY
+            }
+          ]
+          triggers = [
+            {
+              enable    = false
+              name      = ""
+              type      = "" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_trigger#type
+              operation = "" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_trigger#operation
+              body      = ""
+            }
+          ]
+          functions = [
+            {
+              enable = false
+              name   = ""
+              body   = ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      enable = true
+      name   = "Media2"
+      throughput = {
+        requestUnits = null
+        autoScale = {
+          enable = false
+        }
+      }
+      containers = [
+        {
+          enable = true
+          name   = "image"
+          throughput = {
+            requestUnits = null
+            autoScale = {
+              enable = false
+            }
+          }
+          partitionKey = {
+            path    = "/type"
+            version = 2
+          }
+          dataAnalytics = {
+            ttl = null
           }
           storedProcedures = [
             {
@@ -119,79 +192,27 @@ cosmosNoSQL = {
   roles = [
     {
       enable = false
-      name   = "Execute SQL Query"
+      name   = "Account Reader"
       scopePaths = [
-        "/dbs/Media1",
-        "/dbs/Media2"
+        ""
       ]
       permissions = [
-        "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/executeQuery"
+        "Microsoft.DocumentDB/databaseAccounts/readMetadata"
       ]
     }
   ]
   roleAssignments = [
     {
-      enable            = false
-      name              = ""
-      roleName          = "Execute SQL Query"
-      scopePath         = "/dbs/Media1"
-      userPrincipalName = "ricksha@microsoft.com"
-    }
-  ]
-}
-
-##############################################################################################
-# Cosmos DB PostgreSQL (https://learn.microsoft.com/azure/cosmos-db/postgresql/introduction) #
-##############################################################################################
-
-cosmosPostgreSQL = {
-  enable = false
-  cluster = {
-    name         = "xstudio"
-    version      = "16"
-    versionCitus = "12.1"
-    firewallRules = [
-      {
-        enable       = false
-        startAddress = ""
-        endAddress   = ""
+      enable      = true
+      name        = ""
+      scopePath   = ""
+      principalId = "5a5ba375-541b-4c18-8e61-087decdc29cf"
+      role = {
+        id   = "00000000-0000-0000-0000-000000000002" # Cosmos DB Built-in Data Contributor
+        name = ""
       }
-    ]
-  }
-  node = {
-    serverEdition = "MemoryOptimized"
-    storageMB     = 524288
-    coreCount     = 2
-    count         = 0
-    configuration = {
-    }
-  }
-  coordinator = {
-    serverEdition = "GeneralPurpose"
-    storageMB     = 131072
-    coreCount     = 2
-    configuration = {
-    }
-    shards = {
-      enable = true
-    }
-  }
-  roles = [
-    {
-      enable   = false
-      name     = ""
-      password = ""
     }
   ]
-  highAvailability = {
-    enable = false
-  }
-  maintenanceWindow = {
-    enable      = false
-    dayOfWeek   = 0
-    startHour   = 0
-    startMinute = 0
-  }
 }
 
 ###############################################################################################
@@ -199,7 +220,7 @@ cosmosPostgreSQL = {
 # Cosmos DB Mongo DB RU (https://learn.microsoft.com/azure/cosmos-db/mongodb/ru/introduction) #
 ###############################################################################################
 
-cosmosMongoDB = {
+mongoDB = {
   enable = false
   account = {
     name    = "xstudio"
@@ -263,7 +284,7 @@ cosmosMongoDB = {
 # Cosmos DB Mongo DB vCore (https://learn.microsoft.com/azure/cosmos-db/mongodb/vcore/introduction) #
 #####################################################################################################
 
-cosmosMongoDBvCore = {
+mongoDBvCore = {
   enable = false
   cluster = {
     name    = "xstudio"
@@ -276,6 +297,60 @@ cosmosMongoDBvCore = {
   }
   highAvailability = {
     enable = false
+  }
+}
+
+##############################################################################################
+# Cosmos DB PostgreSQL (https://learn.microsoft.com/azure/cosmos-db/postgresql/introduction) #
+##############################################################################################
+
+postgreSQL = {
+  enable = false
+  cluster = {
+    name         = "xstudio"
+    version      = "16"
+    versionCitus = "12.1"
+    firewallRules = [
+      {
+        enable       = false
+        startAddress = ""
+        endAddress   = ""
+      }
+    ]
+  }
+  node = {
+    serverEdition = "MemoryOptimized"
+    storageMB     = 524288
+    coreCount     = 2
+    count         = 0
+    configuration = {
+    }
+  }
+  coordinator = {
+    serverEdition = "GeneralPurpose"
+    storageMB     = 131072
+    coreCount     = 2
+    configuration = {
+    }
+    shards = {
+      enable = true
+    }
+  }
+  roles = [
+    {
+      enable   = false
+      name     = ""
+      password = ""
+    }
+  ]
+  highAvailability = {
+    enable = false
+  }
+  maintenanceWindow = {
+    enable      = false
+    dayOfWeek   = 0
+    startHour   = 0
+    startMinute = 0
   }
 }
 
@@ -356,7 +431,7 @@ apacheCassandra = {
 # Cosmos DB Apache Gremlin (https://learn.microsoft.com/azure/cosmos-db/gremlin/introduction) #
 ###############################################################################################
 
-cosmosGremlin = {
+gremlin = {
   enable = false
   account = {
     name = "xstudio"
@@ -385,7 +460,7 @@ cosmosGremlin = {
 # Cosmos DB Table (https://learn.microsoft.com/azure/cosmos-db/table/introduction) #
 ####################################################################################
 
-cosmosTable = {
+table = {
   enable = false
   account = {
     name = "xstudio"

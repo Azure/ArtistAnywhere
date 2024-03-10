@@ -62,7 +62,7 @@ locals {
     for database in var.cosmosCassandra.databases : [
       for table in database.tables : merge(table, {
         key        = "${database.name}-${table.name}"
-        databaseId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosCassandra.account.name}/cassandraKeyspaces/${database.name}"
+        databaseId = "${azurerm_cosmosdb_account.studio["cassandra"].id}/cassandraKeyspaces/${database.name}"
        }) if table.enable
     ] if database.enable
   ])
@@ -75,7 +75,7 @@ locals {
 resource azurerm_private_dns_zone cassandra {
   count               = var.cosmosCassandra.enable ? 1 : 0
   name                = "privatelink.cassandra.cosmos.azure.com"
-  resource_group_name = azurerm_resource_group.database.name
+  resource_group_name = azurerm_cosmosdb_account.studio["cassandra"].resource_group_name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link cassandra {
@@ -89,8 +89,8 @@ resource azurerm_private_dns_zone_virtual_network_link cassandra {
 resource azurerm_private_endpoint cassandra {
   count               = var.cosmosCassandra.enable ? 1 : 0
   name                = azurerm_cosmosdb_account.studio["cassandra"].name
-  resource_group_name = azurerm_resource_group.database.name
-  location            = azurerm_resource_group.database.location
+  resource_group_name = azurerm_cosmosdb_account.studio["cassandra"].resource_group_name
+  location            = azurerm_cosmosdb_account.studio["cassandra"].location
   subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azurerm_cosmosdb_account.studio["cassandra"].name

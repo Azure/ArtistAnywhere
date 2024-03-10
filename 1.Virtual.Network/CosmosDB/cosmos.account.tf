@@ -6,9 +6,11 @@ variable cosmosDB {
   type = object({
     offerType = string
     dataConsistency = object({
-      policyLevel        = string
-      maxIntervalSeconds = number
-      maxStalenessPrefix = number
+      policyLevel = string
+      maxStaleness = object({
+        intervalSeconds = number
+        itemUpdateCount = number
+      })
     })
     dataAnalytics = object({
       enable     = bool
@@ -65,13 +67,13 @@ data azurerm_key_vault_key data_encryption {
 locals {
   cosmosAccounts = [
     {
-      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosNoSQL.account.name}"
-      name = var.cosmosNoSQL.enable ? var.cosmosNoSQL.account.name : ""
+      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.noSQL.account.name}"
+      name = var.noSQL.enable ? var.noSQL.account.name : ""
       type = "sql"
     },
     {
-      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosMongoDB.account.name}"
-      name = var.cosmosMongoDB.enable ? var.cosmosMongoDB.account.name : ""
+      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.mongoDB.account.name}"
+      name = var.mongoDB.enable ? var.mongoDB.account.name : ""
       type = "mongo"
     },
     {
@@ -80,13 +82,13 @@ locals {
       type = "cassandra"
     },
     {
-      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosGremlin.account.name}"
-      name = var.cosmosGremlin.enable ? var.cosmosGremlin.account.name : ""
+      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.gremlin.account.name}"
+      name = var.gremlin.enable ? var.gremlin.account.name : ""
       type = "gremlin"
     },
     {
-      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosTable.account.name}"
-      name = var.cosmosTable.enable ? var.cosmosTable.account.name : ""
+      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.table.account.name}"
+      name = var.table.enable ? var.table.account.name : ""
       type = "table"
     }
   ]
@@ -94,7 +96,7 @@ locals {
 
 resource azurerm_role_assignment key_vault {
   count                = var.cosmosDB.doubleEncryption.enable ? 1 : 0
-  role_definition_name = "Key Vault Crypto Service Encryption User" # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#key-vault-crypto-service-encryption-user
+  role_definition_name = "Key Vault Crypto Service Encryption User" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#key-vault-crypto-service-encryption-user
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_key_vault.studio.id
 }
@@ -107,7 +109,7 @@ resource azurerm_cosmosdb_account studio {
   resource_group_name             = azurerm_resource_group.database.name
   location                        = azurerm_resource_group.database.location
   kind                            = each.value.type == "mongo" ? "MongoDB" : "GlobalDocumentDB"
-  mongo_server_version            = each.value.type == "mongo" ? var.cosmosMongoDB.account.version : null
+  mongo_server_version            = each.value.type == "mongo" ? var.mongoDB.account.version : null
   offer_type                      = var.cosmosDB.offerType
   key_vault_key_id                = var.cosmosDB.doubleEncryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
   analytical_storage_enabled      = var.cosmosDB.dataAnalytics.enable
@@ -116,6 +118,7 @@ resource azurerm_cosmosdb_account studio {
   enable_automatic_failover       = var.cosmosDB.automaticFailover.enable
   ip_range_filter                 = "${jsondecode(data.http.client_address.response_body).ip},104.42.195.92,40.76.54.131,52.176.6.30,52.169.50.45,52.187.184.26" # Azure Portal
   default_identity_type           = "UserAssignedIdentity=${data.azurerm_user_assigned_identity.studio.id}"
+  local_authentication_disabled   = each.value.type == "sql" ? !var.noSQL.account.accessKeys.enable : null
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -124,8 +127,8 @@ resource azurerm_cosmosdb_account studio {
   }
   consistency_policy {
     consistency_level       = var.cosmosDB.dataConsistency.policyLevel
-    max_interval_in_seconds = var.cosmosDB.dataConsistency.maxIntervalSeconds
-    max_staleness_prefix    = var.cosmosDB.dataConsistency.maxStalenessPrefix
+    max_staleness_prefix    = var.cosmosDB.dataConsistency.maxStaleness.itemUpdateCount
+    max_interval_in_seconds = var.cosmosDB.dataConsistency.maxStaleness.intervalSeconds
   }
   dynamic geo_location {
     for_each = local.regionNames

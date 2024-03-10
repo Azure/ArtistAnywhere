@@ -2,7 +2,7 @@
 # Cosmos DB Apache Gremlin (https://learn.microsoft.com/azure/cosmos-db/gremlin/introduction) #
 ###############################################################################################
 
-variable cosmosGremlin {
+variable gremlin {
   type = object({
     enable = bool
     account = object({
@@ -27,7 +27,7 @@ variable cosmosGremlin {
 
 locals {
   graphs = flatten([
-    for database in var.cosmosGremlin.databases : [
+    for database in var.gremlin.databases : [
       for graph in database.graphs : merge(graph, {
         key          = "${database.name}-${graph.name}"
         databaseName = database.name
@@ -37,13 +37,13 @@ locals {
 }
 
 resource azurerm_private_dns_zone gremlin {
-  count               = var.cosmosGremlin.enable ? 1 : 0
+  count               = var.gremlin.enable ? 1 : 0
   name                = "privatelink.gremlin.cosmos.azure.com"
-  resource_group_name = azurerm_resource_group.database.name
+  resource_group_name = azurerm_cosmosdb_account.studio["gremlin"].resource_group_name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link gremlin {
-  count                 = var.cosmosGremlin.enable ? 1 : 0
+  count                 = var.gremlin.enable ? 1 : 0
   name                  = "gremlin"
   resource_group_name   = azurerm_private_dns_zone.gremlin[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.gremlin[0].name
@@ -51,10 +51,10 @@ resource azurerm_private_dns_zone_virtual_network_link gremlin {
 }
 
 resource azurerm_private_endpoint gremlin {
-  count               = var.cosmosGremlin.enable ? 1 : 0
+  count               = var.gremlin.enable ? 1 : 0
   name                = azurerm_cosmosdb_account.studio["gremlin"].name
-  resource_group_name = azurerm_resource_group.database.name
-  location            = azurerm_resource_group.database.location
+  resource_group_name = azurerm_cosmosdb_account.studio["gremlin"].resource_group_name
+  location            = azurerm_cosmosdb_account.studio["gremlin"].location
   subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azurerm_cosmosdb_account.studio["gremlin"].name
@@ -76,10 +76,10 @@ resource azurerm_private_endpoint gremlin {
 }
 
 resource azurerm_private_endpoint gremlin_sql {
-  count               = var.cosmosGremlin.enable ? 1 : 0
+  count               = var.gremlin.enable ? 1 : 0
   name                = "${azurerm_cosmosdb_account.studio["gremlin"].name}-sql"
-  resource_group_name = azurerm_resource_group.database.name
-  location            = azurerm_resource_group.database.location
+  resource_group_name = azurerm_cosmosdb_account.studio["gremlin"].resource_group_name
+  location            = azurerm_cosmosdb_account.studio["gremlin"].location
   subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azurerm_cosmosdb_account.studio["gremlin"].name
@@ -102,7 +102,7 @@ resource azurerm_private_endpoint gremlin_sql {
 
 resource azurerm_cosmosdb_gremlin_database gremlin {
   for_each = {
-    for database in var.cosmosGremlin.databases : database.name => database if var.cosmosGremlin.enable && database.enable
+    for database in var.gremlin.databases : database.name => database if var.gremlin.enable && database.enable
   }
   name                = each.value.name
   resource_group_name = azurerm_cosmosdb_account.studio["gremlin"].resource_group_name
@@ -112,7 +112,7 @@ resource azurerm_cosmosdb_gremlin_database gremlin {
 
 resource azurerm_cosmosdb_gremlin_graph gremlin {
   for_each = {
-    for graph in local.graphs : graph.name => graph if var.cosmosGremlin.enable
+    for graph in local.graphs : graph.name => graph if var.gremlin.enable
   }
   name                  = each.value.name
   resource_group_name   = azurerm_cosmosdb_gremlin_database.gremlin[0].resource_group_name

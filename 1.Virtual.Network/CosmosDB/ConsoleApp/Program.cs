@@ -1,10 +1,26 @@
-﻿using System.Text.Json;
+﻿using Azure.Identity;
+
+using System.Text.Json;
 
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 
 namespace ConsoleApp
 {
+   public class CosmosAccount
+  {
+      public string? Endpoint { get; set; }
+
+      public string? AuthKey { get; set; }
+  }
+
+  public class CosmosThroughput
+  {
+      public int RequestUnits { get; set; }
+
+      public bool AutoScale { get; set; }
+  }
+
   public partial class Program
   {
     private static readonly IConfigurationRoot _appConfig;
@@ -15,21 +31,32 @@ namespace ConsoleApp
     {
       ConfigurationBuilder configBuilder = new();
       configBuilder.AddJsonFile("AppSettings.json");
-      configBuilder.AddUserSecrets("f566a291-96ac-4cc3-8016-fb34a0c7b975");
       _appConfig = configBuilder.Build();
 
-      string? accountEndpoint = _appConfig["accountEndpoint"];
-      string? accountAuthKey = _appConfig["accountAuthKey"];
+      #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+      CosmosAccount account = _appConfig.GetSection("account").Get<CosmosAccount>();
+      #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
-      CosmosClientOptions cosmosOptions = new();
-      //cosmosOptions.ConnectionMode = ConnectionMode.Direct;
-      //cosmosOptions.ConsistencyLevel = ConsistencyLevel.Session;
-      //cosmosOptions.ApplicationPreferredRegions = ["WestUS2","EastUS"];
-      //cosmosOptions.ApplicationRegion = "WestUS2";
-      //cosmosOptions.AllowBulkExecution = false;
-      //cosmosOptions.PriorityLevel = null;
+      CosmosClientOptions cosmosOptions = new() {
+        //ConnectionMode = ConnectionMode.Direct;
+        //ConsistencyLevel = ConsistencyLevel.Session;
+        //ApplicationPreferredRegions = ["WestUS2","EastUS"];
+        //ApplicationRegion = "WestUS2";
+        //AllowBulkExecution = false;
+        //PriorityLevel = null;
+      };
 
-      _cosmosClient = new CosmosClient(accountEndpoint, accountAuthKey, cosmosOptions);
+      #pragma warning disable CS8602 // Dereference of a possibly null reference.
+      if (account.AuthKey != null) {
+        _cosmosClient = new CosmosClient(account.Endpoint, account.AuthKey, cosmosOptions);
+      } else {
+        DefaultAzureCredentialOptions authTokenOptions = new() {
+          ExcludeInteractiveBrowserCredential = true
+        };
+        DefaultAzureCredential authToken = new(authTokenOptions);
+        _cosmosClient = new CosmosClient(account.Endpoint, authToken, cosmosOptions);
+      }
+      #pragma warning restore CS8602 // Dereference of a possibly null reference.
     }
 
     public static async Task Main(string[] args)
@@ -44,30 +71,5 @@ namespace ConsoleApp
       Database[] databases = await Program.CreateDatabasesAsync();
       Console.WriteLine("Databases: {0}", JsonSerializer.Serialize(databases, jsonOptions));
     }
-  }
-
-  public class CosmosThroughput
-  {
-      public int RequestUnits { get; set; }
-
-      public bool AutoScale { get; set; }
-  }
-
-  public class CosmosDatabase
-  {
-      public string? Name { get; set; }
-
-      public CosmosThroughput? Throughput { get; set; }
-
-      public CosmosContainer[]? Containers { get; set; }
-  }
-
-  public class CosmosContainer
-  {
-      public string? Name { get; set; }
-
-      public CosmosThroughput? Throughput { get; set; }
-
-      public string? PartitionKeyPath { get; set; }
   }
 }

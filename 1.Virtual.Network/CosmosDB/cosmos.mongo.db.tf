@@ -2,7 +2,7 @@
 # Cosmos DB Mongo DB (https://learn.microsoft.com/azure/cosmos-db/mongodb/introduction) #
 #########################################################################################
 
-variable cosmosMongoDB {
+variable mongoDB {
   type = object({
     enable  = bool
     account = object({
@@ -47,7 +47,7 @@ variable cosmosMongoDB {
   })
 }
 
-variable cosmosMongoDBvCore {
+variable mongoDBvCore {
   type = object({
     enable = bool
     cluster = object({
@@ -67,7 +67,7 @@ variable cosmosMongoDBvCore {
 
 locals {
   collections = flatten([
-    for database in var.cosmosMongoDB.databases : [
+    for database in var.mongoDB.databases : [
       for collection in database.collections : merge(collection, {
         key          = "${database.name}-${collection.name}"
         databaseName = database.name
@@ -75,18 +75,18 @@ locals {
     ] if database.enable
   ])
   roles = flatten([
-    for database in var.cosmosMongoDB.databases : [
+    for database in var.mongoDB.databases : [
       for role in database.roles : merge(role, {
         key        = "${database.name}-${role.name}"
-        databaseId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosMongoDB.account.name}/sqlDatabases/${database.name}"
+        databaseId = "${azurerm_cosmosdb_account.studio["mongo"].id}/sqlDatabases/${database.name}"
        }) if role.enable
     ] if database.enable
   ])
   users = flatten([
-    for database in var.cosmosMongoDB.databases : [
+    for database in var.mongoDB.databases : [
       for user in database.users : merge(user, {
         key        = "${database.name}-${user.name}"
-        databaseId = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosMongoDB.account.name}/sqlDatabases/${database.name}"
+        databaseId = "${azurerm_cosmosdb_account.studio["mongo"].id}/sqlDatabases/${database.name}"
        }) if user.enable
     ] if database.enable
   ])
@@ -97,13 +97,13 @@ locals {
 ###############################################################################################
 
 resource azurerm_private_dns_zone mongo_db {
-  count               = var.cosmosMongoDB.enable ? 1 : 0
+  count               = var.mongoDB.enable ? 1 : 0
   name                = "privatelink.mongo.cosmos.azure.com"
-  resource_group_name = azurerm_resource_group.database.name
+  resource_group_name = azurerm_cosmosdb_account.studio["mongo"].resource_group_name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link mongo_db {
-  count                 = var.cosmosMongoDB.enable ? 1 : 0
+  count                 = var.mongoDB.enable ? 1 : 0
   name                  = "mongo"
   resource_group_name   = azurerm_private_dns_zone.mongo_db[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.mongo_db[0].name
@@ -111,10 +111,10 @@ resource azurerm_private_dns_zone_virtual_network_link mongo_db {
 }
 
 resource azurerm_private_endpoint mongo_db {
-  count               = var.cosmosMongoDB.enable ? 1 : 0
+  count               = var.mongoDB.enable ? 1 : 0
   name                = azurerm_cosmosdb_account.studio["mongo"].name
-  resource_group_name = azurerm_resource_group.database.name
-  location            = azurerm_resource_group.database.location
+  resource_group_name = azurerm_cosmosdb_account.studio["mongo"].resource_group_name
+  location            = azurerm_cosmosdb_account.studio["mongo"].location
   subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azurerm_cosmosdb_account.studio["mongo"].name
@@ -137,7 +137,7 @@ resource azurerm_private_endpoint mongo_db {
 
 resource azurerm_cosmosdb_mongo_database mongo_db {
   for_each = {
-    for database in var.cosmosMongoDB.databases : database.name => database if var.cosmosMongoDB.enable && database.enable
+    for database in var.mongoDB.databases : database.name => database if var.mongoDB.enable && database.enable
   }
   name                = each.value.name
   resource_group_name = azurerm_cosmosdb_account.studio["mongo"].resource_group_name
@@ -147,7 +147,7 @@ resource azurerm_cosmosdb_mongo_database mongo_db {
 
 resource azurerm_cosmosdb_mongo_collection mongo_db {
   for_each = {
-    for collection in local.collections : collection.name => collection if var.cosmosMongoDB.enable
+    for collection in local.collections : collection.name => collection if var.mongoDB.enable
   }
   name                = each.value.name
   resource_group_name = azurerm_cosmosdb_account.studio["mongo"].resource_group_name
@@ -168,7 +168,7 @@ resource azurerm_cosmosdb_mongo_collection mongo_db {
 
 resource azurerm_cosmosdb_mongo_role_definition mongo_db {
   for_each = {
-    for role in local.roles : role.name => role if var.cosmosMongoDB.enable
+    for role in local.roles : role.name => role if var.mongoDB.enable
   }
   role_name                = each.value.name
   cosmos_mongo_database_id = each.value.databaseId
@@ -189,7 +189,7 @@ resource azurerm_cosmosdb_mongo_role_definition mongo_db {
 
 resource azurerm_cosmosdb_mongo_user_definition mongo_db {
   for_each = {
-    for user in local.users : user.username => user if var.cosmosMongoDB.enable
+    for user in local.users : user.username => user if var.mongoDB.enable
   }
   cosmos_mongo_database_id = each.value.databaseId
   username                 = each.value.username
@@ -205,13 +205,13 @@ resource azurerm_cosmosdb_mongo_user_definition mongo_db {
 #####################################################################################################
 
 resource azurerm_private_dns_zone mongo_cluster {
-  count               = var.cosmosMongoDBvCore.enable ? 1 : 0
+  count               = var.mongoDBvCore.enable ? 1 : 0
   name                = "privatelink.mongocluster.cosmos.azure.com"
   resource_group_name = azurerm_resource_group.database.name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link mongo_cluster {
-  count                 = var.cosmosMongoDBvCore.enable ? 1 : 0
+  count                 = var.mongoDBvCore.enable ? 1 : 0
   name                  = "mongo-cluster"
   resource_group_name   = azurerm_private_dns_zone.mongo_cluster[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.mongo_cluster[0].name
@@ -219,7 +219,7 @@ resource azurerm_private_dns_zone_virtual_network_link mongo_cluster {
 }
 
 resource azurerm_private_endpoint mongo_cluster {
-  count               = var.cosmosMongoDBvCore.enable ? 1 : 0
+  count               = var.mongoDBvCore.enable ? 1 : 0
   name                = "${azapi_resource.mongo_cluster[0].name}-${azurerm_private_dns_zone_virtual_network_link.mongo_cluster[0].name}"
   resource_group_name = azurerm_resource_group.database.name
   location            = azurerm_resource_group.database.location
@@ -244,8 +244,8 @@ resource azurerm_private_endpoint mongo_cluster {
 }
 
 resource azapi_resource mongo_cluster {
-  count     = var.cosmosMongoDBvCore.enable ? 1 : 0
-  name      = var.cosmosMongoDBvCore.cluster.name
+  count     = var.mongoDBvCore.enable ? 1 : 0
+  name      = var.mongoDBvCore.cluster.name
   type      = "Microsoft.DocumentDB/mongoClusters@2024-02-15-preview"
   parent_id = azurerm_resource_group.database.id
   location  = azurerm_resource_group.database.location
@@ -254,13 +254,13 @@ resource azapi_resource mongo_cluster {
       nodeGroupSpecs = [
         {
           kind       = "Shard"
-          sku        = var.cosmosMongoDBvCore.cluster.tier
-          nodeCount  = var.cosmosMongoDBvCore.node.count
-          diskSizeGB = var.cosmosMongoDBvCore.node.diskSizeGB
-          enableHa   = var.cosmosMongoDBvCore.highAvailability.enable
+          sku        = var.mongoDBvCore.cluster.tier
+          nodeCount  = var.mongoDBvCore.node.count
+          diskSizeGB = var.mongoDBvCore.node.diskSizeGB
+          enableHa   = var.mongoDBvCore.highAvailability.enable
         }
       ]
-      serverVersion              = var.cosmosMongoDBvCore.cluster.version
+      serverVersion              = var.mongoDBvCore.cluster.version
       administratorLogin         = data.azurerm_key_vault_secret.admin_username.value
       administratorLoginPassword = data.azurerm_key_vault_secret.admin_password.value
     }

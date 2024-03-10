@@ -3,12 +3,21 @@ using Microsoft.Extensions.Configuration;
 
 namespace ConsoleApp
 {
+  public class CosmosDatabase
+  {
+      public string? Name { get; set; }
+
+      public CosmosThroughput? Throughput { get; set; }
+
+      public CosmosContainer[]? Containers { get; set; }
+  }
+
   public partial class Program
   {
     public static async Task<Database[]> CreateDatabasesAsync()
     {
       List<Database> databases = [];
-      CosmosDatabase[]? databasesConfig = _appConfig.GetSection("databases").Get<CosmosDatabase[]>();
+      CosmosDatabase[]? databasesConfig = _appConfig.GetSection("sqlDatabases").Get<CosmosDatabase[]>();
       if (databasesConfig != null) {
         foreach (CosmosDatabase? databaseConfig in databasesConfig) {
           if (databaseConfig != null) {
