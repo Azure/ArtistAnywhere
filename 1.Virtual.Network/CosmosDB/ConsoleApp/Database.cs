@@ -5,11 +5,11 @@ namespace ConsoleApp
 {
   public class CosmosDatabase
   {
-      public string? Name { get; set; }
+    public string? Name { get; set; }
 
-      public CosmosThroughput? Throughput { get; set; }
+    public CosmosThroughput? Throughput { get; set; }
 
-      public CosmosContainer[]? Containers { get; set; }
+    public CosmosContainer[]? Containers { get; set; }
   }
 
   public partial class Program

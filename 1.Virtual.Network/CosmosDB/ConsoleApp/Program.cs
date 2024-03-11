@@ -9,16 +9,16 @@ namespace ConsoleApp
 {
    public class CosmosAccount
   {
-      public string? Endpoint { get; set; }
+    public string? Endpoint { get; set; }
 
-      public string? AuthKey { get; set; }
+    public string? AuthKey { get; set; }
   }
 
   public class CosmosThroughput
   {
-      public int RequestUnits { get; set; }
+    public int RequestUnits { get; set; }
 
-      public bool AutoScale { get; set; }
+    public bool AutoScale { get; set; }
   }
 
   public partial class Program

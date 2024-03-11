@@ -1,16 +1,52 @@
+using System.Collections.ObjectModel;
+
 using Microsoft.Azure.Cosmos;
 
 namespace ConsoleApp
 {
-    public class CosmosContainer
+  public class CosmosContainer
   {
-      public string? Name { get; set; }
+    public string? Name { get; set; }
 
-      public CosmosThroughput? Throughput { get; set; }
+    public string? PartitionKeyPath { get; set; }
 
-      public string? PartitionKeyPath { get; set; }
+    public CosmosThroughput? Throughput { get; set; }
 
-      public int? AnalyticsTTL { get; set; }
+    public CosmosIndexPolicy? IndexPolicy { get; set; }
+
+    public CosmosTimeToLive? TimeToLive { get; set; }
+  }
+
+  public class CosmosIndexPolicy
+  {
+    public string? Mode { get; set; }
+
+    public string[]? IncludedPaths { get; set; }
+
+    public string[]? ExcludedPaths { get; set; }
+
+    public string[]? SpatialPaths { get; set; }
+
+    public CosmosIndexComposite[]? Composite { get; set; }
+  }
+
+  public class CosmosIndexComposite
+  {
+    public CosmosIndexCompositePath[]? Paths { get; set; }
+  }
+
+  public class CosmosIndexCompositePath
+  {
+    public string? Value { get; set; }
+
+    public CompositePathSortOrder Order { get; set; }
+  }
+
+  public class CosmosTimeToLive
+  {
+    public int? Default { get; set; }
+
+    public int? Analytics { get; set; }
   }
 
   public partial class Program
@@ -36,8 +72,40 @@ namespace ConsoleApp
       ContainerProperties containerProperties = new() {
         Id = containerConfig.Name,
         PartitionKeyPath = containerConfig.PartitionKeyPath,
-        AnalyticalStoreTimeToLiveInSeconds = containerConfig.AnalyticsTTL
+        DefaultTimeToLive = containerConfig.TimeToLive?.Default,
+        AnalyticalStoreTimeToLiveInSeconds = containerConfig.TimeToLive?.Analytics
       };
+      if (Enum.TryParse<IndexingMode>(containerConfig.IndexPolicy?.Mode, out IndexingMode indexingMode)) {
+        containerProperties.IndexingPolicy.IndexingMode = indexingMode;
+      }
+      if (containerConfig.IndexPolicy != null) {
+        if (containerConfig.IndexPolicy.IncludedPaths != null) {
+          foreach (string includedPath in containerConfig.IndexPolicy.IncludedPaths) {
+            containerProperties.IndexingPolicy.IncludedPaths.Add(new IncludedPath { Path = includedPath });
+          }
+        }
+        if (containerConfig.IndexPolicy.ExcludedPaths != null) {
+          foreach (string excludedPath in containerConfig.IndexPolicy.ExcludedPaths) {
+            containerProperties.IndexingPolicy.ExcludedPaths.Add(new ExcludedPath { Path = excludedPath });
+          }
+        }
+        if (containerConfig.IndexPolicy.SpatialPaths != null) {
+          foreach (string spatialPath in containerConfig.IndexPolicy.SpatialPaths) {
+            containerProperties.IndexingPolicy.SpatialIndexes.Add(new SpatialPath { Path = spatialPath });
+          }
+        }
+        if (containerConfig.IndexPolicy.Composite != null) {
+          foreach (CosmosIndexComposite compositeIndex in containerConfig.IndexPolicy.Composite) {
+            if (compositeIndex.Paths != null) {
+              Collection<CompositePath> compositePaths = [];
+              foreach (CosmosIndexCompositePath indexPath in compositeIndex.Paths) {
+                compositePaths.Add(new CompositePath { Path = indexPath.Value, Order = indexPath.Order });
+              }
+              containerProperties.IndexingPolicy.CompositeIndexes.Add(compositePaths);
+            }
+          }
+        }
+      }
       int? requestUnits = containerConfig.Throughput?.RequestUnits;
       if (requestUnits == null || containerConfig.Throughput == null) {
         containerResponse = await database.CreateContainerIfNotExistsAsync(containerProperties);

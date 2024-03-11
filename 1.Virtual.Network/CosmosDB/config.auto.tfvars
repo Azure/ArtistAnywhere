@@ -95,8 +95,31 @@ noSQL = {
             path    = "/type"
             version = 2
           }
-          dataAnalytics = {
-            ttl = null
+          indexPolicy = {
+            mode = "consistent"
+            includedPaths = [
+              "/*"
+            ]
+            excludedPaths = [
+            ]
+            composite = [
+              {
+                enable = false
+                paths = [
+                  {
+                    enable = false
+                    path   = ""
+                    order  = "Ascending"
+                  }
+                ]
+              }
+            ]
+            spatial = [
+              {
+                enable = false
+                path   = ""
+              }
+            ]
           }
           storedProcedures = [
             {
@@ -127,6 +150,10 @@ noSQL = {
               body   = ""
             }
           ]
+          timeToLive = {
+            default   = null
+            analytics = null
+          }
         }
       ]
     },
@@ -153,8 +180,31 @@ noSQL = {
             path    = "/type"
             version = 2
           }
-          dataAnalytics = {
-            ttl = null
+          indexPolicy = {
+            mode = "consistent"
+            includedPaths = [
+              "/*"
+            ]
+            excludedPaths = [
+            ]
+            composite = [
+              {
+                enable = false
+                paths = [
+                  {
+                    enable = false
+                    path   = ""
+                    order  = "Ascending"
+                  }
+                ]
+              }
+            ]
+            spatial = [
+              {
+                enable = false
+                path   = ""
+              }
+            ]
           }
           storedProcedures = [
             {
@@ -185,6 +235,10 @@ noSQL = {
               body   = ""
             }
           ]
+          timeToLive = {
+            default   = null
+            analytics = null
+          }
         }
       ]
     }

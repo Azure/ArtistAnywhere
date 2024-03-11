@@ -38,8 +38,22 @@ variable noSQL {
           path    = string
           version = number
         })
-        dataAnalytics = object({
-          ttl = number
+        indexPolicy = object({
+          mode          = string
+          includedPaths = list(string)
+          excludedPaths = list(string)
+          composite = list(object({
+            enable = bool
+            paths = list(object({
+              enable = bool
+              path   = string
+              order  = string
+            }))
+          }))
+          spatial = list(object({
+            enable = bool
+            path   = string
+          }))
         })
         storedProcedures = list(object(
           {
@@ -64,6 +78,10 @@ variable noSQL {
             body   = string
           }
         ))
+        timeToLive = object({
+          default   = number
+          analytics = number
+        })
       }))
     }))
     roles = list(object({
@@ -199,7 +217,47 @@ resource azurerm_cosmosdb_sql_container no_sql {
   throughput             = each.value.throughput.autoScale.enable ? null : each.value.throughput.requestUnits
   partition_key_path     = each.value.partitionKey.path
   partition_key_version  = each.value.partitionKey.version
-  analytical_storage_ttl = each.value.dataAnalytics.ttl
+  analytical_storage_ttl = each.value.timeToLive.analytics
+  default_ttl            = each.value.timeToLive.default
+  indexing_policy {
+    indexing_mode = each.value.indexPolicy.mode
+    dynamic included_path {
+      for_each = each.value.indexPolicy.includedPaths
+      content {
+        path = included_path.value
+      }
+    }
+    dynamic excluded_path {
+      for_each = each.value.indexPolicy.excludedPaths
+      content {
+        path = excluded_path.value
+      }
+    }
+    dynamic composite_index {
+      for_each = {
+        for compositeIndex in each.value.indexPolicy.composite : join("-", compositeIndex.paths) => compositeIndex if compositeIndex.enable
+      }
+      content {
+        dynamic index {
+          for_each = {
+            for index in composite_index.value["paths"] : index.path => index if index.enable
+          }
+          content {
+            path  = index.value["path"]
+            order = index.value["order"]
+          }
+        }
+      }
+    }
+    dynamic spatial_index {
+      for_each = {
+        for spatialIndex in each.value.indexPolicy.spatial : spatialIndex.path => spatialIndex if spatialIndex.enable
+      }
+      content {
+        path = spatial_index.value["path"]
+      }
+    }
+  }
   dynamic autoscale_settings {
     for_each = each.value.throughput.autoScale.enable ? [1] : []
     content {
