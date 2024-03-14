@@ -7,4 +7,7 @@ qumulo = {
   accountName      = "xstudio"
   initialCapacity  = 100
   availabilityZone = 1
+  adminLogin = {
+    userPassword = ""
+  }
 }

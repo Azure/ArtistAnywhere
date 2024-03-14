@@ -38,7 +38,7 @@ resource azurerm_shared_image_gallery studio {
 
 resource azurerm_shared_image studio {
   for_each = {
-    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if var.computeGallery.enable && ((var.computeGallery.platform.linux.enable && imageDefinition.type == "Linux") || (var.computeGallery.platform.windows.enable && imageDefinition.type == "Windows"))
+    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if var.computeGallery.enable && ((var.computeGallery.platform.linux.enable && lower(imageDefinition.type) == "linux") || (var.computeGallery.platform.windows.enable && lower(imageDefinition.type) == "windows"))
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.image.name
@@ -55,7 +55,7 @@ resource azurerm_shared_image studio {
 
 resource azurerm_gallery_application studio {
   for_each = {
-    for appDefinition in var.computeGallery.appDefinitions : appDefinition.name => appDefinition if var.computeGallery.enable && ((var.computeGallery.platform.linux.enable && appDefinition.type == "Linux") || (var.computeGallery.platform.windows.enable && appDefinition.type == "Windows"))
+    for appDefinition in var.computeGallery.appDefinitions : appDefinition.name => appDefinition if var.computeGallery.enable && ((var.computeGallery.platform.linux.enable && (appDefinition.type) == "linux") || (var.computeGallery.platform.windows.enable && lower(appDefinition.type) == "windows"))
   }
   name              = each.value.name
   location          = azurerm_resource_group.image.location

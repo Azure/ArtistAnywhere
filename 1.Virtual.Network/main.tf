@@ -30,13 +30,15 @@ variable resourceGroupName {
 data azurerm_client_config studio {}
 
 data azurerm_key_vault studio {
+  count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
   resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret gateway_connection {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.gatewayConnection
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data azurerm_storage_account studio {

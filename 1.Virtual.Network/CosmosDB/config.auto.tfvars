@@ -6,11 +6,35 @@ resourceGroupName = "ArtistAnywhere.Database" # Alphanumeric, underscores, hyphe
 
 cosmosDB = {
   offerType = "Standard"
+  geoLocations = [
+    {
+      regionName       = "EastUS"
+      failoverPriority = 0
+      zoneRedundant = {
+        enable = false
+      }
+    },
+    {
+      regionName       = "WestUS"
+      failoverPriority = 1
+      zoneRedundant = {
+        enable = false
+      }
+    }
+  ]
   dataConsistency = {
     policyLevel = "Session" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#consistency_level
     maxStaleness = {
       intervalSeconds = 5
       itemUpdateCount = 100
+    }
+  }
+  dataFactory = {
+    enable = false
+    name   = "xstudio"
+    doubleEncryption = {
+      enable  = false
+      keyName = ""
     }
   }
   dataAnalytics = {
@@ -26,6 +50,10 @@ cosmosDB = {
         type        = "StorageV2"
         redundancy  = "LRS"
         performance = "Standard"
+      }
+      adminLogin = {
+        userName     = ""
+        userPassword = ""
       }
       doubleEncryption = {
         enable  = false
@@ -51,6 +79,13 @@ cosmosDB = {
   doubleEncryption = {
     enable  = false
     keyName = ""
+  }
+  backup = {
+    type              = "Periodic"
+    tier              = null
+    retentionHours    = 8
+    intervalMinutes   = 240
+    storageRedundancy = "Geo"
   }
 }
 
@@ -344,6 +379,10 @@ mongoDBvCore = {
     name    = "xstudio"
     tier    = "M30"
     version = "6.0"
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+    }
   }
   node = {
     count      = 1
@@ -371,6 +410,9 @@ postgreSQL = {
         endAddress   = ""
       }
     ]
+    adminLogin = {
+      userPassword = ""
+    }
   }
   node = {
     serverEdition = "MemoryOptimized"
@@ -464,6 +506,9 @@ apacheCassandra = {
   cluster = {
     name    = "xstudio"
     version = "4.0"
+    adminLogin = {
+      userPassword = ""
+    }
   }
   datacenter = {
     name = "dc0"
@@ -528,19 +573,32 @@ table = {
   ]
 }
 
-#######################################################################
-# Resource dependency configuration for pre-existing deployments only #
-#######################################################################
+#################################################################
+# Functions - https://learn.microsoft.com/azure/azure-functions #
+#################################################################
 
-existingKeyVault = {
-  enable            = false
-  name              = ""
-  resourceGroupName = ""
+functionApp = {
+  name = "xstudio"
+  servicePlan = {
+    computeType = "Y1"
+  }
+  fileShare = {
+    name   = "functions"
+    sizeGB = 5
+  }
+  siteConfig = {
+    alwaysOn = false
+  }
 }
 
-existingNetwork = {
-  enable            = false
-  name              = ""
-  subnetName        = ""
-  resourceGroupName = ""
+#################################################################################
+# Search - https://learn.microsoft.com/azure/search/search-what-is-azure-search #
+#################################################################################
+
+search = {
+  name = "xstudio"
+  tier = "standard"
+  accessKeys = {
+    enable = true
+  }
 }

@@ -54,6 +54,10 @@ variable mongoDBvCore {
       name    = string
       tier    = string
       version = string
+      adminLogin = object({
+        userName     = string
+        userPassword = string
+      })
     })
     node = object({
       count      = number
@@ -261,8 +265,8 @@ resource azapi_resource mongo_cluster {
         }
       ]
       serverVersion              = var.mongoDBvCore.cluster.version
-      administratorLogin         = data.azurerm_key_vault_secret.admin_username.value
-      administratorLoginPassword = data.azurerm_key_vault_secret.admin_password.value
+      administratorLogin         = var.mongoDBvCore.cluster.adminLogin.userName != "" || !module.global.keyVault.enable ? var.mongoDBvCore.cluster.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
+      administratorLoginPassword = var.mongoDBvCore.cluster.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.mongoDBvCore.cluster.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
     }
   })
   schema_validation_enabled = false

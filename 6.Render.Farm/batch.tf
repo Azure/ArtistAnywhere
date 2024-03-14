@@ -79,7 +79,7 @@ variable batch {
 }
 
 data azuread_service_principal batch {
-  count        = var.batch.enable ? 1 : 0
+  count        = var.batch.enable && module.global.keyVault.enable ? 1 : 0
   display_name = "Microsoft Azure Batch"
 }
 
@@ -113,13 +113,13 @@ locals {
 ###############################################################################################
 
 resource azurerm_private_dns_zone batch {
-  count               = var.batch.enable ? 1 : 0
+  count               = var.batch.enable && module.global.keyVault.enable ? 1 : 0
   name                = "privatelink.batch.azure.com"
   resource_group_name = azurerm_resource_group.farm.name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link batch {
-  count                 = var.batch.enable ? 1 : 0
+  count                 = var.batch.enable && module.global.keyVault.enable ? 1 : 0
   name                  = "batch-${lower(data.azurerm_virtual_network.studio.location)}"
   resource_group_name   = azurerm_private_dns_zone.batch[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.batch[0].name
@@ -127,7 +127,7 @@ resource azurerm_private_dns_zone_virtual_network_link batch {
 }
 
 resource azurerm_private_endpoint batch_account {
-  count               = var.batch.enable ? 1 : 0
+  count               = var.batch.enable && module.global.keyVault.enable ? 1 : 0
   name                = "${azurerm_batch_account.scheduler[0].name}-batchAccount"
   resource_group_name = azurerm_resource_group.farm.name
   location            = azurerm_resource_group.farm.location
@@ -152,7 +152,7 @@ resource azurerm_private_endpoint batch_account {
 }
 
 resource azurerm_private_endpoint batch_node {
-  count               = var.batch.enable ? 1 : 0
+  count               = var.batch.enable && module.global.keyVault.enable ? 1 : 0
   name                = "${azurerm_batch_account.scheduler[0].name}-batchNode"
   resource_group_name = azurerm_resource_group.farm.name
   location            = azurerm_resource_group.farm.location
@@ -181,14 +181,14 @@ resource azurerm_private_endpoint batch_node {
 ############################################################################
 
 resource azurerm_role_assignment batch {
-  count                = var.batch.enable ? 1 : 0
+  count                = var.batch.enable && module.global.keyVault.enable ? 1 : 0
   role_definition_name = "Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#contributor
   principal_id         = data.azuread_service_principal.batch[0].object_id
   scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}"
 }
 
 resource azurerm_batch_account scheduler {
-  count                = var.batch.enable ? 1 : 0
+  count                = var.batch.enable && module.global.keyVault.enable ? 1 : 0
   name                 = var.batch.account.name
   resource_group_name  = azurerm_resource_group.farm.name
   location             = azurerm_resource_group.farm.location
@@ -216,8 +216,8 @@ resource azurerm_batch_account scheduler {
     }
   }
   key_vault_reference {
-    id  = data.azurerm_key_vault.studio.id
-    url = data.azurerm_key_vault.studio.vault_uri
+    id  = data.azurerm_key_vault.studio[0].id
+    url = data.azurerm_key_vault.studio[0].vault_uri
   }
   storage_account_id                  = data.azurerm_storage_account.studio.id
   storage_account_node_identity       = data.azurerm_user_assigned_identity.studio.id
@@ -229,7 +229,7 @@ resource azurerm_batch_account scheduler {
 
 resource azurerm_batch_pool linux {
   for_each = {
-    for pool in local.batchPoolsLinux : pool.name.value => pool if var.batch.enable
+    for pool in local.batchPoolsLinux : pool.name.value => pool if var.batch.enable && module.global.keyVault.enable
   }
   name                           = each.value.name.value
   display_name                   = each.value.name.display != "" ? each.value.name.display : each.value.name.value
@@ -295,8 +295,8 @@ resource azurerm_batch_pool linux {
   }
   user_accounts {
     elevation_level = "Admin"
-    name            = each.value.node.adminLogin.userName != "" ? each.value.node.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-    password        = each.value.node.adminLogin.userPassword != "" ? each.value.node.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+    name            = each.value.node.adminLogin.userName != "" || !module.global.keyVault.enable ? each.value.node.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
+    password        = each.value.node.adminLogin.userPassword != "" || !module.global.keyVault.enable ? each.value.node.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
   }
   dynamic mount {
     for_each = length(local.batchFileSystemsLinux) > 0 ? [1] : []
@@ -381,8 +381,8 @@ resource azurerm_batch_pool windows {
   }
   user_accounts {
     elevation_level = "Admin"
-    name            = each.value.node.adminLogin.userName != "" ? each.value.node.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-    password        = each.value.node.adminLogin.userPassword != "" ? each.value.node.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+    name            = each.value.node.adminLogin.userName != "" || !module.global.keyVault.enable ? each.value.node.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
+    password        = each.value.node.adminLogin.userPassword != "" || !module.global.keyVault.enable ? each.value.node.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
   }
   dynamic mount {
     for_each = length(local.batchFileSystemsWindows) > 0 ? [1] : []

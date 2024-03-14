@@ -17,10 +17,6 @@ terraform {
       source  = "hashicorp/http"
       version = "~>3.4.2"
     }
-    time = {
-      source  = "hashicorp/time"
-      version = "~>0.10.0"
-    }
   }
 }
 
@@ -61,5 +57,5 @@ data azurerm_client_config studio {}
 
 resource azurerm_resource_group studio {
   name     = module.global.resourceGroupName
-  location = module.global.regionName
+  location = module.global.primaryRegion.name
 }

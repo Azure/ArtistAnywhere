@@ -66,8 +66,8 @@ resource azurerm_synapse_workspace analytics {
   managed_resource_group_name          = "${azurerm_resource_group.database.name}.Analytics"
   location                             = azurerm_resource_group.database.location
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.analytics[0].id
-  sql_administrator_login              = data.azurerm_key_vault_secret.admin_username.value
-  sql_administrator_login_password     = data.azurerm_key_vault_secret.admin_password.value
+  sql_administrator_login              = var.cosmosDB.dataAnalytics.workspace.adminLogin.userName != "" || !module.global.keyVault.enable ? var.cosmosDB.dataAnalytics.workspace.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
+  sql_administrator_login_password     = var.cosmosDB.dataAnalytics.workspace.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.cosmosDB.dataAnalytics.workspace.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
   azuread_authentication_only          = var.cosmosDB.dataAnalytics.workspace.authentication.azureADOnly
   managed_virtual_network_enabled      = true
   data_exfiltration_protection_enabled = true

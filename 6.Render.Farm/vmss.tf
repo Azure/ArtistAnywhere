@@ -89,8 +89,8 @@ locals {
   virtualMachineScaleSets = [
     for virtualMachineScaleSet in var.virtualMachineScaleSets : merge(virtualMachineScaleSet, {
       adminLogin = {
-        userName     = virtualMachineScaleSet.adminLogin.userName != "" ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-        userPassword = virtualMachineScaleSet.adminLogin.userPassword != "" ? virtualMachineScaleSet.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+        userName     = virtualMachineScaleSet.adminLogin.userName != "" || !module.global.keyVault.enable ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
+        userPassword = virtualMachineScaleSet.adminLogin.userPassword != "" || !module.global.keyVault.enable ? virtualMachineScaleSet.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
         sshPublicKey = virtualMachineScaleSet.adminLogin.sshPublicKey
         passwordAuth = {
           disable = virtualMachineScaleSet.adminLogin.passwordAuth.disable
@@ -101,8 +101,8 @@ locals {
         domainName       = var.activeDirectory.domainName
         domainServerName = var.activeDirectory.domainServerName
         orgUnitPath      = var.activeDirectory.orgUnitPath
-        adminUsername    = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value
-        adminPassword    = var.activeDirectory.adminPassword != "" ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password.value
+        adminUsername    = var.activeDirectory.adminUsername != "" || !module.global.keyVault.enable ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
+        adminPassword    = var.activeDirectory.adminPassword != "" || !module.global.keyVault.enable ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
       }
     }) if virtualMachineScaleSet.enable
   ]
@@ -110,7 +110,7 @@ locals {
 
 resource azurerm_linux_virtual_machine_scale_set farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.operatingSystem.type == "Linux" && !virtualMachineScaleSet.flexibleOrchestration.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexibleOrchestration.enable
   }
   name                            = each.value.name
   computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
@@ -240,15 +240,15 @@ resource azurerm_linux_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm_linux {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.operatingSystem.type == "Linux" && !virtualMachineScaleSet.flexibleOrchestration.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexibleOrchestration.enable && module.global.monitor.enable
   }
   target_resource_id          = azurerm_linux_virtual_machine_scale_set.farm[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
 }
 
 resource azurerm_windows_virtual_machine_scale_set farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.operatingSystem.type == "Windows" && !virtualMachineScaleSet.flexibleOrchestration.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexibleOrchestration.enable
   }
   name                   = each.value.name
   computer_name_prefix   = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
@@ -363,10 +363,10 @@ resource azurerm_windows_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm_windows {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.operatingSystem.type == "Windows" && !virtualMachineScaleSet.flexibleOrchestration.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexibleOrchestration.enable && module.global.monitor.enable
   }
   target_resource_id          = azurerm_windows_virtual_machine_scale_set.farm[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
 }
 
 resource azurerm_orchestrated_virtual_machine_scale_set farm {
@@ -412,7 +412,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
   }
   os_profile {
     dynamic linux_configuration {
-      for_each = each.value.operatingSystem.type == "Linux" ? [1] : []
+      for_each = lower(each.value.operatingSystem.type) == "linux" ? [1] : []
       content {
         computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
         admin_username                  = each.value.adminLogin.userName
@@ -428,7 +428,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
       }
     }
     dynamic windows_configuration {
-      for_each = each.value.operatingSystem.type == "Windows" ? [1] : []
+      for_each = lower(each.value.operatingSystem.type) == "windows" ? [1] : []
       content {
         computer_name_prefix = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
         admin_username       = each.value.adminLogin.userName
@@ -438,7 +438,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
   }
   extension {
     name                               = "Health"
-    type                               = each.value.operatingSystem.type == "Windows" ? "ApplicationHealthWindows" : "ApplicationHealthLinux"
+    type                               = lower(each.value.operatingSystem.type) == "windows" ? "ApplicationHealthWindows" : "ApplicationHealthLinux"
     publisher                          = "Microsoft.ManagedServices"
     type_handler_version               = "1.0"
     auto_upgrade_minor_version_enabled = true
@@ -450,9 +450,9 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
   }
   extension {
     name                               = "Monitor"
-    type                               = each.value.operatingSystem.type == "Windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
+    type                               = lower(each.value.operatingSystem.type) == "windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
     publisher                          = "Microsoft.Azure.Monitor"
-    type_handler_version               = each.value.operatingSystem.type == "Windows" ? module.global.monitor.agentVersion.windows : module.global.monitor.agentVersion.linux
+    type_handler_version               = lower(each.value.operatingSystem.type) == "windows" ? module.global.monitor.agentVersion.windows : module.global.monitor.agentVersion.linux
     auto_upgrade_minor_version_enabled = true
     settings = jsonencode({
       authentication = {
@@ -470,17 +470,17 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
     for_each = each.value.extension.custom.enable ? [1] : []
     content {
       name                               = each.value.extension.custom.name
-      type                               = each.value.operatingSystem.type == "Windows" ? "CustomScriptExtension" :"CustomScript"
-      publisher                          = each.value.operatingSystem.type == "Windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
-      type_handler_version               = each.value.operatingSystem.type == "Windows" ? "1.10" : "2.1"
+      type                               = lower(each.value.operatingSystem.type) == "windows" ? "CustomScriptExtension" :"CustomScript"
+      publisher                          = lower(each.value.operatingSystem.type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
+      type_handler_version               = lower(each.value.operatingSystem.type) == "windows" ? "1.10" : "2.1"
       auto_upgrade_minor_version_enabled = true
       protected_settings = jsonencode({
-        script = each.value.operatingSystem.type == "Windows" ? null : base64encode(
+        script = lower(each.value.operatingSystem.type) == "windows" ? null : base64encode(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
             fileSystems = local.fileSystemsLinux
           }))
         )
-        commandToExecute = each.value.operatingSystem.type == "Windows" ? "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
+        commandToExecute = lower(each.value.operatingSystem.type) == "windows" ? "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
             fileSystems     = local.fileSystemsWindows
             activeDirectory = each.value.activeDirectory
@@ -511,8 +511,8 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexibleOrchestration.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexibleOrchestration.enable && module.global.monitor.enable
   }
   target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.farm[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
 }

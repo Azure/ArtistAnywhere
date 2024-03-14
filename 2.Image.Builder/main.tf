@@ -54,28 +54,33 @@ data azurerm_user_assigned_identity studio {
 }
 
 data azurerm_key_vault studio {
+  count               = module.global.keyVault.enable ? 1 : 0
   name                = var.existingKeyVault.enable ? var.existingKeyVault.name : module.global.keyVault.name
   resource_group_name = var.existingKeyVault.enable ? var.existingKeyVault.resourceGroupName : module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret admin_username {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data azurerm_key_vault_secret admin_password {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data azurerm_key_vault_secret database_username {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.databaseUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data azurerm_key_vault_secret database_password {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.databasePassword
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data terraform_remote_state network {
@@ -104,12 +109,12 @@ data azurerm_resource_group network {
 }
 
 locals {
-  regionNames = var.existingNetwork.enable ? [module.global.regionName] : [
+  regionNames = var.existingNetwork.enable ? [module.global.primaryRegion.name] : [
     for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
   ]
 }
 
 resource azurerm_resource_group image {
   name     = var.resourceGroupName
-  location = module.global.regionName
+  location = module.global.primaryRegion.name
 }

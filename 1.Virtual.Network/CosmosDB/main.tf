@@ -39,23 +39,6 @@ variable resourceGroupName {
   type = string
 }
 
-variable existingKeyVault {
-  type = object({
-    enable            = bool
-    name              = string
-    resourceGroupName = string
-  })
-}
-
-variable existingNetwork {
-  type = object({
-    enable            = bool
-    name              = string
-    subnetName        = string
-    resourceGroupName = string
-  })
-}
-
 data http client_address {
   url = "https://api.ipify.org?format=json"
 }
@@ -66,28 +49,33 @@ data azurerm_user_assigned_identity studio {
 }
 
 data azurerm_key_vault studio {
-  name                = var.existingKeyVault.enable ? var.existingKeyVault.name : module.global.keyVault.name
-  resource_group_name = var.existingKeyVault.enable ? var.existingKeyVault.resourceGroupName : module.global.resourceGroupName
+  count               = module.global.keyVault.enable ? 1 : 0
+  name                = module.global.keyVault.name
+  resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret admin_username {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data azurerm_key_vault_secret admin_password {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data azurerm_key_vault_secret database_username {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.databaseUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data azurerm_key_vault_secret database_password {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.databasePassword
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data terraform_remote_state network {
@@ -101,29 +89,32 @@ data terraform_remote_state network {
 }
 
 data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
+  name                = local.writeVirtualNetwork.name
+  resource_group_name = local.writeVirtualNetwork.resourceGroupName
 }
 
 data azurerm_subnet data {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Data"
+  name                 = "Data"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
 data azurerm_subnet data_cassandra {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "DataCassandra"
+  name                 = "DataCassandra"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
 locals {
-  regionNames = var.existingNetwork.enable ? [module.global.regionName] : [
-    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
-  ]
+  writeGeoLocation = one([
+    for geoLocation in var.cosmosDB.geoLocations : geoLocation if geoLocation.failoverPriority == 0
+  ])
+  writeVirtualNetwork = one([
+    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork if virtualNetwork.regionName == local.writeGeoLocation.regionName
+  ])
 }
 
 resource azurerm_resource_group database {
   name     = var.resourceGroupName
-  location = module.global.regionName
+  location = var.cosmosDB.geoLocations[0].regionName
 }

@@ -1,5 +1,7 @@
-variable regionName {
-  default = "WestUS2" # Set Azure region name from "az account list-locations --query [].name"
+variable primaryRegion {
+  default = {
+    name = "EastUS" # Set Azure region name from "az account list-locations --query [].name"
+  }
 }
 
 variable resourceGroupName {
@@ -35,7 +37,8 @@ variable managedIdentity {
 
 variable keyVault {
   default = {
-    name = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
+    enable = false
+    name   = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
     secretName = {
       adminUsername     = "AdminUsername"
       adminPassword     = "AdminPassword"
@@ -58,7 +61,8 @@ variable keyVault {
 
 variable monitor {
   default = {
-    name = "xstudio"
+    enable = false
+    name   = "xstudio"
     agentVersion = {
       linux   = "1.29"
       windows = "1.23"
@@ -66,8 +70,8 @@ variable monitor {
   }
 }
 
-output regionName {
-  value = var.regionName
+output primaryRegion {
+  value = var.primaryRegion
 }
 
 output resourceGroupName {

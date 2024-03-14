@@ -102,24 +102,27 @@ data azurerm_user_assigned_identity studio {
 }
 
 data azurerm_key_vault studio {
+  count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
   resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret admin_username {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data azurerm_key_vault_secret admin_password {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data azurerm_key_vault_key cache_encryption {
-  count        = var.hpcCache.encryption.enable ? 1 : 0
+  count        = module.global.keyVault.enable && var.hpcCache.encryption.enable ? 1 : 0
   name         = module.global.keyVault.keyName.cacheEncryption
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data terraform_remote_state network {
@@ -155,7 +158,7 @@ locals {
 resource azurerm_resource_group cache_region {
   count    = var.existingNetwork.enable || !var.enableHPCCache ? 1 : 0
   name     = var.existingNetwork.enable ? var.resourceGroupName : "${var.resourceGroupName}.${local.virtualNetwork.nameSuffix}"
-  location = var.existingNetwork.enable ? module.global.regionName : local.virtualNetwork.regionName
+  location = var.existingNetwork.enable ? module.global.primaryRegion.name : local.virtualNetwork.regionName
 }
 
 resource azurerm_resource_group cache_regions {

@@ -83,21 +83,25 @@ data azurerm_user_assigned_identity studio {
 }
 
 data azurerm_key_vault studio {
+  count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
   resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret admin_username {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data azurerm_key_vault_secret admin_password {
+  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 data azurerm_monitor_data_collection_endpoint studio {
+  count               = module.global.monitor.enable ? 1 : 0
   name                = module.global.monitor.name
   resource_group_name = module.global.resourceGroupName
 }
@@ -119,7 +123,7 @@ data azurerm_virtual_network studio {
 
 locals {
   rootRegion = {
-    name       = var.existingNetwork.enable ? module.global.regionName : data.terraform_remote_state.network.outputs.virtualNetwork.regionName
+    name       = var.existingNetwork.enable ? module.global.primaryRegion.name : data.terraform_remote_state.network.outputs.virtualNetwork.regionName
     nameSuffix = var.existingNetwork.enable ? "" : data.terraform_remote_state.network.outputs.virtualNetwork.nameSuffix
   }
 }

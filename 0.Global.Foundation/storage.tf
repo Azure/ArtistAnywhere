@@ -18,6 +18,12 @@ resource azurerm_storage_account studio {
   account_replication_type        = var.rootStorage.accountRedundancy
   account_tier                    = var.rootStorage.accountPerformance
   allow_nested_items_to_be_public = false
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      azurerm_user_assigned_identity.studio.id
+    ]
+  }
   network_rules {
     default_action = "Deny"
     ip_rules = [
@@ -26,18 +32,8 @@ resource azurerm_storage_account studio {
   }
 }
 
-resource time_sleep storage_account_firewall {
-  create_duration = "30s"
-  depends_on = [
-    azurerm_storage_account.studio
-  ]
-}
-
 resource azurerm_storage_container studio {
   for_each             = module.global.rootStorage.containerName
   name                 = each.value
   storage_account_name = azurerm_storage_account.studio.name
-  depends_on = [
-    time_sleep.storage_account_firewall
-  ]
 }

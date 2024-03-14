@@ -5,11 +5,26 @@
 variable cosmosDB {
   type = object({
     offerType = string
+    geoLocations = list(object({
+      regionName       = string
+      failoverPriority = number
+      zoneRedundant = object({
+        enable = bool
+      })
+    }))
     dataConsistency = object({
       policyLevel = string
       maxStaleness = object({
         intervalSeconds = number
         itemUpdateCount = number
+      })
+    })
+    dataFactory = object({
+      enable = bool
+      name   = string
+      doubleEncryption = object({
+        enable  = bool
+        keyName = string
       })
     })
     dataAnalytics = object({
@@ -25,6 +40,10 @@ variable cosmosDB {
           type        = string
           redundancy  = string
           performance = string
+        })
+        adminLogin = object({
+          userName     = string
+          userPassword = string
         })
         doubleEncryption = object({
           enable  = bool
@@ -51,6 +70,13 @@ variable cosmosDB {
       enable  = bool
       keyName = string
     })
+    backup = object({
+      type              = string
+      tier              = string
+      retentionHours    = number
+      intervalMinutes   = number
+      storageRedundancy = string
+    })
   })
 }
 
@@ -59,9 +85,9 @@ data azuread_service_principal cosmos_db {
 }
 
 data azurerm_key_vault_key data_encryption {
-  count        = var.cosmosDB.doubleEncryption.enable ? 1 : 0
+  count        = var.cosmosDB.doubleEncryption.enable && module.global.keyValue.enable ? 1 : 0
   name         = var.cosmosDB.doubleEncryption.keyName != "" ? var.cosmosDB.doubleEncryption.keyName : module.global.keyVault.keyName.dataEncryption
-  key_vault_id = data.azurerm_key_vault.studio.id
+  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 locals {
@@ -95,10 +121,10 @@ locals {
 }
 
 resource azurerm_role_assignment key_vault {
-  count                = var.cosmosDB.doubleEncryption.enable ? 1 : 0
+  count                = var.cosmosDB.doubleEncryption.enable && module.global.keyValue.enable ? 1 : 0
   role_definition_name = "Key Vault Crypto Service Encryption User" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#key-vault-crypto-service-encryption-user
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-  scope                = data.azurerm_key_vault.studio.id
+  scope                = data.azurerm_key_vault.studio[0].id
 }
 
 resource azurerm_cosmosdb_account studio {
@@ -130,11 +156,19 @@ resource azurerm_cosmosdb_account studio {
     max_staleness_prefix    = var.cosmosDB.dataConsistency.maxStaleness.itemUpdateCount
     max_interval_in_seconds = var.cosmosDB.dataConsistency.maxStaleness.intervalSeconds
   }
+  backup {
+    type                = var.cosmosDB.backup.type
+    tier                = var.cosmosDB.backup.tier
+    retention_in_hours  = var.cosmosDB.backup.retentionHours
+    interval_in_minutes = var.cosmosDB.backup.intervalMinutes
+    storage_redundancy  = var.cosmosDB.backup.storageRedundancy
+  }
   dynamic geo_location {
-    for_each = local.regionNames
+    for_each = var.cosmosDB.geoLocations
     content {
-      location          = geo_location.value
-      failover_priority = index(local.regionNames, geo_location.value)
+      location          = geo_location.value["regionName"]
+      failover_priority = geo_location.value["failoverPriority"]
+      zone_redundant    = geo_location.value["zoneRedundant"].enable
     }
   }
   dynamic analytical_storage {

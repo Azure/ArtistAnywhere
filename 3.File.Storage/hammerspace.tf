@@ -83,8 +83,8 @@ locals {
       index = i
       name  = "${var.hammerspace.namePrefix}${var.hammerspace.metadata.machine.namePrefix}${i + 1}"
       adminLogin = {
-        userName = var.hammerspace.adminLogin.userName != "" ? var.hammerspace.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-        userPassword = var.hammerspace.adminLogin.userPassword != "" ? var.hammerspace.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+        userName = var.hammerspace.adminLogin.userName != "" || !module.global.keyVault.enable ? var.hammerspace.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
+        userPassword = var.hammerspace.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.hammerspace.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
       }},
       var.hammerspace.metadata
     ) if var.hammerspace.namePrefix != ""
@@ -94,8 +94,8 @@ locals {
       index = i
       name  = "${var.hammerspace.namePrefix}${var.hammerspace.data.machine.namePrefix}${i + 1}"
       adminLogin = {
-        userName = var.hammerspace.adminLogin.userName != "" ? var.hammerspace.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-        userPassword = var.hammerspace.adminLogin.userPassword != "" ? var.hammerspace.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+        userName = var.hammerspace.adminLogin.userName != "" || !module.global.keyVault.enable ? var.hammerspace.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
+        userPassword = var.hammerspace.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.hammerspace.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
       }},
       var.hammerspace.data
     ) if var.hammerspace.namePrefix != ""
@@ -363,7 +363,7 @@ resource azurerm_virtual_machine_extension storage {
     script = base64encode(
       <<BASH
         #!/bin/bash -x
-        ADMIN_PASSWORD=${each.value.adminLogin.userPassword != "" ? each.value.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value} /usr/bin/hs-init-admin-pw
+        ADMIN_PASSWORD=${each.value.adminLogin.userPassword != "" || !module.global.keyVault.enable ? each.value.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value} /usr/bin/hs-init-admin-pw
       BASH
     )
   })

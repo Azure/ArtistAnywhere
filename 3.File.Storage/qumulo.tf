@@ -8,6 +8,9 @@ variable qumulo {
     accountName      = string
     initialCapacity  = number
     availabilityZone = number
+    adminLogin = object({
+      userPassword = string
+    })
   })
 }
 
@@ -51,7 +54,7 @@ resource azapi_resource qumulo {
       initialCapacity   = var.qumulo.initialCapacity
       availabilityZone  = tostring(var.qumulo.availabilityZone)
       delegatedSubnetId = data.azurerm_subnet.storage_qumulo[0].id
-      adminPassword     = data.azurerm_key_vault_secret.admin_password.value
+      adminPassword     = var.qumulo.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.qumulo.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
       userDetails = {
         email = data.local_file.user[0].content
       }

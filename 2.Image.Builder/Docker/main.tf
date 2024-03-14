@@ -64,5 +64,5 @@ data azurerm_subnet farm {
 
 resource azurerm_resource_group docker {
   name     = var.resourceGroupName
-  location = module.global.regionName
+  location = module.global.primaryRegion.name
 }

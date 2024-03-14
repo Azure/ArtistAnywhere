@@ -8,7 +8,7 @@ virtualNetworks = [
   {
     enable     = true
     name       = "Studio"
-    nameSuffix = "West"
+    nameSuffix = "East"
     regionName = ""
     addressSpace = [
       "10.0.0.0/16"
@@ -124,10 +124,10 @@ virtualNetworks = [
     ]
   },
   {
-    enable     = false
+    enable     = true
     name       = "Studio"
-    nameSuffix = "East"
-    regionName = "EastUS"
+    nameSuffix = "West"
+    regionName = "WestUS"
     addressSpace = [
       "10.1.0.0/16"
     ]

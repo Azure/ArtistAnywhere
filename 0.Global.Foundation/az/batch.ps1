@@ -1,4 +1,4 @@
-$regionName = "WestUS2"
+$regionName = "EastUS"
 az batch location list-skus --location $regionName --output table
 
 $queryFilter = "[? imageReference.publisher == 'almalinux' && nodeAgentSkuId=='batch.node.el 8']"

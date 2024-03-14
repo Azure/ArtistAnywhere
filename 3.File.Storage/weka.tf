@@ -108,8 +108,8 @@ data azurerm_virtual_machine_scale_set weka {
 locals {
   weka = merge(var.weka, {
     adminLogin = {
-      userName     = var.weka.adminLogin.userName != "" ? var.weka.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-      userPassword = var.weka.adminLogin.userPassword != "" ? var.weka.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+      userName     = var.weka.adminLogin.userName != "" || !module.global.keyVault.enable ? var.weka.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
+      userPassword = var.weka.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.weka.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
     }}
   )
   wekaObjectTier = merge(var.weka.objectTier, {

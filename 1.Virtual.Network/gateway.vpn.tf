@@ -120,6 +120,6 @@ resource azurerm_virtual_network_gateway_connection site_to_site {
   type                       = "IPsec"
   virtual_network_gateway_id = azurerm_virtual_network_gateway.vpn[each.value.name].id
   local_network_gateway_id   = azurerm_local_network_gateway.vpn[each.value.name].id
-  shared_key                 = var.vpnGateway.sharedKey != "" ? var.vpnGateway.sharedKey : data.azurerm_key_vault_secret.gateway_connection.value
+  shared_key                 = var.vpnGateway.sharedKey != "" || !module.global.keyVault.enable ? var.vpnGateway.sharedKey : data.azurerm_key_vault_secret.gateway_connection[0].value
   enable_bgp                 = var.vpnGatewayLocal.bgp.enable
 }

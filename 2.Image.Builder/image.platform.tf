@@ -4,7 +4,7 @@
 
 resource azapi_resource image_platform_linux {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && var.computeGallery.platform.linux.enable && imageTemplate.enable && imageTemplate.source.imageDefinition.name == "Linux" && imageTemplate.build.imageVersion == "0.0.0"
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && var.computeGallery.platform.linux.enable && imageTemplate.enable && lower(imageTemplate.source.imageDefinition.name) == "linux" && imageTemplate.build.imageVersion == "0.0.0"
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"

@@ -38,11 +38,8 @@ variable keyVault {
   })
 }
 
-data azuread_service_principal batch {
-  display_name = "Microsoft Azure Batch"
-}
-
 resource azurerm_key_vault studio {
+  count                           = module.global.keyVault.enable ? 1 : 0
   name                            = module.global.keyVault.name
   resource_group_name             = azurerm_resource_group.studio.name
   location                        = azurerm_resource_group.studio.location
@@ -65,30 +62,30 @@ resource azurerm_key_vault studio {
 
 resource azurerm_key_vault_secret studio {
   for_each = {
-    for secret in var.keyVault.secrets : secret.name => secret
+    for secret in var.keyVault.secrets : secret.name => secret if module.global.keyVault.enable
   }
   name         = each.value.name
   value        = each.value.value
-  key_vault_id = azurerm_key_vault.studio.id
+  key_vault_id = azurerm_key_vault.studio[0].id
 }
 
 resource azurerm_key_vault_key studio {
   for_each = {
-    for key in var.keyVault.keys : key.name => key
+    for key in var.keyVault.keys : key.name => key if module.global.keyVault.enable
   }
   name         = each.value.name
   key_type     = each.value.type
   key_size     = each.value.size
   key_opts     = each.value.operations
-  key_vault_id = azurerm_key_vault.studio.id
+  key_vault_id = azurerm_key_vault.studio[0].id
 }
 
 resource azurerm_key_vault_certificate studio {
   for_each = {
-    for certificate in var.keyVault.certificates : certificate.name => certificate
+    for certificate in var.keyVault.certificates : certificate.name => certificate if module.global.keyVault.enable
   }
   name         = each.value.name
-  key_vault_id = azurerm_key_vault.studio.id
+  key_vault_id = azurerm_key_vault.studio[0].id
   certificate_policy {
     x509_certificate_properties {
       subject            = each.value.subject

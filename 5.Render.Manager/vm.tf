@@ -65,8 +65,8 @@ locals {
   virtualMachines = [
     for virtualMachine in var.virtualMachines : merge(virtualMachine, {
       adminLogin = {
-        userName     = virtualMachine.adminLogin.userName != "" ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-        userPassword = virtualMachine.adminLogin.userPassword != "" ? virtualMachine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+        userName     = virtualMachine.adminLogin.userName != "" || !module.global.keyVault.enable ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
+        userPassword = virtualMachine.adminLogin.userPassword != "" || !module.global.keyVault.enable ? virtualMachine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
         sshPublicKey = virtualMachine.adminLogin.sshPublicKey
         passwordAuth = {
           disable = virtualMachine.adminLogin.passwordAuth.disable
@@ -75,7 +75,7 @@ locals {
       activeDirectory = {
         enable        = var.activeDirectory.enable
         domainName    = var.activeDirectory.domainName
-        adminPassword = var.activeDirectory.adminPassword != "" ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password.value
+        adminPassword = var.activeDirectory.adminPassword != "" || !module.global.keyVault.enable ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
       }
     })
   ]
@@ -99,7 +99,7 @@ resource azurerm_network_interface scheduler {
 
 resource azurerm_linux_virtual_machine scheduler {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.operatingSystem.type == "Linux"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux"
   }
   name                            = each.value.name
   resource_group_name             = azurerm_resource_group.scheduler.name
@@ -148,7 +148,7 @@ resource azurerm_linux_virtual_machine scheduler {
 
 resource azurerm_virtual_machine_extension monitor_linux {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.operatingSystem.type == "Linux"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux"
   }
   name                       = "Monitor"
   type                       = "AzureMonitorLinuxAgent"
@@ -172,15 +172,15 @@ resource azurerm_virtual_machine_extension monitor_linux {
 
 resource azurerm_monitor_data_collection_rule_association scheduler_linux {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.operatingSystem.type == "Linux"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && module.global.monitor.enable
   }
   target_resource_id          = azurerm_linux_virtual_machine.scheduler[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
 }
 
 resource azurerm_virtual_machine_extension initialize_linux {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && virtualMachine.operatingSystem.type == "Linux"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.operatingSystem.type) == "linux"
   }
   name                       = each.value.extension.custom.name
   type                       = "CustomScript"
@@ -201,7 +201,7 @@ resource azurerm_virtual_machine_extension initialize_linux {
 
 resource azurerm_windows_virtual_machine scheduler {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.operatingSystem.type == "Windows"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows"
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.scheduler.name
@@ -234,7 +234,7 @@ resource azurerm_windows_virtual_machine scheduler {
 
 resource azurerm_virtual_machine_extension monitor_windows {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.operatingSystem.type == "Windows"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows"
   }
   name                       = "Monitor"
   type                       = "AzureMonitorWindowsAgent"
@@ -258,15 +258,15 @@ resource azurerm_virtual_machine_extension monitor_windows {
 
 resource azurerm_monitor_data_collection_rule_association scheduler_windows {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.operatingSystem.type == "Windows"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && module.global.monitor.enable
   }
   target_resource_id          = azurerm_windows_virtual_machine.scheduler[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
 }
 
 resource azurerm_virtual_machine_extension initialize_windows {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && virtualMachine.operatingSystem.type == "Windows"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.operatingSystem.type) == "windows"
   }
   name                       = each.value.extension.custom.name
   type                       = "CustomScriptExtension"

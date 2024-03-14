@@ -29,7 +29,7 @@ locals {
   ]
   virtualNetworksNames = [
     for virtualNetwork in var.virtualNetworks : merge(virtualNetwork, {
-      regionName        = virtualNetwork.regionName != "" ? virtualNetwork.regionName : module.global.regionName
+      regionName        = virtualNetwork.regionName != "" ? virtualNetwork.regionName : module.global.primaryRegion.name
       name              = virtualNetwork.nameSuffix != "" ? "${virtualNetwork.name}-${virtualNetwork.nameSuffix}" : virtualNetwork.name
       resourceGroupName = virtualNetwork.nameSuffix != "" ? "${var.resourceGroupName}.${virtualNetwork.nameSuffix}" : var.resourceGroupName
     }) if virtualNetwork.enable

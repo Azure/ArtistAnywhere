@@ -2,8 +2,8 @@
 # Job Scheduler #
 #################
 
-$regionName        = "WestUS2"
-$nameSuffix        = "West"
+$regionName        = "EastUS"
+$nameSuffix        = "East"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
@@ -31,8 +31,8 @@ az vm create --resource-group $resourceGroupName --name $virtualMachine.name --s
 # Render Farm #
 ###############
 
-$regionName        = "WestUS2"
-$nameSuffix        = "West"
+$regionName        = "EastUS"
+$nameSuffix        = "East"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
@@ -66,8 +66,8 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
   az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""' --priority $virtualMachine.priorityMode --eviction-policy $virtualMachine.evictionPolicy
 }
 
-$regionName        = "WestUS2"
-$nameSuffix        = "West"
+$regionName        = "EastUS"
+$nameSuffix        = "East"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
@@ -105,8 +105,8 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
 # Artist Workstation #
 ######################
 
-$regionName        = "WestUS2"
-$nameSuffix        = "West"
+$regionName        = "EastUS"
+$nameSuffix        = "East"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
@@ -133,8 +133,8 @@ $virtualMachine = @{
 az group create --name $resourceGroupName --location $regionName
 az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""'
 
-$regionName        = "WestUS2"
-$nameSuffix        = "West"
+$regionName        = "EastUS"
+$nameSuffix        = "East"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv

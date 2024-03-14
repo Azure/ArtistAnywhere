@@ -3,6 +3,7 @@
 ###############################################################################################
 
 resource azurerm_private_dns_zone key_vault {
+  count               = module.global.keyVault.enable ? 1 : 0
   name                = "privatelink.vaultcore.azure.net"
   resource_group_name = azurerm_resource_group.network.name
 }
@@ -19,11 +20,11 @@ resource azurerm_private_dns_zone storage_file {
 
 resource azurerm_private_dns_zone_virtual_network_link key_vault {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.keyVault.enable
   }
   name                  = "key-vault-${lower(each.value.regionName)}"
-  resource_group_name   = azurerm_private_dns_zone.key_vault.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.key_vault.name
+  resource_group_name   = azurerm_private_dns_zone.key_vault[0].resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.key_vault[0].name
   virtual_network_id    = each.value.id
   depends_on = [
     azurerm_virtual_network.studio
@@ -58,24 +59,24 @@ resource azurerm_private_dns_zone_virtual_network_link storage_file {
 
 resource azurerm_private_endpoint key_vault {
   for_each = {
-    for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet
+    for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if module.global.keyVault.enable
   }
-  name                = "${data.azurerm_key_vault.studio.name}-vault"
+  name                = "${data.azurerm_key_vault.studio[0].name}-vault"
   resource_group_name = each.value.resourceGroupName
   location            = each.value.regionName
   subnet_id           = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
   private_service_connection {
-    name                           = data.azurerm_key_vault.studio.name
-    private_connection_resource_id = data.azurerm_key_vault.studio.id
+    name                           = data.azurerm_key_vault.studio[0].name
+    private_connection_resource_id = data.azurerm_key_vault.studio[0].id
     is_manual_connection           = false
     subresource_names = [
       "vault"
     ]
   }
   private_dns_zone_group {
-    name = data.azurerm_key_vault.studio.name
+    name = data.azurerm_key_vault.studio[0].name
     private_dns_zone_ids = [
-      azurerm_private_dns_zone.key_vault.id
+      azurerm_private_dns_zone.key_vault[0].id
     ]
   }
   depends_on = [

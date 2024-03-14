@@ -40,8 +40,8 @@ data azurerm_subnet cache {
 locals {
   vfxtCache = merge({
     cluster = {
-      adminUsername = var.vfxtCache.cluster.adminUsername != "" ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username.value
-      adminPassword = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password.value
+      adminUsername = var.vfxtCache.cluster.adminUsername != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
+      adminPassword = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
     }},
     var.vfxtCache
   )
@@ -55,9 +55,9 @@ module vfxt_controller {
   source                         = "github.com/Azure/Avere/src/terraform/modules/controller3"
   create_resource_group          = false
   resource_group_name            = azurerm_resource_group.cache_region[0].name
-  location                       = module.global.regionName
-  admin_username                 = var.vfxtCache.cluster.adminUsername != "" ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username.value
-  admin_password                 = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password.value
+  location                       = module.global.primaryRegion.name
+  admin_username                 = var.vfxtCache.cluster.adminUsername != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
+  admin_password                 = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
   ssh_key_data                   = var.vfxtCache.cluster.sshPublicKey != "" ? var.vfxtCache.cluster.sshPublicKey : null
   virtual_network_name           = data.azurerm_virtual_network.studio.name
   virtual_network_resource_group = data.azurerm_virtual_network.studio.resource_group_name
@@ -73,7 +73,7 @@ resource avere_vfxt cache {
   count                           = var.enableHPCCache ? 0 : 1
   vfxt_cluster_name               = lower(var.cacheName)
   azure_resource_group            = azurerm_resource_group.cache_region[0].name
-  location                        = module.global.regionName
+  location                        = module.global.primaryRegion.name
   node_cache_size                 = var.vfxtCache.cluster.nodeSize
   vfxt_node_count                 = var.vfxtCache.cluster.nodeCount
   image_id                        = var.vfxtCache.cluster.imageId.node
@@ -82,8 +82,8 @@ resource avere_vfxt cache {
   azure_subnet_name               = data.azurerm_subnet.cache.name
   controller_address              = module.vfxt_controller[count.index].controller_address
   controller_admin_username       = module.vfxt_controller[count.index].controller_username
-  controller_admin_password       = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password.value
-  vfxt_admin_password             = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password.value
+  controller_admin_password       = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
+  vfxt_admin_password             = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
   vfxt_ssh_key_data               = var.vfxtCache.cluster.sshPublicKey != "" ? var.vfxtCache.cluster.sshPublicKey : null
   support_uploads_company_name    = var.vfxtCache.support.companyName
   enable_support_uploads          = var.vfxtCache.support.enableLogUpload

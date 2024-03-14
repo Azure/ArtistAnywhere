@@ -74,6 +74,20 @@ keyVault = {
   ]
 }
 
+######################################################################
+# Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
+######################################################################
+
+monitor = {
+  workspace = {
+    sku = "PerGB2018"
+  }
+  insight = {
+    type = "web"
+  }
+  retentionDays = 90
+}
+
 ###############################################################################################
 # Traffic Manager (https://learn.microsoft.comazure/traffic-manager/traffic-manager-overview) #
 ###############################################################################################
@@ -94,18 +108,4 @@ trafficManager = {
   trafficView = {
     enable = true
   }
-}
-
-######################################################################
-# Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
-######################################################################
-
-monitor = {
-  workspace = {
-    sku = "PerGB2018"
-  }
-  insight = {
-    type = "web"
-  }
-  retentionDays = 90
 }
