@@ -38,6 +38,9 @@ variable noSQL {
           path    = string
           version = number
         })
+        geospatial = object({
+          type = string
+        })
         indexPolicy = object({
           mode          = string
           includedPaths = list(string)

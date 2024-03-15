@@ -6,17 +6,26 @@ resourceGroupName = "ArtistAnywhere.Database" # Alphanumeric, underscores, hyphe
 
 cosmosDB = {
   offerType = "Standard"
+  serverless = {
+    enable = true
+  }
   geoLocations = [
     {
-      regionName       = "EastUS"
-      failoverPriority = 0
+      enable     = true
+      regionName = "EastUS"
+      failover = {
+        priority = 0
+      }
       zoneRedundant = {
         enable = false
       }
     },
     {
-      regionName       = "WestUS"
-      failoverPriority = 1
+      enable     = false
+      regionName = "WestUS"
+      failover = {
+        priority = 1
+      }
       zoneRedundant = {
         enable = false
       }
@@ -73,9 +82,6 @@ cosmosDB = {
   partitionMerge = {
     enable = false
   }
-  serverless = {
-    enable = false
-  }
   doubleEncryption = {
     enable  = false
     keyName = ""
@@ -109,92 +115,7 @@ noSQL = {
   databases = [
     {
       enable = true
-      name   = "Media1"
-      throughput = {
-        requestUnits = 1000
-        autoScale = {
-          enable = true
-        }
-      }
-      containers = [
-        {
-          enable = true
-          name   = "image"
-          throughput = {
-            requestUnits = 1000
-            autoScale = {
-              enable = true
-            }
-          }
-          partitionKey = {
-            path    = "/type"
-            version = 2
-          }
-          indexPolicy = {
-            mode = "consistent"
-            includedPaths = [
-              "/*"
-            ]
-            excludedPaths = [
-            ]
-            composite = [
-              {
-                enable = false
-                paths = [
-                  {
-                    enable = false
-                    path   = ""
-                    order  = "Ascending"
-                  }
-                ]
-              }
-            ]
-            spatial = [
-              {
-                enable = false
-                path   = ""
-              }
-            ]
-          }
-          storedProcedures = [
-            {
-              enable = false
-              name   = "helloCosmos"
-              body   = <<BODY
-                function () {
-                  var context = getContext();
-                  var response = context.getResponse();
-                  response.setBody("Hello Cosmos!");
-                }
-              BODY
-            }
-          ]
-          triggers = [
-            {
-              enable    = false
-              name      = ""
-              type      = "" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_trigger#type
-              operation = "" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_trigger#operation
-              body      = ""
-            }
-          ]
-          functions = [
-            {
-              enable = false
-              name   = ""
-              body   = ""
-            }
-          ]
-          timeToLive = {
-            default   = null
-            analytics = null
-          }
-        }
-      ]
-    },
-    {
-      enable = true
-      name   = "Media2"
+      name   = "Media"
       throughput = {
         requestUnits = null
         autoScale = {
@@ -215,6 +136,9 @@ noSQL = {
             path    = "/type"
             version = 2
           }
+          # geospatial = {
+          #   type = "Geography"
+          # }
           indexPolicy = {
             mode = "consistent"
             includedPaths = [

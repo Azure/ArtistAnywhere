@@ -107,7 +107,7 @@ data azurerm_subnet data_cassandra {
 
 locals {
   writeGeoLocation = one([
-    for geoLocation in var.cosmosDB.geoLocations : geoLocation if geoLocation.failoverPriority == 0
+    for geoLocation in var.cosmosDB.geoLocations : geoLocation if geoLocation.failover.priority == 0
   ])
   writeVirtualNetwork = one([
     for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork if virtualNetwork.regionName == local.writeGeoLocation.regionName

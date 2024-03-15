@@ -5,9 +5,15 @@
 variable cosmosDB {
   type = object({
     offerType = string
+    serverless = object({
+      enable = bool
+    })
     geoLocations = list(object({
-      regionName       = string
-      failoverPriority = number
+      enable     = bool
+      regionName = string
+      failover = object({
+        priority = number
+      })
       zoneRedundant = object({
         enable = bool
       })
@@ -63,9 +69,6 @@ variable cosmosDB {
     partitionMerge = object({
       enable = bool
     })
-    serverless = object({
-      enable = bool
-    })
     doubleEncryption = object({
       enable  = bool
       keyName = string
@@ -85,7 +88,7 @@ data azuread_service_principal cosmos_db {
 }
 
 data azurerm_key_vault_key data_encryption {
-  count        = var.cosmosDB.doubleEncryption.enable && module.global.keyValue.enable ? 1 : 0
+  count        = var.cosmosDB.doubleEncryption.enable && module.global.keyVault.enable ? 1 : 0
   name         = var.cosmosDB.doubleEncryption.keyName != "" ? var.cosmosDB.doubleEncryption.keyName : module.global.keyVault.keyName.dataEncryption
   key_vault_id = data.azurerm_key_vault.studio[0].id
 }
@@ -121,7 +124,7 @@ locals {
 }
 
 resource azurerm_role_assignment key_vault {
-  count                = var.cosmosDB.doubleEncryption.enable && module.global.keyValue.enable ? 1 : 0
+  count                = var.cosmosDB.doubleEncryption.enable && module.global.keyVault.enable ? 1 : 0
   role_definition_name = "Key Vault Crypto Service Encryption User" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#key-vault-crypto-service-encryption-user
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_key_vault.studio[0].id
@@ -164,10 +167,12 @@ resource azurerm_cosmosdb_account studio {
     storage_redundancy  = var.cosmosDB.backup.storageRedundancy
   }
   dynamic geo_location {
-    for_each = var.cosmosDB.geoLocations
+    for_each = {
+      for geoLocation in var.cosmosDB.geoLocations : geoLocation.regionName => geoLocation if geoLocation.enable
+    }
     content {
       location          = geo_location.value["regionName"]
-      failover_priority = geo_location.value["failoverPriority"]
+      failover_priority = geo_location.value["failover"].priority
       zone_redundant    = geo_location.value["zoneRedundant"].enable
     }
   }

@@ -8,13 +8,27 @@ namespace ConsoleApp
   {
     public string? Name { get; set; }
 
-    public string? PartitionKeyPath { get; set; }
+    public CosmosPartitionKey? PartitionKey { get; set; }
+
+    public CosmosGeospatial? Geospatial { get; set; }
 
     public CosmosThroughput? Throughput { get; set; }
 
     public CosmosIndexPolicy? IndexPolicy { get; set; }
 
     public CosmosTimeToLive? TimeToLive { get; set; }
+  }
+
+  public class CosmosPartitionKey
+  {
+    public string? Path { get; set; }
+
+    public string? Version { get; set; }
+  }
+
+  public class CosmosGeospatial
+  {
+    public string? Type { get; set; }
   }
 
   public class CosmosIndexPolicy
@@ -71,10 +85,16 @@ namespace ConsoleApp
       ContainerResponse containerResponse;
       ContainerProperties containerProperties = new() {
         Id = containerConfig.Name,
-        PartitionKeyPath = containerConfig.PartitionKeyPath,
+        PartitionKeyPath = containerConfig.PartitionKey?.Path,
         DefaultTimeToLive = containerConfig.TimeToLive?.Default,
         AnalyticalStoreTimeToLiveInSeconds = containerConfig.TimeToLive?.Analytics
       };
+      if (Enum.TryParse<PartitionKeyDefinitionVersion>(containerConfig.PartitionKey?.Version, out PartitionKeyDefinitionVersion partitionKeyVersion)) {
+        containerProperties.PartitionKeyDefinitionVersion = partitionKeyVersion;
+      }
+      if (Enum.TryParse<GeospatialType>(containerConfig.Geospatial?.Type, out GeospatialType geospatialType)) {
+        containerProperties.GeospatialConfig.GeospatialType = geospatialType;
+      }
       if (Enum.TryParse<IndexingMode>(containerConfig.IndexPolicy?.Mode, out IndexingMode indexingMode)) {
         containerProperties.IndexingPolicy.IndexingMode = indexingMode;
       }

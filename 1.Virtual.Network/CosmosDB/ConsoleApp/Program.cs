@@ -16,7 +16,7 @@ namespace ConsoleApp
 
   public class CosmosThroughput
   {
-    public int RequestUnits { get; set; }
+    public int? RequestUnits { get; set; }
 
     public bool AutoScale { get; set; }
   }
