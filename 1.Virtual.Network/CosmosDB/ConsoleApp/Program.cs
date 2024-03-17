@@ -11,7 +11,7 @@ namespace ConsoleApp
   {
     public string? Endpoint { get; set; }
 
-    public string? AuthKey { get; set; }
+    public string? Key { get; set; }
   }
 
   public class CosmosThroughput
@@ -47,8 +47,8 @@ namespace ConsoleApp
       };
 
       #pragma warning disable CS8602 // Dereference of a possibly null reference.
-      if (account.AuthKey != null) {
-        _cosmosClient = new CosmosClient(account.Endpoint, account.AuthKey, cosmosOptions);
+      if (account.Key != null) {
+        _cosmosClient = new CosmosClient(account.Endpoint, account.Key, cosmosOptions);
       } else {
         DefaultAzureCredentialOptions authTokenOptions = new() {
           ExcludeInteractiveBrowserCredential = true

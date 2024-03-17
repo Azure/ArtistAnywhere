@@ -125,7 +125,7 @@ noSQL = {
       containers = [
         {
           enable = true
-          name   = "image"
+          name   = "Content"
           throughput = {
             requestUnits = null
             autoScale = {
@@ -133,8 +133,10 @@ noSQL = {
             }
           }
           partitionKey = {
-            path    = "/type"
             version = 2
+            paths = [
+             "/tenantId"
+            ]
           }
           # geospatial = {
           #   type = "Geography"

@@ -7,7 +7,11 @@ namespace ConsoleApp
   {
     public string? id { get; set; }
 
-    public string? type { get; set; }
+    public string? tenantId { get; set; }
+
+    public string? userId { get; set; }
+
+    public string? sessionId { get; set; }
 
     public string? data {get; set;}
   }
@@ -33,13 +37,13 @@ namespace ConsoleApp
       return itemResponse.RequestCharge;
     }
 
-    private static async Task<double> ReplaceItemAsync<T>(Container container, PartitionKey? partitionKey, string itemId, T item)
+    private static async Task<double> ReplaceItemAsync<T>(Container container, PartitionKey partitionKey, string itemId, T item)
     {
       ItemResponse<T> itemResponse = await container.ReplaceItemAsync<T>(item, itemId, partitionKey);
       return itemResponse.RequestCharge;
     }
 
-    private static async Task<double> UpsertItemAsync<T>(Container container, PartitionKey? partitionKey, T item)
+    private static async Task<double> UpsertItemAsync<T>(Container container, PartitionKey partitionKey, T item)
     {
       ItemResponse<T> itemResponse = await container.UpsertItemAsync<T>(item, partitionKey);
       return itemResponse.RequestCharge;
@@ -51,14 +55,26 @@ namespace ConsoleApp
       return itemResponse.RequestCharge;
     }
 
-    private static async Task ProcessItemAsync(Container container, string partitionId, string itemId)
+    private static async Task ProcessItemAsync(Container container, CosmosContainer containerConfig, string tenantId, string userId, string sessionId, string itemId)
     {
-      PartitionKey partitionKey = new(partitionId);
       CosmosItem item = new() {
         id = itemId,
-        type = partitionId,
+        tenantId = tenantId,
+        userId = userId,
+        sessionId = sessionId,
         data = DateTime.UtcNow.ToString()
       };
+      PartitionKeyBuilder partitionKeyBuilder = new();
+      partitionKeyBuilder.Add(tenantId);
+      if (containerConfig.PartitionKey != null && containerConfig.PartitionKey.Paths != null) {
+        if (containerConfig.PartitionKey.Paths.Contains("/userId")) {
+          partitionKeyBuilder.Add(userId);
+        }
+        if (containerConfig.PartitionKey.Paths.Contains("/sessionId")) {
+          partitionKeyBuilder.Add(sessionId);
+        }
+      }
+      PartitionKey partitionKey = partitionKeyBuilder.Build();
       double requestCharge;
       if (await ItemExistsAsync<CosmosItem>(container, partitionKey, itemId)) {
         requestCharge = await ReplaceItemAsync<CosmosItem>(container, partitionKey, itemId, item);

@@ -21,9 +21,9 @@ namespace ConsoleApp
 
   public class CosmosPartitionKey
   {
-    public string? Path { get; set; }
-
     public string? Version { get; set; }
+
+    public string[]? Paths { get; set; }
   }
 
   public class CosmosGeospatial
@@ -72,9 +72,16 @@ namespace ConsoleApp
         foreach (CosmosContainer containerConfig in databaseConfig.Containers) {
           Container container = await CreateContainerAsync(database, containerConfig);
           containers.Add(container);
-          string itemId = "1";
-          await ProcessItemAsync(container, "A", itemId);
-          await ProcessItemAsync(container, "B", itemId);
+          string tenantId = "t1";
+          string userId = "u1";
+          string sessionId = "s1";
+          string itemId = "i1";
+          await ProcessItemAsync(container, containerConfig, tenantId, userId, sessionId, itemId);
+          tenantId = "t2";
+          userId = "u1";
+          sessionId = "s1";
+          itemId = "i1";
+          await ProcessItemAsync(container, containerConfig, tenantId, userId, sessionId, itemId);
         }
       }
       return [.. containers];
@@ -85,10 +92,16 @@ namespace ConsoleApp
       ContainerResponse containerResponse;
       ContainerProperties containerProperties = new() {
         Id = containerConfig.Name,
-        PartitionKeyPath = containerConfig.PartitionKey?.Path,
         DefaultTimeToLive = containerConfig.TimeToLive?.Default,
         AnalyticalStoreTimeToLiveInSeconds = containerConfig.TimeToLive?.Analytics
       };
+      if (containerConfig.PartitionKey != null && containerConfig.PartitionKey.Paths != null) {
+        if (containerConfig.PartitionKey.Paths.Length > 1) {
+          containerProperties.PartitionKeyPaths = containerConfig.PartitionKey?.Paths;
+        } else {
+          containerProperties.PartitionKeyPath = containerConfig.PartitionKey?.Paths[0];
+        }
+      }
       if (Enum.TryParse<PartitionKeyDefinitionVersion>(containerConfig.PartitionKey?.Version, out PartitionKeyDefinitionVersion partitionKeyVersion)) {
         containerProperties.PartitionKeyDefinitionVersion = partitionKeyVersion;
       }

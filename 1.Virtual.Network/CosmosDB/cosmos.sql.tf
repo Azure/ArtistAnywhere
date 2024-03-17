@@ -35,8 +35,8 @@ variable noSQL {
           })
         })
         partitionKey = object({
-          path    = string
           version = number
+          paths   = list(string)
         })
         # geospatial = object({
         #   type = string
@@ -218,7 +218,7 @@ resource azurerm_cosmosdb_sql_container no_sql {
   account_name           = azurerm_cosmosdb_account.studio["sql"].name
   database_name          = each.value.databaseName
   throughput             = each.value.throughput.autoScale.enable ? null : each.value.throughput.requestUnits
-  partition_key_path     = each.value.partitionKey.path
+  partition_key_path     = each.value.partitionKey.paths[0]
   partition_key_version  = each.value.partitionKey.version
   analytical_storage_ttl = each.value.timeToLive.analytics
   default_ttl            = each.value.timeToLive.default
