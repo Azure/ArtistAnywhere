@@ -55,10 +55,19 @@ resource azurerm_shared_image studio {
 
 resource azurerm_gallery_application studio {
   for_each = {
-    for appDefinition in var.computeGallery.appDefinitions : appDefinition.name => appDefinition if var.computeGallery.enable && ((var.computeGallery.platform.linux.enable && (appDefinition.type) == "linux") || (var.computeGallery.platform.windows.enable && lower(appDefinition.type) == "windows"))
+    for appDefinition in var.computeGallery.appDefinitions : appDefinition.name => appDefinition if var.computeGallery.enable && ((var.computeGallery.platform.linux.enable && lower(appDefinition.type) == "linux") || (var.computeGallery.platform.windows.enable && lower(appDefinition.type) == "windows"))
   }
   name              = each.value.name
   location          = azurerm_resource_group.image.location
   gallery_id        = azurerm_shared_image_gallery.studio[0].id
   supported_os_type = each.value.type
+}
+
+resource azurerm_marketplace_agreement linux {
+  for_each = {
+    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if var.computeGallery.enable && var.computeGallery.platform.linux.enable && lower(imageDefinition.type) == "linux"
+  }
+  publisher = each.value.publisher
+  offer     = each.value.offer
+  plan      = each.value.sku
 }

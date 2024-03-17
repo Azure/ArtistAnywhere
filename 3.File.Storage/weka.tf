@@ -273,7 +273,7 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     protected_settings = jsonencode({
       script = base64encode(
         templatefile("initialize.sh", {
-          wekaVersion               = "4.2.7.64"
+          wekaVersion               = "4.2.9.28"
           wekaApiToken              = var.weka.apiToken
           wekaClusterName           = var.weka.name.resource
           wekaDataDiskSize          = var.weka.dataDisk.sizeGB

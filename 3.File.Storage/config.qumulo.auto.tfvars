@@ -3,10 +3,9 @@
 #######################################################################################
 
 qumulo = {
-  enable           = false
-  accountName      = "xstudio"
-  initialCapacity  = 100
-  availabilityZone = 1
+  enable          = false
+  accountName     = "xstudio"
+  initialCapacity = 100
   adminLogin = {
     userPassword = ""
   }

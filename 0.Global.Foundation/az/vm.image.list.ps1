@@ -1,24 +1,10 @@
-https://repo.almalinux.org/vault/
-
-az vm image list --publisher AlmaLinux --offer AlmaLinux --sku 9-Gen2 --all
-az vm image list --publisher AlmaLinux --offer AlmaLinux --sku 8-Gen2 --all
-
-az vm image list --publisher AlmaLinux --offer AlmaLinux-x86_64 --sku 9-Gen2 --all
-az vm image list --publisher AlmaLinux --offer AlmaLinux-x86_64 --sku 8-Gen2 --all
-
-uname -r
-4.18.0-477.15.1.el8_8.x86_64
-
-dnf -y upgrade
-4.18.0-513.5.1.el8_9.x86_64
-
 https://download.rockylinux.org/vault/
 
-az vm image list --publisher CIQ --offer Rocky --sku Rocky-9 --all
-az vm image list --publisher CIQ --offer Rocky --sku Rocky-8 --all
+az vm image list --publisher RESF --offer Rocky --all
 
-az vm image list --publisher CIQ --offer Rocky --sku Rocky-8-6 --all
-4.18.0-372.16.1.el8_6.0.1.x86_64
+az vm image list --publisher RESF --offer RockyLinux-x86_64 --sku 8-Base --all
+uname -r
+4.18.0-513.5.1.el8_9.x86_64
 
 az vm image list --publisher MicrosoftWindowsServer --offer WindowsServer --sku 2022-Datacenter-G2 --all
 az vm image list --publisher MicrosoftWindowsDesktop --offer Windows-10 --sku Win10-22H2-Pro-G2 --all

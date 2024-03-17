@@ -20,9 +20,9 @@ computeGallery = {
       name       = "Linux"
       type       = "Linux"
       generation = "V2"
-      publisher  = "AlmaLinux"
-      offer      = "AlmaLinux-x86_64"
-      sku        = "8-Gen2"
+      publisher  = "RESF"
+      offer      = "RockyLinux-x86_64"
+      sku        = "8-Base"
     },
     {
       name       = "WinServer"
@@ -80,55 +80,16 @@ computeGallery = {
 imageBuilder = {
   templates = [
     {
-      name   = "LnxPlatform"
       enable = true
-      source = {
-        imageDefinition = {
-          name    = "Linux"
-          version = "Latest"
-        }
-        imageVersion = {
-          id = ""
-        }
-      }
-      build = {
-        machineType    = ""
-        machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                 # NVIDIA or AMD
-        imageVersion   = "0.0.0"
-        osDiskSizeGB   = 0
-        timeoutMinutes = 120
-        renderEngines = [
-        ]
-        customization = [
-          "systemctl --now disable firewalld",
-          "sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config",
-          "dnf -y install gcc gcc-c++ python3-devel perl openssl cmake git jq nfs-utils",
-          "dnf -y upgrade",
-          "export AZNFS_NONINTERACTIVE_INSTALL=1",
-          "curl -L https://github.com/Azure/AZNFS-mount/releases/download/2.0.3/aznfs_install.sh | bash"
-        ]
-      }
-      distribute = {
-        replicaCount       = 3
-        storageAccountType = "Premium_LRS"
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
-      }
-    },
-    {
       name   = "LnxStorage"
-      enable = true
       source = {
         imageDefinition = {
           name    = "Linux"
           version = "Latest"
         }
-        imageVersion = {
-          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
-        }
+        # imageVersion = {
+        #   id = ""
+        # }
       }
       build = {
         machineType    = "Storage"
@@ -152,16 +113,16 @@ imageBuilder = {
       }
     },
     {
-      name   = "LnxScheduler"
       enable = true
+      name   = "LnxScheduler"
       source = {
         imageDefinition = {
           name    = "Linux"
           version = "Latest"
         }
-        imageVersion = {
-          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
-        }
+        # imageVersion = {
+        #   id = ""
+        # }
       }
       build = {
         machineType    = "Scheduler"
@@ -185,16 +146,16 @@ imageBuilder = {
       }
     },
     {
-      name   = "LnxFarmC"
       enable = true
+      name   = "LnxFarmC"
       source = {
         imageDefinition = {
           name    = "Linux"
           version = "Latest"
         }
-        imageVersion = {
-          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
-        }
+        # imageVersion = {
+        #   id = ""
+        # }
       }
       build = {
         machineType    = "Farm"
@@ -219,16 +180,16 @@ imageBuilder = {
       }
     },
     {
-      name   = "LnxFarmG"
       enable = true
+      name   = "LnxFarmG"
       source = {
         imageDefinition = {
           name    = "Linux"
           version = "Latest"
         }
-        imageVersion = {
-          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
-        }
+        # imageVersion = {
+        #   id = ""
+        # }
       }
       build = {
         machineType    = "Farm"
@@ -254,16 +215,16 @@ imageBuilder = {
       }
     },
     {
-      name   = "LnxArtistN"
       enable = true
+      name   = "LnxArtistN"
       source = {
         imageDefinition = {
           name    = "Linux"
           version = "Latest"
         }
-        imageVersion = {
-          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
-        }
+        # imageVersion = {
+        #   id = ""
+        # }
       }
       build = {
         machineType    = "Workstation"
@@ -289,16 +250,16 @@ imageBuilder = {
       }
     },
     {
-      name   = "LnxArtistA"
       enable = false
+      name   = "LnxArtistA"
       source = {
         imageDefinition = {
           name    = "Linux"
           version = "Latest"
         }
-        imageVersion = {
-          id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
-        }
+        # imageVersion = {
+        #   id = ""
+        # }
       }
       build = {
         machineType    = "Workstation"
@@ -324,16 +285,16 @@ imageBuilder = {
       }
     },
     {
-      name   = "WinScheduler"
       enable = true
+      name   = "WinScheduler"
       source = {
         imageDefinition = {
           name    = "WinServer"
           version = "Latest"
         }
-        imageVersion = {
-          id = ""
-        }
+        # imageVersion = {
+        #   id = ""
+        # }
       }
       build = {
         machineType    = "Scheduler"
@@ -357,16 +318,16 @@ imageBuilder = {
       }
     },
     {
-      name   = "WinFarmC"
       enable = true
+      name   = "WinFarmC"
       source = {
         imageDefinition = {
           name    = "WinFarm"
           version = "Latest"
         }
-        imageVersion = {
-          id = ""
-        }
+        # imageVersion = {
+        #   id = ""
+        # }
       }
       build = {
         machineType    = "Farm"
@@ -391,16 +352,16 @@ imageBuilder = {
       }
     },
     {
-      name   = "WinFarmG"
       enable = true
+      name   = "WinFarmG"
       source = {
         imageDefinition = {
           name    = "WinFarm"
           version = "Latest"
         }
-        imageVersion = {
-          id = ""
-        }
+        # imageVersion = {
+        #   id = ""
+        # }
       }
       build = {
         machineType    = "Farm"
@@ -427,16 +388,16 @@ imageBuilder = {
       }
     },
     {
-      name   = "WinArtistN"
       enable = true
+      name   = "WinArtistN"
       source = {
         imageDefinition = {
           name    = "WinArtist"
           version = "Latest"
         }
-        imageVersion = {
-          id = ""
-        }
+        # imageVersion = {
+        #   id = ""
+        # }
       }
       build = {
         machineType    = "Workstation"
@@ -463,16 +424,16 @@ imageBuilder = {
       }
     },
     {
-      name   = "WinArtistA"
       enable = false
+      name   = "WinArtistA"
       source = {
         imageDefinition = {
           name    = "WinArtist"
           version = "Latest"
         }
-        imageVersion = {
-          id = ""
-        }
+        # imageVersion = {
+        #   id = ""
+        # }
       }
       build = {
         machineType    = "Workstation"
@@ -516,9 +477,19 @@ versionPath = {
   pcoipAgent        = "23.12"
 }
 
-jobDatabase = {
-  host = ""
-  port = 27017 # 10255
+dataPlatform = {
+  adminLogin = {
+    userName     = "xadmin"
+    userPassword = "P@ssword1234"
+  }
+  jobDatabase = {
+    host = ""
+    port = 27017 # 10255
+    serviceLogin = {
+      userName     = "dbuser"
+      userPassword = "P@ssword1234"
+    }
+  }
 }
 
 binStorage = { # Required configuration for image building

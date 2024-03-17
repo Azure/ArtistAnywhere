@@ -26,12 +26,12 @@ $machineType = $buildConfig.machineType
 $gpuProvider = $buildConfig.gpuProvider
 $binStorageHost = $buildConfig.binStorage.host
 $binStorageAuth = $buildConfig.binStorage.auth
-$adminUsername = $buildConfig.dataPlatform.admin.username
-$adminPassword = $buildConfig.dataPlatform.admin.password
-$databaseUsername = $buildConfig.dataPlatform.database.username
-$databasePassword = $buildConfig.dataPlatform.database.password
-$databaseHost = $buildConfig.dataPlatform.database.host
-$databasePort = $buildConfig.dataPlatform.database.port
+# $adminUsername = $buildConfig.dataPlatform.adminLogin.userName
+# $adminPassword = $buildConfig.dataPlatform.adminLogin.userPassword
+# $databaseUsername = $buildConfig.dataPlatform.jobDatabase.serviceLogin.userName
+# $databasePassword = $buildConfig.dataPlatform.jobDatabase.serviceLogin.userPassword
+# $databaseHost = $buildConfig.dataPlatform.jobDatabase.host
+# $databasePort = $buildConfig.dataPlatform.jobDatabase.port
 $renderEngines = $buildConfig.renderEngines
 $enableCosmosDB = $false
 if ($databaseHost -eq "") {
@@ -42,11 +42,11 @@ if ($databaseHost -eq "") {
 }
 Write-Host "Machine Type: $machineType"
 Write-Host "GPU Provider: $gpuProvider"
-Write-Host "Admin Username: $adminUsername"
-Write-Host "Admin Password: $adminPassword"
-Write-Host "Enable CosmosDB: $enableCosmosDB"
-Write-Host "Database Username: $databaseUsername"
-Write-Host "Database Password: $databasePassword"
+# Write-Host "Admin Username: $adminUsername"
+# Write-Host "Admin Password: $adminPassword"
+# Write-Host "Enable CosmosDB: $enableCosmosDB"
+# Write-Host "Database Username: $databaseUsername"
+# Write-Host "Database Password: $databasePassword"
 Write-Host "Database Host: $databaseHost"
 Write-Host "Database Port: $databasePort"
 Write-Host "Render Engines: $renderEngines"

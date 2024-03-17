@@ -10,17 +10,18 @@ touch $aaaProfile
 source /tmp/functions.sh
 
 echo "Customize (Start): Image Build Parameters"
+dnf -y install jq
 buildConfig=$(echo $buildConfigEncoded | base64 -d)
 machineType=$(echo $buildConfig | jq -r .machineType)
 gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
 binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
 binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
-adminUsername=$(echo $buildConfig | jq -r .dataPlatform.admin.username)
-adminPassword=$(echo $buildConfig | jq -r .dataPlatform.admin.password)
-databaseUsername=$(echo $buildConfig | jq -r .dataPlatform.database.username)
-databasePassword=$(echo $buildConfig | jq -r .dataPlatform.database.password)
-databaseHost=$(echo $buildConfig | jq -r .dataPlatform.database.host)
-databasePort=$(echo $buildConfig | jq -r .dataPlatform.database.port)
+adminUsername=$(echo $buildConfig | jq -r .dataPlatform.adminLogin.userName)
+adminPassword=$(echo $buildConfig | jq -r .dataPlatform.adminLogin.userPassword)
+databaseUsername=$(echo $buildConfig | jq -r .dataPlatform.jobDatabase.serviceLogin.userName)
+databasePassword=$(echo $buildConfig | jq -r .dataPlatform.jobDatabase.serviceLogin.userPassword)
+databaseHost=$(echo $buildConfig | jq -r .dataPlatform.jobDatabase.host)
+databasePort=$(echo $buildConfig | jq -r .dataPlatform.jobDatabase.port)
 renderEngines=$(echo $buildConfig | jq -c .renderEngines)
 enableCosmosDB=false
 if [ "$databaseHost" == "" ]; then
@@ -41,7 +42,12 @@ echo "Render Engines: $renderEngines"
 echo "Customize (End): Image Build Parameters"
 
 echo "Customize (Start): Image Build Platform"
-dnf -y install kernel-devel-$(uname -r)
+# systemctl --now disable firewalld
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+dnf -y install gcc gcc-c++ perl cmake git
+dnf -y install kernel-devel-$(uname -r) python3-devel
+export AZNFS_NONINTERACTIVE_INSTALL=1
+curl -L https://github.com/Azure/AZNFS-mount/releases/download/2.0.4/aznfs_install.sh | bash
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): Image Build Platform (Workstation)"
   dnf -y group install workstation

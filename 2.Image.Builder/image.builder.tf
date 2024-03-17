@@ -5,16 +5,16 @@
 variable imageBuilder {
   type = object({
     templates = list(object({
-      name   = string
       enable = bool
+      name   = string
       source = object({
         imageDefinition = object({
           name    = string
           version = string
         })
-        imageVersion = object({
-          id = string
-        })
+        # imageVersion = object({
+        #   id = string
+        # })
       })
       build = object({
         machineType    = string
@@ -55,10 +55,20 @@ variable versionPath {
   })
 }
 
-variable jobDatabase {
+variable dataPlatform {
   type = object({
-    host = string
-    port = number
+    adminLogin = object({
+      userName     = string
+      userPassword = string
+    })
+    jobDatabase = object({
+      host = string
+      port = number
+      serviceLogin = object({
+        userName     = string
+        userPassword = string
+      })
+    })
   })
 }
 
@@ -75,15 +85,17 @@ variable binStorage {
 
 locals {
   dataPlatform = {
-    admin = {
-      username = data.azurerm_key_vault_secret.admin_username.value
-      password = data.azurerm_key_vault_secret.admin_password.value
+    adminLogin = {
+      userName     = var.dataPlatform.adminLogin.userName != "" || !module.global.keyVault.enable ? var.dataPlatform.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
+      userPassword = var.dataPlatform.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.dataPlatform.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
     }
-    database = {
-      username = data.azurerm_key_vault_secret.database_username.value
-      password = data.azurerm_key_vault_secret.database_password.value
-      host     = var.jobDatabase.host
-      port     = var.jobDatabase.port
+    jobDatabase = {
+      host = var.dataPlatform.jobDatabase.host
+      port = var.dataPlatform.jobDatabase.port
+      serviceLogin = {
+        userName     = var.dataPlatform.jobDatabase.serviceLogin.userName != "" || !module.global.keyVault.enable ? var.dataPlatform.jobDatabase.serviceLogin.userName : data.azurerm_key_vault_secret.database_username[0].value
+        userPassword = var.dataPlatform.jobDatabase.serviceLogin.userPassword != "" || !module.global.keyVault.enable ? var.dataPlatform.jobDatabase.serviceLogin.userPassword : data.azurerm_key_vault_secret.database_password[0].value
+      }
     }
   }
 }
@@ -109,9 +121,9 @@ resource azurerm_role_assignment image {
   scope                = azurerm_resource_group.image.id
 }
 
-resource azapi_resource image_builder_linux {
+resource azapi_resource linux {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && var.computeGallery.platform.linux.enable && imageTemplate.enable && lower(imageTemplate.source.imageDefinition.name) == "linux" && imageTemplate.build.imageVersion != "0.0.0"
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && var.computeGallery.platform.linux.enable && imageTemplate.enable && lower(imageTemplate.source.imageDefinition.name) == "linux"
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"
@@ -137,8 +149,16 @@ resource azapi_resource image_builder_linux {
         }
       }
       source = {
-        type           = "SharedImageVersion"
-        imageVersionId = each.value.source.imageVersion.id
+        type      = "PlatformImage"
+        publisher = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].publisher
+        offer     = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].offer
+        sku       = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].sku
+        version   = each.value.source.imageDefinition.version
+        planInfo = {
+          planPublisher = lower(var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].publisher)
+          planProduct   = lower(var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].offer)
+          planName      = lower(var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].sku)
+        }
       }
       optimize = {
         vmBoot = {
@@ -218,14 +238,14 @@ resource azapi_resource image_builder_linux {
     ]
   }
   depends_on = [
+    azurerm_marketplace_agreement.linux,
     azurerm_role_assignment.identity,
     azurerm_role_assignment.network,
-    azurerm_role_assignment.image,
-    terraform_data.image_platform_linux_build
+    azurerm_role_assignment.image
   ]
 }
 
-resource azapi_resource image_builder_windows {
+resource azapi_resource windows {
   for_each = {
     for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && var.computeGallery.platform.windows.enable && imageTemplate.enable && startswith(imageTemplate.source.imageDefinition.name, "Win")
   }

@@ -4,10 +4,9 @@
 
 variable qumulo {
   type = object({
-    enable           = bool
-    accountName      = string
-    initialCapacity  = number
-    availabilityZone = number
+    enable          = bool
+    accountName     = string
+    initialCapacity = number
     adminLogin = object({
       userPassword = string
     })
@@ -45,24 +44,23 @@ resource azurerm_resource_group qumulo {
 resource azapi_resource qumulo {
   count     = var.qumulo.enable ? 1 : 0
   name      = var.qumulo.accountName
-  type      = "Qumulo.Storage/fileSystems@2023-08-29-preview"
+  type      = "Qumulo.Storage/fileSystems@2024-01-30-preview"
   parent_id = azurerm_resource_group.qumulo[0].id
   location  = azurerm_resource_group.qumulo[0].location
   body = jsonencode({
     properties = {
-      storageSku        = "Active"
-      initialCapacity   = var.qumulo.initialCapacity
-      availabilityZone  = tostring(var.qumulo.availabilityZone)
-      delegatedSubnetId = data.azurerm_subnet.storage_qumulo[0].id
-      adminPassword     = var.qumulo.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.qumulo.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
-      userDetails = {
-        email = data.local_file.user[0].content
-      }
       marketplaceDetails = {
         publisherId = "qumulo1584033880660"
         offerId     = "qumulo-saas-mpp"
-        planId      = "azure-native-qumulo-v2"
+        planId      = "azure-native-qumulo-hot-cold-iops-live"
       }
+      userDetails = {
+        email = data.local_file.user[0].content
+      }
+      storageSku        = "Hot"
+      initialCapacity   = var.qumulo.initialCapacity
+      delegatedSubnetId = data.azurerm_subnet.storage_qumulo[0].id
+      adminPassword     = var.qumulo.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.qumulo.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
     }
   })
   schema_validation_enabled = false
