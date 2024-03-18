@@ -30,8 +30,8 @@ $binStorageAuth = $buildConfig.binStorage.auth
 # $adminPassword = $buildConfig.dataPlatform.adminLogin.userPassword
 # $databaseUsername = $buildConfig.dataPlatform.jobDatabase.serviceLogin.userName
 # $databasePassword = $buildConfig.dataPlatform.jobDatabase.serviceLogin.userPassword
-# $databaseHost = $buildConfig.dataPlatform.jobDatabase.host
-# $databasePort = $buildConfig.dataPlatform.jobDatabase.port
+$databaseHost = $buildConfig.dataPlatform.jobDatabase.host
+$databasePort = $buildConfig.dataPlatform.jobDatabase.port
 $renderEngines = $buildConfig.renderEngines
 $enableCosmosDB = $false
 if ($databaseHost -eq "") {
