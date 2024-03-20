@@ -443,7 +443,7 @@ if ($machineType -eq "Workstation") {
   Write-Host "Customize (Start): HP Anyware"
   $versionPath = $buildConfig.versionPath.pcoipAgent
   $processType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
-  $installFile = "${processType}_$versionPath.2.exe"
+  $installFile = "${processType}_$versionPath.exe"
   $downloadUrl = "$binStorageHost/Teradici/$versionPath/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   RunProcess .\$installFile "/S /NoPostReboot /Force" "$binDirectory\$processType"

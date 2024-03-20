@@ -313,7 +313,7 @@ if [ $machineType == Workstation ]; then
   echo "Customize (Start): HP Anyware"
   versionPath=$(echo $buildConfig | jq -r .versionPath.pcoipAgent)
   [ "$gpuProvider" == "" ] && processType="pcoip-agent-standard" || processType="pcoip-agent-graphics"
-  installFile="pcoip-agent-offline-rocky8.8_$versionPath.2-1.el8.x86_64.tar.gz"
+  installFile="pcoip-agent-offline-rocky8.8_$versionPath-1.el8.x86_64.tar.gz"
   downloadUrl="$binStorageHost/Teradici/$versionPath/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   mkdir -p $processType
