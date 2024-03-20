@@ -12,7 +12,7 @@ cosmosDB = {
   geoLocations = [
     {
       enable     = true
-      regionName = "EastUS"
+      regionName = "WestUS2"
       failover = {
         priority = 0
       }
@@ -22,7 +22,7 @@ cosmosDB = {
     },
     {
       enable     = false
-      regionName = "WestUS"
+      regionName = "WestUS3"
       failover = {
         priority = 1
       }
@@ -54,15 +54,15 @@ cosmosDB = {
       authentication = {
         azureADOnly = false
       }
+      adminLogin = {
+        userName     = "xadmin"
+        userPassword = "P@ssword1234"
+      }
       storageAccount = {
         name        = "xstudio1"
         type        = "StorageV2"
         redundancy  = "LRS"
         performance = "Standard"
-      }
-      adminLogin = {
-        userName     = ""
-        userPassword = ""
       }
       doubleEncryption = {
         enable  = false
@@ -306,8 +306,8 @@ mongoDBvCore = {
     tier    = "M30"
     version = "6.0"
     adminLogin = {
-      userName     = ""
-      userPassword = ""
+      userName     = "xadmin"
+      userPassword = "P@ssword1234"
     }
   }
   node = {
@@ -329,6 +329,9 @@ postgreSQL = {
     name         = "xstudio"
     version      = "16"
     versionCitus = "12.1"
+    adminLogin = {
+      userPassword = "P@ssword1234"
+    }
     firewallRules = [
       {
         enable       = false
@@ -336,9 +339,6 @@ postgreSQL = {
         endAddress   = ""
       }
     ]
-    adminLogin = {
-      userPassword = ""
-    }
   }
   node = {
     serverEdition = "MemoryOptimized"
@@ -433,7 +433,7 @@ apacheCassandra = {
     name    = "xstudio"
     version = "4.0"
     adminLogin = {
-      userPassword = ""
+      userPassword = "P@ssword1234"
     }
   }
   datacenter = {

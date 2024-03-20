@@ -57,6 +57,10 @@ variable virtualMachines {
           })
         })
       })
+      monitor = object({
+        enable = bool
+        name   = string
+      })
     })
   }))
 }
@@ -64,6 +68,15 @@ variable virtualMachines {
 locals {
   virtualMachines = [
     for virtualMachine in var.virtualMachines : merge(virtualMachine, {
+      image = {
+        id = virtualMachine.image.id
+        plan = {
+          enable    = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? true : virtualMachine.image.plan.enable
+          publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.publisher : virtualMachine.image.plan.publisher
+          product   = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.offer : virtualMachine.image.plan.product
+          name      = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.sku : virtualMachine.image.plan.name
+        }
+      }
       adminLogin = {
         userName     = virtualMachine.adminLogin.userName != "" || !module.global.keyVault.enable ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
         userPassword = virtualMachine.adminLogin.userPassword != "" || !module.global.keyVault.enable ? virtualMachine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
@@ -71,11 +84,6 @@ locals {
         passwordAuth = {
           disable = virtualMachine.adminLogin.passwordAuth.disable
         }
-      }
-      activeDirectory = {
-        enable        = var.activeDirectory.enable
-        domainName    = var.activeDirectory.domainName
-        adminPassword = var.activeDirectory.adminPassword != "" || !module.global.keyVault.enable ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
       }
     })
   ]
@@ -146,38 +154,6 @@ resource azurerm_linux_virtual_machine scheduler {
   ]
 }
 
-resource azurerm_virtual_machine_extension monitor_linux {
-  for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux"
-  }
-  name                       = "Monitor"
-  type                       = "AzureMonitorLinuxAgent"
-  publisher                  = "Microsoft.Azure.Monitor"
-  type_handler_version       = module.global.monitor.agentVersion.linux
-  automatic_upgrade_enabled  = true
-  auto_upgrade_minor_version = true
-  virtual_machine_id         = "${azurerm_resource_group.scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
-  settings = jsonencode({
-    authentication = {
-      managedIdentity = {
-        identifier-name  = "mi_res_id"
-        identifier-value = data.azurerm_user_assigned_identity.studio.id
-      }
-    }
-  })
-  depends_on = [
-    azurerm_linux_virtual_machine.scheduler
-  ]
-}
-
-resource azurerm_monitor_data_collection_rule_association scheduler_linux {
-  for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && module.global.monitor.enable
-  }
-  target_resource_id          = azurerm_linux_virtual_machine.scheduler[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
-}
-
 resource azurerm_virtual_machine_extension initialize_linux {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.operatingSystem.type) == "linux"
@@ -195,8 +171,40 @@ resource azurerm_virtual_machine_extension initialize_linux {
     )
   })
   depends_on = [
-    azurerm_virtual_machine_extension.monitor_linux
+    azurerm_linux_virtual_machine.scheduler
   ]
+}
+
+resource azurerm_virtual_machine_extension monitor_linux {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && module.global.monitor.enable && virtualMachine.extension.monitor.enable
+  }
+  name                       = each.value.extension.monitor.name
+  type                       = "AzureMonitorLinuxAgent"
+  publisher                  = "Microsoft.Azure.Monitor"
+  type_handler_version       = module.global.monitor.agentVersion.linux
+  automatic_upgrade_enabled  = true
+  auto_upgrade_minor_version = true
+  virtual_machine_id         = "${azurerm_resource_group.scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
+  settings = jsonencode({
+    authentication = {
+      managedIdentity = {
+        identifier-name  = "mi_res_id"
+        identifier-value = data.azurerm_user_assigned_identity.studio.id
+      }
+    }
+  })
+  depends_on = [
+    azurerm_virtual_machine_extension.initialize_linux
+  ]
+}
+
+resource azurerm_monitor_data_collection_rule_association scheduler_linux {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && module.global.monitor.enable && virtualMachine.extension.monitor.enable
+  }
+  target_resource_id          = azurerm_linux_virtual_machine.scheduler[each.value.name].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
 }
 
 resource azurerm_windows_virtual_machine scheduler {
@@ -232,11 +240,35 @@ resource azurerm_windows_virtual_machine scheduler {
   ]
 }
 
+resource azurerm_virtual_machine_extension initialize_windows {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.operatingSystem.type) == "windows"
+  }
+  name                       = each.value.extension.custom.name
+  type                       = "CustomScriptExtension"
+  publisher                  = "Microsoft.Compute"
+  type_handler_version       = "1.10"
+  automatic_upgrade_enabled  = false
+  auto_upgrade_minor_version = true
+  virtual_machine_id         = "${azurerm_resource_group.scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
+  protected_settings = jsonencode({
+    commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
+      templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
+        adminPassword   = each.value.adminLogin.userPassword
+        activeDirectory = var.activeDirectory
+      })), "UTF-16LE"
+    )}"
+  })
+  depends_on = [
+    azurerm_windows_virtual_machine.scheduler
+  ]
+}
+
 resource azurerm_virtual_machine_extension monitor_windows {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && virtualMachine.extension.monitor.enable
   }
-  name                       = "Monitor"
+  name                       = each.value.extension.monitor.name
   type                       = "AzureMonitorWindowsAgent"
   publisher                  = "Microsoft.Azure.Monitor"
   type_handler_version       = module.global.monitor.agentVersion.windows
@@ -252,37 +284,14 @@ resource azurerm_virtual_machine_extension monitor_windows {
     }
   })
   depends_on = [
-    azurerm_windows_virtual_machine.scheduler
+    azurerm_virtual_machine_extension.initialize_windows
   ]
 }
 
 resource azurerm_monitor_data_collection_rule_association scheduler_windows {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && module.global.monitor.enable
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && module.global.monitor.enable && virtualMachine.extension.monitor.enable
   }
   target_resource_id          = azurerm_windows_virtual_machine.scheduler[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
-}
-
-resource azurerm_virtual_machine_extension initialize_windows {
-  for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.operatingSystem.type) == "windows"
-  }
-  name                       = each.value.extension.custom.name
-  type                       = "CustomScriptExtension"
-  publisher                  = "Microsoft.Compute"
-  type_handler_version       = "1.10"
-  automatic_upgrade_enabled  = false
-  auto_upgrade_minor_version = true
-  virtual_machine_id         = "${azurerm_resource_group.scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
-  protected_settings = jsonencode({
-    commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
-      templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
-        activeDirectory = each.value.activeDirectory
-      })), "UTF-16LE"
-    )}"
-  })
-  depends_on = [
-    azurerm_virtual_machine_extension.monitor_windows
-  ]
 }

@@ -23,6 +23,14 @@ variable weka {
         })
       })
     })
+    adminLogin = object({
+      userName     = string
+      userPassword = string
+      sshPublicKey = string
+      passwordAuth = object({
+        disable = bool
+      })
+    })
     network = object({
       acceleration = object({
         enable = bool
@@ -72,14 +80,6 @@ variable weka {
       port        = number
       requestPath = string
     })
-    adminLogin = object({
-      userName     = string
-      userPassword = string
-      sshPublicKey = string
-      passwordAuth = object({
-        disable = bool
-      })
-    })
     license = object({
       key = string
       payGo = object({
@@ -107,18 +107,31 @@ data azurerm_virtual_machine_scale_set weka {
 
 locals {
   weka = merge(var.weka, {
+    machine = {
+      image = {
+        id = var.weka.machine.image.id
+        plan = {
+          enable    = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? true : var.weka.machine.image.plan.enable
+          publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.publisher : var.weka.machine.image.plan.publisher
+          product   = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.offer : var.weka.machine.image.plan.product
+          name      = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.sku : var.weka.machine.image.plan.name
+        }
+      }
+    }
     adminLogin = {
       userName     = var.weka.adminLogin.userName != "" || !module.global.keyVault.enable ? var.weka.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
       userPassword = var.weka.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.weka.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+    }
+    objectTier = {
+      enable  = var.weka.objectTier.enable
+      percent = var.weka.objectTier.percent
+      storage = {
+        accountName   = var.weka.objectTier.storage.accountName != "" ? var.weka.objectTier.storage.accountName : data.azurerm_storage_account.blob.name
+        accountKey    = var.weka.objectTier.storage.accountKey != "" ? var.weka.objectTier.storage.accountKey : data.azurerm_storage_account.blob.primary_access_key
+        containerName = var.weka.objectTier.storage.containerName != "" ? var.weka.objectTier.storage.containerName : "weka"
+      }
     }}
   )
-  wekaObjectTier = merge(var.weka.objectTier, {
-    storage = {
-      accountName   = var.weka.objectTier.storage.accountName != "" ? var.weka.objectTier.storage.accountName : data.azurerm_storage_account.blob.name
-      accountKey    = var.weka.objectTier.storage.accountKey != "" ? var.weka.objectTier.storage.accountKey : data.azurerm_storage_account.blob.primary_access_key
-      containerName = var.weka.objectTier.storage.containerName != "" ? var.weka.objectTier.storage.containerName : "weka"
-    }
-  })
   wekaMachineSize = trimsuffix(trimsuffix(trimprefix(var.weka.machine.size, "Standard_"), "as_v3"), "s_v3")
   wekaMachineSpec = jsonencode(local.wekaMachineSpecs[local.wekaMachineSize])
   wekaMachineSpecs = {
@@ -283,7 +296,7 @@ resource azurerm_linux_virtual_machine_scale_set weka {
           wekaFileSystemScript      = local.wekaFileSystemScript
           wekaFileSystemName        = var.weka.fileSystem.name
           wekaFileSystemAutoScale   = var.weka.fileSystem.autoScale
-          wekaObjectTierPercent     = local.wekaObjectTier.percent
+          wekaObjectTierPercent     = local.weka.objectTier.percent
           wekaTerminateNotification = var.weka.terminateNotification
           wekaAdminPassword         = local.weka.adminLogin.userPassword
           wekaResourceGroupName     = azurerm_resource_group.weka[0].name
@@ -299,11 +312,11 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     ]
   }
   dynamic plan {
-    for_each = var.weka.machine.image.plan.enable ? [1] : []
+    for_each = local.weka.machine.image.plan.enable ? [1] : []
     content {
-      publisher = var.weka.machine.image.plan.publisher
-      product   = var.weka.machine.image.plan.product
-      name      = var.weka.machine.image.plan.name
+      publisher = local.weka.machine.image.plan.publisher
+      product   = local.weka.machine.image.plan.product
+      name      = local.weka.machine.image.plan.name
     }
   }
   dynamic admin_ssh_key {
@@ -414,9 +427,9 @@ resource terraform_data weka_file_system {
       "  source ${local.wekaFileSystemScript}",
       "  fileSystemGroupName=${var.weka.fileSystem.groupName}",
       "  fileSystemAuthRequired=${var.weka.fileSystem.authRequired ? "yes" : "no"}",
-      "  fileSystemContainerName=${local.wekaObjectTier.storage.containerName}",
-      "  if [ ${local.wekaObjectTier.enable} == true ]; then",
-      "    weka fs tier s3 add $fileSystemContainerName --obs-type AZURE --hostname ${local.wekaObjectTier.storage.accountName}.blob.core.windows.net --secret-key ${nonsensitive(local.wekaObjectTier.storage.accountKey)} --access-key-id ${local.wekaObjectTier.storage.accountName} --bucket ${local.wekaObjectTier.storage.containerName} --protocol https --port 443",
+      "  fileSystemContainerName=${local.weka.objectTier.storage.containerName}",
+      "  if [ ${local.weka.objectTier.enable} == true ]; then",
+      "    weka fs tier s3 add $fileSystemContainerName --obs-type AZURE --hostname ${local.weka.objectTier.storage.accountName}.blob.core.windows.net --secret-key ${nonsensitive(local.weka.objectTier.storage.accountKey)} --access-key-id ${local.weka.objectTier.storage.accountName} --bucket ${local.weka.objectTier.storage.containerName} --protocol https --port 443",
       "  fi",
       "  weka fs group create $fileSystemGroupName",
       "  weka fs create $fileSystemName $fileSystemGroupName \"$fileSystemTotalBytes\"B --obs-name $fileSystemContainerName --ssd-capacity \"$fileSystemDriveBytes\"B --auth-required $fileSystemAuthRequired",

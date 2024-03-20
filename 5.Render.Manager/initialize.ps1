@@ -19,6 +19,6 @@ if ("${autoScale.enable}" -ne $false) {
 Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -User System -Force
 
 if ("${activeDirectory.enable}" -eq $true) {
-  $securePassword = ConvertTo-SecureString ${activeDirectory.adminPassword} -AsPlainText -Force
+  $securePassword = ConvertTo-SecureString ${adminPassword} -AsPlainText -Force
   Install-ADDSForest -DomainName "${activeDirectory.domainName}" -SafeModeAdministratorPassword $securePassword -InstallDns -Force
 }

@@ -12,6 +12,14 @@ variable hammerspace {
         size       = string
         count      = number
       })
+      adminLogin = object({
+        userName     = string
+        userPassword = string
+        sshPublicKey = string
+        passwordAuth = object({
+          disable = bool
+        })
+      })
       network = object({
         acceleration = object({
           enable = bool
@@ -27,6 +35,13 @@ variable hammerspace {
         cachingType = string
         sizeGB      = number
       })
+    })
+    data = object({
+      machine = object({
+        namePrefix = string
+        size       = string
+        count      = number
+      })
       adminLogin = object({
         userName     = string
         userPassword = string
@@ -34,13 +49,6 @@ variable hammerspace {
         passwordAuth = object({
           disable = bool
         })
-      })
-    })
-    data = object({
-      machine = object({
-        namePrefix = string
-        size       = string
-        count      = number
       })
       network = object({
         acceleration = object({
@@ -58,14 +66,6 @@ variable hammerspace {
         enableRaid0 = bool
         sizeGB      = number
         count       = number
-      })
-      adminLogin = object({
-        userName     = string
-        userPassword = string
-        sshPublicKey = string
-        passwordAuth = object({
-          disable = bool
-        })
       })
     })
   })

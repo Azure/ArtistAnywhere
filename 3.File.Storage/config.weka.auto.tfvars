@@ -13,13 +13,21 @@ weka = {
     size  = "Standard_L8s_v3"
     count = 6
     image = {
-      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.1.0"
+      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/0.0.0"
       plan = {
         enable    = false
         publisher = ""
         product   = ""
         name      = ""
       }
+    }
+  }
+  adminLogin = {
+    userName     = "xadmin"
+    userPassword = "P@ssword1234"
+    sshPublicKey = "" # "ssh-rsa ..."
+    passwordAuth = {
+      disable = false
     }
   }
   network = {
@@ -70,14 +78,6 @@ weka = {
     protocol    = "http"
     port        = 14000
     requestPath = "/ui"
-  }
-  adminLogin = {
-    userName     = ""
-    userPassword = ""
-    sshPublicKey = "" # "ssh-rsa ..."
-    passwordAuth = {
-      disable = false
-    }
   }
   license = {
     key = ""

@@ -35,6 +35,12 @@ resource azurerm_log_analytics_workspace studio {
   retention_in_days          = var.monitor.retentionDays
   internet_ingestion_enabled = false
   internet_query_enabled     = false
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      azurerm_user_assigned_identity.studio.id
+    ]
+  }
 }
 
 resource azurerm_application_insights studio {
@@ -72,6 +78,9 @@ resource azurerm_monitor_data_collection_endpoint studio {
   lifecycle {
     create_before_destroy = true
   }
+  depends_on = [
+    azurerm_user_assigned_identity.studio
+  ]
 }
 
 resource azurerm_monitor_data_collection_rule studio {

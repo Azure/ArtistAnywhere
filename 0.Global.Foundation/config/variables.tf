@@ -1,6 +1,6 @@
 variable primaryRegion {
   default = {
-    name = "EastUS" # Set Azure region name from "az account list-locations --query [].name"
+    name = "WestUS2" # Set Azure region name from "az account list-locations --query [].name"
   }
 }
 

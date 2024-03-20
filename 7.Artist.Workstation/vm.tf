@@ -17,6 +17,14 @@ variable virtualMachines {
         name      = string
       })
     })
+    adminLogin = object({
+      userName     = string
+      userPassword = string
+      sshPublicKey = string
+      passwordAuth = object({
+        disable = bool
+      })
+    })
     operatingSystem = object({
       type = string
       disk = object({
@@ -31,22 +39,18 @@ variable virtualMachines {
         enable = bool
       })
     })
-    adminLogin = object({
-      userName     = string
-      userPassword = string
-      sshPublicKey = string
-      passwordAuth = object({
-        disable = bool
-      })
-    })
     extension = object({
       custom = object({
-        enable     = bool
-        name       = string
-        fileName   = string
+        enable   = bool
+        name     = string
+        fileName = string
         parameters = object({
           pcoipLicenseKey = string
         })
+      })
+      monitor = object({
+        enable = bool
+        name   = string
       })
     })
   }))
@@ -145,38 +149,6 @@ resource azurerm_linux_virtual_machine workstation {
   ]
 }
 
-resource azurerm_virtual_machine_extension monitor_linux {
-  for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && module.global.monitor.enable
-  }
-  name                       = "Monitor"
-  type                       = "AzureMonitorLinuxAgent"
-  publisher                  = "Microsoft.Azure.Monitor"
-  type_handler_version       = module.global.monitor.agentVersion.linux
-  automatic_upgrade_enabled  = true
-  auto_upgrade_minor_version = true
-  virtual_machine_id         = "${azurerm_resource_group.workstation.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
-  settings = jsonencode({
-    authentication = {
-      managedIdentity = {
-        identifier-name  = "mi_res_id"
-        identifier-value = data.azurerm_user_assigned_identity.studio.id
-      }
-    }
-  })
-  depends_on = [
-    azurerm_linux_virtual_machine.workstation
-  ]
-}
-
-resource azurerm_monitor_data_collection_rule_association workstation_linux {
-  for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && module.global.monitor.enable
-  }
-  target_resource_id          = azurerm_linux_virtual_machine.workstation[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
-}
-
 resource azurerm_virtual_machine_extension initialize_linux {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.operatingSystem.type) == "linux"
@@ -196,13 +168,45 @@ resource azurerm_virtual_machine_extension initialize_linux {
     )
   })
   depends_on = [
-    azurerm_virtual_machine_extension.monitor_linux
+    azurerm_linux_virtual_machine.workstation
   ]
+}
+
+resource azurerm_virtual_machine_extension monitor_linux {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && module.global.monitor.enable && virtualMachine.extension.monitor.enable
+  }
+  name                       = each.value.extension.monitor.name
+  type                       = "AzureMonitorLinuxAgent"
+  publisher                  = "Microsoft.Azure.Monitor"
+  type_handler_version       = module.global.monitor.agentVersion.linux
+  automatic_upgrade_enabled  = true
+  auto_upgrade_minor_version = true
+  virtual_machine_id         = "${azurerm_resource_group.workstation.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
+  settings = jsonencode({
+    authentication = {
+      managedIdentity = {
+        identifier-name  = "mi_res_id"
+        identifier-value = data.azurerm_user_assigned_identity.studio.id
+      }
+    }
+  })
+  depends_on = [
+    azurerm_virtual_machine_extension.initialize_linux
+  ]
+}
+
+resource azurerm_monitor_data_collection_rule_association workstation_linux {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && module.global.monitor.enable && virtualMachine.extension.monitor.enable
+  }
+  target_resource_id          = azurerm_linux_virtual_machine.workstation[each.value.name].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
 }
 
 resource azurerm_windows_virtual_machine workstation {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && module.global.monitor.enable
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows"
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.workstation.name
@@ -230,38 +234,6 @@ resource azurerm_windows_virtual_machine workstation {
   ]
 }
 
-resource azurerm_virtual_machine_extension monitor_windows {
-  for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && module.global.monitor.enable
-  }
-  name                       = "Monitor"
-  type                       = "AzureMonitorWindowsAgent"
-  publisher                  = "Microsoft.Azure.Monitor"
-  type_handler_version       = module.global.monitor.agentVersion.windows
-  automatic_upgrade_enabled  = true
-  auto_upgrade_minor_version = true
-  virtual_machine_id         = "${azurerm_resource_group.workstation.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
-  settings = jsonencode({
-    authentication = {
-      managedIdentity = {
-        identifier-name  = "mi_res_id"
-        identifier-value = data.azurerm_user_assigned_identity.studio.id
-      }
-    }
-  })
-  depends_on = [
-    azurerm_windows_virtual_machine.workstation
-  ]
-}
-
-resource azurerm_monitor_data_collection_rule_association workstation_windows {
-  for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && module.global.monitor.enable
-  }
-  target_resource_id          = azurerm_windows_virtual_machine.workstation[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
-}
-
 resource azurerm_virtual_machine_extension initialize_windows {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.operatingSystem.type) == "windows"
@@ -282,6 +254,38 @@ resource azurerm_virtual_machine_extension initialize_windows {
     )}"
   })
   depends_on = [
-    azurerm_virtual_machine_extension.monitor_windows
+    azurerm_windows_virtual_machine.workstation
   ]
+}
+
+resource azurerm_virtual_machine_extension monitor_windows {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && module.global.monitor.enable && virtualMachine.extension.monitor.enable
+  }
+  name                       = each.value.extension.monitor.name
+  type                       = "AzureMonitorWindowsAgent"
+  publisher                  = "Microsoft.Azure.Monitor"
+  type_handler_version       = module.global.monitor.agentVersion.windows
+  automatic_upgrade_enabled  = true
+  auto_upgrade_minor_version = true
+  virtual_machine_id         = "${azurerm_resource_group.workstation.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
+  settings = jsonencode({
+    authentication = {
+      managedIdentity = {
+        identifier-name  = "mi_res_id"
+        identifier-value = data.azurerm_user_assigned_identity.studio.id
+      }
+    }
+  })
+  depends_on = [
+    azurerm_virtual_machine_extension.initialize_windows
+  ]
+}
+
+resource azurerm_monitor_data_collection_rule_association workstation_windows {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && module.global.monitor.enable && virtualMachine.extension.monitor.enable
+  }
+  target_resource_id          = azurerm_windows_virtual_machine.workstation[each.value.name].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
 }

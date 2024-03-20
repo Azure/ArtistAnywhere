@@ -18,6 +18,14 @@ virtualMachines = [
         name      = ""
       }
     }
+    adminLogin = {
+      userName     = "xadmin"
+      userPassword = "P@ssword1234"
+      sshPublicKey = "" # "ssh-rsa ..."
+      passwordAuth = {
+        disable = false
+      }
+    }
     operatingSystem = {
       type = "Linux"
       disk = {
@@ -32,14 +40,6 @@ virtualMachines = [
         enable = true
       }
       staticIpAddress = ""
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshPublicKey = "" # "ssh-rsa ..."
-      passwordAuth = {
-        disable = false
-      }
     }
     extension = {
       custom = {
@@ -59,19 +59,31 @@ virtualMachines = [
           }
         }
       }
+      monitor = {
+        enable = false
+        name   = "Monitor"
+      }
     }
   },
   {
     enable = false
     name   = "WinScheduler"
-      size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      image = {
+    size   = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    image = {
       id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinServer/versions/1.0.0"
       plan = {
         enable    = false
         publisher = ""
         product   = ""
         name      = ""
+      }
+    }
+    adminLogin = {
+      userName     = "xadmin"
+      userPassword = "P@ssword1234"
+      sshPublicKey = "" # "ssh-rsa ..."
+      passwordAuth = {
+        disable = false
       }
     }
     operatingSystem = {
@@ -88,14 +100,6 @@ virtualMachines = [
         enable = true
       }
       staticIpAddress = "10.0.127.0"
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshPublicKey = "" # "ssh-rsa ..."
-      passwordAuth = {
-        disable = false
-      }
     }
     extension = {
       custom = {
@@ -115,6 +119,10 @@ virtualMachines = [
           }
         }
       }
+      monitor = {
+        enable = false
+        name   = "Monitor"
+      }
     }
   }
 ]
@@ -133,9 +141,8 @@ dnsRecord = {
 ###############################################################################################################
 
 activeDirectory = {
-  enable        = true
-  domainName    = "artist.studio"
-  adminPassword = ""
+  enable     = true
+  domainName = "artist.studio"
 }
 
 #######################################################################

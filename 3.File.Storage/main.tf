@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.95.0"
+      version = "~>3.96.0"
     }
     azapi = {
       source = "azure/azapi"
@@ -15,7 +15,7 @@ terraform {
     }
     local = {
       source  = "hashicorp/local"
-      version = "~>2.4.1"
+      version = "~>2.5.1"
     }
   }
   backend azurerm {
@@ -112,6 +112,16 @@ data terraform_remote_state network {
     storage_account_name = module.global.rootStorage.accountName
     container_name       = module.global.rootStorage.containerName.terraformState
     key                  = "1.Virtual.Network"
+  }
+}
+
+data terraform_remote_state image {
+  backend = "azurerm"
+  config = {
+    resource_group_name  = module.global.resourceGroupName
+    storage_account_name = module.global.rootStorage.accountName
+    container_name       = module.global.rootStorage.containerName.terraformState
+    key                  = "2.Image.Builder"
   }
 }
 

@@ -7,6 +7,6 @@ qumulo = {
   accountName     = "xstudio"
   initialCapacity = 100
   adminLogin = {
-    userPassword = ""
+    userPassword = "P@ssword1234"
   }
 }

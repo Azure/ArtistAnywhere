@@ -2,8 +2,8 @@
 # Platform #
 ############
 
-$regionName        = "EastUS"
-$nameSuffix        = "East"
+$regionName        = "WestUS2"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
@@ -31,8 +31,8 @@ az vm create --resource-group $resourceGroupName --name $virtualMachine.name --s
 # Storage #
 ###########
 
-$regionName        = "EastUS"
-$nameSuffix        = "East"
+$regionName        = "WestUS2"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
@@ -70,8 +70,8 @@ for ($i = 1; $i -le $virtualMachine.dataDisk.count; $i++) {
 # Job Scheduler #
 #################
 
-$regionName        = "EastUS"
-$nameSuffix        = "East"
+$regionName        = "WestUS2"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
@@ -99,8 +99,8 @@ az vm create --resource-group $resourceGroupName --name $virtualMachine.name --s
 # Render Farm #
 ###############
 
-$regionName        = "EastUS"
-$nameSuffix        = "East"
+$regionName        = "WestUS2"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
@@ -134,8 +134,8 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
   az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""' --priority $virtualMachine.priorityMode --eviction-policy $virtualMachine.evictionPolicy
 }
 
-$regionName        = "EastUS"
-$nameSuffix        = "East"
+$regionName        = "WestUS2"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
@@ -173,8 +173,8 @@ if ($virtualMachine.osDisk.ephemeral.enable) {
 # Artist Workstation #
 ######################
 
-$regionName        = "EastUS"
-$nameSuffix        = "East"
+$regionName        = "WestUS2"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
@@ -201,8 +201,8 @@ $virtualMachine = @{
 az group create --name $resourceGroupName --location $regionName
 az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""'
 
-$regionName        = "EastUS"
-$nameSuffix        = "East"
+$regionName        = "WestUS2"
+$nameSuffix        = "West"
 $resourceGroupName = "AAA"
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv

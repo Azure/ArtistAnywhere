@@ -4,8 +4,7 @@
 
 variable computeGallery {
   type = object({
-    name   = string
-    enable = bool
+    name = string
     platform = object({
       linux = object({
         enable = bool
@@ -30,7 +29,6 @@ variable computeGallery {
 }
 
 resource azurerm_shared_image_gallery studio {
-  count               = var.computeGallery.enable ? 1 : 0
   name                = var.computeGallery.name
   resource_group_name = azurerm_resource_group.image.name
   location            = azurerm_resource_group.image.location
@@ -38,12 +36,12 @@ resource azurerm_shared_image_gallery studio {
 
 resource azurerm_shared_image studio {
   for_each = {
-    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if var.computeGallery.enable && ((var.computeGallery.platform.linux.enable && lower(imageDefinition.type) == "linux") || (var.computeGallery.platform.windows.enable && lower(imageDefinition.type) == "windows"))
+    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if (var.computeGallery.platform.linux.enable && lower(imageDefinition.type) == "linux") || (var.computeGallery.platform.windows.enable && lower(imageDefinition.type) == "windows")
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.image.name
   location            = azurerm_resource_group.image.location
-  gallery_name        = azurerm_shared_image_gallery.studio[0].name
+  gallery_name        = azurerm_shared_image_gallery.studio.name
   hyper_v_generation  = each.value.generation
   os_type             = each.value.type
   identifier {
@@ -55,19 +53,27 @@ resource azurerm_shared_image studio {
 
 resource azurerm_gallery_application studio {
   for_each = {
-    for appDefinition in var.computeGallery.appDefinitions : appDefinition.name => appDefinition if var.computeGallery.enable && ((var.computeGallery.platform.linux.enable && lower(appDefinition.type) == "linux") || (var.computeGallery.platform.windows.enable && lower(appDefinition.type) == "windows"))
+    for appDefinition in var.computeGallery.appDefinitions : appDefinition.name => appDefinition if (var.computeGallery.platform.linux.enable && lower(appDefinition.type) == "linux") || (var.computeGallery.platform.windows.enable && lower(appDefinition.type) == "windows")
   }
   name              = each.value.name
   location          = azurerm_resource_group.image.location
-  gallery_id        = azurerm_shared_image_gallery.studio[0].id
+  gallery_id        = azurerm_shared_image_gallery.studio.id
   supported_os_type = each.value.type
 }
 
 resource azurerm_marketplace_agreement linux {
   for_each = {
-    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if var.computeGallery.enable && var.computeGallery.platform.linux.enable && lower(imageDefinition.type) == "linux"
+    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if var.computeGallery.platform.linux.enable && lower(imageDefinition.type) == "linux"
   }
   publisher = each.value.publisher
   offer     = each.value.offer
   plan      = each.value.sku
+}
+
+output linuxPlan {
+  value = {
+    publisher = lower(azurerm_marketplace_agreement.linux["Linux"].publisher)
+    offer     = lower(azurerm_marketplace_agreement.linux["Linux"].offer)
+    sku       = lower(azurerm_marketplace_agreement.linux["Linux"].plan)
+  }
 }

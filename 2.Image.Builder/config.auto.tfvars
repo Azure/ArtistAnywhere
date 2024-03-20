@@ -5,8 +5,7 @@ resourceGroupName = "ArtistAnywhere.Image" # Alphanumeric, underscores, hyphens,
 ###############################################################################################
 
 computeGallery = {
-  name   = "xstudio"
-  enable = true
+  name = "xstudio"
   platform = {
     linux = {
       enable = true
@@ -95,7 +94,7 @@ imageBuilder = {
         machineType    = "Storage"
         machineSize    = "Standard_L8s_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
-        imageVersion   = "0.1.0"
+        imageVersion   = "0.0.0"
         osDiskSizeGB   = 0
         timeoutMinutes = 120
         renderEngines = [
@@ -129,7 +128,7 @@ imageBuilder = {
         machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "1.0.0"
-        osDiskSizeGB   = 0
+        osDiskSizeGB   = 30
         timeoutMinutes = 120
         renderEngines = [
         ]
@@ -474,7 +473,7 @@ versionPath = {
   renderUnreal      = "5.3.2"
   renderUnrealPixel = "5.3-1.0.1"
   jobScheduler      = "10.3.1.4"
-  pcoipAgent        = "23.12"
+  pcoipAgent        = "23.12.8"
 }
 
 dataPlatform = {

@@ -41,15 +41,15 @@ variable cosmosDB {
         authentication = object({
           azureADOnly = bool
         })
+        adminLogin = object({
+          userName     = string
+          userPassword = string
+        })
         storageAccount = object({
           name        = string
           type        = string
           redundancy  = string
           performance = string
-        })
-        adminLogin = object({
-          userName     = string
-          userPassword = string
         })
         doubleEncryption = object({
           enable  = bool

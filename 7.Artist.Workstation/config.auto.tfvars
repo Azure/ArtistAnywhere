@@ -19,6 +19,14 @@ virtualMachines = [
         name      = ""
       }
     }
+    adminLogin = {
+      userName     = "xadmin"
+      userPassword = "P@ssword1234"
+      sshPublicKey = "" # "ssh-rsa ..."
+      passwordAuth = {
+        disable = false
+      }
+    }
     operatingSystem = {
       type = "Linux"
       disk = {
@@ -31,14 +39,6 @@ virtualMachines = [
       subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
-      }
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshPublicKey = "" # "ssh-rsa ..."
-      passwordAuth = {
-        disable = false
       }
     }
     extension = {
@@ -66,6 +66,14 @@ virtualMachines = [
         name      = ""
       }
     }
+    adminLogin = {
+      userName     = "xadmin"
+      userPassword = "P@ssword1234"
+      sshPublicKey = "" # "ssh-rsa ..."
+      passwordAuth = {
+        disable = false
+      }
+    }
     operatingSystem = {
       type = "Linux"
       disk = {
@@ -80,14 +88,6 @@ virtualMachines = [
         enable = true
       }
     }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshPublicKey = "" # "ssh-rsa ..."
-      passwordAuth = {
-        disable = false
-      }
-    }
     extension = {
       custom = {
         enable   = true
@@ -96,6 +96,10 @@ virtualMachines = [
         parameters = {
           pcoipLicenseKey = ""
         }
+      }
+      monitor = {
+        enable = false
+        name   = "Monitor"
       }
     }
   },
@@ -113,6 +117,14 @@ virtualMachines = [
         name      = ""
       }
     }
+    adminLogin = {
+      userName     = "xadmin"
+      userPassword = "P@ssword1234"
+      sshPublicKey = "" # "ssh-rsa ..."
+      passwordAuth = {
+        disable = false
+      }
+    }
     operatingSystem = {
       type = "Windows"
       disk = {
@@ -127,14 +139,6 @@ virtualMachines = [
         enable = true
       }
     }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshPublicKey = "" # "ssh-rsa ..."
-      passwordAuth = {
-        disable = false
-      }
-    }
     extension = {
       custom = {
         enable   = true
@@ -143,6 +147,10 @@ virtualMachines = [
         parameters = {
           pcoipLicenseKey = ""
         }
+      }
+      monitor = {
+        enable = false
+        name   = "Monitor"
       }
     }
   },
@@ -160,6 +168,14 @@ virtualMachines = [
         name      = ""
       }
     }
+    adminLogin = {
+      userName     = "xadmin"
+      userPassword = "P@ssword1234"
+      sshPublicKey = "" # "ssh-rsa ..."
+      passwordAuth = {
+        disable = false
+      }
+    }
     operatingSystem = {
       type = "Windows"
       disk = {
@@ -172,14 +188,6 @@ virtualMachines = [
       subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
-      }
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshPublicKey = "" # "ssh-rsa ..."
-      passwordAuth = {
-        disable = false
       }
     }
     extension = {

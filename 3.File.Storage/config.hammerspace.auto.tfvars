@@ -11,6 +11,14 @@ hammerspace = {
       size       = "Standard_E4as_v4"
       count      = 1 # Set to 2 (or more) to enable high availability
     }
+    adminLogin = {
+      userName     = "xadmin"
+      userPassword = "P@ssword1234"
+      sshPublicKey = "" # "ssh-rsa ..."
+      passwordAuth = {
+        disable = false
+      }
+    }
     network = {
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
@@ -26,20 +34,20 @@ hammerspace = {
       cachingType = "None"
       sizeGB      = 256
     }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshPublicKey = "" # "ssh-rsa ..."
-      passwordAuth = {
-        disable = false
-      }
-    }
   }
   data = {
     machine = {
       namePrefix = "DSX"
       size       = "Standard_F2s_v2"
       count      = 2
+    }
+    adminLogin = {
+      userName     = "xadmin"
+      userPassword = "P@ssword1234"
+      sshPublicKey = "" # "ssh-rsa ..."
+      passwordAuth = {
+        disable = false
+      }
     }
     network = {
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -57,14 +65,6 @@ hammerspace = {
       enableRaid0 = false
       sizeGB      = 256
       count       = 2
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshPublicKey = "" # "ssh-rsa ..."
-      passwordAuth = {
-        disable = false
-      }
     }
   }
 }

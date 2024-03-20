@@ -101,21 +101,18 @@ locals {
 }
 
 resource azurerm_role_assignment identity {
-  count                = var.computeGallery.enable ? 1 : 0
   role_definition_name = "Managed Identity Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#managed-identity-operator
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_user_assigned_identity.studio.id
 }
 
 resource azurerm_role_assignment network {
-  count                = var.computeGallery.enable ? 1 : 0
   role_definition_name = "Virtual Machine Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#virtual-machine-contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_resource_group.network.id
 }
 
 resource azurerm_role_assignment image {
-  count                = var.computeGallery.enable ? 1 : 0
   role_definition_name = "Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = azurerm_resource_group.image.id
@@ -123,7 +120,7 @@ resource azurerm_role_assignment image {
 
 resource azapi_resource linux {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && var.computeGallery.platform.linux.enable && imageTemplate.enable && lower(imageTemplate.source.imageDefinition.name) == "linux"
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.platform.linux.enable && imageTemplate.enable && lower(imageTemplate.source.imageDefinition.name) == "linux"
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"
@@ -247,7 +244,7 @@ resource azapi_resource linux {
 
 resource azapi_resource windows {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.enable && var.computeGallery.platform.windows.enable && imageTemplate.enable && startswith(imageTemplate.source.imageDefinition.name, "Win")
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.platform.windows.enable && imageTemplate.enable && startswith(imageTemplate.source.imageDefinition.name, "Win")
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"

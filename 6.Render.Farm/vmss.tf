@@ -20,6 +20,14 @@ variable virtualMachineScaleSets {
         })
       })
     })
+    adminLogin = object({
+      userName     = string
+      userPassword = string
+      sshPublicKey = string
+      passwordAuth = object({
+        disable = bool
+      })
+    })
     operatingSystem = object({
       type = string
       disk = object({
@@ -46,30 +54,28 @@ variable virtualMachineScaleSets {
         enable = bool
       })
     })
-    adminLogin = object({
-      userName     = string
-      userPassword = string
-      sshPublicKey = string
-      passwordAuth = object({
-        disable = bool
-      })
-    })
     extension = object({
-      health = object({
-        protocol    = string
-        port        = number
-        requestPath = string
-      })
       custom = object({
-        enable     = bool
-        name       = string
-        fileName   = string
+        enable   = bool
+        name     = string
+        fileName = string
         parameters = object({
           terminateNotification = object({
             enable       = bool
             delayTimeout = string
           })
         })
+      })
+      health = object({
+        enable      = bool
+        name        = string
+        protocol    = string
+        port        = number
+        requestPath = string
+      })
+      monitor = object({
+        enable = bool
+        name   = string
       })
     })
     flexibleOrchestration = object({
@@ -88,6 +94,20 @@ locals {
   ]
   virtualMachineScaleSets = [
     for virtualMachineScaleSet in var.virtualMachineScaleSets : merge(virtualMachineScaleSet, {
+      machine = {
+        namePrefix = virtualMachineScaleSet.machine.namePrefix
+        size       = virtualMachineScaleSet.machine.size
+        count      = virtualMachineScaleSet.machine.count
+        image = {
+          id = virtualMachineScaleSet.machine.image.id
+          plan = {
+            enable    = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? true : virtualMachineScaleSet.machine.image.plan.enable
+            publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.publisher : virtualMachineScaleSet.machine.image.plan.publisher
+            product   = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.offer : virtualMachineScaleSet.machine.image.plan.product
+            name      = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.sku : virtualMachineScaleSet.machine.image.plan.name
+          }
+        }
+      }
       adminLogin = {
         userName     = virtualMachineScaleSet.adminLogin.userName != "" || !module.global.keyVault.enable ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
         userPassword = virtualMachineScaleSet.adminLogin.userPassword != "" || !module.global.keyVault.enable ? virtualMachineScaleSet.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
@@ -126,6 +146,12 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   eviction_policy                 = each.value.spot.enable ? each.value.spot.evictionPolicy : null
   single_placement_group          = false
   overprovision                   = false
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
+  }
   network_interface {
     name    = each.value.name
     primary = true
@@ -148,43 +174,13 @@ resource azurerm_linux_virtual_machine_scale_set farm {
       }
     }
   }
-  identity {
-    type = "UserAssigned"
-    identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
-    ]
-  }
-  extension {
-    name                       = "Health"
-    type                       = "ApplicationHealthLinux"
-    publisher                  = "Microsoft.ManagedServices"
-    type_handler_version       = "1.0"
-    automatic_upgrade_enabled  = true
-    auto_upgrade_minor_version = true
-    settings = jsonencode({
-      protocol    = each.value.extension.health.protocol
-      port        = each.value.extension.health.port
-      requestPath = each.value.extension.health.requestPath
-    })
-  }
-  extension {
-    name                       = "Monitor"
-    type                       = "AzureMonitorLinuxAgent"
-    publisher                  = "Microsoft.Azure.Monitor"
-    type_handler_version       = module.global.monitor.agentVersion.linux
-    automatic_upgrade_enabled  = true
-    auto_upgrade_minor_version = true
-    settings = jsonencode({
-      authentication = {
-        managedIdentity = {
-          identifier-name  = "mi_res_id"
-          identifier-value = data.azurerm_user_assigned_identity.studio.id
-        }
-      }
-    })
-    provision_after_extensions = [
-      "Health"
-    ]
+  dynamic plan {
+    for_each = each.value.machine.image.plan.enable ? [1] : []
+    content {
+      publisher = each.value.machine.image.plan.publisher
+      product   = each.value.machine.image.plan.product
+      name      = each.value.machine.image.plan.name
+    }
   }
   dynamic extension {
     for_each = each.value.extension.custom.enable ? [1] : []
@@ -202,17 +198,41 @@ resource azurerm_linux_virtual_machine_scale_set farm {
           }))
         )
       })
-      provision_after_extensions = [
-        "Monitor"
-      ]
     }
   }
-  dynamic plan {
-    for_each = each.value.machine.image.plan.enable ? [1] : []
+  dynamic extension {
+    for_each = each.value.extension.health.enable ? [1] : []
     content {
-      publisher = each.value.machine.image.plan.publisher
-      product   = each.value.machine.image.plan.product
-      name      = each.value.machine.image.plan.name
+      name                       = each.value.extension.health.name
+      type                       = "ApplicationHealthLinux"
+      publisher                  = "Microsoft.ManagedServices"
+      type_handler_version       = "1.0"
+      automatic_upgrade_enabled  = true
+      auto_upgrade_minor_version = true
+      settings = jsonencode({
+        protocol    = each.value.extension.health.protocol
+        port        = each.value.extension.health.port
+        requestPath = each.value.extension.health.requestPath
+      })
+    }
+  }
+  dynamic extension {
+    for_each = module.global.monitor.enable && each.value.extension.monitor.enable ? [1] : []
+    content {
+      name                       = each.value.extension.monitor.name
+      type                       = "AzureMonitorLinuxAgent"
+      publisher                  = "Microsoft.Azure.Monitor"
+      type_handler_version       = module.global.monitor.agentVersion.linux
+      automatic_upgrade_enabled  = true
+      auto_upgrade_minor_version = true
+      settings = jsonencode({
+        authentication = {
+          managedIdentity = {
+            identifier-name  = "mi_res_id"
+            identifier-value = data.azurerm_user_assigned_identity.studio.id
+          }
+        }
+      })
     }
   }
   dynamic admin_ssh_key {
@@ -240,7 +260,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm_linux {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexibleOrchestration.enable && module.global.monitor.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexibleOrchestration.enable && module.global.monitor.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_linux_virtual_machine_scale_set.farm[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
@@ -263,6 +283,12 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   eviction_policy        = each.value.spot.enable ? each.value.spot.evictionPolicy : null
   single_placement_group = false
   overprovision          = false
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
+  }
   network_interface {
     name    = each.value.name
     primary = true
@@ -285,44 +311,6 @@ resource azurerm_windows_virtual_machine_scale_set farm {
       }
     }
   }
-  identity {
-    type = "UserAssigned"
-    identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
-    ]
-  }
-  extension {
-    name                       = "Health"
-    type                       = "ApplicationHealthWindows"
-    publisher                  = "Microsoft.ManagedServices"
-    type_handler_version       = "1.0"
-    automatic_upgrade_enabled  = true
-    auto_upgrade_minor_version = true
-    settings = jsonencode({
-      protocol    = each.value.extension.health.protocol
-      port        = each.value.extension.health.port
-      requestPath = each.value.extension.health.requestPath
-    })
-  }
-  extension {
-    name                       = "Monitor"
-    type                       = "AzureMonitorWindowsAgent"
-    publisher                  = "Microsoft.Azure.Monitor"
-    type_handler_version       = module.global.monitor.agentVersion.windows
-    automatic_upgrade_enabled  = true
-    auto_upgrade_minor_version = true
-    settings = jsonencode({
-      authentication = {
-        managedIdentity = {
-          identifier-name  = "mi_res_id"
-          identifier-value = data.azurerm_user_assigned_identity.studio.id
-        }
-      }
-    })
-    provision_after_extensions = [
-      "Health"
-    ]
-  }
   dynamic extension {
     for_each = each.value.extension.custom.enable ? [1] : []
     content {
@@ -340,9 +328,41 @@ resource azurerm_windows_virtual_machine_scale_set farm {
           })), "UTF-16LE"
         )}"
       })
-      provision_after_extensions = [
-        "Monitor"
-      ]
+    }
+  }
+  dynamic extension {
+    for_each = each.value.extension.health.enable ? [1] : []
+    content {
+      name                       = each.value.extension.health.name
+      type                       = "ApplicationHealthWindows"
+      publisher                  = "Microsoft.ManagedServices"
+      type_handler_version       = "1.0"
+      automatic_upgrade_enabled  = true
+      auto_upgrade_minor_version = true
+      settings = jsonencode({
+        protocol    = each.value.extension.health.protocol
+        port        = each.value.extension.health.port
+        requestPath = each.value.extension.health.requestPath
+      })
+    }
+  }
+  dynamic extension {
+    for_each = module.global.monitor.enable && each.value.extension.monitor.enable ? [1] : []
+    content {
+      name                       = each.value.extension.monitor.name
+      type                       = "AzureMonitorWindowsAgent"
+      publisher                  = "Microsoft.Azure.Monitor"
+      type_handler_version       = module.global.monitor.agentVersion.windows
+      automatic_upgrade_enabled  = true
+      auto_upgrade_minor_version = true
+      settings = jsonencode({
+        authentication = {
+          managedIdentity = {
+            identifier-name  = "mi_res_id"
+            identifier-value = data.azurerm_user_assigned_identity.studio.id
+          }
+        }
+      })
     }
   }
   dynamic termination_notification {
@@ -363,7 +383,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm_windows {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexibleOrchestration.enable && module.global.monitor.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexibleOrchestration.enable && module.global.monitor.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_windows_virtual_machine_scale_set.farm[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
@@ -436,35 +456,13 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
       }
     }
   }
-  extension {
-    name                               = "Health"
-    type                               = lower(each.value.operatingSystem.type) == "windows" ? "ApplicationHealthWindows" : "ApplicationHealthLinux"
-    publisher                          = "Microsoft.ManagedServices"
-    type_handler_version               = "1.0"
-    auto_upgrade_minor_version_enabled = true
-    settings = jsonencode({
-      protocol    = each.value.extension.health.protocol
-      port        = each.value.extension.health.port
-      requestPath = each.value.extension.health.requestPath
-    })
-  }
-  extension {
-    name                               = "Monitor"
-    type                               = lower(each.value.operatingSystem.type) == "windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
-    publisher                          = "Microsoft.Azure.Monitor"
-    type_handler_version               = lower(each.value.operatingSystem.type) == "windows" ? module.global.monitor.agentVersion.windows : module.global.monitor.agentVersion.linux
-    auto_upgrade_minor_version_enabled = true
-    settings = jsonencode({
-      authentication = {
-        managedIdentity = {
-          identifier-name  = "mi_res_id"
-          identifier-value = data.azurerm_user_assigned_identity.studio.id
-        }
-      }
-    })
-    # extensions_to_provision_after_vm_creation = [
-    #   "Health"
-    # ]
+  dynamic plan {
+    for_each = each.value.machine.image.plan.enable ? [1] : []
+    content {
+      publisher = each.value.machine.image.plan.publisher
+      product   = each.value.machine.image.plan.product
+      name      = each.value.machine.image.plan.name
+    }
   }
   dynamic extension {
     for_each = each.value.extension.custom.enable ? [1] : []
@@ -487,17 +485,39 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
           })), "UTF-16LE"
         )}" : null
       })
-      # extensions_to_provision_after_vm_creation = [
-      #   "Monitor"
-      # ]
     }
   }
-  dynamic plan {
-    for_each = each.value.machine.image.plan.enable ? [1] : []
+  dynamic extension {
+    for_each = each.value.extension.health.enable ? [1] : []
     content {
-      publisher = each.value.machine.image.plan.publisher
-      product   = each.value.machine.image.plan.product
-      name      = each.value.machine.image.plan.name
+      name                               = each.value.extension.health.name
+      type                               = lower(each.value.operatingSystem.type) == "windows" ? "ApplicationHealthWindows" : "ApplicationHealthLinux"
+      publisher                          = "Microsoft.ManagedServices"
+      type_handler_version               = "1.0"
+      auto_upgrade_minor_version_enabled = true
+      settings = jsonencode({
+        protocol    = each.value.extension.health.protocol
+        port        = each.value.extension.health.port
+        requestPath = each.value.extension.health.requestPath
+      })
+    }
+  }
+  dynamic extension {
+    for_each = module.global.monitor.enable && each.value.extension.monitor.enable ? [1] : []
+    content {
+      name                               = each.value.extension.monitor.name
+      type                               = lower(each.value.operatingSystem.type) == "windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
+      publisher                          = "Microsoft.Azure.Monitor"
+      type_handler_version               = lower(each.value.operatingSystem.type) == "windows" ? module.global.monitor.agentVersion.windows : module.global.monitor.agentVersion.linux
+      auto_upgrade_minor_version_enabled = true
+      settings = jsonencode({
+        authentication = {
+          managedIdentity = {
+            identifier-name  = "mi_res_id"
+            identifier-value = data.azurerm_user_assigned_identity.studio.id
+          }
+        }
+      })
     }
   }
   dynamic termination_notification {
@@ -511,7 +531,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexibleOrchestration.enable && module.global.monitor.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexibleOrchestration.enable && module.global.monitor.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.farm[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
