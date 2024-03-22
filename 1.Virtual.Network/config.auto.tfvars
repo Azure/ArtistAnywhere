@@ -8,7 +8,7 @@ virtualNetworks = [
   {
     enable     = true
     name       = "Studio"
-    nameSuffix = "West2"
+    nameSuffix = "West"
     regionName = ""
     addressSpace = [
       "10.0.0.0/16"
@@ -126,8 +126,8 @@ virtualNetworks = [
   {
     enable     = true
     name       = "Studio"
-    nameSuffix = "West3"
-    regionName = "WestUS3"
+    nameSuffix = "East"
+    regionName = "EastUS"
     addressSpace = [
       "10.1.0.0/16"
     ]
@@ -328,4 +328,12 @@ vpnGatewayLocal = {
     peerWeight     = 0
     peeringAddress = ""
   }
+}
+
+######################################################################
+# Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
+######################################################################
+
+monitor = {
+  enable = true
 }

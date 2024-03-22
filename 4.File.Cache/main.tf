@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.96.0"
+      version = "~>3.97.1"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -158,7 +158,7 @@ locals {
 resource azurerm_resource_group cache_region {
   count    = var.existingNetwork.enable || !var.enableHPCCache ? 1 : 0
   name     = var.existingNetwork.enable ? var.resourceGroupName : "${var.resourceGroupName}.${local.virtualNetwork.nameSuffix}"
-  location = var.existingNetwork.enable ? module.global.primaryRegion.name : local.virtualNetwork.regionName
+  location = var.existingNetwork.enable ? module.global.resourceLocation.region : local.virtualNetwork.regionName
 }
 
 resource azurerm_resource_group cache_regions {

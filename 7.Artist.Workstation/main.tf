@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.96.0"
+      version = "~>3.97.1"
     }
   }
   backend azurerm {
@@ -133,7 +133,7 @@ data azurerm_virtual_network studio {
 
 locals {
   rootRegion = {
-    name       = var.existingNetwork.enable ? module.global.primaryRegion.name : data.terraform_remote_state.network.outputs.virtualNetwork.regionName
+    name       = var.existingNetwork.enable ? module.global.resourceLocation.region : data.terraform_remote_state.network.outputs.virtualNetwork.regionName
     nameSuffix = var.existingNetwork.enable ? "" : data.terraform_remote_state.network.outputs.virtualNetwork.nameSuffix
   }
 }

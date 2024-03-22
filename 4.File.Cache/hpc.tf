@@ -33,7 +33,7 @@ locals {
     for i in range(length(local.virtualNetworks)) : merge(var.hpcCache, {
       name              = var.cacheName
       nameSuffix        = ""
-      regionName        = module.global.primaryRegion.name
+      regionName        = module.global.resourceLocation.region
       resourceGroupName = var.resourceGroupName
       virtualNetwork = {
         subnetId          = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.existingNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${var.existingNetwork.name}/subnets/${var.existingNetwork.subnetName}"

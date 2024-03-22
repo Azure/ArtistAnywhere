@@ -40,8 +40,8 @@ namespace ConsoleApp
       CosmosClientOptions cosmosOptions = new() {
         //ConnectionMode = ConnectionMode.Direct;
         //ConsistencyLevel = ConsistencyLevel.Session;
-        //ApplicationPreferredRegions = ["WestUS2","WestUS3"];
-        //ApplicationRegion = "WestUS2";
+        //ApplicationPreferredRegions = ["WestUS","EastUS"];
+        //ApplicationRegion = "WestUS";
         //AllowBulkExecution = false;
         //PriorityLevel = null;
       };

@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.96.0"
+      version = "~>3.97.1"
     }
   }
   backend azurerm {
@@ -64,5 +64,5 @@ data azurerm_subnet farm {
 
 resource azurerm_resource_group docker {
   name     = var.resourceGroupName
-  location = module.global.primaryRegion.name
+  location = module.global.resourceLocation.region
 }

@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.96.0"
+      version = "~>3.97.1"
     }
     azapi = {
       source = "azure/azapi"
@@ -109,12 +109,12 @@ data azurerm_resource_group network {
 }
 
 locals {
-  regionNames = var.existingNetwork.enable ? [module.global.primaryRegion.name] : [
+  regionNames = var.existingNetwork.enable ? [module.global.resourceLocation.region] : [
     for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
   ]
 }
 
 resource azurerm_resource_group image {
   name     = var.resourceGroupName
-  location = module.global.primaryRegion.name
+  location = module.global.resourceLocation.region
 }

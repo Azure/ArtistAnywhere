@@ -1,6 +1,7 @@
-variable primaryRegion {
+variable resourceLocation {
   default = {
-    name = "WestUS2" # Set Azure region name from "az account list-locations --query [].name"
+    region   = "WestUS"
+    edgeZone = "LosAngeles"
   }
 }
 
@@ -70,8 +71,8 @@ variable monitor {
   }
 }
 
-output primaryRegion {
-  value = var.primaryRegion
+output resourceLocation {
+  value = var.resourceLocation
 }
 
 output resourceGroupName {

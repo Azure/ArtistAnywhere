@@ -50,6 +50,10 @@ virtualMachines = [
           pcoipLicenseKey = ""
         }
       }
+      monitor = {
+        enable = false
+        name   = "Monitor"
+      }
     }
   },
   {
@@ -198,6 +202,10 @@ virtualMachines = [
         parameters = {
           pcoipLicenseKey = ""
         }
+      }
+      monitor = {
+        enable = false
+        name   = "Monitor"
       }
     }
   }

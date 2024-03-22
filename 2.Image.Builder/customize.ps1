@@ -411,12 +411,12 @@ if ($machineType -ne "Storage") {
   Write-Host "Customize (End): Deadline Client"
 
   Write-Host "Customize (Start): Deadline Scheduled Task"
-  # $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
-  # $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx"
-  # if ($machineType -eq "Scheduler") {
-  #   $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct $installRoot $installRoot\$certificateFile"
-  # }
-  # Register-ScheduledTask -TaskName $jobSchedulerTaskName -Trigger $taskTrigger -Action $taskAction -User System -Force
+  $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
+  $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx"
+  if ($machineType -eq "Scheduler") {
+    $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct $installRoot $installRoot\$certificateFile"
+  }
+  Register-ScheduledTask -TaskName $jobSchedulerTaskName -Trigger $taskTrigger -Action $taskAction -User System -Force
   Write-Host "Customize (End): Deadline Scheduled Task"
 
   Write-Host "Customize (Start): Deadline Monitor"

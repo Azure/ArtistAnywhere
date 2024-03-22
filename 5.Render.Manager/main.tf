@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.96.0"
+      version = "~>3.97.1"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -121,7 +121,7 @@ data azurerm_private_dns_zone studio {
 
 resource azurerm_resource_group scheduler {
   name     = var.resourceGroupName
-  location = module.global.primaryRegion.name
+  location = module.global.resourceLocation.region
 }
 
 resource azurerm_private_dns_a_record scheduler {

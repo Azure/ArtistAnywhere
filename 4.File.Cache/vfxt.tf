@@ -55,7 +55,7 @@ module vfxt_controller {
   source                         = "github.com/Azure/Avere/src/terraform/modules/controller3"
   create_resource_group          = false
   resource_group_name            = azurerm_resource_group.cache_region[0].name
-  location                       = module.global.primaryRegion.name
+  location                       = module.global.resourceLocation.region
   admin_username                 = var.vfxtCache.cluster.adminUsername != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
   admin_password                 = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
   ssh_key_data                   = var.vfxtCache.cluster.sshPublicKey != "" ? var.vfxtCache.cluster.sshPublicKey : null
@@ -73,7 +73,7 @@ resource avere_vfxt cache {
   count                           = var.enableHPCCache ? 0 : 1
   vfxt_cluster_name               = lower(var.cacheName)
   azure_resource_group            = azurerm_resource_group.cache_region[0].name
-  location                        = module.global.primaryRegion.name
+  location                        = module.global.resourceLocation.region
   node_cache_size                 = var.vfxtCache.cluster.nodeSize
   vfxt_node_count                 = var.vfxtCache.cluster.nodeCount
   image_id                        = var.vfxtCache.cluster.imageId.node
