@@ -30,7 +30,7 @@ locals {
     resourceGroupName = var.existingStorageBlobNfs.resourceGroupName
   }
   storageCaches = distinct(var.existingNetwork.enable ? [
-    for i in range(length(local.virtualNetworks)) : merge(var.hpcCache, {
+    for virtualNetwork in local.virtualNetworks : merge(var.hpcCache, {
       name              = var.cacheName
       nameSuffix        = ""
       regionName        = module.global.resourceLocation.region

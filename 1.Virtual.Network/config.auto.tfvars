@@ -25,7 +25,7 @@ virtualNetworks = [
           "Microsoft.Storage.Global",
           "Microsoft.ContainerRegistry"
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       },
       {
         name = "Workstation"
@@ -35,7 +35,7 @@ virtualNetworks = [
         serviceEndpoints = [
           "Microsoft.Storage.Global"
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       },
       {
         name = "Storage"
@@ -45,7 +45,7 @@ virtualNetworks = [
         serviceEndpoints = [
           "Microsoft.Storage.Global"
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       },
       {
         name = "StorageNetApp"
@@ -54,7 +54,13 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = "Microsoft.Netapp/volumes"
+        serviceDelegation = {
+          service = "Microsoft.Netapp/volumes"
+          actions = [
+            "Microsoft.Network/networkinterfaces/*",
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
       },
       {
         name = "StorageQumulo"
@@ -63,7 +69,12 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = "Qumulo.Storage/fileSystems"
+        serviceDelegation = {
+          service = "Qumulo.Storage/fileSystems"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
       },
       {
         name = "Data"
@@ -72,7 +83,7 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       },
       {
         name = "DataCassandra"
@@ -81,7 +92,12 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = "Microsoft.DocumentDB/cassandraClusters"
+        serviceDelegation = {
+          service = "Microsoft.DocumentDB/cassandraClusters"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
       },
       {
         name = "Cache"
@@ -91,7 +107,7 @@ virtualNetworks = [
         serviceEndpoints = [
           "Microsoft.Storage.Global"
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       },
       {
         name = "AI"
@@ -101,7 +117,12 @@ virtualNetworks = [
         serviceEndpoints = [
           "Microsoft.CognitiveServices"
         ]
-        serviceDelegation = "Microsoft.Web/serverFarms"
+        serviceDelegation = {
+          service = "Microsoft.Web/serverFarms"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/action"
+          ]
+        }
       },
       {
         name = "GatewaySubnet"
@@ -110,7 +131,7 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       },
       {
         name = "AzureBastionSubnet"
@@ -119,7 +140,7 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       }
     ]
   },
@@ -143,7 +164,7 @@ virtualNetworks = [
           "Microsoft.Storage.Global",
           "Microsoft.ContainerRegistry"
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       },
       {
         name = "Workstation"
@@ -153,7 +174,7 @@ virtualNetworks = [
         serviceEndpoints = [
           "Microsoft.Storage.Global"
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       },
       {
         name = "Storage"
@@ -163,7 +184,7 @@ virtualNetworks = [
         serviceEndpoints = [
           "Microsoft.Storage.Global"
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       },
       {
         name = "StorageNetApp"
@@ -172,7 +193,13 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = "Microsoft.Netapp/volumes"
+        serviceDelegation = {
+          service = "Microsoft.Netapp/volumes"
+          actions = [
+            "Microsoft.Network/networkinterfaces/*",
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
       },
       {
         name = "StorageQumulo"
@@ -181,7 +208,12 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = "Qumulo.Storage/fileSystems"
+        serviceDelegation = {
+          service = "Qumulo.Storage/fileSystems"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
       },
       {
         name = "Data"
@@ -190,7 +222,7 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       },
       {
         name = "DataCassandra"
@@ -199,7 +231,12 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = "Microsoft.DocumentDB/cassandraClusters"
+        serviceDelegation = {
+          service = "Microsoft.DocumentDB/cassandraClusters"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
       },
       {
         name = "Cache"
@@ -209,7 +246,7 @@ virtualNetworks = [
         serviceEndpoints = [
           "Microsoft.Storage.Global"
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       },
       {
         name = "AI"
@@ -219,7 +256,12 @@ virtualNetworks = [
         serviceEndpoints = [
           "Microsoft.CognitiveServices"
         ]
-        serviceDelegation = "Microsoft.Web/serverFarms"
+        serviceDelegation = {
+          service = "Microsoft.Web/serverFarms"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/action"
+          ]
+        }
       },
       {
         name = "GatewaySubnet"
@@ -228,7 +270,7 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       },
       {
         name = "AzureBastionSubnet"
@@ -237,7 +279,7 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = ""
+        serviceDelegation = null
       }
     ]
   }

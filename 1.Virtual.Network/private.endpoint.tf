@@ -20,7 +20,7 @@ resource azurerm_private_dns_zone storage_file {
 
 resource azurerm_private_dns_zone_virtual_network_link key_vault {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.keyVault.enable
+    for virtualNetwork in local.virtualNetworksRegional : virtualNetwork.name => virtualNetwork if module.global.keyVault.enable
   }
   name                  = "key-vault-${lower(each.value.regionName)}"
   resource_group_name   = azurerm_private_dns_zone.key_vault[0].resource_group_name
@@ -33,7 +33,7 @@ resource azurerm_private_dns_zone_virtual_network_link key_vault {
 
 resource azurerm_private_dns_zone_virtual_network_link storage_blob {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworksRegional : virtualNetwork.name => virtualNetwork
   }
   name                  = "storage-blob-${lower(each.value.regionName)}"
   resource_group_name   = azurerm_private_dns_zone.storage_blob.resource_group_name
@@ -46,7 +46,7 @@ resource azurerm_private_dns_zone_virtual_network_link storage_blob {
 
 resource azurerm_private_dns_zone_virtual_network_link storage_file {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworksRegional : virtualNetwork.name => virtualNetwork
   }
   name                  = "storage-file-${lower(each.value.regionName)}"
   resource_group_name   = azurerm_private_dns_zone.storage_file.resource_group_name
@@ -59,7 +59,7 @@ resource azurerm_private_dns_zone_virtual_network_link storage_file {
 
 resource azurerm_private_endpoint key_vault {
   for_each = {
-    for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if module.global.keyVault.enable
+    for subnet in local.virtualNetworksSubnetStorage : subnet.key => subnet if module.global.keyVault.enable
   }
   name                = "${data.azurerm_key_vault.studio[0].name}-vault"
   resource_group_name = each.value.resourceGroupName
@@ -88,7 +88,7 @@ resource azurerm_private_endpoint key_vault {
 
 resource azurerm_private_endpoint storage_blob {
   for_each = {
-    for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet
+    for subnet in local.virtualNetworksSubnetStorage : subnet.key => subnet
   }
   name                = "${data.azurerm_storage_account.studio.name}-blob"
   resource_group_name = each.value.resourceGroupName
@@ -117,7 +117,7 @@ resource azurerm_private_endpoint storage_blob {
 
 resource azurerm_private_endpoint storage_file {
   for_each = {
-    for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet
+    for subnet in local.virtualNetworksSubnetStorage : subnet.key => subnet
   }
   name                = "${data.azurerm_storage_account.studio.name}-file"
   resource_group_name = each.value.resourceGroupName

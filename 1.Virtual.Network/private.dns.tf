@@ -18,7 +18,7 @@ resource azurerm_private_dns_zone studio {
 
 resource azurerm_private_dns_zone_virtual_network_link studio {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if virtualNetwork.edgeZone == ""
   }
   name                  = each.value.name
   resource_group_name   = azurerm_private_dns_zone.studio.resource_group_name

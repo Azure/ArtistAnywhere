@@ -37,12 +37,14 @@ variable vpnGatewayLocal {
 }
 
 locals {
-  vpnGatewayNetworks = var.vpnGateway.enablePerRegion ? local.virtualNetworks : [local.virtualNetwork]
+  vpnGatewayNetworks = [
+    for i in range(length(local.virtualNetworksRegional)) : local.virtualNetworks[i] if var.vpnGateway.enable && (i == 0 || (i > 0 && var.vpnGateway.enablePerRegion))
+  ]
 }
 
 resource azurerm_virtual_network_gateway vpn {
   for_each = {
-    for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enable
+    for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork
   }
   name                = "Gateway-VPN"
   resource_group_name = each.value.resourceGroupName
@@ -89,7 +91,7 @@ resource azurerm_virtual_network_gateway vpn {
 
 resource azurerm_local_network_gateway vpn {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enable && (var.vpnGatewayLocal.fqdn != "" || var.vpnGatewayLocal.address != "")
+    for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork if var.vpnGatewayLocal.fqdn != "" || var.vpnGatewayLocal.address != ""
   }
   name                = each.value.name
   resource_group_name = each.value.resourceGroupName
@@ -112,7 +114,7 @@ resource azurerm_local_network_gateway vpn {
 
 resource azurerm_virtual_network_gateway_connection site_to_site {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enable && (var.vpnGatewayLocal.fqdn != "" || var.vpnGatewayLocal.address != "")
+    for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork if var.vpnGatewayLocal.fqdn != "" || var.vpnGatewayLocal.address != ""
   }
   name                       = each.value.name
   resource_group_name        = each.value.resourceGroupName

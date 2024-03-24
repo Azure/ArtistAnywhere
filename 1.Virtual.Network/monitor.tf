@@ -26,6 +26,12 @@ data azurerm_monitor_data_collection_endpoint studio {
   resource_group_name = module.global.resourceGroupName
 }
 
+locals {
+  monitorNetworks = [
+    for virtualNetwork in local.virtualNetworks: virtualNetwork if module.global.monitor.enable && var.monitor.enable && virtualNetwork.edgeZone == ""
+  ]
+}
+
 resource azurerm_private_dns_zone monitor {
   count               = module.global.monitor.enable && var.monitor.enable ? 1 : 0
   name                = "privatelink.monitor.azure.com"
@@ -52,7 +58,7 @@ resource azurerm_private_dns_zone monitor_automation {
 
 resource azurerm_private_dns_zone_virtual_network_link monitor {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.monitor.enable && var.monitor.enable
+    for virtualNetwork in local.monitorNetworks : virtualNetwork.name => virtualNetwork
   }
   name                  = "monitor-${lower(each.value.regionName)}"
   resource_group_name   = azurerm_private_dns_zone.monitor[0].resource_group_name
@@ -62,7 +68,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor {
 
 resource azurerm_private_dns_zone_virtual_network_link monitor_opinsights_oms {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.monitor.enable && var.monitor.enable
+    for virtualNetwork in local.monitorNetworks : virtualNetwork.name => virtualNetwork
   }
   name                  = "monitor-opinsights-oms-${lower(each.value.regionName)}"
   resource_group_name   = azurerm_private_dns_zone.monitor_opinsights_oms[0].resource_group_name
@@ -72,7 +78,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor_opinsights_oms {
 
 resource azurerm_private_dns_zone_virtual_network_link monitor_opinsights_ods {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.monitor.enable && var.monitor.enable
+    for virtualNetwork in local.monitorNetworks : virtualNetwork.name => virtualNetwork
   }
   name                  = "monitor-opinsights-ods-${lower(each.value.regionName)}"
   resource_group_name   = azurerm_private_dns_zone.monitor_opinsights_ods[0].resource_group_name
@@ -82,7 +88,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor_opinsights_ods {
 
 resource azurerm_private_dns_zone_virtual_network_link monitor_automation {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.monitor.enable && var.monitor.enable
+    for virtualNetwork in local.monitorNetworks : virtualNetwork.name => virtualNetwork
   }
   name                  = "monitor-automation-${lower(each.value.regionName)}"
   resource_group_name   = azurerm_private_dns_zone.monitor_automation[0].resource_group_name
@@ -92,7 +98,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor_automation {
 
 resource azurerm_private_endpoint monitor {
   for_each = {
-    for subnet in local.virtualNetworksSubnetStorage : "${subnet.virtualNetworkName}-${subnet.name}" => subnet if module.global.monitor.enable && var.monitor.enable
+    for subnet in local.virtualNetworksSubnetStorage : subnet.key => subnet if module.global.monitor.enable && var.monitor.enable
   }
   name                = "${azurerm_monitor_private_link_scope.monitor[0].name}-monitor"
   resource_group_name = each.value.resourceGroupName

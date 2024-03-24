@@ -5,7 +5,7 @@
 
 resource azurerm_public_ip_prefix vpn_gateway {
   for_each = {
-    for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enable
+    for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork
   }
   name                = "Gateway-VPN"
   resource_group_name = each.value.resourceGroupName
@@ -21,7 +21,7 @@ resource azurerm_public_ip_prefix vpn_gateway {
 
 resource azurerm_public_ip vpn_gateway_1 {
   for_each = {
-    for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enable
+    for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork
   }
   name                = var.vpnGateway.enableActiveActive ? "${azurerm_public_ip_prefix.vpn_gateway[each.value.name].name}1" : azurerm_public_ip_prefix.vpn_gateway[each.value.name].name
   resource_group_name = each.value.resourceGroupName
@@ -36,7 +36,7 @@ resource azurerm_public_ip vpn_gateway_1 {
 
 resource azurerm_public_ip vpn_gateway_2 {
   for_each = {
-    for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enable && var.vpnGateway.enableActiveActive
+    for virtualNetwork in local.vpnGatewayNetworks : virtualNetwork.name => virtualNetwork if var.vpnGateway.enableActiveActive
   }
   name                = "${azurerm_public_ip_prefix.vpn_gateway[each.value.name].name}2"
   resource_group_name = each.value.resourceGroupName
@@ -51,7 +51,7 @@ resource azurerm_public_ip vpn_gateway_2 {
 
 resource azurerm_public_ip_prefix nat_gateway {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.natGatewayNetworks : virtualNetwork.name => virtualNetwork
   }
   name                = "Gateway-NAT"
   resource_group_name = each.value.resourceGroupName

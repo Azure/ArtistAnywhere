@@ -30,6 +30,12 @@ $virtualNetwork = @{
       )
     }
     @{
+      name        = "Data"
+      ipAddresses = "10.0.195.0/24"
+      endpoints = @(
+      )
+    }
+    @{
       name        = "GatewaySubnet"
       ipAddresses = "10.0.255.0/26"
       endpoints = @(

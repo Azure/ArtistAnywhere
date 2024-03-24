@@ -35,7 +35,7 @@ variable storageAccounts {
 
 locals {
   serviceEndpointSubnets = distinct(var.existingNetwork.enable ? flatten([
-    for i in range(length(data.terraform_remote_state.network.outputs.storageEndpointSubnets)) : [
+    for subnet in data.terraform_remote_state.network.outputs.storageEndpointSubnets : [
       var.existingNetwork.serviceEndpointSubnets
     ]
   ]) : data.terraform_remote_state.network.outputs.storageEndpointSubnets)
