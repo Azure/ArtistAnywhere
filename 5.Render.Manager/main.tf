@@ -119,9 +119,23 @@ data azurerm_private_dns_zone studio {
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
 }
 
+locals {
+  rootRegion = {
+    name       = var.existingNetwork.enable ? module.global.resourceLocation.region : data.terraform_remote_state.network.outputs.virtualNetwork.regionName
+    nameSuffix = var.existingNetwork.enable ? "" : data.terraform_remote_state.network.outputs.virtualNetwork.nameSuffix
+  }
+  edgeZone = module.global.resourceLocation.edgeZone != "" ? module.global.resourceLocation.edgeZone : null
+}
+
 resource azurerm_resource_group scheduler {
-  name     = var.resourceGroupName
-  location = module.global.resourceLocation.region
+  name     = var.existingNetwork.enable || local.rootRegion.nameSuffix == "" ? var.resourceGroupName : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}"
+  location = local.rootRegion.name
+}
+
+resource azurerm_resource_group scheduler_edge {
+  count    = module.global.resourceLocation.edgeZone != "" ? 1 : 0
+  name     = "${azurerm_resource_group.scheduler.name}.Edge"
+  location = local.rootRegion.name
 }
 
 resource azurerm_private_dns_a_record scheduler {

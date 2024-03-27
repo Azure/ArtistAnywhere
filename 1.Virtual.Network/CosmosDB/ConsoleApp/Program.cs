@@ -47,7 +47,7 @@ namespace ConsoleApp
       };
 
       #pragma warning disable CS8602 // Dereference of a possibly null reference.
-      if (account.Key != null) {
+      if (!string.IsNullOrEmpty(account.Key)) {
         _cosmosClient = new CosmosClient(account.Endpoint, account.Key, cosmosOptions);
       } else {
         DefaultAzureCredentialOptions authTokenOptions = new() {

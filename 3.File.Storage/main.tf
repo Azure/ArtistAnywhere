@@ -154,9 +154,13 @@ locals {
     name       = var.existingNetwork.enable ? module.global.resourceLocation.region : data.terraform_remote_state.network.outputs.virtualNetwork.regionName
     nameSuffix = var.existingNetwork.enable ? "" : data.terraform_remote_state.network.outputs.virtualNetwork.nameSuffix
   }
+  edgeZone = lookup(azurerm_resource_group.storage.tags, "edgeZone", null) != "" ? azurerm_resource_group.storage.tags["edgeZone"] : null
 }
 
 resource azurerm_resource_group storage {
   name     = var.existingNetwork.enable || local.rootRegion.nameSuffix == "" ? var.resourceGroupName : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}"
   location = local.rootRegion.name
+  tags = {
+    edgeZone = module.global.resourceLocation.edgeZone
+  }
 }

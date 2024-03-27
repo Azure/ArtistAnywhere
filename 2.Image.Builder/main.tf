@@ -94,8 +94,8 @@ data terraform_remote_state network {
 }
 
 data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
+  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetworkRegional.name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetworkRegional.resourceGroupName
 }
 
 data azurerm_subnet farm {
@@ -110,7 +110,7 @@ data azurerm_resource_group network {
 
 locals {
   regionNames = var.existingNetwork.enable ? [module.global.resourceLocation.region] : [
-    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
+    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworksRegional : virtualNetwork.regionName
   ]
 }
 

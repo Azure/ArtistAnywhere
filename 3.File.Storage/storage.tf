@@ -80,6 +80,7 @@ resource azurerm_storage_account studio {
   name                            = each.value.name
   resource_group_name             = azurerm_resource_group.storage.name
   location                        = azurerm_resource_group.storage.location
+  edge_zone                       = local.edgeZone
   account_kind                    = each.value.type
   account_tier                    = each.value.tier
   account_replication_type        = each.value.redundancy

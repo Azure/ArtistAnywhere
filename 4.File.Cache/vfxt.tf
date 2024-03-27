@@ -26,17 +26,6 @@ variable vfxtCache {
   })
 }
 
-data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
-}
-
-data azurerm_subnet cache {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Cache"
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
-}
-
 locals {
   vfxtCache = merge({
     cluster = {

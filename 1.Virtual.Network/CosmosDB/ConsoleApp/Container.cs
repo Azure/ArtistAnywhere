@@ -72,16 +72,31 @@ namespace ConsoleApp
         foreach (CosmosContainer containerConfig in databaseConfig.Containers) {
           Container container = await CreateContainerAsync(database, containerConfig);
           containers.Add(container);
+
           string tenantId = "t1";
           string userId = "u1";
           string sessionId = "s1";
           string itemId = "i1";
-          await ProcessItemAsync(container, containerConfig, tenantId, userId, sessionId, itemId);
+          ItemRequestOptions itemOptions = new() {
+            IndexingDirective = IndexingDirective.Default,
+            ConsistencyLevel = ConsistencyLevel.Session,
+            PriorityLevel = PriorityLevel.High,
+            EnableContentResponseOnWrite = false,
+            PreTriggers = [],
+            PostTriggers = [],
+            SessionToken = null
+          };
+          await ProcessItemAsync(container, containerConfig, tenantId, userId, sessionId, itemId, itemOptions);
           tenantId = "t2";
           userId = "u1";
           sessionId = "s1";
           itemId = "i1";
-          await ProcessItemAsync(container, containerConfig, tenantId, userId, sessionId, itemId);
+          await ProcessItemAsync(container, containerConfig, tenantId, userId, sessionId, itemId, itemOptions);
+
+          string queryText = "SELECT * FROM Content c WHERE c.id = @itemId";
+          QueryDefinition queryDefinition = new QueryDefinition(queryText).WithParameter("@itemId", itemId);
+          QueryRequestOptions queryOptions = new();
+          FeedIterator<CosmosItem> resultPages = await GetItemsAsync<CosmosItem>(container, queryDefinition, queryOptions);
         }
       }
       return [.. containers];

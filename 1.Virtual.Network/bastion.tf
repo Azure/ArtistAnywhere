@@ -17,7 +17,7 @@ variable bastion {
 }
 
 locals {
-  bastionNetworks = var.bastion.enablePerRegion ? local.virtualNetworks : [local.virtualNetwork]
+  bastionNetworks = var.bastion.enablePerRegion ? local.virtualNetworksRegional : [local.virtualNetworksRegional[0]]
 }
 
 resource azurerm_network_security_group bastion {

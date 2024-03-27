@@ -29,7 +29,7 @@ computeGallery = {
       generation = "V2"
       publisher  = "MicrosoftWindowsServer"
       offer      = "WindowsServer"
-      sku        = "2022-Datacenter-G2"
+      sku        = "2022-Datacenter-Azure-Edition"
     },
     {
       name       = "WinFarm"
@@ -37,7 +37,7 @@ computeGallery = {
       generation = "V2"
       publisher  = "MicrosoftWindowsDesktop"
       offer      = "Windows-10"
-      sku        = "Win10-22H2-Pro-G2"
+      sku        = "Win10-22H2-Ent-G2"
     },
     {
       name       = "WinArtist"
@@ -45,7 +45,7 @@ computeGallery = {
       generation = "V2"
       publisher  = "MicrosoftWindowsDesktop"
       offer      = "Windows-11"
-      sku        = "Win11-23H2-Pro"
+      sku        = "Win11-23H2-Ent"
     }
   ]
   appDefinitions = [
@@ -125,8 +125,8 @@ imageBuilder = {
       }
       build = {
         machineType    = "Scheduler"
-        machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                 # NVIDIA or AMD
+        machineSize    = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
         osDiskSizeGB   = 30
         timeoutMinutes = 120
@@ -297,8 +297,8 @@ imageBuilder = {
       }
       build = {
         machineType    = "Scheduler"
-        machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                 # NVIDIA or AMD
+        machineSize    = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
         osDiskSizeGB   = 0
         timeoutMinutes = 240

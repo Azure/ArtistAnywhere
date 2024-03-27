@@ -2,13 +2,15 @@
 # Storage #
 ###########
 
-$regionName        = "WestUS"
-$nameSuffix        = "West"
 $resourceGroupName = "AAA"
+$resourceLocation = @{
+  region   = "WestUS"
+  edgeZone = "LosAngeles"
+}
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
-  name              = "Studio-$nameSuffix"
+  resourceGroupName = "ArtistAnywhere.Network.West"
+  name              = "Studio-West"
   subnetName        = "Storage"
 }
 $virtualMachine = @{
@@ -30,7 +32,7 @@ $virtualMachine = @{
     type    = "Premium_LRS"
   }
 }
-az group create --name $resourceGroupName --location $regionName
+az group create --name $resourceGroupName --location $resourceLocation.region
 az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""'
 for ($i = 1; $i -le $virtualMachine.dataDisk.count; $i++) {
   $dataDiskName = $virtualMachine.name + "_DataDisk_$i"
@@ -41,18 +43,20 @@ for ($i = 1; $i -le $virtualMachine.dataDisk.count; $i++) {
 # Job Scheduler #
 #################
 
-$regionName        = "WestUS"
-$nameSuffix        = "West"
 $resourceGroupName = "AAA"
+$resourceLocation = @{
+  region   = "WestUS"
+  edgeZone = "LosAngeles"
+}
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
-  name              = "Studio-$nameSuffix"
+  resourceGroupName = "ArtistAnywhere.Network.West.Edge"
+  name              = "Studio-West-Edge"
   subnetName        = "Farm"
 }
 $virtualMachine = @{
   name    = "LnxScheduler"
-  size    = "Standard_D8as_v5"
+  size    = "Standard_E8s_v4"
   imageId = "RESF:RockyLinux-x86_64:8-Base:Latest"
   adminLogin = @{
     username = "xadmin"
@@ -63,20 +67,22 @@ $virtualMachine = @{
     caching = "ReadWrite"
   }
 }
-az group create --name $resourceGroupName --location $regionName
-az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""'
+az group create --name $resourceGroupName --location $resourceLocation.region
+az vm create --resource-group $resourceGroupName --edge-zone $resourceLocation.edgeZone --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""'
 
 ###############
 # Render Farm #
 ###############
 
-$regionName        = "WestUS"
-$nameSuffix        = "West"
 $resourceGroupName = "AAA"
+$resourceLocation = @{
+  region   = "WestUS"
+  edgeZone = "LosAngeles"
+}
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
-  name              = "Studio-$nameSuffix"
+  resourceGroupName = "ArtistAnywhere.Network.West.Edge"
+  name              = "Studio-West-Edge"
   subnetName        = "Farm"
 }
 $virtualMachine = @{
@@ -98,20 +104,22 @@ $virtualMachine = @{
   priorityMode   = "Spot"
   evictionPolicy = "Delete"
 }
-az group create --name $resourceGroupName --location $regionName
+az group create --name $resourceGroupName --location $resourceLocation.region
 if ($virtualMachine.osDisk.ephemeral.enable) {
-  az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --ephemeral-os-disk $virtualMachine.osDisk.ephemeral.enable --ephemeral-os-disk-placement $virtualMachine.osDisk.ephemeral.placement --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""' --priority $virtualMachine.priorityMode --eviction-policy $virtualMachine.evictionPolicy
+  az vm create --resource-group $resourceGroupName --edge-zone $resourceLocation.edgeZone --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --ephemeral-os-disk $virtualMachine.osDisk.ephemeral.enable --ephemeral-os-disk-placement $virtualMachine.osDisk.ephemeral.placement --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""' --priority $virtualMachine.priorityMode --eviction-policy $virtualMachine.evictionPolicy
 } else {
-  az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""' --priority $virtualMachine.priorityMode --eviction-policy $virtualMachine.evictionPolicy
+  az vm create --resource-group $resourceGroupName --edge-zone $resourceLocation.edgeZone --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""' --priority $virtualMachine.priorityMode --eviction-policy $virtualMachine.evictionPolicy
 }
 
-$regionName        = "WestUS"
-$nameSuffix        = "West"
 $resourceGroupName = "AAA"
+$resourceLocation = @{
+  region   = "WestUS"
+  edgeZone = "LosAngeles"
+}
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
-  name              = "Studio-$nameSuffix"
+  resourceGroupName = "ArtistAnywhere.Network.West.Edge"
+  name              = "Studio-West-Edge"
   subnetName        = "Farm"
 }
 $virtualMachine = @{
@@ -133,24 +141,26 @@ $virtualMachine = @{
   priorityMode   = "Spot"
   evictionPolicy = "Delete"
 }
-az group create --name $resourceGroupName --location $regionName
+az group create --name $resourceGroupName --location $resourceLocation.region
 if ($virtualMachine.osDisk.ephemeral.enable) {
-  az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --ephemeral-os-disk $virtualMachine.osDisk.ephemeral.enable --ephemeral-os-disk-placement $virtualMachine.osDisk.ephemeral.placement --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""' --priority $virtualMachine.priorityMode --eviction-policy $virtualMachine.evictionPolicy
+  az vm create --resource-group $resourceGroupName --edge-zone $resourceLocation.edgeZone --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --ephemeral-os-disk $virtualMachine.osDisk.ephemeral.enable --ephemeral-os-disk-placement $virtualMachine.osDisk.ephemeral.placement --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""' --priority $virtualMachine.priorityMode --eviction-policy $virtualMachine.evictionPolicy
 } else {
-  az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""' --priority $virtualMachine.priorityMode --eviction-policy $virtualMachine.evictionPolicy
+  az vm create --resource-group $resourceGroupName --edge-zone $resourceLocation.edgeZone --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""' --priority $virtualMachine.priorityMode --eviction-policy $virtualMachine.evictionPolicy
 }
 
 ######################
 # Artist Workstation #
 ######################
 
-$regionName        = "WestUS"
-$nameSuffix        = "West"
 $resourceGroupName = "AAA"
+$resourceLocation = @{
+  region   = "WestUS"
+  edgeZone = "LosAngeles"
+}
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
-  name              = "Studio-$nameSuffix"
+  resourceGroupName = "ArtistAnywhere.Network.West.Edge"
+  name              = "Studio-West-Edge"
   subnetName        = "Workstation"
 }
 $virtualMachine = @{
@@ -169,16 +179,18 @@ $virtualMachine = @{
     enable = $false
   }
 }
-az group create --name $resourceGroupName --location $regionName
-az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""'
+az group create --name $resourceGroupName --location $resourceLocation.region
+az vm create --resource-group $resourceGroupName --edge-zone $resourceLocation.edgeZone --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""'
 
-$regionName        = "WestUS"
-$nameSuffix        = "West"
 $resourceGroupName = "AAA"
+$resourceLocation = @{
+  region   = "WestUS"
+  edgeZone = "LosAngeles"
+}
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$nameSuffix"
-  name              = "Studio-$nameSuffix"
+  resourceGroupName = "ArtistAnywhere.Network.West.Edge"
+  name              = "Studio-West-Edge"
   subnetName        = "Workstation"
 }
 $virtualMachine = @{
@@ -197,5 +209,5 @@ $virtualMachine = @{
     enable = $false
   }
 }
-az group create --name $resourceGroupName --location $regionName
-az vm create --resource-group $resourceGroupName --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""'
+az group create --name $resourceGroupName --location $resourceLocation.region
+az vm create --resource-group $resourceGroupName --edge-zone $resourceLocation.edgeZone --name $virtualMachine.name --size $virtualMachine.size --os-disk-size-gb $virtualMachine.osDisk.sizeGB --os-disk-caching $virtualMachine.osDisk.caching --image $virtualMachine.imageId --admin-username $virtualMachine.adminLogin.username --admin-password $virtualMachine.adminLogin.password --subnet "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)" --public-ip-address '""' --nsg '""'

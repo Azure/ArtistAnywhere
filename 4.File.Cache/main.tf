@@ -145,14 +145,25 @@ data terraform_remote_state storage {
   }
 }
 
+data azurerm_virtual_network studio {
+  name                = var.existingNetwork.enable ? var.existingNetwork.name : local.virtualNetwork.name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : local.virtualNetwork.resourceGroupName
+}
+
+data azurerm_subnet cache {
+  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Cache"
+  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio.name
+}
+
 data azurerm_private_dns_zone studio {
   name                = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.terraform_remote_state.network.outputs.privateDns.name
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
 }
 
 locals {
-  virtualNetwork  = data.terraform_remote_state.network.outputs.virtualNetwork
-  virtualNetworks = data.terraform_remote_state.network.outputs.virtualNetworks
+  virtualNetwork  = data.terraform_remote_state.network.outputs.virtualNetworkRegional
+  virtualNetworks = data.terraform_remote_state.network.outputs.virtualNetworksRegional
 }
 
 resource azurerm_resource_group cache_region {

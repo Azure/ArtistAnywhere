@@ -89,8 +89,8 @@ data terraform_remote_state network {
 }
 
 data azurerm_virtual_network studio {
-  name                = local.writeVirtualNetwork.name
-  resource_group_name = local.writeVirtualNetwork.resourceGroupName
+  name                = data.terraform_remote_state.network.outputs.virtualNetworkRegional.name
+  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworkRegional.resourceGroupName
 }
 
 data azurerm_subnet data {
@@ -103,15 +103,6 @@ data azurerm_subnet data_cassandra {
   name                 = "DataCassandra"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
-}
-
-locals {
-  writeGeoLocation = one([
-    for geoLocation in var.cosmosDB.geoLocations : geoLocation if geoLocation.failover.priority == 0
-  ])
-  writeVirtualNetwork = one([
-    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork if virtualNetwork.regionName == local.writeGeoLocation.regionName
-  ])
 }
 
 resource azurerm_resource_group database {

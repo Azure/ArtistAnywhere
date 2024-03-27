@@ -65,13 +65,6 @@ $binPathChoco = "C:\ProgramData\chocolatey"
 $binPaths += ";$binPathChoco"
 Write-Host "Customize (End): Chocolatey"
 
-Write-Host "Customize (Start): OpenSSL"
-$processType = "openssl"
-RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
-$binPathOpenSSL = "C:\Program Files\OpenSSL-Win64\bin"
-$binPaths += ";$binPathOpenSSL"
-Write-Host "Customize (End): OpenSSL"
-
 Write-Host "Customize (Start): Python"
 $processType = "python"
 RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"

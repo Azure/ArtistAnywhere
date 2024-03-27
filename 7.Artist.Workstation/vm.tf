@@ -93,8 +93,9 @@ resource azurerm_network_interface workstation {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable
   }
   name                = each.value.name
-  resource_group_name = azurerm_resource_group.workstation.name
-  location            = azurerm_resource_group.workstation.location
+  resource_group_name = local.edgeZone != null ? azurerm_resource_group.workstation_edge[0].name : azurerm_resource_group.workstation.name
+  location            = local.edgeZone != null ? azurerm_resource_group.workstation_edge[0].location : azurerm_resource_group.workstation.location
+  edge_zone           = local.edgeZone
   ip_configuration {
     name                          = "ipConfig"
     subnet_id                     = "${data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : each.value.network.subnetName}"
@@ -108,8 +109,9 @@ resource azurerm_linux_virtual_machine workstation {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux"
   }
   name                            = each.value.name
-  resource_group_name             = azurerm_resource_group.workstation.name
-  location                        = azurerm_resource_group.workstation.location
+  resource_group_name             = local.edgeZone != null ? azurerm_resource_group.workstation_edge[0].name : azurerm_resource_group.workstation.name
+  location                        = local.edgeZone != null ? azurerm_resource_group.workstation_edge[0].location : azurerm_resource_group.workstation.location
+  edge_zone                       = local.edgeZone
   size                            = each.value.size
   source_image_id                 = each.value.image.id
   admin_username                  = each.value.adminLogin.userName
@@ -209,8 +211,9 @@ resource azurerm_windows_virtual_machine workstation {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows"
   }
   name                = each.value.name
-  resource_group_name = azurerm_resource_group.workstation.name
-  location            = azurerm_resource_group.workstation.location
+  resource_group_name = local.edgeZone != null ? azurerm_resource_group.workstation_edge[0].name : azurerm_resource_group.workstation.name
+  location            = local.edgeZone != null ? azurerm_resource_group.workstation_edge[0].location : azurerm_resource_group.workstation.location
+  edge_zone           = local.edgeZone
   size                = each.value.size
   source_image_id     = each.value.image.id
   admin_username      = each.value.adminLogin.userName

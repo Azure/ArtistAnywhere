@@ -8,7 +8,7 @@ virtualMachines = [
   {
     enable = false
     name   = "LnxScheduler"
-    size   = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/1.0.0"
       plan = {
@@ -68,7 +68,7 @@ virtualMachines = [
   {
     enable = false
     name   = "WinScheduler"
-    size   = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinServer/versions/1.0.0"
       plan = {

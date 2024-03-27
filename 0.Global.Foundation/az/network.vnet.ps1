@@ -36,6 +36,13 @@ $virtualNetwork = @{
       )
     }
     @{
+      name        = "Cache"
+      ipAddresses = "10.0.197.0/24"
+      endpoints = @(
+        "Microsoft.Storage.Global"
+      )
+    }
+    @{
       name        = "GatewaySubnet"
       ipAddresses = "10.0.255.0/26"
       endpoints = @(

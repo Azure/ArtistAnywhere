@@ -136,9 +136,16 @@ locals {
     name       = var.existingNetwork.enable ? module.global.resourceLocation.region : data.terraform_remote_state.network.outputs.virtualNetwork.regionName
     nameSuffix = var.existingNetwork.enable ? "" : data.terraform_remote_state.network.outputs.virtualNetwork.nameSuffix
   }
+  edgeZone = module.global.resourceLocation.edgeZone != "" ? module.global.resourceLocation.edgeZone : null
 }
 
 resource azurerm_resource_group workstation {
   name     = var.existingNetwork.enable || local.rootRegion.nameSuffix == "" ? var.resourceGroupName : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}"
+  location = local.rootRegion.name
+}
+
+resource azurerm_resource_group workstation_edge {
+  count    = module.global.resourceLocation.edgeZone != "" ? 1 : 0
+  name     = "${azurerm_resource_group.workstation.name}.Edge"
   location = local.rootRegion.name
 }
