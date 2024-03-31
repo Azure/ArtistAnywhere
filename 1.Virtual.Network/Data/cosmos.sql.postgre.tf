@@ -93,8 +93,8 @@ resource azurerm_private_endpoint postgre_sql {
 resource azurerm_cosmosdb_postgresql_cluster postgre_sql {
   count                                = var.postgreSQL.enable ? 1 : 0
   name                                 = var.postgreSQL.cluster.name
-  resource_group_name                  = azurerm_resource_group.database.name
-  location                             = azurerm_resource_group.database.location
+  resource_group_name                  = azurerm_resource_group.data.name
+  location                             = azurerm_resource_group.data.location
   sql_version                          = var.postgreSQL.cluster.version
   citus_version                        = var.postgreSQL.cluster.versionCitus
   node_server_edition                  = var.postgreSQL.node.serverEdition

@@ -38,6 +38,7 @@ locals {
       resourceGroupName = virtualNetwork.nameSuffix != "" ? "${var.resourceGroupName}.${virtualNetwork.nameSuffix}" : var.resourceGroupName
     }) if virtualNetwork.enable
   ]
+  virtualNetworksZoneLink = module.global.resourceLocation.edgeZone != "" ? [local.virtualNetwork] : local.virtualNetworksRegional
   virtualNetworksRegional = [
     for virtualNetwork in local.virtualNetworksNames : merge(virtualNetwork, {
       id              = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${virtualNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}"

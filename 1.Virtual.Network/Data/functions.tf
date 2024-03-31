@@ -40,7 +40,7 @@ resource azurerm_storage_share studio {
 resource azurerm_service_plan studio {
   count               = var.noSQL.enable ? 1 : 0
   name                = var.functionApp.name
-  resource_group_name = azurerm_resource_group.database.name
+  resource_group_name = azurerm_resource_group.data.name
   location            = var.cosmosDB.geoLocations[0].regionName
   sku_name            = var.functionApp.servicePlan.computeType
   os_type             = "Windows"
@@ -49,8 +49,8 @@ resource azurerm_service_plan studio {
 resource azurerm_windows_function_app studio {
   count                                          = var.noSQL.enable ? 1 : 0
   name                                           = var.functionApp.name
-  resource_group_name                            = azurerm_resource_group.database.name
-  location                                       = azurerm_resource_group.database.location
+  resource_group_name                            = azurerm_resource_group.data.name
+  location                                       = azurerm_resource_group.data.location
   service_plan_id                                = azurerm_service_plan.studio[0].id
   storage_account_name                           = data.azurerm_storage_account.studio[0].name
   storage_uses_managed_identity                  = true

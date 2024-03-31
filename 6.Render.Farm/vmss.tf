@@ -134,8 +134,8 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   }
   name                            = each.value.name
   computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
-  resource_group_name             = local.edgeZone != null ? azurerm_resource_group.farm_edge[0].name : azurerm_resource_group.farm.name
-  location                        = local.edgeZone != null ? azurerm_resource_group.farm_edge[0].location : azurerm_resource_group.farm.location
+  resource_group_name             = local.edgeZone != null ? azurerm_resource_group.farm_edge.name : azurerm_resource_group.farm.name
+  location                        = local.edgeZone != null ? azurerm_resource_group.farm_edge.location : azurerm_resource_group.farm.location
   edge_zone                       = local.edgeZone
   sku                             = each.value.machine.size
   instances                       = each.value.machine.count
@@ -273,8 +273,8 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   }
   name                   = each.value.name
   computer_name_prefix   = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
-  resource_group_name    = local.edgeZone != null ? azurerm_resource_group.farm_edge[0].name : azurerm_resource_group.farm.name
-  location               = local.edgeZone != null ? azurerm_resource_group.farm_edge[0].location : azurerm_resource_group.farm.location
+  resource_group_name    = local.edgeZone != null ? azurerm_resource_group.farm_edge.name : azurerm_resource_group.farm.name
+  location               = local.edgeZone != null ? azurerm_resource_group.farm_edge.location : azurerm_resource_group.farm.location
   edge_zone              = local.edgeZone
   sku                    = each.value.machine.size
   instances              = each.value.machine.count

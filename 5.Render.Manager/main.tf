@@ -133,9 +133,8 @@ resource azurerm_resource_group scheduler {
 }
 
 resource azurerm_resource_group scheduler_edge {
-  count    = module.global.resourceLocation.edgeZone != "" ? 1 : 0
   name     = "${azurerm_resource_group.scheduler.name}.Edge"
-  location = local.rootRegion.name
+  location = azurerm_resource_group.scheduler.location
 }
 
 resource azurerm_private_dns_a_record scheduler {

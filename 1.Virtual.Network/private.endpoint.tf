@@ -22,7 +22,7 @@ resource azurerm_private_dns_zone_virtual_network_link key_vault {
   for_each = {
     for virtualNetwork in local.virtualNetworksRegional : virtualNetwork.name => virtualNetwork if module.global.keyVault.enable
   }
-  name                  = "key-vault-${lower(each.value.regionName)}"
+  name                  = "${lower(each.value.name)}-key-vault"
   resource_group_name   = azurerm_private_dns_zone.key_vault[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.key_vault[0].name
   virtual_network_id    = each.value.id
@@ -33,9 +33,9 @@ resource azurerm_private_dns_zone_virtual_network_link key_vault {
 
 resource azurerm_private_dns_zone_virtual_network_link storage_blob {
   for_each = {
-    for virtualNetwork in local.virtualNetworksRegional : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworksZoneLink : virtualNetwork.name => virtualNetwork
   }
-  name                  = "storage-blob-${lower(each.value.regionName)}"
+  name                  = "${lower(each.value.name)}-storage-blob"
   resource_group_name   = azurerm_private_dns_zone.storage_blob.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.storage_blob.name
   virtual_network_id    = each.value.id
@@ -46,9 +46,9 @@ resource azurerm_private_dns_zone_virtual_network_link storage_blob {
 
 resource azurerm_private_dns_zone_virtual_network_link storage_file {
   for_each = {
-    for virtualNetwork in local.virtualNetworksRegional : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworksZoneLink : virtualNetwork.name => virtualNetwork
   }
-  name                  = "storage-file-${lower(each.value.regionName)}"
+  name                  = "${lower(each.value.name)}-storage-file"
   resource_group_name   = azurerm_private_dns_zone.storage_file.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.storage_file.name
   virtual_network_id    = each.value.id

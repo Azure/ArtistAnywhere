@@ -145,7 +145,6 @@ resource azurerm_resource_group workstation {
 }
 
 resource azurerm_resource_group workstation_edge {
-  count    = module.global.resourceLocation.edgeZone != "" ? 1 : 0
   name     = "${azurerm_resource_group.workstation.name}.Edge"
-  location = local.rootRegion.name
+  location = azurerm_resource_group.workstation.location
 }

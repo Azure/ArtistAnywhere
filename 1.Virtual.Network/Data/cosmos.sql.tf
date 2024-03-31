@@ -150,7 +150,7 @@ locals {
 resource azurerm_private_dns_zone no_sql {
   count               = var.noSQL.enable || var.gremlin.enable || var.table.enable ? 1 : 0
   name                = var.noSQL.account.dedicatedGateway.enable ? "privatelink.sqlx.cosmos.azure.com" : "privatelink.documents.azure.com"
-  resource_group_name = azurerm_resource_group.database.name
+  resource_group_name = azurerm_resource_group.data.name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link no_sql {

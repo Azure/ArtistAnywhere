@@ -211,7 +211,7 @@ resource azurerm_cosmosdb_mongo_user_definition mongo_db {
 resource azurerm_private_dns_zone mongo_cluster {
   count               = var.mongoDBvCore.enable ? 1 : 0
   name                = "privatelink.mongocluster.cosmos.azure.com"
-  resource_group_name = azurerm_resource_group.database.name
+  resource_group_name = azurerm_resource_group.data.name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link mongo_cluster {
@@ -225,8 +225,8 @@ resource azurerm_private_dns_zone_virtual_network_link mongo_cluster {
 resource azurerm_private_endpoint mongo_cluster {
   count               = var.mongoDBvCore.enable ? 1 : 0
   name                = "${azapi_resource.mongo_cluster[0].name}-${azurerm_private_dns_zone_virtual_network_link.mongo_cluster[0].name}"
-  resource_group_name = azurerm_resource_group.database.name
-  location            = azurerm_resource_group.database.location
+  resource_group_name = azurerm_resource_group.data.name
+  location            = azurerm_resource_group.data.location
   subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azapi_resource.mongo_cluster[0].name
@@ -251,8 +251,8 @@ resource azapi_resource mongo_cluster {
   count     = var.mongoDBvCore.enable ? 1 : 0
   name      = var.mongoDBvCore.cluster.name
   type      = "Microsoft.DocumentDB/mongoClusters@2024-02-15-preview"
-  parent_id = azurerm_resource_group.database.id
-  location  = azurerm_resource_group.database.location
+  parent_id = azurerm_resource_group.data.id
+  location  = azurerm_resource_group.data.location
   body = jsonencode({
     properties = {
       nodeGroupSpecs = [

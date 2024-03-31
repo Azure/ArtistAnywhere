@@ -60,7 +60,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor {
   for_each = {
     for virtualNetwork in local.monitorNetworks : virtualNetwork.name => virtualNetwork
   }
-  name                  = "monitor-${lower(each.value.regionName)}"
+  name                  = "${lower(each.value.name)}-monitor"
   resource_group_name   = azurerm_private_dns_zone.monitor[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.monitor[0].name
   virtual_network_id    = each.value.id
@@ -70,7 +70,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor_opinsights_oms {
   for_each = {
     for virtualNetwork in local.monitorNetworks : virtualNetwork.name => virtualNetwork
   }
-  name                  = "monitor-opinsights-oms-${lower(each.value.regionName)}"
+  name                  = "${lower(each.value.name)}-monitor-opinsights-oms"
   resource_group_name   = azurerm_private_dns_zone.monitor_opinsights_oms[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.monitor_opinsights_oms[0].name
   virtual_network_id    = each.value.id
@@ -80,7 +80,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor_opinsights_ods {
   for_each = {
     for virtualNetwork in local.monitorNetworks : virtualNetwork.name => virtualNetwork
   }
-  name                  = "monitor-opinsights-ods-${lower(each.value.regionName)}"
+  name                  = "${lower(each.value.name)}-monitor-opinsights-ods"
   resource_group_name   = azurerm_private_dns_zone.monitor_opinsights_ods[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.monitor_opinsights_ods[0].name
   virtual_network_id    = each.value.id
@@ -90,7 +90,7 @@ resource azurerm_private_dns_zone_virtual_network_link monitor_automation {
   for_each = {
     for virtualNetwork in local.monitorNetworks : virtualNetwork.name => virtualNetwork
   }
-  name                  = "monitor-automation-${lower(each.value.regionName)}"
+  name                  = "${lower(each.value.name)}-monitor-automation"
   resource_group_name   = azurerm_private_dns_zone.monitor_automation[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.monitor_automation[0].name
   virtual_network_id    = each.value.id

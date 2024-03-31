@@ -19,7 +19,7 @@ terraform {
     }
   }
   backend azurerm {
-    key = "1.Virtual.Network.CosmosDB"
+    key = "1.Virtual.Network.Data"
   }
 }
 
@@ -105,7 +105,13 @@ data azurerm_subnet data_cassandra {
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
-resource azurerm_resource_group database {
+resource azurerm_resource_group data {
   name     = var.resourceGroupName
   location = var.cosmosDB.geoLocations[0].regionName
+}
+
+resource azurerm_resource_group data_analytics {
+  count    = var.cosmosDB.dataAnalytics.enable ? 1 : 0
+  name     = "${azurerm_resource_group.data.name}.Analytics"
+  location = azurerm_resource_group.data.location
 }

@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Database" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.Data" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
 ########################################################################
 # Cosmos DB (https://learn.microsoft.com/azure/cosmos-db/introduction) #
@@ -525,6 +525,28 @@ search = {
   name = "xstudio"
   tier = "standard"
   accessKeys = {
+    enable = true
+  }
+}
+
+###############################################################################################
+# Traffic Manager (https://learn.microsoft.comazure/traffic-manager/traffic-manager-overview) #
+###############################################################################################
+
+trafficManager = {
+  enable        = true
+  name          = "xstudio"
+  routingMethod = "Performance" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/traffic_manager_profile.html#traffic_routing_method
+  dns = {
+    name = "xstudio"
+    ttl  = 300
+  }
+  monitor = {
+    protocol = "HTTP"
+    port     = 80
+    path     = "/"
+  }
+  trafficView = {
     enable = true
   }
 }

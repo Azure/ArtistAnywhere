@@ -453,15 +453,6 @@ if ($machineType -ne "Scheduler") {
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   dism /Online /NoRestart /LogPath:"$binDirectory\wsl-appx" /Add-ProvisionedAppxPackage /PackagePath:$installFile /SkipLicense
   Write-Host "Customize (End): WSL"
-
-  Write-Host "Customize (Start): PSTools"
-  $installFile = "PSTools.zip"
-  $downloadUrl = "https://download.sysinternals.com/files/$installFile"
-  (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
-  $binPathPSTools = "C:\Program Files\PSTools"
-  Expand-Archive -Path $installFile -DestinationPath $binPathPSTools
-  $binPaths += ";$binPathPSTools"
-  Write-Host "Customize (End): PSTools"
 }
 
 Write-Host "Customize (PATH): $($binPaths.substring(1))"

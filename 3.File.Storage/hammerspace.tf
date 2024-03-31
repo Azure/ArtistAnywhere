@@ -162,7 +162,7 @@ locals {
 
 resource azurerm_resource_group hammerspace {
   count    = var.hammerspace.namePrefix != "" ? 1 : 0
-  name     = "${var.resourceGroupName}.Hammerspace"
+  name     = "${azurerm_resource_group.storage.name}.Hammerspace"
   location = azurerm_resource_group.storage.location
 }
 

@@ -15,7 +15,7 @@ variable search {
 resource azurerm_private_dns_zone search {
   count               = var.noSQL.enable ? 1 : 0
   name                = "privatelink.search.windows.net"
-  resource_group_name = azurerm_resource_group.database.name
+  resource_group_name = azurerm_resource_group.data.name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link search {
@@ -29,8 +29,8 @@ resource azurerm_private_dns_zone_virtual_network_link search {
 resource azurerm_private_endpoint search {
   count               = var.noSQL.enable ? 1 : 0
   name                = "${azurerm_search_service.cosmos_db[0].name}-search"
-  resource_group_name = azurerm_resource_group.database.name
-  location            = azurerm_resource_group.database.location
+  resource_group_name = azurerm_resource_group.data.name
+  location            = azurerm_resource_group.data.location
   subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azurerm_search_service.cosmos_db[0].name
@@ -51,8 +51,8 @@ resource azurerm_private_endpoint search {
 resource azurerm_search_service cosmos_db {
   count                         = var.noSQL.enable ? 1 : 0
   name                          = var.search.name
-  resource_group_name           = azurerm_resource_group.database.name
-  location                      = azurerm_resource_group.database.location
+  resource_group_name           = azurerm_resource_group.data.name
+  location                      = azurerm_resource_group.data.location
   sku                           = var.search.tier
   local_authentication_enabled  = var.search.accessKeys.enable
   public_network_access_enabled = false

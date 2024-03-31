@@ -174,8 +174,8 @@ resource azurerm_role_assignment cassandra {
 resource azurerm_cosmosdb_cassandra_cluster cassandra {
   count                          = var.apacheCassandra.enable ? 1 : 0
   name                           = var.apacheCassandra.cluster.name
-  resource_group_name            = azurerm_resource_group.database.name
-  location                       = azurerm_resource_group.database.location
+  resource_group_name            = azurerm_resource_group.data.name
+  location                       = azurerm_resource_group.data.location
   delegated_management_subnet_id = data.azurerm_subnet.data_cassandra.id
   version                        = var.apacheCassandra.cluster.version
   hours_between_backups          = var.apacheCassandra.backup.intervalHours

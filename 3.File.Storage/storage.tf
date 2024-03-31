@@ -34,19 +34,26 @@ variable storageAccounts {
 }
 
 locals {
+  storageAccounts = [
+    for storageAccount in var.storageAccounts : merge(storageAccount, {
+      resourceGroupName     = local.edgeZone != null ? azurerm_resource_group.storage_edge.name : azurerm_resource_group.storage.name
+      resourceGroupLocation = local.edgeZone != null ? azurerm_resource_group.storage_edge.location : azurerm_resource_group.storage.location
+      storageAccountId      = "${local.edgeZone != null ? azurerm_resource_group.storage_edge.id : azurerm_resource_group.storage.id}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
+      storageAccountName    = storageAccount.name
+    })
+  ]
   serviceEndpointSubnets = distinct(var.existingNetwork.enable ? flatten([
     for subnet in data.terraform_remote_state.network.outputs.storageEndpointSubnets : [
       var.existingNetwork.serviceEndpointSubnets
     ]
   ]) : data.terraform_remote_state.network.outputs.storageEndpointSubnets)
   privateEndpoints = flatten([
-    for storageAccount in var.storageAccounts : [
-      for privateEndpointType in storageAccount.privateEndpointTypes : {
-        type               = privateEndpointType
-        storageAccountName = storageAccount.name
-        storageAccountId   = "${azurerm_resource_group.storage.id}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
-        dnsZoneId          = "${data.azurerm_resource_group.dns.id}/providers/Microsoft.Network/privateDnsZones/privatelink.${privateEndpointType}.core.windows.net"
-      }
+    for storageAccount in local.storageAccounts : [
+      for privateEndpointType in storageAccount.privateEndpointTypes : merge(storageAccount, {
+        key       = "${storageAccount.name}-${privateEndpointType}"
+        type      = privateEndpointType
+        dnsZoneId = "${data.azurerm_resource_group.dns.id}/providers/Microsoft.Network/privateDnsZones/privatelink.${privateEndpointType}.core.windows.net"
+      })
     ] if storageAccount.enable
   ])
   blobStorageAccount = one([
@@ -56,18 +63,16 @@ locals {
     for storageAccount in azurerm_storage_account.studio : storageAccount if storageAccount.nfsv3_enabled == true
   ])
   blobContainers = flatten([
-    for storageAccount in var.storageAccounts : [
-      for blobContainer in storageAccount.blobContainers : merge(blobContainer, {
-        key                = "${storageAccount.name}-${blobContainer.name}"
-        storageAccountName = storageAccount.name
+    for storageAccount in local.storageAccounts : [
+      for blobContainer in storageAccount.blobContainers : merge(storageAccount, blobContainer, {
+        key = "${storageAccount.name}-${blobContainer.name}"
       }) if blobContainer.enable
     ] if storageAccount.enable
   ])
   fileShares = flatten([
-    for storageAccount in var.storageAccounts : [
-      for fileShare in storageAccount.fileShares : merge(fileShare, {
-        key                = "${storageAccount.name}-${fileShare.name}"
-        storageAccountName = storageAccount.name
+    for storageAccount in local.storageAccounts : [
+      for fileShare in storageAccount.fileShares : merge(storageAccount, fileShare, {
+        key = "${storageAccount.name}-${fileShare.name}"
       }) if fileShare.enable
     ] if storageAccount.enable
   ])
@@ -75,11 +80,11 @@ locals {
 
 resource azurerm_storage_account studio {
   for_each = {
-    for storageAccount in var.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
+    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
   }
   name                            = each.value.name
-  resource_group_name             = azurerm_resource_group.storage.name
-  location                        = azurerm_resource_group.storage.location
+  resource_group_name             = each.value.resourceGroupName
+  location                        = each.value.resourceGroupLocation
   edge_zone                       = local.edgeZone
   account_kind                    = each.value.type
   account_tier                    = each.value.tier
@@ -103,11 +108,11 @@ resource azurerm_storage_account studio {
 
 resource azurerm_private_endpoint storage {
   for_each = {
-    for privateEndpoint in local.privateEndpoints : "${privateEndpoint.storageAccountName}-${privateEndpoint.type}" => privateEndpoint
+    for privateEndpoint in local.privateEndpoints : privateEndpoint.key => privateEndpoint
   }
-  name                = "${each.value.storageAccountName}-${each.value.type}"
-  resource_group_name = azurerm_resource_group.storage.name
-  location            = azurerm_resource_group.storage.location
+  name                = each.value.key
+  resource_group_name = each.value.resourceGroupName
+  location            = each.value.resourceGroupLocation
   subnet_id           = data.azurerm_subnet.storage.id
   private_service_connection {
     name                           = each.value.storageAccountName
@@ -130,11 +135,11 @@ resource azurerm_private_endpoint storage {
 
 resource azurerm_role_assignment storage_contributor {
   for_each = {
-    for storageAccount in var.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
+    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
   }
   role_definition_name = "Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-  scope                = "${azurerm_resource_group.storage.id}/providers/Microsoft.Storage/storageAccounts/${each.value.name}"
+  scope                = each.value.storageAccountId
   depends_on = [
     azurerm_storage_account.studio
   ]
@@ -142,11 +147,11 @@ resource azurerm_role_assignment storage_contributor {
 
 resource azurerm_role_assignment storage_blob_data_owner {
   for_each = {
-    for storageAccount in var.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
+    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
   }
   role_definition_name = "Storage Blob Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-blob-data-owner
   principal_id         = data.azurerm_client_config.studio.object_id
-  scope                = "${azurerm_resource_group.storage.id}/providers/Microsoft.Storage/storageAccounts/${each.value.name}"
+  scope                = each.value.storageAccountId
   depends_on = [
     azurerm_storage_account.studio
   ]

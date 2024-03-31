@@ -93,7 +93,7 @@ variable weka {
 
 data azurerm_storage_account blob {
   name                = local.blobStorageAccount.name
-  resource_group_name = azurerm_resource_group.storage.name
+  resource_group_name = local.blobStorageAccount.resource_group_name
   depends_on = [
     azurerm_storage_account.studio
   ]
@@ -184,7 +184,7 @@ locals {
 
 resource azurerm_resource_group weka {
   count    = var.weka.enable ? 1 : 0
-  name     = "${var.resourceGroupName}.Weka"
+  name     = "${azurerm_resource_group.storage.name}.Weka"
   location = azurerm_resource_group.storage.location
 }
 

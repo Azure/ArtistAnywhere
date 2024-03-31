@@ -96,27 +96,27 @@ data azurerm_key_vault_key data_encryption {
 locals {
   cosmosAccounts = [
     {
-      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.noSQL.account.name}"
+      id = "${azurerm_resource_group.data.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.noSQL.account.name}"
       name = var.noSQL.enable ? var.noSQL.account.name : ""
       type = "sql"
     },
     {
-      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.mongoDB.account.name}"
+      id = "${azurerm_resource_group.data.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.mongoDB.account.name}"
       name = var.mongoDB.enable ? var.mongoDB.account.name : ""
       type = "mongo"
     },
     {
-      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosCassandra.account.name}"
+      id = "${azurerm_resource_group.data.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.cosmosCassandra.account.name}"
       name = var.cosmosCassandra.enable ? var.cosmosCassandra.account.name : ""
       type = "cassandra"
     },
     {
-      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.gremlin.account.name}"
+      id = "${azurerm_resource_group.data.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.gremlin.account.name}"
       name = var.gremlin.enable ? var.gremlin.account.name : ""
       type = "gremlin"
     },
     {
-      id = "${azurerm_resource_group.database.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.table.account.name}"
+      id = "${azurerm_resource_group.data.id}/providers/Microsoft.DocumentDB/databaseAccounts/${var.table.account.name}"
       name = var.table.enable ? var.table.account.name : ""
       type = "table"
     }
@@ -135,8 +135,8 @@ resource azurerm_cosmosdb_account studio {
     for cosmosAccount in local.cosmosAccounts : cosmosAccount.type => cosmosAccount if cosmosAccount.name != ""
   }
   name                            = each.value.name
-  resource_group_name             = azurerm_resource_group.database.name
-  location                        = azurerm_resource_group.database.location
+  resource_group_name             = azurerm_resource_group.data.name
+  location                        = azurerm_resource_group.data.location
   kind                            = each.value.type == "mongo" ? "MongoDB" : "GlobalDocumentDB"
   mongo_server_version            = each.value.type == "mongo" ? var.mongoDB.account.version : null
   offer_type                      = var.cosmosDB.offerType

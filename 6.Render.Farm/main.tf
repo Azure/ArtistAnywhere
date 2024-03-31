@@ -188,7 +188,6 @@ resource azurerm_resource_group farm {
 }
 
 resource azurerm_resource_group farm_edge {
-  count    = module.global.resourceLocation.edgeZone != "" ? 1 : 0
   name     = "${azurerm_resource_group.farm.name}.Edge"
-  location = local.rootRegion.name
+  location = azurerm_resource_group.farm.location
 }

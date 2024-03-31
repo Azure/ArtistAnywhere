@@ -25,7 +25,7 @@ variable trafficManager {
 resource azurerm_traffic_manager_profile studio {
   count                  = var.trafficManager.enable ? 1 : 0
   name                   = var.trafficManager.name
-  resource_group_name    = azurerm_resource_group.studio.name
+  resource_group_name    = module.global.resourceGroupName
   traffic_routing_method = var.trafficManager.routingMethod
   traffic_view_enabled   = var.trafficManager.trafficView.enable
   dns_config {
