@@ -85,6 +85,11 @@ variable noSQL {
           default   = number
           analytics = number
         })
+        conflictResolutionPolicy = object({
+          mode      = string
+          path      = string
+          procedure = string
+        })
       }))
     }))
     roles = list(object({
@@ -266,6 +271,11 @@ resource azurerm_cosmosdb_sql_container no_sql {
     content {
       max_throughput = each.value.throughput.requestUnits
     }
+  }
+  conflict_resolution_policy {
+    mode                          = each.value.conflictResolutionPolicy.mode
+    conflict_resolution_path      = each.value.conflictResolutionPolicy.path != "" ? each.value.conflictResolutionPolicy.path : null
+    conflict_resolution_procedure = each.value.conflictResolutionPolicy.procedure != "" ? each.value.conflictResolutionPolicy.procedure : null
   }
   depends_on = [
     azurerm_cosmosdb_sql_database.no_sql

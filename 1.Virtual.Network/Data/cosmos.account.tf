@@ -25,14 +25,6 @@ variable cosmosDB {
         itemUpdateCount = number
       })
     })
-    dataFactory = object({
-      enable = bool
-      name   = string
-      doubleEncryption = object({
-        enable  = bool
-        keyName = string
-      })
-    })
     dataAnalytics = object({
       enable     = bool
       schemaType = string
@@ -55,6 +47,14 @@ variable cosmosDB {
           enable  = bool
           keyName = string
         })
+      })
+    })
+    dataFactory = object({
+      enable = bool
+      name   = string
+      doubleEncryption = object({
+        enable  = bool
+        keyName = string
       })
     })
     aggregationPipeline = object({

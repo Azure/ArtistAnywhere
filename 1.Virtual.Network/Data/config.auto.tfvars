@@ -38,16 +38,8 @@ cosmosDB = {
       itemUpdateCount = 100
     }
   }
-  dataFactory = {
-    enable = false
-    name   = "xstudio"
-    doubleEncryption = {
-      enable  = false
-      keyName = ""
-    }
-  }
   dataAnalytics = {
-    enable     = false
+    enable     = true
     schemaType = "FullFidelity" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#schema_type
     workspace = {
       name = "xstudio"
@@ -68,6 +60,14 @@ cosmosDB = {
         enable  = false
         keyName = ""
       }
+    }
+  }
+  dataFactory = {
+    enable = false
+    name   = "xstudio"
+    doubleEncryption = {
+      enable  = false
+      keyName = ""
     }
   }
   aggregationPipeline = {
@@ -199,6 +199,11 @@ noSQL = {
           timeToLive = {
             default   = null
             analytics = null
+          }
+          conflictResolutionPolicy = {
+            mode      = "LastWriterWins"
+            path      = "/_ts"
+            procedure = ""
           }
         }
       ]
