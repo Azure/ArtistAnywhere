@@ -36,17 +36,13 @@ variable storageAccounts {
 locals {
   storageAccounts = [
     for storageAccount in var.storageAccounts : merge(storageAccount, {
-      resourceGroupName     = local.edgeZone != null ? azurerm_resource_group.storage_edge.name : azurerm_resource_group.storage.name
-      resourceGroupLocation = local.edgeZone != null ? azurerm_resource_group.storage_edge.location : azurerm_resource_group.storage.location
-      storageAccountId      = "${local.edgeZone != null ? azurerm_resource_group.storage_edge.id : azurerm_resource_group.storage.id}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
+      resourceGroupName     = azurerm_resource_group.storage.name
+      resourceGroupLocation = azurerm_resource_group.storage.location
+      storageAccountId      = "${azurerm_resource_group.storage.id}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
       storageAccountName    = storageAccount.name
     })
   ]
-  serviceEndpointSubnets = distinct(var.existingNetwork.enable ? flatten([
-    for subnet in data.terraform_remote_state.network.outputs.storageEndpointSubnets : [
-      var.existingNetwork.serviceEndpointSubnets
-    ]
-  ]) : data.terraform_remote_state.network.outputs.storageEndpointSubnets)
+  serviceEndpointSubnets = try(data.terraform_remote_state.network.outputs.virtualNetworksSubnetStorage, [])
   privateEndpoints = flatten([
     for storageAccount in local.storageAccounts : [
       for privateEndpointType in storageAccount.privateEndpointTypes : merge(storageAccount, {
@@ -78,61 +74,6 @@ locals {
   ])
 }
 
-resource azurerm_storage_account studio {
-  for_each = {
-    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
-  }
-  name                            = each.value.name
-  resource_group_name             = each.value.resourceGroupName
-  location                        = each.value.resourceGroupLocation
-  edge_zone                       = local.edgeZone
-  account_kind                    = each.value.type
-  account_tier                    = each.value.tier
-  account_replication_type        = each.value.redundancy
-  enable_https_traffic_only       = each.value.enableHttpsOnly
-  is_hns_enabled                  = each.value.enableBlobNfsV3
-  nfsv3_enabled                   = each.value.enableBlobNfsV3
-  large_file_share_enabled        = each.value.enableLargeFileShare ? true : null
-  allow_nested_items_to_be_public = false
-  network_rules {
-    default_action = "Deny"
-    virtual_network_subnet_ids = [
-      for serviceEndpointSubnet in local.serviceEndpointSubnets :
-        "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${serviceEndpointSubnet.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${serviceEndpointSubnet.virtualNetworkName}/subnets/${serviceEndpointSubnet.name}"
-    ]
-    ip_rules = [
-      jsondecode(data.http.client_address.response_body).ip
-    ]
-  }
-}
-
-resource azurerm_private_endpoint storage {
-  for_each = {
-    for privateEndpoint in local.privateEndpoints : privateEndpoint.key => privateEndpoint
-  }
-  name                = each.value.key
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.resourceGroupLocation
-  subnet_id           = data.azurerm_subnet.storage.id
-  private_service_connection {
-    name                           = each.value.storageAccountName
-    private_connection_resource_id = each.value.storageAccountId
-    is_manual_connection           = false
-    subresource_names = [
-      each.value.type
-    ]
-  }
-  private_dns_zone_group {
-    name = each.value.storageAccountName
-    private_dns_zone_ids = [
-      each.value.dnsZoneId
-    ]
-  }
-  depends_on = [
-    azurerm_storage_account.studio
-  ]
-}
-
 resource azurerm_role_assignment storage_contributor {
   for_each = {
     for storageAccount in local.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
@@ -155,6 +96,34 @@ resource azurerm_role_assignment storage_blob_data_owner {
   depends_on = [
     azurerm_storage_account.studio
   ]
+}
+
+resource azurerm_storage_account studio {
+  for_each = {
+    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
+  }
+  name                            = each.value.name
+  resource_group_name             = each.value.resourceGroupName
+  location                        = each.value.resourceGroupLocation
+  # edge_zone                       = local.edgeZone
+  account_kind                    = each.value.type
+  account_tier                    = each.value.tier
+  account_replication_type        = each.value.redundancy
+  enable_https_traffic_only       = each.value.enableHttpsOnly
+  is_hns_enabled                  = each.value.enableBlobNfsV3
+  nfsv3_enabled                   = each.value.enableBlobNfsV3
+  large_file_share_enabled        = each.value.enableLargeFileShare ? true : null
+  allow_nested_items_to_be_public = false
+  network_rules {
+    default_action = "Deny"
+    virtual_network_subnet_ids = [
+      for serviceEndpointSubnet in local.serviceEndpointSubnets :
+        "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${serviceEndpointSubnet.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${serviceEndpointSubnet.virtualNetworkName}/subnets/${serviceEndpointSubnet.name}"
+    ]
+    ip_rules = [
+      jsondecode(data.http.client_address.response_body).ip
+    ]
+  }
 }
 
 resource azurerm_storage_container core {
@@ -279,6 +248,33 @@ resource terraform_data file_share_load_blob {
   }
   depends_on = [
     azurerm_storage_share.core
+  ]
+}
+
+resource azurerm_private_endpoint storage {
+  for_each = {
+    for privateEndpoint in local.privateEndpoints : privateEndpoint.key => privateEndpoint
+  }
+  name                = each.value.key
+  resource_group_name = each.value.resourceGroupName
+  location            = each.value.resourceGroupLocation
+  subnet_id           = data.azurerm_subnet.storage_region.id
+  private_service_connection {
+    name                           = each.value.storageAccountName
+    private_connection_resource_id = each.value.storageAccountId
+    is_manual_connection           = false
+    subresource_names = [
+      each.value.type
+    ]
+  }
+  private_dns_zone_group {
+    name = each.value.storageAccountName
+    private_dns_zone_ids = [
+      each.value.dnsZoneId
+    ]
+  }
+  depends_on = [
+    azurerm_storage_account.studio
   ]
 }
 

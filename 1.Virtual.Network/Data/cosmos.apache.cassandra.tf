@@ -75,45 +75,6 @@ locals {
 # Cosmos DB Apache Cassandra (https://learn.microsoft.com/azure/cosmos-db/cassandra/introduction) #
 ###################################################################################################
 
-resource azurerm_private_dns_zone cassandra {
-  count               = var.cosmosCassandra.enable ? 1 : 0
-  name                = "privatelink.cassandra.cosmos.azure.com"
-  resource_group_name = azurerm_cosmosdb_account.studio["cassandra"].resource_group_name
-}
-
-resource azurerm_private_dns_zone_virtual_network_link cassandra {
-  count                 = var.cosmosCassandra.enable ? 1 : 0
-  name                  = "cassandra"
-  resource_group_name   = azurerm_private_dns_zone.cassandra[0].resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.cassandra[0].name
-  virtual_network_id    = data.azurerm_virtual_network.studio.id
-}
-
-resource azurerm_private_endpoint cassandra {
-  count               = var.cosmosCassandra.enable ? 1 : 0
-  name                = azurerm_cosmosdb_account.studio["cassandra"].name
-  resource_group_name = azurerm_cosmosdb_account.studio["cassandra"].resource_group_name
-  location            = azurerm_cosmosdb_account.studio["cassandra"].location
-  subnet_id           = data.azurerm_subnet.data.id
-  private_service_connection {
-    name                           = azurerm_cosmosdb_account.studio["cassandra"].name
-    private_connection_resource_id = azurerm_cosmosdb_account.studio["cassandra"].id
-    is_manual_connection           = false
-    subresource_names = [
-      "Cassandra"
-    ]
-  }
-  private_dns_zone_group {
-    name = azurerm_cosmosdb_account.studio["cassandra"].name
-    private_dns_zone_ids = [
-      azurerm_private_dns_zone.cassandra[0].id
-    ]
-  }
-  depends_on = [
-    azurerm_private_dns_zone_virtual_network_link.cassandra
-  ]
-}
-
 resource azurerm_cosmosdb_cassandra_keyspace cassandra {
   for_each = {
     for database in var.cosmosCassandra.databases : database.name => database if var.cosmosCassandra.enable && database.enable
@@ -157,6 +118,42 @@ resource azurerm_cosmosdb_cassandra_table cassandra {
         type = column.value["type"]
       }
     }
+  }
+}
+
+resource azurerm_private_dns_zone cassandra {
+  count               = var.cosmosCassandra.enable ? 1 : 0
+  name                = "privatelink.cassandra.cosmos.azure.com"
+  resource_group_name = azurerm_cosmosdb_account.studio["cassandra"].resource_group_name
+}
+
+resource azurerm_private_dns_zone_virtual_network_link cassandra {
+  count                 = var.cosmosCassandra.enable ? 1 : 0
+  name                  = "cassandra"
+  resource_group_name   = azurerm_private_dns_zone.cassandra[0].resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.cassandra[0].name
+  virtual_network_id    = data.azurerm_virtual_network.studio.id
+}
+
+resource azurerm_private_endpoint cassandra {
+  count               = var.cosmosCassandra.enable ? 1 : 0
+  name                = azurerm_cosmosdb_account.studio["cassandra"].name
+  resource_group_name = azurerm_cosmosdb_account.studio["cassandra"].resource_group_name
+  location            = azurerm_cosmosdb_account.studio["cassandra"].location
+  subnet_id           = data.azurerm_subnet.data.id
+  private_service_connection {
+    name                           = azurerm_cosmosdb_account.studio["cassandra"].name
+    private_connection_resource_id = azurerm_cosmosdb_account.studio["cassandra"].id
+    is_manual_connection           = false
+    subresource_names = [
+      "Cassandra"
+    ]
+  }
+  private_dns_zone_group {
+    name = azurerm_private_dns_zone_virtual_network_link.cassandra[0].name
+    private_dns_zone_ids = [
+      azurerm_private_dns_zone.cassandra[0].id
+    ]
   }
 }
 

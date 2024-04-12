@@ -17,12 +17,12 @@ variable bastion {
 }
 
 locals {
-  bastionNetworks = var.bastion.enablePerRegion ? local.virtualNetworksRegional : [local.virtualNetworksRegional[0]]
+  bastionNetworks = var.bastion.enable ? var.bastion.enablePerRegion ? local.virtualNetworks : [local.virtualNetworks[0]] : []
 }
 
 resource azurerm_network_security_group bastion {
   for_each = {
-    for virtualNetwork in local.bastionNetworks : virtualNetwork.name => virtualNetwork if var.bastion.enable
+    for virtualNetwork in local.bastionNetworks : virtualNetwork.name => virtualNetwork
   }
   name                = "Bastion"
   resource_group_name = each.value.resourceGroupName
@@ -131,7 +131,7 @@ resource azurerm_network_security_group bastion {
 
 resource azurerm_subnet_network_security_group_association bastion {
   for_each = {
-    for virtualNetwork in local.bastionNetworks : virtualNetwork.name => virtualNetwork if var.bastion.enable
+    for virtualNetwork in local.bastionNetworks : virtualNetwork.name => virtualNetwork
   }
   subnet_id                 = "${each.value.id}/subnets/AzureBastionSubnet"
   network_security_group_id = azurerm_network_security_group.bastion[each.value.name].id
@@ -142,7 +142,7 @@ resource azurerm_subnet_network_security_group_association bastion {
 
 resource azurerm_public_ip bastion {
   for_each = {
-    for virtualNetwork in local.bastionNetworks : virtualNetwork.name => virtualNetwork if var.bastion.enable
+    for virtualNetwork in local.bastionNetworks : virtualNetwork.name => virtualNetwork
   }
   name                = "Bastion"
   resource_group_name = each.value.resourceGroupName
@@ -156,7 +156,7 @@ resource azurerm_public_ip bastion {
 
 resource azurerm_bastion_host studio {
   for_each = {
-    for virtualNetwork in local.bastionNetworks : virtualNetwork.name => virtualNetwork if var.bastion.enable
+    for virtualNetwork in local.bastionNetworks : virtualNetwork.name => virtualNetwork
   }
   name                   = "Bastion"
   resource_group_name    = each.value.resourceGroupName

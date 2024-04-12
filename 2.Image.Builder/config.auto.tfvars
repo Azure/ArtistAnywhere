@@ -495,20 +495,3 @@ binStorage = { # Required configuration for image building
   host = ""
   auth = ""
 }
-
-#######################################################################
-# Resource dependency configuration for pre-existing deployments only #
-#######################################################################
-
-existingKeyVault = {
-  enable            = false
-  name              = ""
-  resourceGroupName = ""
-}
-
-existingNetwork = {
-  enable            = false
-  name              = ""
-  subnetName        = ""
-  resourceGroupName = ""
-}

@@ -51,45 +51,6 @@ variable postgreSQL {
   })
 }
 
-resource azurerm_private_dns_zone postgre_sql {
-  count               = var.postgreSQL.enable ? 1 : 0
-  name                = "privatelink.postgres.cosmos.azure.com"
-  resource_group_name = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].resource_group_name
-}
-
-resource azurerm_private_dns_zone_virtual_network_link postgre_sql {
-  count                 = var.postgreSQL.enable ? 1 : 0
-  name                  = "postgre-sql"
-  resource_group_name   = azurerm_private_dns_zone.postgre_sql[0].resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.postgre_sql[0].name
-  virtual_network_id    = data.azurerm_virtual_network.studio.id
-}
-
-resource azurerm_private_endpoint postgre_sql {
-  count               = var.postgreSQL.enable ? 1 : 0
-  name                = "${azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].name}-${azurerm_private_dns_zone_virtual_network_link.postgre_sql[0].name}"
-  resource_group_name = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].resource_group_name
-  location            = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].location
-  subnet_id           = data.azurerm_subnet.data.id
-  private_service_connection {
-    name                           = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].name
-    private_connection_resource_id = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].id
-    is_manual_connection           = false
-    subresource_names = [
-      "coordinator"
-    ]
-  }
-  private_dns_zone_group {
-    name = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].name
-    private_dns_zone_ids = [
-      azurerm_private_dns_zone.postgre_sql[0].id
-    ]
-  }
-  depends_on = [
-    azurerm_private_dns_zone_virtual_network_link.postgre_sql
-  ]
-}
-
 resource azurerm_cosmosdb_postgresql_cluster postgre_sql {
   count                                = var.postgreSQL.enable ? 1 : 0
   name                                 = var.postgreSQL.cluster.name
@@ -150,4 +111,40 @@ resource azurerm_cosmosdb_postgresql_role postgre_sql {
   name       = each.value.name
   password   = each.value.password
   cluster_id = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].id
+}
+
+resource azurerm_private_dns_zone postgre_sql {
+  count               = var.postgreSQL.enable ? 1 : 0
+  name                = "privatelink.postgres.cosmos.azure.com"
+  resource_group_name = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].resource_group_name
+}
+
+resource azurerm_private_dns_zone_virtual_network_link postgre_sql {
+  count                 = var.postgreSQL.enable ? 1 : 0
+  name                  = "postgre-sql"
+  resource_group_name   = azurerm_private_dns_zone.postgre_sql[0].resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.postgre_sql[0].name
+  virtual_network_id    = data.azurerm_virtual_network.studio.id
+}
+
+resource azurerm_private_endpoint postgre_sql {
+  count               = var.postgreSQL.enable ? 1 : 0
+  name                = "${azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].name}-${azurerm_private_dns_zone_virtual_network_link.postgre_sql[0].name}"
+  resource_group_name = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].resource_group_name
+  location            = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].location
+  subnet_id           = data.azurerm_subnet.data.id
+  private_service_connection {
+    name                           = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].name
+    private_connection_resource_id = azurerm_cosmosdb_postgresql_cluster.postgre_sql[0].id
+    is_manual_connection           = false
+    subresource_names = [
+      "coordinator"
+    ]
+  }
+  private_dns_zone_group {
+    name = azurerm_private_dns_zone_virtual_network_link.postgre_sql[0].name
+    private_dns_zone_ids = [
+      azurerm_private_dns_zone.postgre_sql[0].id
+    ]
+  }
 }

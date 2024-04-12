@@ -13,31 +13,21 @@ variable qumulo {
   })
 }
 
+data external user {
+  count   = var.qumulo.enable ? 1 : 0
+  program = ["az", "account", "show", "--query", "user"]
+}
+
 data azurerm_subnet storage_qumulo {
   count                = var.qumulo.enable ? 1 : 0
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "StorageQumulo"
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
-}
-
-data local_file user {
-  count    = var.qumulo.enable ? 1 : 0
-  filename = "user.txt"
-  depends_on = [
-    terraform_data.user
-  ]
-}
-
-resource terraform_data user {
-  count = var.qumulo.enable ? 1 : 0
-  provisioner local-exec {
-    command = "az account show --query user.name --output tsv > user.txt"
-  }
+  name                 = "StorageQumulo"
+  resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }
 
 resource azurerm_resource_group qumulo {
   count    = var.qumulo.enable ? 1 : 0
-  name     = var.existingNetwork.enable || local.rootRegion.nameSuffix == "" ? "${var.resourceGroupName}.Qumulo" : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}.Qumulo"
+  name     = local.rootRegion.nameSuffix == "" ? "${var.resourceGroupName}.Qumulo" : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}.Qumulo"
   location = local.rootRegion.name
 }
 
@@ -55,7 +45,7 @@ resource azapi_resource qumulo {
         planId      = "azure-native-qumulo-hot-cold-iops-live"
       }
       userDetails = {
-        email = data.local_file.user[0].content
+        email = data.external.user[0].result.name
       }
       storageSku        = "Hot"
       initialCapacity   = var.qumulo.initialCapacity

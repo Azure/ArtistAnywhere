@@ -10,13 +10,25 @@ virtualMachines = [
     name   = "LnxScheduler"
     size   = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
-      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/1.0.0"
+      resourceGroupName = "ArtistAnywhere.Image"
+      galleryName       = "xstudio"
+      definitionName    = "Linux"
+      versionId         = "1.0.0"
       plan = {
-        enable    = false
         publisher = ""
         product   = ""
         name      = ""
       }
+    }
+    network = {
+      subnetName = "Farm"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
+      }
+      staticIpAddress = ""
     }
     adminLogin = {
       userName     = "xadmin"
@@ -33,13 +45,6 @@ virtualMachines = [
         cachingType = "ReadWrite"
         sizeGB      = 0
       }
-    }
-    network = {
-      subnetName = "Farm"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-      staticIpAddress = ""
     }
     extension = {
       custom = {
@@ -70,13 +75,25 @@ virtualMachines = [
     name   = "WinScheduler"
     size   = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
-      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinServer/versions/1.0.0"
+      resourceGroupName = "ArtistAnywhere.Image"
+      galleryName       = "xstudio"
+      definitionName    = "WinServer"
+      versionId         = "1.0.0"
       plan = {
-        enable    = false
         publisher = ""
         product   = ""
         name      = ""
       }
+    }
+    network = {
+      subnetName = "Farm"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
+      }
+      staticIpAddress = "10.0.127.0"
     }
     adminLogin = {
       userName     = "xadmin"
@@ -93,13 +110,6 @@ virtualMachines = [
         cachingType = "ReadWrite"
         sizeGB      = 0
       }
-    }
-    network = {
-      subnetName = "Farm"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-      staticIpAddress = "10.0.127.0"
     }
     extension = {
       custom = {

@@ -4,7 +4,7 @@
 
 variable cosmosDB {
   type = object({
-    offerType = string
+    tier = string
     serverless = object({
       enable = bool
     })
@@ -25,38 +25,6 @@ variable cosmosDB {
         itemUpdateCount = number
       })
     })
-    dataAnalytics = object({
-      enable     = bool
-      schemaType = string
-      workspace = object({
-        name = string
-        authentication = object({
-          azureADOnly = bool
-        })
-        adminLogin = object({
-          userName     = string
-          userPassword = string
-        })
-        storageAccount = object({
-          name        = string
-          type        = string
-          redundancy  = string
-          performance = string
-        })
-        doubleEncryption = object({
-          enable  = bool
-          keyName = string
-        })
-      })
-    })
-    dataFactory = object({
-      enable = bool
-      name   = string
-      doubleEncryption = object({
-        enable  = bool
-        keyName = string
-      })
-    })
     aggregationPipeline = object({
       enable = bool
     })
@@ -69,9 +37,8 @@ variable cosmosDB {
     partitionMerge = object({
       enable = bool
     })
-    doubleEncryption = object({
-      enable  = bool
-      keyName = string
+    encryption = object({
+      enable = bool
     })
     backup = object({
       type              = string
@@ -85,12 +52,6 @@ variable cosmosDB {
 
 data azuread_service_principal cosmos_db {
   display_name = "Azure Cosmos DB"
-}
-
-data azurerm_key_vault_key data_encryption {
-  count        = var.cosmosDB.doubleEncryption.enable && module.global.keyVault.enable ? 1 : 0
-  name         = var.cosmosDB.doubleEncryption.keyName != "" ? var.cosmosDB.doubleEncryption.keyName : module.global.keyVault.keyName.dataEncryption
-  key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
 locals {
@@ -124,7 +85,7 @@ locals {
 }
 
 resource azurerm_role_assignment key_vault {
-  count                = var.cosmosDB.doubleEncryption.enable && module.global.keyVault.enable ? 1 : 0
+  count                = var.cosmosDB.encryption.enable && module.global.keyVault.enable ? 1 : 0
   role_definition_name = "Key Vault Crypto Service Encryption User" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#key-vault-crypto-service-encryption-user
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_key_vault.studio[0].id
@@ -139,9 +100,9 @@ resource azurerm_cosmosdb_account studio {
   location                        = azurerm_resource_group.data.location
   kind                            = each.value.type == "mongo" ? "MongoDB" : "GlobalDocumentDB"
   mongo_server_version            = each.value.type == "mongo" ? var.mongoDB.account.version : null
-  offer_type                      = var.cosmosDB.offerType
-  key_vault_key_id                = var.cosmosDB.doubleEncryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
-  analytical_storage_enabled      = var.cosmosDB.dataAnalytics.enable
+  offer_type                      = var.cosmosDB.tier
+  key_vault_key_id                = var.cosmosDB.encryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
+  analytical_storage_enabled      = var.data.analytics.enable
   partition_merge_enabled         = var.cosmosDB.partitionMerge.enable
   enable_multiple_write_locations = var.cosmosDB.multiRegionWrite.enable
   enable_automatic_failover       = var.cosmosDB.automaticFailover.enable
@@ -177,9 +138,9 @@ resource azurerm_cosmosdb_account studio {
     }
   }
   dynamic analytical_storage {
-    for_each = var.cosmosDB.dataAnalytics.enable ? [1] : []
+    for_each = var.data.analytics.enable ? [1] : []
     content {
-      schema_type = var.cosmosDB.dataAnalytics.schemaType
+      schema_type = var.data.analytics.schemaType
     }
   }
   dynamic capabilities {

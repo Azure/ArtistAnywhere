@@ -1,11 +1,48 @@
 resourceGroupName = "ArtistAnywhere.Data" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
+data = {
+  factory = {
+    enable = true
+    name   = "xstudio"
+    encryption = {
+      enable = false
+    }
+  }
+  analytics = {
+    enable     = true
+    schemaType = "FullFidelity" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#schema_type
+    workspace = {
+      name = "xstudio"
+      authentication = {
+        azureADOnly = false
+      }
+      adminLogin = {
+        userName     = "xadmin"
+        userPassword = "P@ssword1234"
+      }
+      storageAccount = {
+        name        = "xstudio1"
+        type        = "StorageV2"
+        redundancy  = "LRS"
+        performance = "Standard"
+      }
+      encryption = {
+        enable = false
+      }
+    }
+  }
+  governance = {
+    enable = false
+    name   = "xstudio"
+  }
+}
+
 ########################################################################
 # Cosmos DB (https://learn.microsoft.com/azure/cosmos-db/introduction) #
 ########################################################################
 
 cosmosDB = {
-  offerType = "Standard"
+  tier = "Standard"
   serverless = {
     enable = true
   }
@@ -38,38 +75,6 @@ cosmosDB = {
       itemUpdateCount = 100
     }
   }
-  dataAnalytics = {
-    enable     = true
-    schemaType = "FullFidelity" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#schema_type
-    workspace = {
-      name = "xstudio"
-      authentication = {
-        azureADOnly = false
-      }
-      adminLogin = {
-        userName     = "xadmin"
-        userPassword = "P@ssword1234"
-      }
-      storageAccount = {
-        name        = "xstudio1"
-        type        = "StorageV2"
-        redundancy  = "LRS"
-        performance = "Standard"
-      }
-      doubleEncryption = {
-        enable  = false
-        keyName = ""
-      }
-    }
-  }
-  dataFactory = {
-    enable = false
-    name   = "xstudio"
-    doubleEncryption = {
-      enable  = false
-      keyName = ""
-    }
-  }
   aggregationPipeline = {
     enable = false
   }
@@ -82,9 +87,8 @@ cosmosDB = {
   partitionMerge = {
     enable = false
   }
-  doubleEncryption = {
-    enable  = false
-    keyName = ""
+  encryption = {
+    enable = false
   }
   backup = {
     type              = "Periodic"
@@ -519,39 +523,5 @@ functionApp = {
   }
   siteConfig = {
     alwaysOn = false
-  }
-}
-
-#################################################################################
-# Search - https://learn.microsoft.com/azure/search/search-what-is-azure-search #
-#################################################################################
-
-search = {
-  name = "xstudio"
-  tier = "standard"
-  accessKeys = {
-    enable = true
-  }
-}
-
-###############################################################################################
-# Traffic Manager (https://learn.microsoft.comazure/traffic-manager/traffic-manager-overview) #
-###############################################################################################
-
-trafficManager = {
-  enable        = true
-  name          = "xstudio"
-  routingMethod = "Performance" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/traffic_manager_profile.html#traffic_routing_method
-  dns = {
-    name = "xstudio"
-    ttl  = 300
-  }
-  monitor = {
-    protocol = "HTTP"
-    port     = 80
-    path     = "/"
-  }
-  trafficView = {
-    enable = true
   }
 }

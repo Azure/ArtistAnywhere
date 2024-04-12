@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 
 using Microsoft.Azure.Cosmos;
 
-namespace ConsoleApp
+namespace ArtistAnywhere.Data
 {
   public class CosmosContainer
   {

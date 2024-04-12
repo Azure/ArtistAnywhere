@@ -2,10 +2,39 @@
 # Storage (https://learn.microsoft.com/azure/storage) #
 #######################################################
 
-rootStorage = {
+storage = {
   accountType        = "StorageV2" # https://learn.microsoft.com/azure/storage/common/storage-account-overview
   accountRedundancy  = "LRS"       # https://learn.microsoft.com/azure/storage/common/storage-redundancy
   accountPerformance = "Standard"  # https://learn.microsoft.com/azure/storage/blobs/storage-blob-performance-tiers
+}
+
+#################################################################################
+# Search (https://learn.microsoft.com/azure/search/search-what-is-azure-search) #
+#################################################################################
+
+search = {
+  name           = "xstudio"
+  tier           = "standard"
+  hostingMode    = "default"
+  replicaCount   = 1
+  partitionCount = 1
+  sharedPrivateAccess = {
+    enable = false
+  }
+}
+
+######################################################################
+# Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
+######################################################################
+
+monitor = {
+  workspace = {
+    sku = "PerGB2018"
+  }
+  insight = {
+    type = "web"
+  }
+  retentionDays = 90
 }
 
 ############################################################################
@@ -74,16 +103,24 @@ keyVault = {
   ]
 }
 
-######################################################################
-# Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
-######################################################################
+###############################################################################################
+# Traffic Manager (https://learn.microsoft.comazure/traffic-manager/traffic-manager-overview) #
+###############################################################################################
 
-monitor = {
-  workspace = {
-    sku = "PerGB2018"
+trafficManager = {
+  enable        = false
+  name          = "xstudio"
+  routingMethod = "Performance" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/traffic_manager_profile.html#traffic_routing_method
+  dns = {
+    name = "xstudio"
+    ttl  = 300
   }
-  insight = {
-    type = "web"
+  monitor = {
+    protocol = "HTTP"
+    port     = 80
+    path     = "/"
   }
-  retentionDays = 90
+  trafficView = {
+    enable = true
+  }
 }

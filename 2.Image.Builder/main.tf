@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.97.1"
+      version = "~>3.99.0"
     }
     azapi = {
       source = "azure/azapi"
@@ -31,23 +31,6 @@ variable resourceGroupName {
   type = string
 }
 
-variable existingKeyVault {
-  type = object({
-    enable            = bool
-    name              = string
-    resourceGroupName = string
-  })
-}
-
-variable existingNetwork {
-  type = object({
-    enable            = bool
-    name              = string
-    subnetName        = string
-    resourceGroupName = string
-  })
-}
-
 data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name
   resource_group_name = module.global.resourceGroupName
@@ -55,8 +38,8 @@ data azurerm_user_assigned_identity studio {
 
 data azurerm_key_vault studio {
   count               = module.global.keyVault.enable ? 1 : 0
-  name                = var.existingKeyVault.enable ? var.existingKeyVault.name : module.global.keyVault.name
-  resource_group_name = var.existingKeyVault.enable ? var.existingKeyVault.resourceGroupName : module.global.resourceGroupName
+  name                = module.global.keyVault.name
+  resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret admin_username {
@@ -87,21 +70,21 @@ data terraform_remote_state network {
   backend = "azurerm"
   config = {
     resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.rootStorage.accountName
-    container_name       = module.global.rootStorage.containerName.terraformState
+    storage_account_name = module.global.storage.accountName
+    container_name       = module.global.storage.containerName.terraformState
     key                  = "1.Virtual.Network"
   }
 }
 
-data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetworkRegional.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetworkRegional.resourceGroupName
+data azurerm_virtual_network studio_region {
+  name                = data.terraform_remote_state.network.outputs.virtualNetworks[0].name
+  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
 data azurerm_subnet farm {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Farm"
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
+  name                 = "Farm"
+  resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }
 
 data azurerm_resource_group network {
@@ -109,8 +92,8 @@ data azurerm_resource_group network {
 }
 
 locals {
-  regionNames = var.existingNetwork.enable ? [module.global.resourceLocation.region] : [
-    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworksRegional : virtualNetwork.regionName
+  regionNames = [
+    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
   ]
 }
 

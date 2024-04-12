@@ -73,22 +73,22 @@ function Retry ($delaySeconds, $maxCount, $scriptBlock) {
   }
 }
 
-function JoinActiveDirectory ($domainName, $domainServerName, $orgUnitPath, $adminUsername, $adminPassword) {
-  if ($adminUsername -notlike "*@*") {
-    $adminUsername = "$adminUsername@$domainName"
+function JoinActiveDirectory ($domainName, $domainServerName, $orgUnitPath, $userName, $userPassword) {
+  if ($userName -notlike "*@*") {
+    $userName = "$userName@$domainName"
   }
-  $securePassword = ConvertTo-SecureString $adminPassword -AsPlainText -Force
-  $adminCredential = New-Object System.Management.Automation.PSCredential($adminUsername, $securePassword)
+  $securePassword = ConvertTo-SecureString $userPassword -AsPlainText -Force
+  $userCredential = New-Object System.Management.Automation.PSCredential($userName, $securePassword)
 
-  $adComputer = Get-ADComputer -Identity $(hostname) -Server $domainServerName -Credential $adminCredential
+  $adComputer = Get-ADComputer -Identity $(hostname) -Server $domainServerName -Credential $userCredential
   if ($adComputer) {
     Remove-ADObject -Identity $adComputer -Server $domainServerName -Recursive -Confirm:$false
   }
 
   if ($orgUnitPath -ne "") {
-    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $adminCredential -OUPath $orgUnitPath -Force -PassThru -Verbose -Restart
+    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $userCredential -OUPath $orgUnitPath -Force -PassThru -Verbose -Restart
   } else {
-    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $adminCredential -Force -PassThru -Verbose -Restart
+    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $userCredential -Force -PassThru -Verbose -Restart
   }
 }
 

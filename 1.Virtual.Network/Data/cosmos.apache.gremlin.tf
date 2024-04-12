@@ -36,6 +36,29 @@ locals {
   ])
 }
 
+resource azurerm_cosmosdb_gremlin_database gremlin {
+  for_each = {
+    for database in var.gremlin.databases : database.name => database if var.gremlin.enable && database.enable
+  }
+  name                = each.value.name
+  resource_group_name = azurerm_cosmosdb_account.studio["gremlin"].resource_group_name
+  account_name        = azurerm_cosmosdb_account.studio["gremlin"].name
+  throughput          = each.value.throughput
+}
+
+resource azurerm_cosmosdb_gremlin_graph gremlin {
+  for_each = {
+    for graph in local.graphs : graph.name => graph if var.gremlin.enable
+  }
+  name                  = each.value.name
+  resource_group_name   = azurerm_cosmosdb_gremlin_database.gremlin[0].resource_group_name
+  account_name          = azurerm_cosmosdb_gremlin_database.gremlin[0].account_name
+  database_name         = each.value.databaseName
+  throughput            = each.value.throughput
+  partition_key_path    = each.value.partitionKey.path
+  partition_key_version = each.value.partitionKey.version
+}
+
 resource azurerm_private_dns_zone gremlin {
   count               = var.gremlin.enable ? 1 : 0
   name                = "privatelink.gremlin.cosmos.azure.com"
@@ -65,14 +88,11 @@ resource azurerm_private_endpoint gremlin {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_cosmosdb_account.studio["gremlin"].name
+    name = azurerm_private_dns_zone_virtual_network_link.gremlin[0].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.gremlin[0].id
     ]
   }
-  depends_on = [
-    azurerm_private_dns_zone_virtual_network_link.gremlin
-  ]
 }
 
 resource azurerm_private_endpoint gremlin_sql {
@@ -90,35 +110,9 @@ resource azurerm_private_endpoint gremlin_sql {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_cosmosdb_account.studio["gremlin"].name
+    name = azurerm_private_dns_zone_virtual_network_link.no_sql[0].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.no_sql[0].id
     ]
   }
-  depends_on = [
-    azurerm_private_dns_zone_virtual_network_link.no_sql
-  ]
-}
-
-resource azurerm_cosmosdb_gremlin_database gremlin {
-  for_each = {
-    for database in var.gremlin.databases : database.name => database if var.gremlin.enable && database.enable
-  }
-  name                = each.value.name
-  resource_group_name = azurerm_cosmosdb_account.studio["gremlin"].resource_group_name
-  account_name        = azurerm_cosmosdb_account.studio["gremlin"].name
-  throughput          = each.value.throughput
-}
-
-resource azurerm_cosmosdb_gremlin_graph gremlin {
-  for_each = {
-    for graph in local.graphs : graph.name => graph if var.gremlin.enable
-  }
-  name                  = each.value.name
-  resource_group_name   = azurerm_cosmosdb_gremlin_database.gremlin[0].resource_group_name
-  account_name          = azurerm_cosmosdb_gremlin_database.gremlin[0].account_name
-  database_name         = each.value.databaseName
-  throughput            = each.value.throughput
-  partition_key_path    = each.value.partitionKey.path
-  partition_key_version = each.value.partitionKey.version
 }

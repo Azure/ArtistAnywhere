@@ -9,9 +9,7 @@ variable natGateway {
 }
 
 locals {
-  natGatewayNetworks = [
-    for virtualNetwork in local.virtualNetworksRegional : virtualNetwork if var.natGateway.enable
-  ]
+  natGatewayNetworks = var.natGateway.enable ? local.virtualNetworks : []
   natGatewayNetworksSubnets = [
     for subnet in local.virtualNetworksSubnets : subnet if var.natGateway.enable && subnet.name != "GatewaySubnet" && subnet.virtualNetworkEdgeZone == ""
   ]

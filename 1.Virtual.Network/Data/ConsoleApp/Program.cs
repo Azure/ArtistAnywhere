@@ -5,7 +5,7 @@ using System.Text.Json;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 
-namespace ConsoleApp
+namespace ArtistAnywhere.Data
 {
    public class CosmosAccount
   {

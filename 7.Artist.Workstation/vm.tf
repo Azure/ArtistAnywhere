@@ -9,12 +9,23 @@ variable virtualMachines {
     size   = string
     count  = number
     image = object({
-      id   = string
+      resourceGroupName = string
+      galleryName       = string
+      definitionName    = string
+      versionId         = string
       plan = object({
-        enable    = bool
         publisher = string
         product   = string
         name      = string
+      })
+    })
+    network = object({
+      subnetName = string
+      acceleration = object({
+        enable = bool
+      })
+      locationEdge = object({
+        enable = bool
       })
     })
     adminLogin = object({
@@ -31,12 +42,6 @@ variable virtualMachines {
         storageType = string
         cachingType = string
         sizeGB      = number
-      })
-    })
-    network = object({
-      subnetName = string
-      acceleration = object({
-        enable = bool
       })
     })
     extension = object({
@@ -67,22 +72,24 @@ locals {
     for virtualMachine in var.virtualMachines : [
       for i in range(virtualMachine.count) : merge(virtualMachine, {
         name = "${virtualMachine.name}${i}"
-        adminLogin = {
+        image = merge(virtualMachine.image, {
+          plan = {
+            publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher, virtualMachine.image.plan.publisher)
+            product   = try(data.terraform_remote_state.image.outputs.linuxPlan.offer, virtualMachine.image.plan.product)
+            name      = try(data.terraform_remote_state.image.outputs.linuxPlan.sku, virtualMachine.image.plan.name)
+          }
+        })
+        network = merge(virtualMachine.network, {
+          subnetId = "${virtualMachine.network.locationEdge.enable ? data.azurerm_virtual_network.studio.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
+        })
+        adminLogin = merge(virtualMachine.adminLogin, {
           userName     = virtualMachine.adminLogin.userName != "" || !module.global.keyVault.enable ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
           userPassword = virtualMachine.adminLogin.userPassword != "" || !module.global.keyVault.enable ? virtualMachine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
-          sshPublicKey = virtualMachine.adminLogin.sshPublicKey
-          passwordAuth = {
-            disable = virtualMachine.adminLogin.passwordAuth.disable
-          }
-        }
-        activeDirectory = {
-          enable           = var.activeDirectory.enable
-          domainName       = var.activeDirectory.domainName
-          domainServerName = var.activeDirectory.domainServerName
-          orgUnitPath      = var.activeDirectory.orgUnitPath
-          adminUsername    = var.activeDirectory.adminUsername != "" || !module.global.keyVault.enable ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
-          adminPassword    = var.activeDirectory.adminPassword != "" || !module.global.keyVault.enable ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
-        }
+        })
+        activeDirectory = merge(var.activeDirectory, {
+          adminUsername = var.activeDirectory.adminUsername != "" || !module.global.keyVault.enable ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
+          adminPassword = var.activeDirectory.adminPassword != "" || !module.global.keyVault.enable ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
+        })
       })
     ]
   ])
@@ -93,12 +100,12 @@ resource azurerm_network_interface workstation {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable
   }
   name                = each.value.name
-  resource_group_name = local.edgeZone != null ? azurerm_resource_group.workstation_edge.name : azurerm_resource_group.workstation.name
-  location            = local.edgeZone != null ? azurerm_resource_group.workstation_edge.location : azurerm_resource_group.workstation.location
+  resource_group_name = azurerm_resource_group.workstation.name
+  location            = azurerm_resource_group.workstation.location
   edge_zone           = local.edgeZone
   ip_configuration {
     name                          = "ipConfig"
-    subnet_id                     = "${data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : each.value.network.subnetName}"
+    subnet_id                     = each.value.network.subnetId
     private_ip_address_allocation = "Dynamic"
   }
   enable_accelerated_networking = each.value.network.acceleration.enable
@@ -109,11 +116,11 @@ resource azurerm_linux_virtual_machine workstation {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux"
   }
   name                            = each.value.name
-  resource_group_name             = local.edgeZone != null ? azurerm_resource_group.workstation_edge.name : azurerm_resource_group.workstation.name
-  location                        = local.edgeZone != null ? azurerm_resource_group.workstation_edge.location : azurerm_resource_group.workstation.location
+  resource_group_name             = azurerm_resource_group.workstation.name
+  location                        = azurerm_resource_group.workstation.location
   edge_zone                       = local.edgeZone
   size                            = each.value.size
-  source_image_id                 = each.value.image.id
+  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
@@ -132,7 +139,7 @@ resource azurerm_linux_virtual_machine workstation {
     ]
   }
   dynamic plan {
-    for_each = each.value.image.plan.enable ? [1] : []
+    for_each = each.value.image.publisher != "" ? [1] : []
     content {
       publisher = each.value.image.plan.publisher
       product   = each.value.image.plan.product
@@ -211,11 +218,11 @@ resource azurerm_windows_virtual_machine workstation {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows"
   }
   name                = each.value.name
-  resource_group_name = local.edgeZone != null ? azurerm_resource_group.workstation_edge.name : azurerm_resource_group.workstation.name
-  location            = local.edgeZone != null ? azurerm_resource_group.workstation_edge.location : azurerm_resource_group.workstation.location
+  resource_group_name = azurerm_resource_group.workstation.name
+  location            = azurerm_resource_group.workstation.location
   edge_zone           = local.edgeZone
   size                = each.value.size
-  source_image_id     = each.value.image.id
+  source_image_id     = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username      = each.value.adminLogin.userName
   admin_password      = each.value.adminLogin.userPassword
   network_interface_ids = [

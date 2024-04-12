@@ -4,6 +4,8 @@
 
 variable hpcCache {
   type = object({
+    enable     = bool
+    name       = string
     throughput = string
     size       = number
     mtuSize    = number
@@ -20,7 +22,7 @@ variable hpcCache {
 }
 
 data azuread_service_principal hpc_cache {
-  count        = var.enableHPCCache ? 1 : 0
+  count        = var.hpcCache.enable ? 1 : 0
   display_name = "HPC Cache Resource Provider"
 }
 
@@ -31,7 +33,6 @@ locals {
   }
   storageCaches = distinct(var.existingNetwork.enable ? [
     for virtualNetwork in local.virtualNetworks : merge(var.hpcCache, {
-      name              = var.cacheName
       nameSuffix        = ""
       regionName        = module.global.resourceLocation.region
       resourceGroupName = var.resourceGroupName
@@ -40,10 +41,10 @@ locals {
         dnsZoneName       = var.existingNetwork.privateDnsZoneName
         resourceGroupName = var.existingNetwork.resourceGroupName
       }
-    }) if var.enableHPCCache
+    }) if var.hpcCache.enable
   ] : [
     for virtualNetwork in local.virtualNetworks : merge(var.hpcCache, {
-      name              = "${var.cacheName}-${virtualNetwork.nameSuffix}"
+      name              = "${var.hpcCache.name}-${virtualNetwork.nameSuffix}"
       nameSuffix        = virtualNetwork.nameSuffix
       regionName        = virtualNetwork.regionName
       resourceGroupName = "${var.resourceGroupName}.${virtualNetwork.nameSuffix}"
@@ -52,7 +53,7 @@ locals {
         dnsZoneName       = data.terraform_remote_state.network.outputs.privateDns.name
         resourceGroupName = virtualNetwork.resourceGroupName
       }
-    }) if var.enableHPCCache
+    }) if var.hpcCache.enable
   ])
   storageTargets = flatten([
     for storageCache in local.storageCaches : [
@@ -66,14 +67,14 @@ locals {
 }
 
 resource azurerm_role_assignment storage_account_contributor {
-  count                = var.enableHPCCache ? 1 : 0
+  count                = var.hpcCache.enable ? 1 : 0
   role_definition_name = "Storage Account Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-account-contributor
   principal_id         = data.azuread_service_principal.hpc_cache[0].object_id
   scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.blobStorageAccountNfs.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.blobStorageAccountNfs.name}"
 }
 
 resource azurerm_role_assignment storage_blob_data_contributor {
-  count                = var.enableHPCCache ? 1 : 0
+  count                = var.hpcCache.enable ? 1 : 0
   role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor
   principal_id         = data.azuread_service_principal.hpc_cache[0].object_id
   scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.blobStorageAccountNfs.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.blobStorageAccountNfs.name}"
@@ -170,11 +171,11 @@ resource azurerm_private_dns_a_record cache_hpc {
 }
 
 output hpcCacheDNS {
-  value = !var.enableHPCCache ? null : [
+  value = var.hpcCache.enable ? [
     for dnsRecord in azurerm_private_dns_a_record.cache_hpc : {
       name    = dnsRecord.name
       fqdn    = dnsRecord.fqdn
       records = dnsRecord.records
     }
-  ]
+  ] : null
 }

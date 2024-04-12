@@ -11,12 +11,23 @@ virtualMachines = [
     size   = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
-      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/3.0.0"
+      resourceGroupName = "ArtistAnywhere.Image"
+      galleryName       = "xstudio"
+      definitionName    = "Linux"
+      versionId         = "3.0.0"
       plan = {
-        enable    = false
         publisher = ""
         product   = ""
         name      = ""
+      }
+    }
+    network = {
+      subnetName = "Workstation"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
       }
     }
     adminLogin = {
@@ -33,12 +44,6 @@ virtualMachines = [
         storageType = "Premium_LRS"
         cachingType = "ReadWrite"
         sizeGB      = 0
-      }
-    }
-    network = {
-      subnetName = "Workstation"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
       }
     }
     extension = {
@@ -62,12 +67,23 @@ virtualMachines = [
     size   = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
-      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/3.1.0"
+      resourceGroupName = "ArtistAnywhere.Image"
+      galleryName       = "xstudio"
+      definitionName    = "Linux"
+      versionId         = "3.1.0"
       plan = {
-        enable    = false
         publisher = ""
         product   = ""
         name      = ""
+      }
+    }
+    network = {
+      subnetName = "Workstation"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
       }
     }
     adminLogin = {
@@ -84,12 +100,6 @@ virtualMachines = [
         storageType = "Premium_LRS"
         cachingType = "ReadWrite"
         sizeGB      = 0
-      }
-    }
-    network = {
-      subnetName = "Workstation"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
       }
     }
     extension = {
@@ -113,12 +123,23 @@ virtualMachines = [
     size   = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
-      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinArtist/versions/3.0.0"
+      resourceGroupName = "ArtistAnywhere.Image"
+      galleryName       = "xstudio"
+      definitionName    = "WinArtist"
+      versionId         = "3.0.0"
       plan = {
-        enable    = false
         publisher = ""
         product   = ""
         name      = ""
+      }
+    }
+    network = {
+      subnetName = "Workstation"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
       }
     }
     adminLogin = {
@@ -135,12 +156,6 @@ virtualMachines = [
         storageType = "Premium_LRS"
         cachingType = "ReadWrite"
         sizeGB      = 0
-      }
-    }
-    network = {
-      subnetName = "Workstation"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
       }
     }
     extension = {
@@ -164,12 +179,23 @@ virtualMachines = [
     size   = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
-      id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinArtist/versions/3.1.0"
+      resourceGroupName = "ArtistAnywhere.Image"
+      galleryName       = "xstudio"
+      definitionName    = "WinArtist"
+      versionId         = "3.1.0"
       plan = {
-        enable    = false
         publisher = ""
         product   = ""
         name      = ""
+      }
+    }
+    network = {
+      subnetName = "Workstation"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
       }
     }
     adminLogin = {
@@ -186,12 +212,6 @@ virtualMachines = [
         storageType = "Premium_LRS"
         cachingType = "ReadWrite"
         sizeGB      = 0
-      }
-    }
-    network = {
-      subnetName = "Workstation"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
       }
     }
     extension = {

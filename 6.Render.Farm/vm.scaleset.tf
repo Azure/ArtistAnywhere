@@ -11,13 +11,24 @@ variable virtualMachineScaleSets {
       size       = string
       count      = number
       image = object({
-        id   = string
+        resourceGroupName = string
+        galleryName       = string
+        definitionName    = string
+        versionId         = string
         plan = object({
-          enable    = bool
           publisher = string
           product   = string
           name      = string
         })
+      })
+    })
+    network = object({
+      subnetName = string
+      acceleration = object({
+        enable = bool
+      })
+      locationEdge = object({
+        enable = bool
       })
     })
     adminLogin = object({
@@ -46,12 +57,6 @@ variable virtualMachineScaleSets {
       tryRestore = object({
         enable  = bool
         timeout = string
-      })
-    })
-    network = object({
-      subnetName = string
-      acceleration = object({
-        enable = bool
       })
     })
     extension = object({
@@ -94,36 +99,26 @@ locals {
   ]
   virtualMachineScaleSets = [
     for virtualMachineScaleSet in var.virtualMachineScaleSets : merge(virtualMachineScaleSet, {
-      machine = {
-        namePrefix = virtualMachineScaleSet.machine.namePrefix
-        size       = virtualMachineScaleSet.machine.size
-        count      = virtualMachineScaleSet.machine.count
-        image = {
-          id = virtualMachineScaleSet.machine.image.id
+      machine = merge(virtualMachineScaleSet.machine, {
+        image = merge(virtualMachineScaleSet.machine.image, {
           plan = {
-            enable    = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? true : virtualMachineScaleSet.machine.image.plan.enable
-            publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.publisher : virtualMachineScaleSet.machine.image.plan.publisher
-            product   = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.offer : virtualMachineScaleSet.machine.image.plan.product
-            name      = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.sku : virtualMachineScaleSet.machine.image.plan.name
+            publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher, virtualMachineScaleSet.machine.image.plan.publisher)
+            product   = try(data.terraform_remote_state.image.outputs.linuxPlan.offer, virtualMachineScaleSet.machine.image.plan.product)
+            name      = try(data.terraform_remote_state.image.outputs.linuxPlan.sku, virtualMachineScaleSet.machine.image.plan.name)
           }
-        }
-      }
-      adminLogin = {
+        })
+      })
+      network = merge(virtualMachineScaleSet.network, {
+        subnetId = "${virtualMachineScaleSet.network.locationEdge.enable ? data.azurerm_virtual_network.studio.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
+      })
+      adminLogin = merge(virtualMachineScaleSet.adminLogin, {
         userName     = virtualMachineScaleSet.adminLogin.userName != "" || !module.global.keyVault.enable ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
         userPassword = virtualMachineScaleSet.adminLogin.userPassword != "" || !module.global.keyVault.enable ? virtualMachineScaleSet.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
-        sshPublicKey = virtualMachineScaleSet.adminLogin.sshPublicKey
-        passwordAuth = {
-          disable = virtualMachineScaleSet.adminLogin.passwordAuth.disable
-        }
-      }
-      activeDirectory = {
-        enable           = var.activeDirectory.enable
-        domainName       = var.activeDirectory.domainName
-        domainServerName = var.activeDirectory.domainServerName
-        orgUnitPath      = var.activeDirectory.orgUnitPath
-        adminUsername    = var.activeDirectory.adminUsername != "" || !module.global.keyVault.enable ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
-        adminPassword    = var.activeDirectory.adminPassword != "" || !module.global.keyVault.enable ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
-      }
+      })
+      activeDirectory = merge(var.activeDirectory, {
+        adminUsername = var.activeDirectory.adminUsername != "" || !module.global.keyVault.enable ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
+        adminPassword = var.activeDirectory.adminPassword != "" || !module.global.keyVault.enable ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
+      })
     }) if virtualMachineScaleSet.enable
   ]
 }
@@ -134,12 +129,12 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   }
   name                            = each.value.name
   computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
-  resource_group_name             = local.edgeZone != null ? azurerm_resource_group.farm_edge.name : azurerm_resource_group.farm.name
-  location                        = local.edgeZone != null ? azurerm_resource_group.farm_edge.location : azurerm_resource_group.farm.location
+  resource_group_name             = azurerm_resource_group.farm.name
+  location                        = azurerm_resource_group.farm.location
   edge_zone                       = local.edgeZone
   sku                             = each.value.machine.size
   instances                       = each.value.machine.count
-  source_image_id                 = each.value.machine.image.id
+  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
@@ -176,7 +171,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
     }
   }
   dynamic plan {
-    for_each = each.value.machine.image.plan.enable ? [1] : []
+    for_each = each.value.machine.image.plan.publisher != "" ? [1] : []
     content {
       publisher = each.value.machine.image.plan.publisher
       product   = each.value.machine.image.plan.product
@@ -273,12 +268,12 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   }
   name                   = each.value.name
   computer_name_prefix   = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
-  resource_group_name    = local.edgeZone != null ? azurerm_resource_group.farm_edge.name : azurerm_resource_group.farm.name
-  location               = local.edgeZone != null ? azurerm_resource_group.farm_edge.location : azurerm_resource_group.farm.location
+  resource_group_name    = azurerm_resource_group.farm.name
+  location               = azurerm_resource_group.farm.location
   edge_zone              = local.edgeZone
   sku                    = each.value.machine.size
   instances              = each.value.machine.count
-  source_image_id        = each.value.machine.image.id
+  source_image_id        = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   admin_username         = each.value.adminLogin.userName
   admin_password         = each.value.adminLogin.userPassword
   priority               = each.value.spot.enable ? "Spot" : "Regular"
@@ -400,7 +395,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
   location                    = azurerm_resource_group.farm.location
   sku_name                    = each.value.machine.size
   instances                   = each.value.machine.count
-  source_image_id             = each.value.machine.image.id
+  source_image_id             = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   priority                    = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy             = each.value.spot.enable ? each.value.spot.evictionPolicy : null
   platform_fault_domain_count = each.value.flexibleOrchestration.faultDomainCount
@@ -459,7 +454,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
     }
   }
   dynamic plan {
-    for_each = each.value.machine.image.plan.enable ? [1] : []
+    for_each = each.value.machine.image.plan.publisher != "" ? [1] : []
     content {
       publisher = each.value.machine.image.plan.publisher
       product   = each.value.machine.image.plan.product

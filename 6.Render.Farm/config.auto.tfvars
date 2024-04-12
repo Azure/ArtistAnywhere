@@ -13,13 +13,24 @@ virtualMachineScaleSets = [
       size       = "Standard_HB120rs_v3"
       count      = 2
       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
+        resourceGroupName = "ArtistAnywhere.Image"
+        galleryName       = "xstudio"
+        definitionName    = "Linux"
+        versionId         = "2.0.0"
         plan = {
-          enable    = false
           publisher = ""
           product   = ""
           name      = ""
         }
+      }
+    }
+    network = {
+      subnetName = "Farm"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
       }
     }
     adminLogin = {
@@ -48,12 +59,6 @@ virtualMachineScaleSets = [
       tryRestore = {
         enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
         timeout = "PT1H"
-      }
-    }
-    network = {
-      subnetName = "Farm"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
       }
     }
     extension = {
@@ -93,13 +98,24 @@ virtualMachineScaleSets = [
       size       = "Standard_NV36ads_A10_v5"
       count      = 2
       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.1.0"
+        resourceGroupName = "ArtistAnywhere.Image"
+        galleryName       = "xstudio"
+        definitionName    = "Linux"
+        versionId         = "2.1.0"
         plan = {
-          enable    = false
           publisher = ""
           product   = ""
           name      = ""
         }
+      }
+    }
+    network = {
+      subnetName = "Farm"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
       }
     }
     adminLogin = {
@@ -128,12 +144,6 @@ virtualMachineScaleSets = [
       tryRestore = {
         enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
         timeout = "PT1H"
-      }
-    }
-    network = {
-      subnetName = "Farm"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
       }
     }
     extension = {
@@ -173,13 +183,24 @@ virtualMachineScaleSets = [
       size       = "Standard_HB120rs_v3"
       count      = 2
       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinFarm/versions/2.0.0"
+        resourceGroupName = "ArtistAnywhere.Image"
+        galleryName       = "xstudio"
+        definitionName    = "WinFarm"
+        versionId         = "2.0.0"
         plan = {
-          enable    = false
           publisher = ""
           product   = ""
           name      = ""
         }
+      }
+    }
+    network = {
+      subnetName = "Farm"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
       }
     }
     adminLogin = {
@@ -208,12 +229,6 @@ virtualMachineScaleSets = [
       tryRestore = {
         enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
         timeout = "PT1H"
-      }
-    }
-    network = {
-      subnetName = "Farm"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
       }
     }
     extension = {
@@ -253,13 +268,24 @@ virtualMachineScaleSets = [
       size       = "Standard_NV36ads_A10_v5"
       count      = 2
       image = {
-        id = "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/WinFarm/versions/2.1.0"
+        resourceGroupName = "ArtistAnywhere.Image"
+        galleryName       = "xstudio"
+        definitionName    = "WinFarm"
+        versionId         = "2.1.0"
         plan = {
-          enable    = false
           publisher = ""
           product   = ""
           name      = ""
         }
+      }
+    }
+    network = {
+      subnetName = "Farm"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
       }
     }
     adminLogin = {
@@ -288,12 +314,6 @@ virtualMachineScaleSets = [
       tryRestore = {
         enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
         timeout = "PT1H"
-      }
-    }
-    network = {
-      subnetName = "Farm"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
       }
     }
     extension = {

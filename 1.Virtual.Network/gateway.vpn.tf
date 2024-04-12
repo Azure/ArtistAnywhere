@@ -37,9 +37,7 @@ variable vpnGatewayLocal {
 }
 
 locals {
-  vpnGatewayNetworks = [
-    for i in range(length(local.virtualNetworksRegional)) : local.virtualNetworks[i] if var.vpnGateway.enable && (i == 0 || (i > 0 && var.vpnGateway.enablePerRegion))
-  ]
+  vpnGatewayNetworks = var.vpnGateway.enable ? var.vpnGateway.enablePerRegion ? local.virtualNetworks : [local.virtualNetworks[0]] : []
 }
 
 resource azurerm_virtual_network_gateway vpn {

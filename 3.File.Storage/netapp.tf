@@ -33,9 +33,9 @@ variable netApp {
 
 data azurerm_subnet storage_netapp {
   count                = var.netApp.enable ? 1 : 0
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "StorageNetApp"
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
+  name                 = "StorageNetApp"
+  resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }
 
 locals {
@@ -50,7 +50,7 @@ locals {
 
 resource azurerm_resource_group netapp {
   count    = var.netApp.enable ? 1 : 0
-  name     = var.existingNetwork.enable || local.rootRegion.nameSuffix == "" ? "${var.resourceGroupName}.NetApp" : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}.NetApp"
+  name     = local.rootRegion.nameSuffix == "" ? "${var.resourceGroupName}.NetApp" : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}.NetApp"
   location = local.rootRegion.name
 }
 

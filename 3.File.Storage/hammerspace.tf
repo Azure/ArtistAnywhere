@@ -127,7 +127,7 @@ locals {
       "networks": {
         "eth0": {
           "cluster_ips": [
-            "@METADATA_HOST_IP@/${reverse(split("/", data.azurerm_subnet.storage.address_prefixes[0]))[0]}"
+            "@METADATA_HOST_IP@/${reverse(split("/", data.azurerm_subnet.storage_region.address_prefixes[0]))[0]}"
           ]
         },
         "eth1": {
@@ -141,7 +141,7 @@ locals {
       "domainname": local.hammerspaceDomainName
       "metadata": {
         "ips": [
-          "@METADATA_HOST_IP@/${reverse(split("/", data.azurerm_subnet.storage.address_prefixes[0]))[0]}"
+          "@METADATA_HOST_IP@/${reverse(split("/", data.azurerm_subnet.storage_region.address_prefixes[0]))[0]}"
         ]
       }
     },
@@ -198,7 +198,7 @@ resource azurerm_network_interface storage_primary {
   location            = azurerm_resource_group.hammerspace[0].location
   ip_configuration {
     name                          = "ipConfig"
-    subnet_id                     = data.azurerm_subnet.storage.id
+    subnet_id                     = data.azurerm_subnet.storage_region.id
     private_ip_address_allocation = "Dynamic"
   }
   enable_accelerated_networking = each.value.network.acceleration.enable
@@ -213,7 +213,7 @@ resource azurerm_network_interface storage_secondary {
   location            = azurerm_resource_group.hammerspace[0].location
   ip_configuration {
     name                          = "ipConfig"
-    subnet_id                     = data.azurerm_subnet.storage.id
+    subnet_id                     = data.azurerm_subnet.storage_region.id
     private_ip_address_allocation = "Dynamic"
   }
   enable_accelerated_networking = each.value.network.acceleration.enable
@@ -381,7 +381,7 @@ resource azurerm_lb storage {
   sku                 = "Standard"
   frontend_ip_configuration {
     name      = "ipConfigFrontend"
-    subnet_id = data.azurerm_subnet.storage.id
+    subnet_id = data.azurerm_subnet.storage_region.id
   }
 }
 

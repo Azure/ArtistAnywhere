@@ -1,6 +1,6 @@
 using Microsoft.Azure.Cosmos;
 
-namespace ConsoleApp
+namespace ArtistAnywhere.Data
 {
   #pragma warning disable IDE1006 // Naming Styles
   public record CosmosItem

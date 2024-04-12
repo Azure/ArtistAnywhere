@@ -2,95 +2,11 @@
 # Private Endpoint (https://learn.microsoft.com/azure/private-link/private-endpoint-overview) #
 ###############################################################################################
 
-resource azurerm_private_dns_zone key_vault {
-  count               = module.global.keyVault.enable ? 1 : 0
-  name                = "privatelink.vaultcore.azure.net"
-  resource_group_name = azurerm_resource_group.network.name
-}
-
-resource azurerm_private_dns_zone storage_blob {
-  name                = "privatelink.blob.core.windows.net"
-  resource_group_name = azurerm_resource_group.network.name
-}
-
-resource azurerm_private_dns_zone storage_file {
-  name                = "privatelink.file.core.windows.net"
-  resource_group_name = azurerm_resource_group.network.name
-}
-
-resource azurerm_private_dns_zone_virtual_network_link key_vault {
-  for_each = {
-    for virtualNetwork in local.virtualNetworksRegional : virtualNetwork.name => virtualNetwork if module.global.keyVault.enable
-  }
-  name                  = "${lower(each.value.name)}-key-vault"
-  resource_group_name   = azurerm_private_dns_zone.key_vault[0].resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.key_vault[0].name
-  virtual_network_id    = each.value.id
-  depends_on = [
-    azurerm_virtual_network.studio
-  ]
-}
-
-resource azurerm_private_dns_zone_virtual_network_link storage_blob {
-  for_each = {
-    for virtualNetwork in local.virtualNetworksZoneLink : virtualNetwork.name => virtualNetwork
-  }
-  name                  = "${lower(each.value.name)}-storage-blob"
-  resource_group_name   = azurerm_private_dns_zone.storage_blob.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.storage_blob.name
-  virtual_network_id    = each.value.id
-  depends_on = [
-    azurerm_virtual_network.studio
-  ]
-}
-
-resource azurerm_private_dns_zone_virtual_network_link storage_file {
-  for_each = {
-    for virtualNetwork in local.virtualNetworksZoneLink : virtualNetwork.name => virtualNetwork
-  }
-  name                  = "${lower(each.value.name)}-storage-file"
-  resource_group_name   = azurerm_private_dns_zone.storage_file.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.storage_file.name
-  virtual_network_id    = each.value.id
-  depends_on = [
-    azurerm_virtual_network.studio
-  ]
-}
-
-resource azurerm_private_endpoint key_vault {
-  for_each = {
-    for subnet in local.virtualNetworksSubnetStorage : subnet.key => subnet if module.global.keyVault.enable
-  }
-  name                = "${data.azurerm_key_vault.studio[0].name}-vault"
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
-  subnet_id           = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
-  private_service_connection {
-    name                           = data.azurerm_key_vault.studio[0].name
-    private_connection_resource_id = data.azurerm_key_vault.studio[0].id
-    is_manual_connection           = false
-    subresource_names = [
-      "vault"
-    ]
-  }
-  private_dns_zone_group {
-    name = data.azurerm_key_vault.studio[0].name
-    private_dns_zone_ids = [
-      azurerm_private_dns_zone.key_vault[0].id
-    ]
-  }
-  depends_on = [
-    azurerm_subnet.studio,
-    azurerm_private_dns_zone_virtual_network_link.key_vault,
-    azurerm_subnet_nat_gateway_association.studio
-  ]
-}
-
 resource azurerm_private_endpoint storage_blob {
   for_each = {
     for subnet in local.virtualNetworksSubnetStorage : subnet.key => subnet
   }
-  name                = "${data.azurerm_storage_account.studio.name}-blob"
+  name                = "${lower(each.value.virtualNetworkName)}-blob"
   resource_group_name = each.value.resourceGroupName
   location            = each.value.regionName
   subnet_id           = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
@@ -103,14 +19,14 @@ resource azurerm_private_endpoint storage_blob {
     ]
   }
   private_dns_zone_group {
-    name = data.azurerm_storage_account.studio.name
+    name = azurerm_private_dns_zone_virtual_network_link.storage_blob[each.value.virtualNetworkName].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.storage_blob.id
     ]
   }
   depends_on = [
     azurerm_subnet.studio,
-    azurerm_private_endpoint.key_vault,
+    azurerm_subnet_nat_gateway_association.studio,
     azurerm_private_dns_zone_virtual_network_link.storage_blob
  ]
 }
@@ -119,7 +35,7 @@ resource azurerm_private_endpoint storage_file {
   for_each = {
     for subnet in local.virtualNetworksSubnetStorage : subnet.key => subnet
   }
-  name                = "${data.azurerm_storage_account.studio.name}-file"
+  name                = "${lower(each.value.virtualNetworkName)}-file"
   resource_group_name = each.value.resourceGroupName
   location            = each.value.regionName
   subnet_id           = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
@@ -132,14 +48,72 @@ resource azurerm_private_endpoint storage_file {
     ]
   }
   private_dns_zone_group {
-    name = data.azurerm_storage_account.studio.name
+    name = azurerm_private_dns_zone_virtual_network_link.storage_file[each.value.virtualNetworkName].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.storage_file.id
     ]
   }
   depends_on = [
     azurerm_subnet.studio,
-    azurerm_private_dns_zone_virtual_network_link.storage_file,
-    azurerm_private_endpoint.storage_blob
+    azurerm_private_endpoint.storage_blob,
+    azurerm_private_dns_zone_virtual_network_link.storage_file
+  ]
+}
+
+resource azurerm_private_endpoint search {
+  for_each = {
+    for subnet in local.virtualNetworksSubnetCompute : subnet.key => subnet if module.global.search.enable
+  }
+  name                = "${lower(each.value.virtualNetworkName)}-search"
+  resource_group_name = each.value.resourceGroupName
+  location            = each.value.regionName
+  subnet_id           = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
+  private_service_connection {
+    name                           = data.azurerm_search_service.studio[0].name
+    private_connection_resource_id = data.azurerm_search_service.studio[0].id
+    is_manual_connection           = false
+    subresource_names = [
+      "searchService"
+    ]
+  }
+  private_dns_zone_group {
+    name = azurerm_private_dns_zone_virtual_network_link.search[each.value.virtualNetworkName].name
+    private_dns_zone_ids = [
+      azurerm_private_dns_zone.search[0].id
+    ]
+  }
+  depends_on = [
+    azurerm_subnet.studio,
+    azurerm_private_endpoint.storage_file,
+    azurerm_private_dns_zone_virtual_network_link.search
+  ]
+}
+
+resource azurerm_private_endpoint key_vault {
+  for_each = {
+    for subnet in local.virtualNetworksSubnetStorage : subnet.key => subnet if module.global.keyVault.enable
+  }
+  name                = "${lower(each.value.virtualNetworkName)}-vault"
+  resource_group_name = each.value.resourceGroupName
+  location            = each.value.regionName
+  subnet_id           = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
+  private_service_connection {
+    name                           = data.azurerm_key_vault.studio[0].name
+    private_connection_resource_id = data.azurerm_key_vault.studio[0].id
+    is_manual_connection           = false
+    subresource_names = [
+      "vault"
+    ]
+  }
+  private_dns_zone_group {
+    name = azurerm_private_dns_zone_virtual_network_link.key_vault[each.value.virtualNetworkName].name
+    private_dns_zone_ids = [
+      azurerm_private_dns_zone.key_vault[0].id
+    ]
+  }
+  depends_on = [
+    azurerm_subnet.studio,
+    azurerm_private_endpoint.search,
+    azurerm_private_dns_zone_virtual_network_link.key_vault
   ]
 }

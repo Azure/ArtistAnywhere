@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.97.1"
+      version = "~>3.99.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.47.0"
+      version = "~>2.48.0"
     }
     avere = {
       source  = "hashicorp/avere"
@@ -38,14 +38,6 @@ module global {
 
 variable resourceGroupName {
   type = string
-}
-
-variable cacheName {
-  type = string
-}
-
-variable enableHPCCache {
-  type = bool
 }
 
 variable storageTargets {
@@ -101,6 +93,12 @@ data azurerm_user_assigned_identity studio {
   resource_group_name = module.global.resourceGroupName
 }
 
+data azurerm_key_vault_key cache_encryption {
+  count        = module.global.keyVault.enable && var.hpcCache.encryption.enable ? 1 : 0
+  name         = module.global.keyVault.keyName.cacheEncryption
+  key_vault_id = data.azurerm_key_vault.studio[0].id
+}
+
 data azurerm_key_vault studio {
   count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
@@ -119,18 +117,12 @@ data azurerm_key_vault_secret admin_password {
   key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
-data azurerm_key_vault_key cache_encryption {
-  count        = module.global.keyVault.enable && var.hpcCache.encryption.enable ? 1 : 0
-  name         = module.global.keyVault.keyName.cacheEncryption
-  key_vault_id = data.azurerm_key_vault.studio[0].id
-}
-
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
     resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.rootStorage.accountName
-    container_name       = module.global.rootStorage.containerName.terraformState
+    storage_account_name = module.global.storage.accountName
+    container_name       = module.global.storage.containerName.terraformState
     key                  = "1.Virtual.Network"
   }
 }
@@ -139,21 +131,21 @@ data terraform_remote_state storage {
   backend = "azurerm"
   config = {
     resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.rootStorage.accountName
-    container_name       = module.global.rootStorage.containerName.terraformState
+    storage_account_name = module.global.storage.accountName
+    container_name       = module.global.storage.containerName.terraformState
     key                  = "3.File.Storage"
   }
 }
 
-data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : local.virtualNetwork.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : local.virtualNetwork.resourceGroupName
+data azurerm_virtual_network studio_region {
+  name                = var.existingNetwork.enable ? var.existingNetwork.name : local.virtualNetworks[0].name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : local.virtualNetworks[0].resourceGroupName
 }
 
 data azurerm_subnet cache {
   name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Cache"
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
+  resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }
 
 data azurerm_private_dns_zone studio {
@@ -162,20 +154,13 @@ data azurerm_private_dns_zone studio {
 }
 
 locals {
-  virtualNetwork  = data.terraform_remote_state.network.outputs.virtualNetworkRegional
-  virtualNetworks = data.terraform_remote_state.network.outputs.virtualNetworksRegional
-}
-
-resource azurerm_resource_group cache_region {
-  count    = var.existingNetwork.enable || !var.enableHPCCache ? 1 : 0
-  name     = var.existingNetwork.enable ? var.resourceGroupName : "${var.resourceGroupName}.${local.virtualNetwork.nameSuffix}"
-  location = var.existingNetwork.enable ? module.global.resourceLocation.region : local.virtualNetwork.regionName
+  virtualNetworks = data.terraform_remote_state.network.outputs.virtualNetworks
 }
 
 resource azurerm_resource_group cache_regions {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if !var.existingNetwork.enable && var.enableHPCCache
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
   }
-  name     = each.value.nameSuffix == "" ? var.resourceGroupName : "${var.resourceGroupName}.${each.value.nameSuffix}"
+  name     = each.value.nameSuffix != "" ? "${var.resourceGroupName}.${each.value.nameSuffix}" : var.resourceGroupName
   location = each.value.regionName
 }

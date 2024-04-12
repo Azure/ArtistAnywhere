@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.97.1"
+      version = "~>3.99.0"
     }
   }
   backend azurerm {
@@ -29,6 +29,17 @@ variable resourceGroupName {
 
 data azurerm_client_config studio {}
 
+data azurerm_storage_account studio {
+  name                = module.global.storage.accountName
+  resource_group_name = module.global.resourceGroupName
+}
+
+data azurerm_search_service studio {
+  count               = module.global.search.enable ? 1 : 0
+  name                = module.global.search.name
+  resource_group_name = module.global.resourceGroupName
+}
+
 data azurerm_key_vault studio {
   count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
@@ -41,26 +52,15 @@ data azurerm_key_vault_secret gateway_connection {
   key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
-data azurerm_storage_account studio {
-  name                = module.global.rootStorage.accountName
-  resource_group_name = module.global.resourceGroupName
-}
-
 resource azurerm_resource_group network {
   name     = var.resourceGroupName
-  location = local.virtualNetwork.regionName
-  tags = {
-    nameSuffix = local.virtualNetwork.nameSuffix
-  }
+  location = local.virtualNetworks[0].regionName
 }
 
 resource azurerm_resource_group network_regions {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.name => virtualNetwork
   }
   name     = each.value.resourceGroupName
   location = each.value.regionName
-  tags = {
-    nameSuffix = each.value.nameSuffix
-  }
 }

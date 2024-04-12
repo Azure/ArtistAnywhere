@@ -1,25 +1,12 @@
 variable resourceLocation {
   default = {
-    region   = "WestUS" # Set from "az account list-locations --query [].name"
-    edgeZone = ""       # Set to "" to disable Azure Edge Zone deployment
+    region   = "WestUS"     # Set from "az account list-locations --query [].name"
+    edgeZone = "LosAngeles" # Set to "" to disable Azure Edge Zone deployment
   }
 }
 
 variable resourceGroupName {
   default = "ArtistAnywhere" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
-}
-
-###################################################################################
-# Storage (https://learn.microsoft.com/azure/storage/common/storage-introduction) #
-###################################################################################
-
-variable rootStorage {
-  default = {
-    accountName = "xstudio0" # Set to a globally unique name (lowercase alphanumeric)
-    containerName = {
-      terraformState = "terraform-state"
-    }
-  }
 }
 
 #####################################################################################################################
@@ -29,6 +16,45 @@ variable rootStorage {
 variable managedIdentity {
   default = {
     name = "xstudio" # Alphanumeric, underscores and hyphens are allowed
+  }
+}
+
+###################################################################################
+# Storage (https://learn.microsoft.com/azure/storage/common/storage-introduction) #
+###################################################################################
+
+variable storage {
+  default = {
+    accountName = "xstudio0" # Set to a globally unique name (lowercase alphanumeric)
+    containerName = {
+      terraformState = "terraform-state"
+    }
+  }
+}
+
+######################################################################
+# Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
+######################################################################
+
+variable monitor {
+  default = {
+    enable = true
+    name   = "xstudio"
+    agentVersion = {
+      linux   = "1.30"
+      windows = "1.24"
+    }
+  }
+}
+
+#################################################################################
+# Search (https://learn.microsoft.com/azure/search/search-what-is-azure-search) #
+#################################################################################
+
+variable search {
+  default = {
+    enable = false
+    name   = "xstudio" # Set to a globally unique name (lowercase alphanumeric)
   }
 }
 
@@ -56,21 +82,6 @@ variable keyVault {
   }
 }
 
-######################################################################
-# Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
-######################################################################
-
-variable monitor {
-  default = {
-    enable = true
-    name   = "xstudio"
-    agentVersion = {
-      linux   = "1.30"
-      windows = "1.24"
-    }
-  }
-}
-
 output resourceLocation {
   value = var.resourceLocation
 }
@@ -79,18 +90,22 @@ output resourceGroupName {
   value = var.resourceGroupName
 }
 
-output rootStorage {
-  value = var.rootStorage
-}
-
 output managedIdentity {
   value = var.managedIdentity
 }
 
-output keyVault {
-  value = var.keyVault
+output storage {
+  value = var.storage
 }
 
 output monitor {
   value = var.monitor
+}
+
+output search {
+  value = var.search
+}
+
+output keyVault {
+  value = var.keyVault
 }

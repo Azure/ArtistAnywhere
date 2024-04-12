@@ -4,6 +4,8 @@
 
 variable vfxtCache {
   type = object({
+    enable = bool
+    name   = string
     cluster = object({
       nodeSize      = number
       nodeCount     = number
@@ -27,47 +29,43 @@ variable vfxtCache {
 }
 
 locals {
-  vfxtCache = merge({
-    cluster = {
+  vfxtCache = merge(var.vfxtCache, {
+    cluster = merge(var.vfxtCache.cluster, {
       adminUsername = var.vfxtCache.cluster.adminUsername != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
       adminPassword = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
-    }},
-    var.vfxtCache
-  )
+    })
+  })
   vfxtControllerAddress   = cidrhost(data.azurerm_subnet.cache.address_prefixes[0], 39)
   vfxtVServerFirstAddress = cidrhost(data.azurerm_subnet.cache.address_prefixes[0], 40)
   vfxtVServerAddressCount = 12
 }
 
 module vfxt_controller {
-  count                          = var.enableHPCCache ? 0 : 1
+  count                          = var.vfxtCache.enable ? 1 : 0
   source                         = "github.com/Azure/Avere/src/terraform/modules/controller3"
   create_resource_group          = false
-  resource_group_name            = azurerm_resource_group.cache_region[0].name
-  location                       = module.global.resourceLocation.region
+  resource_group_name            = azurerm_resource_group.cache_regions[0].name
+  location                       = azurerm_resource_group.cache_regions[0].location
   admin_username                 = var.vfxtCache.cluster.adminUsername != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
   admin_password                 = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
   ssh_key_data                   = var.vfxtCache.cluster.sshPublicKey != "" ? var.vfxtCache.cluster.sshPublicKey : null
-  virtual_network_name           = data.azurerm_virtual_network.studio.name
-  virtual_network_resource_group = data.azurerm_virtual_network.studio.resource_group_name
+  virtual_network_name           = data.azurerm_virtual_network.studio_region.name
+  virtual_network_resource_group = data.azurerm_virtual_network.studio_region.resource_group_name
   virtual_network_subnet_name    = data.azurerm_subnet.cache.name
   static_ip_address              = local.vfxtControllerAddress
   image_id                       = var.vfxtCache.cluster.imageId.controller
-  depends_on = [
-    azurerm_resource_group.cache_region
-  ]
 }
 
 resource avere_vfxt cache {
-  count                           = var.enableHPCCache ? 0 : 1
-  vfxt_cluster_name               = lower(var.cacheName)
-  azure_resource_group            = azurerm_resource_group.cache_region[0].name
-  location                        = module.global.resourceLocation.region
+  count                           = var.vfxtCache.enable ? 1 : 0
+  vfxt_cluster_name               = lower(var.vfxtCache.name)
+  azure_resource_group            = azurerm_resource_group.cache_regions[0].name
+  location                        = azurerm_resource_group.cache_regions[0].location
   node_cache_size                 = var.vfxtCache.cluster.nodeSize
   vfxt_node_count                 = var.vfxtCache.cluster.nodeCount
   image_id                        = var.vfxtCache.cluster.imageId.node
-  azure_network_name              = data.azurerm_virtual_network.studio.name
-  azure_network_resource_group    = data.azurerm_virtual_network.studio.resource_group_name
+  azure_network_name              = data.azurerm_virtual_network.studio_region.name
+  azure_network_resource_group    = data.azurerm_virtual_network.studio_region.resource_group_name
   azure_subnet_name               = data.azurerm_subnet.cache.name
   controller_address              = module.vfxt_controller[count.index].controller_address
   controller_admin_username       = module.vfxt_controller[count.index].controller_username
@@ -111,28 +109,28 @@ resource avere_vfxt cache {
 ############################################################################
 
 resource azurerm_private_dns_a_record cache_vfxt {
-  count               = var.enableHPCCache ? 0 : 1
-  name                = lower(var.cacheName)
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.azurerm_private_dns_zone.studio.resource_group_name
-  zone_name           = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.azurerm_private_dns_zone.studio.name
+  count               = var.vfxtCache.enable ? 1 : 0
+  name                = lower(var.vfxtCache.name)
+  resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
+  zone_name           = data.azurerm_private_dns_zone.studio.name
   records             = avere_vfxt.cache[0].vserver_ip_addresses
   ttl                 = var.dnsRecord.ttlSeconds
 }
 
 output vfxtCacheControllerAddress {
-  value = var.enableHPCCache ? null : avere_vfxt.cache[0].controller_address
+  value = var.vfxtCache.enable ? avere_vfxt.cache[0].controller_address : null
 }
 
 output vfxtCacheManagementAddress {
-  value = var.enableHPCCache ? null : avere_vfxt.cache[0].vfxt_management_ip
+  value = var.vfxtCache.enable ? avere_vfxt.cache[0].vfxt_management_ip : null
 }
 
 output vfxtCacheDNS {
-  value = var.enableHPCCache ? null : [
+  value = var.vfxtCache.enable ? [
     for dnsRecord in azurerm_private_dns_a_record.cache_vfxt : {
       name    = dnsRecord.name
       fqdn    = dnsRecord.fqdn
       records = dnsRecord.records
     }
-  ]
+  ] : null
 }

@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.97.1"
+      version = "~>3.99.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.47.0"
+      version = "~>2.48.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -28,9 +28,6 @@ provider azurerm {
       force_delete                  = false
       roll_instances_when_required  = true
       scale_to_zero_before_deletion = true
-    }
-    cognitive_account {
-      purge_soft_delete_on_destroy = true
     }
   }
 }
@@ -109,6 +106,12 @@ data azurerm_user_assigned_identity studio {
   resource_group_name = module.global.resourceGroupName
 }
 
+data azurerm_monitor_data_collection_endpoint studio {
+  count               = module.global.monitor.enable ? 1 : 0
+  name                = module.global.monitor.name
+  resource_group_name = module.global.resourceGroupName
+}
+
 data azurerm_key_vault studio {
   count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
@@ -127,18 +130,12 @@ data azurerm_key_vault_secret admin_password {
   key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
-data azurerm_monitor_data_collection_endpoint studio {
-  count               = module.global.monitor.enable ? 1 : 0
-  name                = module.global.monitor.name
-  resource_group_name = module.global.resourceGroupName
-}
-
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
     resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.rootStorage.accountName
-    container_name       = module.global.rootStorage.containerName.terraformState
+    storage_account_name = module.global.storage.accountName
+    container_name       = module.global.storage.containerName.terraformState
     key                  = "1.Virtual.Network"
   }
 }
@@ -147,8 +144,8 @@ data terraform_remote_state image {
   backend = "azurerm"
   config = {
     resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.rootStorage.accountName
-    container_name       = module.global.rootStorage.containerName.terraformState
+    storage_account_name = module.global.storage.accountName
+    container_name       = module.global.storage.containerName.terraformState
     key                  = "2.Image.Builder"
   }
 }
@@ -158,8 +155,8 @@ data terraform_remote_state storage {
   backend = "azurerm"
   config = {
     resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.rootStorage.accountName
-    container_name       = module.global.rootStorage.containerName.terraformState
+    storage_account_name = module.global.storage.accountName
+    container_name       = module.global.storage.containerName.terraformState
     key                  = "3.File.Storage"
   }
 }
@@ -167,6 +164,11 @@ data terraform_remote_state storage {
 data azurerm_virtual_network studio {
   name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.name
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
+}
+
+data azurerm_virtual_network studio_region {
+  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetworks[0].name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
 data azurerm_storage_account studio {
@@ -185,9 +187,4 @@ locals {
 resource azurerm_resource_group farm {
   name     = var.existingNetwork.enable || local.rootRegion.nameSuffix == "" ? var.resourceGroupName : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}"
   location = local.rootRegion.name
-}
-
-resource azurerm_resource_group farm_edge {
-  name     = "${azurerm_resource_group.farm.name}.Edge"
-  location = azurerm_resource_group.farm.location
 }

@@ -100,45 +100,6 @@ locals {
 # Cosmos DB Mongo DB RU (https://learn.microsoft.com/azure/cosmos-db/mongodb/ru/introduction) #
 ###############################################################################################
 
-resource azurerm_private_dns_zone mongo_db {
-  count               = var.mongoDB.enable ? 1 : 0
-  name                = "privatelink.mongo.cosmos.azure.com"
-  resource_group_name = azurerm_cosmosdb_account.studio["mongo"].resource_group_name
-}
-
-resource azurerm_private_dns_zone_virtual_network_link mongo_db {
-  count                 = var.mongoDB.enable ? 1 : 0
-  name                  = "mongo"
-  resource_group_name   = azurerm_private_dns_zone.mongo_db[0].resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.mongo_db[0].name
-  virtual_network_id    = data.azurerm_virtual_network.studio.id
-}
-
-resource azurerm_private_endpoint mongo_db {
-  count               = var.mongoDB.enable ? 1 : 0
-  name                = azurerm_cosmosdb_account.studio["mongo"].name
-  resource_group_name = azurerm_cosmosdb_account.studio["mongo"].resource_group_name
-  location            = azurerm_cosmosdb_account.studio["mongo"].location
-  subnet_id           = data.azurerm_subnet.data.id
-  private_service_connection {
-    name                           = azurerm_cosmosdb_account.studio["mongo"].name
-    private_connection_resource_id = azurerm_cosmosdb_account.studio["mongo"].id
-    is_manual_connection           = false
-    subresource_names = [
-      "MongoDB"
-    ]
-  }
-  private_dns_zone_group {
-    name = azurerm_cosmosdb_account.studio["mongo"].name
-    private_dns_zone_ids = [
-      azurerm_private_dns_zone.mongo_db[0].id
-    ]
-  }
-  depends_on = [
-    azurerm_private_dns_zone_virtual_network_link.mongo_db
-  ]
-}
-
 resource azurerm_cosmosdb_mongo_database mongo_db {
   for_each = {
     for database in var.mongoDB.databases : database.name => database if var.mongoDB.enable && database.enable
@@ -204,9 +165,70 @@ resource azurerm_cosmosdb_mongo_user_definition mongo_db {
   ]
 }
 
+resource azurerm_private_dns_zone mongo_db {
+  count               = var.mongoDB.enable ? 1 : 0
+  name                = "privatelink.mongo.cosmos.azure.com"
+  resource_group_name = azurerm_cosmosdb_account.studio["mongo"].resource_group_name
+}
+
+resource azurerm_private_dns_zone_virtual_network_link mongo_db {
+  count                 = var.mongoDB.enable ? 1 : 0
+  name                  = "mongo"
+  resource_group_name   = azurerm_private_dns_zone.mongo_db[0].resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.mongo_db[0].name
+  virtual_network_id    = data.azurerm_virtual_network.studio.id
+}
+
+resource azurerm_private_endpoint mongo_db {
+  count               = var.mongoDB.enable ? 1 : 0
+  name                = azurerm_cosmosdb_account.studio["mongo"].name
+  resource_group_name = azurerm_cosmosdb_account.studio["mongo"].resource_group_name
+  location            = azurerm_cosmosdb_account.studio["mongo"].location
+  subnet_id           = data.azurerm_subnet.data.id
+  private_service_connection {
+    name                           = azurerm_cosmosdb_account.studio["mongo"].name
+    private_connection_resource_id = azurerm_cosmosdb_account.studio["mongo"].id
+    is_manual_connection           = false
+    subresource_names = [
+      "MongoDB"
+    ]
+  }
+  private_dns_zone_group {
+    name = azurerm_private_dns_zone_virtual_network_link.mongo_db[0].name
+    private_dns_zone_ids = [
+      azurerm_private_dns_zone.mongo_db[0].id
+    ]
+  }
+}
+
 #####################################################################################################
 # Cosmos DB Mongo DB vCore (https://learn.microsoft.com/azure/cosmos-db/mongodb/vcore/introduction) #
 #####################################################################################################
+
+resource azapi_resource mongo_cluster {
+  count     = var.mongoDBvCore.enable ? 1 : 0
+  name      = var.mongoDBvCore.cluster.name
+  type      = "Microsoft.DocumentDB/mongoClusters@2024-03-01-preview"
+  parent_id = azurerm_resource_group.data.id
+  location  = azurerm_resource_group.data.location
+  body = jsonencode({
+    properties = {
+      nodeGroupSpecs = [
+        {
+          kind       = "Shard"
+          sku        = var.mongoDBvCore.cluster.tier
+          nodeCount  = var.mongoDBvCore.node.count
+          diskSizeGB = var.mongoDBvCore.node.diskSizeGB
+          enableHa   = var.mongoDBvCore.highAvailability.enable
+        }
+      ]
+      serverVersion              = var.mongoDBvCore.cluster.version
+      administratorLogin         = var.mongoDBvCore.cluster.adminLogin.userName != "" || !module.global.keyVault.enable ? var.mongoDBvCore.cluster.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
+      administratorLoginPassword = var.mongoDBvCore.cluster.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.mongoDBvCore.cluster.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+    }
+  })
+  schema_validation_enabled = false
+}
 
 resource azurerm_private_dns_zone mongo_cluster {
   count               = var.mongoDBvCore.enable ? 1 : 0
@@ -237,37 +259,9 @@ resource azurerm_private_endpoint mongo_cluster {
     ]
   }
   private_dns_zone_group {
-    name = azapi_resource.mongo_cluster[0].name
+    name = azurerm_private_dns_zone_virtual_network_link.mongo_cluster[0].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.mongo_cluster[0].id
     ]
   }
-  depends_on = [
-    azurerm_private_dns_zone_virtual_network_link.mongo_cluster
-  ]
-}
-
-resource azapi_resource mongo_cluster {
-  count     = var.mongoDBvCore.enable ? 1 : 0
-  name      = var.mongoDBvCore.cluster.name
-  type      = "Microsoft.DocumentDB/mongoClusters@2024-02-15-preview"
-  parent_id = azurerm_resource_group.data.id
-  location  = azurerm_resource_group.data.location
-  body = jsonencode({
-    properties = {
-      nodeGroupSpecs = [
-        {
-          kind       = "Shard"
-          sku        = var.mongoDBvCore.cluster.tier
-          nodeCount  = var.mongoDBvCore.node.count
-          diskSizeGB = var.mongoDBvCore.node.diskSizeGB
-          enableHa   = var.mongoDBvCore.highAvailability.enable
-        }
-      ]
-      serverVersion              = var.mongoDBvCore.cluster.version
-      administratorLogin         = var.mongoDBvCore.cluster.adminLogin.userName != "" || !module.global.keyVault.enable ? var.mongoDBvCore.cluster.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
-      administratorLoginPassword = var.mongoDBvCore.cluster.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.mongoDBvCore.cluster.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
-    }
-  })
-  schema_validation_enabled = false
 }

@@ -8,13 +8,25 @@ variable virtualMachines {
     name   = string
     size   = string
     image = object({
-      id = string
+      resourceGroupName = string
+      galleryName       = string
+      definitionName    = string
+      versionId         = string
       plan = object({
-        enable    = bool
         publisher = string
         product   = string
         name      = string
       })
+    })
+    network = object({
+      subnetName = string
+      acceleration = object({
+        enable = bool
+      })
+      locationEdge = object({
+        enable = bool
+      })
+      staticIpAddress = string
     })
     operatingSystem = object({
       type = string
@@ -23,13 +35,6 @@ variable virtualMachines {
         cachingType = string
         sizeGB      = number
       })
-    })
-    network = object({
-      subnetName = string
-      acceleration = object({
-        enable = bool
-      })
-      staticIpAddress = string
     })
     adminLogin = object({
       userName     = string
@@ -68,23 +73,20 @@ variable virtualMachines {
 locals {
   virtualMachines = [
     for virtualMachine in var.virtualMachines : merge(virtualMachine, {
-      image = {
-        id = virtualMachine.image.id
+      image = merge(virtualMachine.image, {
         plan = {
-          enable    = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? true : virtualMachine.image.plan.enable
-          publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.publisher : virtualMachine.image.plan.publisher
-          product   = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.offer : virtualMachine.image.plan.product
-          name      = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher != "", false) ? data.terraform_remote_state.image.outputs.linuxPlan.sku : virtualMachine.image.plan.name
+          publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher, virtualMachine.image.plan.publisher)
+          product   = try(data.terraform_remote_state.image.outputs.linuxPlan.offer, virtualMachine.image.plan.product)
+          name      = try(data.terraform_remote_state.image.outputs.linuxPlan.sku, virtualMachine.image.plan.name)
         }
-      }
-      adminLogin = {
+      })
+      network = merge(virtualMachine.network, {
+        subnetId = "${virtualMachine.network.locationEdge.enable ? data.azurerm_virtual_network.studio.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
+      })
+      adminLogin = merge(virtualMachine.adminLogin, {
         userName     = virtualMachine.adminLogin.userName != "" || !module.global.keyVault.enable ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
         userPassword = virtualMachine.adminLogin.userPassword != "" || !module.global.keyVault.enable ? virtualMachine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
-        sshPublicKey = virtualMachine.adminLogin.sshPublicKey
-        passwordAuth = {
-          disable = virtualMachine.adminLogin.passwordAuth.disable
-        }
-      }
+      })
     })
   ]
 }
@@ -94,8 +96,8 @@ resource azurerm_network_interface scheduler {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable
   }
   name                = each.value.name
-  resource_group_name = local.edgeZone != null ? azurerm_resource_group.scheduler_edge.name : azurerm_resource_group.scheduler.name
-  location            = local.edgeZone != null ? azurerm_resource_group.scheduler_edge.location : azurerm_resource_group.scheduler.location
+  resource_group_name = azurerm_resource_group.scheduler.name
+  location            = azurerm_resource_group.scheduler.location
   edge_zone           = local.edgeZone
   ip_configuration {
     name                          = "ipConfig"
@@ -111,10 +113,10 @@ resource azurerm_linux_virtual_machine scheduler {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux"
   }
   name                            = each.value.name
-  resource_group_name             = local.edgeZone != null ? azurerm_resource_group.scheduler_edge.name : azurerm_resource_group.scheduler.name
-  location                        = local.edgeZone != null ? azurerm_resource_group.scheduler_edge.location : azurerm_resource_group.scheduler.location
+  resource_group_name             = azurerm_resource_group.scheduler.name
+  location                        = azurerm_resource_group.scheduler.location
   edge_zone                       = local.edgeZone
-  source_image_id                 = each.value.image.id
+  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                            = each.value.size
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
@@ -137,7 +139,7 @@ resource azurerm_linux_virtual_machine scheduler {
     ]
   }
   dynamic plan {
-    for_each = each.value.image.plan.enable ? [1] : []
+    for_each = each.value.image.plan.publisher != "" ? [1] : []
     content {
       publisher = each.value.image.plan.publisher
       product   = each.value.image.plan.product
@@ -214,10 +216,10 @@ resource azurerm_windows_virtual_machine scheduler {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows"
   }
   name                = each.value.name
-  resource_group_name = local.edgeZone != null ? azurerm_resource_group.scheduler_edge.name : azurerm_resource_group.scheduler.name
-  location            = local.edgeZone != null ? azurerm_resource_group.scheduler_edge.location : azurerm_resource_group.scheduler.location
+  resource_group_name = azurerm_resource_group.scheduler.name
+  location            = azurerm_resource_group.scheduler.location
   edge_zone           = local.edgeZone
-  source_image_id     = each.value.image.id
+  source_image_id     = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                = each.value.size
   admin_username      = each.value.adminLogin.userName
   admin_password      = each.value.adminLogin.userPassword

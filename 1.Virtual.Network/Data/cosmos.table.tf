@@ -16,6 +16,16 @@ variable table {
   })
 }
 
+resource azurerm_cosmosdb_table tables {
+  for_each = {
+    for table in var.table.tables : table.name => table if table.enable
+  }
+  name                = each.value.name
+  resource_group_name = azurerm_cosmosdb_account.studio["table"].resource_group_name
+  account_name        = azurerm_cosmosdb_account.studio["table"].name
+  throughput          = each.value.throughput
+}
+
 resource azurerm_private_dns_zone table {
   count               = var.table.enable ? 1 : 0
   name                = "privatelink.table.cosmos.azure.com"
@@ -45,14 +55,11 @@ resource azurerm_private_endpoint table {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_cosmosdb_account.studio["table"].name
+    name = azurerm_private_dns_zone_virtual_network_link.table[0].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.table[0].id
     ]
   }
-  depends_on = [
-    azurerm_private_dns_zone_virtual_network_link.table
-  ]
 }
 
 resource azurerm_private_endpoint table_sql {
@@ -70,22 +77,9 @@ resource azurerm_private_endpoint table_sql {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_cosmosdb_account.studio["table"].name
+    name = azurerm_private_dns_zone_virtual_network_link.no_sql[0].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.no_sql[0].id
     ]
   }
-  depends_on = [
-    azurerm_private_dns_zone_virtual_network_link.no_sql
-  ]
-}
-
-resource azurerm_cosmosdb_table tables {
-  for_each = {
-    for table in var.table.tables : table.name => table if table.enable
-  }
-  name                = each.value.name
-  resource_group_name = azurerm_cosmosdb_account.studio["table"].resource_group_name
-  account_name        = azurerm_cosmosdb_account.studio["table"].name
-  throughput          = each.value.throughput
 }

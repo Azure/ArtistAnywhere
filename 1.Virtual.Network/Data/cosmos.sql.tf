@@ -152,45 +152,6 @@ locals {
   ])
 }
 
-resource azurerm_private_dns_zone no_sql {
-  count               = var.noSQL.enable || var.gremlin.enable || var.table.enable ? 1 : 0
-  name                = var.noSQL.account.dedicatedGateway.enable ? "privatelink.sqlx.cosmos.azure.com" : "privatelink.documents.azure.com"
-  resource_group_name = azurerm_resource_group.data.name
-}
-
-resource azurerm_private_dns_zone_virtual_network_link no_sql {
-  count                 = var.noSQL.enable || var.gremlin.enable || var.table.enable ? 1 : 0
-  name                  = "no-sql"
-  resource_group_name   = azurerm_private_dns_zone.no_sql[0].resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.no_sql[0].name
-  virtual_network_id    = data.azurerm_virtual_network.studio.id
-}
-
-resource azurerm_private_endpoint no_sql {
-  count               = var.noSQL.enable ? 1 : 0
-  name                = azurerm_cosmosdb_account.studio["sql"].name
-  resource_group_name = azurerm_cosmosdb_account.studio["sql"].resource_group_name
-  location            = azurerm_cosmosdb_account.studio["sql"].location
-  subnet_id           = data.azurerm_subnet.data.id
-  private_service_connection {
-    name                           = azurerm_cosmosdb_account.studio["sql"].name
-    private_connection_resource_id = azurerm_cosmosdb_account.studio["sql"].id
-    is_manual_connection           = false
-    subresource_names = [
-      var.noSQL.account.dedicatedGateway.enable ? "SqlDedicated" : "Sql"
-    ]
-  }
-  private_dns_zone_group {
-    name = azurerm_cosmosdb_account.studio["sql"].name
-    private_dns_zone_ids = [
-      azurerm_private_dns_zone.no_sql[0].id
-    ]
-  }
-  depends_on = [
-    azurerm_private_dns_zone_virtual_network_link.no_sql
-  ]
-}
-
 resource azurerm_cosmosdb_sql_dedicated_gateway no_sql {
   count               = var.noSQL.enable && var.noSQL.account.dedicatedGateway.enable ? 1 : 0
   cosmosdb_account_id = azurerm_cosmosdb_account.studio["sql"].id
@@ -347,4 +308,40 @@ resource azurerm_cosmosdb_sql_role_assignment no_sql {
   scope               = "${azurerm_cosmosdb_account.studio["sql"].id}${each.value.scopePath}"
   principal_id        = each.value.principalId
   role_definition_id  = each.value.role.id != "" ? "${azurerm_cosmosdb_account.studio["sql"].id}/sqlRoleDefinitions/${each.value.role.id}" : azurerm_cosmosdb_sql_role_definition.no_sql[each.value.role.Name].id
+}
+
+resource azurerm_private_dns_zone no_sql {
+  count               = var.noSQL.enable || var.gremlin.enable || var.table.enable ? 1 : 0
+  name                = var.noSQL.account.dedicatedGateway.enable ? "privatelink.sqlx.cosmos.azure.com" : "privatelink.documents.azure.com"
+  resource_group_name = azurerm_resource_group.data.name
+}
+
+resource azurerm_private_dns_zone_virtual_network_link no_sql {
+  count                 = var.noSQL.enable || var.gremlin.enable || var.table.enable ? 1 : 0
+  name                  = "no-sql"
+  resource_group_name   = azurerm_private_dns_zone.no_sql[0].resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.no_sql[0].name
+  virtual_network_id    = data.azurerm_virtual_network.studio.id
+}
+
+resource azurerm_private_endpoint no_sql {
+  count               = var.noSQL.enable ? 1 : 0
+  name                = azurerm_cosmosdb_account.studio["sql"].name
+  resource_group_name = azurerm_cosmosdb_account.studio["sql"].resource_group_name
+  location            = azurerm_cosmosdb_account.studio["sql"].location
+  subnet_id           = data.azurerm_subnet.data.id
+  private_service_connection {
+    name                           = azurerm_cosmosdb_account.studio["sql"].name
+    private_connection_resource_id = azurerm_cosmosdb_account.studio["sql"].id
+    is_manual_connection           = false
+    subresource_names = [
+      var.noSQL.account.dedicatedGateway.enable ? "SqlDedicated" : "Sql"
+    ]
+  }
+  private_dns_zone_group {
+    name = azurerm_private_dns_zone_virtual_network_link.no_sql[0].name
+    private_dns_zone_ids = [
+      azurerm_private_dns_zone.no_sql[0].id
+    ]
+  }
 }

@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.97.1"
+      version = "~>3.99.0"
     }
   }
   backend azurerm {
@@ -27,15 +27,6 @@ variable resourceGroupName {
   type = string
 }
 
-variable existingNetwork {
-  type = object({
-    enable            = bool
-    name              = string
-    subnetName        = string
-    resourceGroupName = string
-  })
-}
-
 data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name
   resource_group_name = module.global.resourceGroupName
@@ -45,21 +36,21 @@ data terraform_remote_state network {
   backend = "azurerm"
   config = {
     resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.rootStorage.accountName
-    container_name       = module.global.rootStorage.containerName.terraformState
+    storage_account_name = module.global.storage.accountName
+    container_name       = module.global.storage.containerName.terraformState
     key                  = "1.Virtual.Network"
   }
 }
 
-data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetworkRegional.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetworkRegional.resourceGroupName
+data azurerm_virtual_network studio_region {
+  name                = data.terraform_remote_state.network.outputs.virtualNetworks[0].name
+  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
 data azurerm_subnet farm {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Farm"
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
+  name                 = "Farm"
+  resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }
 
 resource azurerm_resource_group docker {

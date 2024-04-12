@@ -26,7 +26,7 @@ data azurerm_application_insights studio {
 
 data azurerm_storage_account studio {
   count               = var.noSQL.enable ? 1 : 0
-  name                = module.global.rootStorage.accountName
+  name                = module.global.storage.accountName
   resource_group_name = module.global.resourceGroupName
 }
 
