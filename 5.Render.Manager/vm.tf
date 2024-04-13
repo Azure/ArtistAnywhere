@@ -51,14 +51,7 @@ variable virtualMachines {
         fileName = string
         parameters = object({
           autoScale = object({
-            enable                   = bool
-            fileName                 = string
-            resourceGroupName        = string
-            scaleSetName             = string
-            scaleSetMachineCountMax  = number
-            jobWaitThresholdSeconds  = number
-            workerIdleDeleteSeconds  = number
-            detectionIntervalSeconds = number
+            enable = bool
           })
         })
       })
@@ -121,9 +114,6 @@ resource azurerm_linux_virtual_machine scheduler {
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
-  custom_data = base64encode(
-    templatefile(each.value.extension.custom.parameters.autoScale.fileName, merge(each.value.extension.custom.parameters, {}))
-  )
   network_interface_ids = [
     "${azurerm_resource_group.scheduler.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
   ]
@@ -223,9 +213,6 @@ resource azurerm_windows_virtual_machine scheduler {
   size                = each.value.size
   admin_username      = each.value.adminLogin.userName
   admin_password      = each.value.adminLogin.userPassword
-  custom_data = base64encode(
-    templatefile(each.value.extension.custom.parameters.autoScale.fileName, merge(each.value.extension.custom.parameters, {}))
-  )
   network_interface_ids = [
     "${azurerm_resource_group.scheduler.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
   ]

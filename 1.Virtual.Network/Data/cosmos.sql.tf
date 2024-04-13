@@ -321,7 +321,7 @@ resource azurerm_private_dns_zone_virtual_network_link no_sql {
   name                  = "no-sql"
   resource_group_name   = azurerm_private_dns_zone.no_sql[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.no_sql[0].name
-  virtual_network_id    = data.azurerm_virtual_network.studio.id
+  virtual_network_id    = data.azurerm_virtual_network.studio_region.id
 }
 
 resource azurerm_private_endpoint no_sql {

@@ -4,12 +4,12 @@ az login --tenant $tenantId
 az account set --subscription $subscriptionId
 az account show
 
-az account list-locations --query "[?name=='losangeles']" --include-extended-locations
-az account list-locations --query "[?name=='westus']"
-az account list-locations --query "[?name=='westus2']"
-az account list-locations --query "[?name=='westus3']"
+az account list-locations --query [?name=='losangeles'] --include-extended-locations
+az account list-locations --query [?name=='westus']
+az account list-locations --query [?name=='westus2']
+az account list-locations --query [?name=='westus3']
 
-az account list-locations --query "[?name=='westus']|[0]"
+az account list-locations --query [?name=='westus']|[0]
 {
   "availabilityZoneMappings": [
     {
@@ -46,5 +46,15 @@ az account list-locations --query "[?name=='westus']|[0]"
   "regionalDisplayName": "(US) West US",
   "type": "Region"
 }
+
+az account list-locations --query [?name=='westus'].availabilityZoneMappings[].logicalZone
+[
+  "1",
+  "2",
+  "3"
+]
+
+az account list-locations --query [?name=='westcentralus'].availabilityZoneMappings[].logicalZone
+[]
 
 az account list-locations --query [].[metadata.regionType,name,metadata.pairedRegion[0].name] --output table

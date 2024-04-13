@@ -132,7 +132,7 @@ resource azurerm_private_dns_zone_virtual_network_link cassandra {
   name                  = "cassandra"
   resource_group_name   = azurerm_private_dns_zone.cassandra[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.cassandra[0].name
-  virtual_network_id    = data.azurerm_virtual_network.studio.id
+  virtual_network_id    = data.azurerm_virtual_network.studio_region.id
 }
 
 resource azurerm_private_endpoint cassandra {
@@ -165,7 +165,7 @@ resource azurerm_role_assignment cassandra {
   count                = var.apacheCassandra.enable ? 1 : 0
   role_definition_name = "Network Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#network-contributor
   principal_id         = data.azuread_service_principal.cosmos_db.object_id
-  scope                = data.azurerm_virtual_network.studio.id
+  scope                = data.azurerm_virtual_network.studio_region.id
 }
 
 resource azurerm_cosmosdb_cassandra_cluster cassandra {

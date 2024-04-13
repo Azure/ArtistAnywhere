@@ -1,7 +1,7 @@
 $binDirectory = "C:\Users\Public\Downloads"
 Set-Location -Path $binDirectory
 
-. C:\AzureData\functions.ps1
+Import-Module C:\AzureData\functions.psm1
 
 if ("${terminateNotification.enable}" -eq $true) {
   $taskName = "AAA Terminate Event Handler"

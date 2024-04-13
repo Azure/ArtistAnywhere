@@ -161,6 +161,6 @@ resource azurerm_resource_group cache_regions {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
   }
-  name     = each.value.nameSuffix != "" ? "${var.resourceGroupName}.${each.value.nameSuffix}" : var.resourceGroupName
+  name     = "${var.resourceGroupName}.${each.value.nameSuffix}"
   location = each.value.regionName
 }

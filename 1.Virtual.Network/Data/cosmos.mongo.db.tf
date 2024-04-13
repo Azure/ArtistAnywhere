@@ -176,7 +176,7 @@ resource azurerm_private_dns_zone_virtual_network_link mongo_db {
   name                  = "mongo"
   resource_group_name   = azurerm_private_dns_zone.mongo_db[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.mongo_db[0].name
-  virtual_network_id    = data.azurerm_virtual_network.studio.id
+  virtual_network_id    = data.azurerm_virtual_network.studio_region.id
 }
 
 resource azurerm_private_endpoint mongo_db {
@@ -241,7 +241,7 @@ resource azurerm_private_dns_zone_virtual_network_link mongo_cluster {
   name                  = "mongo-cluster"
   resource_group_name   = azurerm_private_dns_zone.mongo_cluster[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.mongo_cluster[0].name
-  virtual_network_id    = data.azurerm_virtual_network.studio.id
+  virtual_network_id    = data.azurerm_virtual_network.studio_region.id
 }
 
 resource azurerm_private_endpoint mongo_cluster {

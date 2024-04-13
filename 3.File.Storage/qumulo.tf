@@ -27,8 +27,8 @@ data azurerm_subnet storage_qumulo {
 
 resource azurerm_resource_group qumulo {
   count    = var.qumulo.enable ? 1 : 0
-  name     = local.rootRegion.nameSuffix == "" ? "${var.resourceGroupName}.Qumulo" : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}.Qumulo"
-  location = local.rootRegion.name
+  name     = "${var.resourceGroupName}.${module.global.resourceLocation.nameSuffix}.Qumulo"
+  location = module.global.resourceLocation.region
 }
 
 resource azapi_resource qumulo {

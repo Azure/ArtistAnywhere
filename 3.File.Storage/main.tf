@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~>3.99.0"
     }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~>2.48.0"
+    }
     azapi = {
       source = "azure/azapi"
       version = "~>1.12.1"
@@ -153,14 +157,10 @@ data azurerm_private_dns_zone studio {
 }
 
 locals {
-  rootRegion = {
-    name       = data.terraform_remote_state.network.outputs.virtualNetwork.regionName
-    nameSuffix = data.terraform_remote_state.network.outputs.virtualNetwork.nameSuffix
-  }
   edgeZone = module.global.resourceLocation.edgeZone != "" ? module.global.resourceLocation.edgeZone : null
 }
 
 resource azurerm_resource_group storage {
-  name     = local.rootRegion.nameSuffix == "" ? var.resourceGroupName : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}"
-  location = local.rootRegion.name
+  name     = "${var.resourceGroupName}.${module.global.resourceLocation.nameSuffix}"
+  location = module.global.resourceLocation.region
 }

@@ -139,14 +139,10 @@ data azurerm_virtual_network studio_region {
 }
 
 locals {
-  rootRegion = {
-    name       = var.existingNetwork.enable ? module.global.resourceLocation.region : data.terraform_remote_state.network.outputs.virtualNetwork.regionName
-    nameSuffix = var.existingNetwork.enable ? "" : data.terraform_remote_state.network.outputs.virtualNetwork.nameSuffix
-  }
   edgeZone = module.global.resourceLocation.edgeZone != "" ? module.global.resourceLocation.edgeZone : null
 }
 
 resource azurerm_resource_group workstation {
-  name     = var.existingNetwork.enable || local.rootRegion.nameSuffix == "" ? var.resourceGroupName : "${var.resourceGroupName}.${local.rootRegion.nameSuffix}"
-  location = local.rootRegion.name
+  name     = "${var.resourceGroupName}.${module.global.resourceLocation.nameSuffix}"
+  location = module.global.resourceLocation.region
 }

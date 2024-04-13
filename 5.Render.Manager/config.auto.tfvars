@@ -53,14 +53,7 @@ virtualMachines = [
         fileName = "initialize.sh"
         parameters = {
           autoScale = {
-            enable                   = false
-            fileName                 = "scale.sh"
-            resourceGroupName        = "ArtistAnywhere.Farm.West"
-            scaleSetName             = "LnxFarmC"
-            scaleSetMachineCountMax  = 100
-            jobWaitThresholdSeconds  = 300
-            workerIdleDeleteSeconds  = 600
-            detectionIntervalSeconds = 60
+            enable = false
           }
         }
       }
@@ -118,14 +111,7 @@ virtualMachines = [
         fileName = "initialize.ps1"
         parameters = {
           autoScale = {
-            enable                   = false
-            fileName                 = "scale.ps1"
-            resourceGroupName        = "ArtistAnywhere.Farm.West"
-            scaleSetName             = "WinFarmC"
-            scaleSetMachineCountMax  = 100
-            jobWaitThresholdSeconds  = 300
-            workerIdleDeleteSeconds  = 600
-            detectionIntervalSeconds = 60
+            enable = false
           }
         }
       }

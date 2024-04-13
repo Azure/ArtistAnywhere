@@ -95,20 +95,20 @@ resource azurerm_cosmosdb_account studio {
   for_each = {
     for cosmosAccount in local.cosmosAccounts : cosmosAccount.type => cosmosAccount if cosmosAccount.name != ""
   }
-  name                            = each.value.name
-  resource_group_name             = azurerm_resource_group.data.name
-  location                        = azurerm_resource_group.data.location
-  kind                            = each.value.type == "mongo" ? "MongoDB" : "GlobalDocumentDB"
-  mongo_server_version            = each.value.type == "mongo" ? var.mongoDB.account.version : null
-  offer_type                      = var.cosmosDB.tier
-  key_vault_key_id                = var.cosmosDB.encryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
-  analytical_storage_enabled      = var.data.analytics.enable
-  partition_merge_enabled         = var.cosmosDB.partitionMerge.enable
-  enable_multiple_write_locations = var.cosmosDB.multiRegionWrite.enable
-  enable_automatic_failover       = var.cosmosDB.automaticFailover.enable
-  ip_range_filter                 = "${jsondecode(data.http.client_address.response_body).ip},104.42.195.92,40.76.54.131,52.176.6.30,52.169.50.45,52.187.184.26" # Azure Portal
-  default_identity_type           = "UserAssignedIdentity=${data.azurerm_user_assigned_identity.studio.id}"
-  local_authentication_disabled   = each.value.type == "sql" ? !var.noSQL.account.accessKeys.enable : null
+  name                             = each.value.name
+  resource_group_name              = azurerm_resource_group.data.name
+  location                         = azurerm_resource_group.data.location
+  kind                             = each.value.type == "mongo" ? "MongoDB" : "GlobalDocumentDB"
+  mongo_server_version             = each.value.type == "mongo" ? var.mongoDB.account.version : null
+  offer_type                       = var.cosmosDB.tier
+  key_vault_key_id                 = var.cosmosDB.encryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
+  analytical_storage_enabled       = var.data.analytics.enable
+  partition_merge_enabled          = var.cosmosDB.partitionMerge.enable
+  multiple_write_locations_enabled = var.cosmosDB.multiRegionWrite.enable
+  automatic_failover_enabled       = var.cosmosDB.automaticFailover.enable
+  ip_range_filter                  = "${jsondecode(data.http.client_address.response_body).ip},104.42.195.92,40.76.54.131,52.176.6.30,52.169.50.45,52.187.184.26" # Azure Portal
+  default_identity_type            = "UserAssignedIdentity=${data.azurerm_user_assigned_identity.studio.id}"
+  local_authentication_disabled    = each.value.type == "sql" ? !var.noSQL.account.accessKeys.enable : null
   identity {
     type = "UserAssigned"
     identity_ids = [

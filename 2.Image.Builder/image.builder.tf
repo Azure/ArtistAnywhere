@@ -289,8 +289,8 @@ resource azapi_resource windows {
         [
           {
             type        = "File"
-            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.ps1"
-            destination = "C:\\AzureData\\functions.ps1"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.psm1"
+            destination = "C:\\AzureData\\functions.psm1"
             inline      = null
             runElevated = false
             runAsSystem = false
