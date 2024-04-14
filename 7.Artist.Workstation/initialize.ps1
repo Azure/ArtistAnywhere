@@ -1,7 +1,7 @@
 $binDirectory = "C:\Users\Public\Downloads"
 Set-Location -Path $binDirectory
 
-Import-Module -Name C:\AzureData\functions.psm1 -Variable *
+Import-Module -Name C:\AzureData\functions.psm1 -Function * -Variable *
 
 if ("${pcoipLicenseKey}" -ne "") {
   $installFile = "C:\Program Files\Teradici\PCoIP Agent\pcoip-register-host.ps1"

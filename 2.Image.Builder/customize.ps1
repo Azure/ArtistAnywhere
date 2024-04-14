@@ -8,7 +8,7 @@ $binPaths = ""
 $binDirectory = "C:\Users\Public\Downloads"
 Set-Location -Path $binDirectory
 
-Import-Module -Name C:\AzureData\functions.psm1 -Variable *
+Import-Module -Name C:\AzureData\functions.psm1 -Function * -Variable *
 
 Write-Host "Customize (Start): Resize OS Disk"
 $osDriveLetter = "C"
@@ -84,6 +84,16 @@ $binPathGit = "C:\Program Files\Git\bin"
 $binPaths += ";$binPathGit"
 Write-Host "Customize (End): Git"
 
+Write-Host "Customize (Start): 7-Zip"
+$processType = "7zip"
+RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
+Write-Host "Customize (End): 7-Zip"
+
+Write-Host "Customize (Start): Docker Desktop"
+$processType = "docker-desktop"
+RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
+Write-Host "Customize (End): Docker Desktop"
+
 Write-Host "Customize (Start): Visual Studio Build Tools"
 $processType = "vsBuildTools"
 RunProcess "$binPathChoco\choco.exe" "install visualstudio2022buildtools --package-parameters ""--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.Component.MSBuild"" --confirm --no-progress" "$binDirectory\$processType"
@@ -91,11 +101,6 @@ $binPathCMake = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\
 $binPathMSBuild = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64"
 $binPaths += ";$binPathCMake;$binPathMSBuild"
 Write-Host "Customize (End): Visual Studio Build Tools"
-
-Write-Host "Customize (Start): 7-Zip"
-$processType = "7zip"
-RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
-Write-Host "Customize (End): 7-Zip"
 
 Write-Host "Customize (End): Image Build Platform"
 

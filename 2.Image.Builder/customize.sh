@@ -44,7 +44,7 @@ echo "Customize (End): Image Build Parameters"
 echo "Customize (Start): Image Build Platform"
 # systemctl --now disable firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-dnf -y install gcc gcc-c++ perl cmake git
+dnf -y install gcc gcc-c++ perl cmake git docker
 dnf -y install kernel-devel-$(uname -r) python3-devel
 export AZNFS_NONINTERACTIVE_INSTALL=1
 curl -L https://github.com/Azure/AZNFS-mount/releases/download/2.0.4/aznfs_install.sh | bash
