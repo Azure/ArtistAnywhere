@@ -8,7 +8,7 @@ $binPaths = ""
 $binDirectory = "C:\Users\Public\Downloads"
 Set-Location -Path $binDirectory
 
-Import-Module -Name C:\AzureData\functions.psm1
+Import-Module -Name C:\AzureData\functions.psm1 -Variable *
 
 Write-Host "Customize (Start): Resize OS Disk"
 $osDriveLetter = "C"
