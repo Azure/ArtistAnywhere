@@ -4,6 +4,7 @@
 
 variable hammerspace {
   type = object({
+    enable     = bool
     namePrefix = string
     domainName = string
     metadata = object({
@@ -87,7 +88,7 @@ locals {
         userPassword = var.hammerspace.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.hammerspace.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
       }},
       var.hammerspace.metadata
-    ) if var.hammerspace.namePrefix != ""
+    ) if var.hammerspace.enable
   ]
   hammerspaceDataNodes = [
     for i in range(var.hammerspace.data.machine.count) : merge({
@@ -98,14 +99,14 @@ locals {
         userPassword = var.hammerspace.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.hammerspace.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
       }},
       var.hammerspace.data
-    ) if var.hammerspace.namePrefix != ""
+    ) if var.hammerspace.enable
   ]
   hammerspaceDataDisks = [
     for i in range(var.hammerspace.data.machine.count * var.hammerspace.data.dataDisk.count) : merge(var.hammerspace.data, {
       index       = i % var.hammerspace.data.dataDisk.count + 1
       machineName = "${var.hammerspace.namePrefix}${var.hammerspace.data.machine.namePrefix}${floor(i / var.hammerspace.data.dataDisk.count) + 1}"
       name        = "${var.hammerspace.namePrefix}${var.hammerspace.data.machine.namePrefix}${floor(i / var.hammerspace.data.dataDisk.count) + 1}DataDisk${i % var.hammerspace.data.dataDisk.count + 1}"
-    }) if var.hammerspace.namePrefix != ""
+    }) if var.hammerspace.enable
   ]
   hammerspaceDomainName = var.hammerspace.domainName == "" ? "${var.hammerspace.namePrefix}.azure" : var.hammerspace.domainName
   hammerspaceMetadataNodeConfig = {
@@ -157,24 +158,24 @@ locals {
       "add_volumes": true
     }
   }
-  hammerspaceEnableHighAvailability = var.hammerspace.namePrefix != "" && var.hammerspace.metadata.machine.count > 1
+  hammerspaceEnableHighAvailability = var.hammerspace.enable && var.hammerspace.metadata.machine.count > 1
 }
 
 resource azurerm_resource_group hammerspace {
-  count    = var.hammerspace.namePrefix != "" ? 1 : 0
+  count    = var.hammerspace.enable ? 1 : 0
   name     = "${azurerm_resource_group.storage.name}.Hammerspace"
   location = azurerm_resource_group.storage.location
 }
 
 resource azurerm_proximity_placement_group storage {
-  count               = var.hammerspace.namePrefix != "" ? 1 : 0
+  count               = var.hammerspace.enable ? 1 : 0
   name                = var.hammerspace.namePrefix
   location            = azurerm_resource_group.hammerspace[0].location
   resource_group_name = azurerm_resource_group.hammerspace[0].name
 }
 
 resource azurerm_availability_set storage_metadata {
-  count                        = var.hammerspace.namePrefix != "" ? 1 : 0
+  count                        = var.hammerspace.enable ? 1 : 0
   name                         = "${var.hammerspace.namePrefix}${var.hammerspace.metadata.machine.namePrefix}"
   resource_group_name          = azurerm_resource_group.hammerspace[0].name
   location                     = azurerm_resource_group.hammerspace[0].location
@@ -182,7 +183,7 @@ resource azurerm_availability_set storage_metadata {
 }
 
 resource azurerm_availability_set storage_data {
-  count                        = var.hammerspace.namePrefix != "" ? 1 : 0
+  count                        = var.hammerspace.enable ? 1 : 0
   name                         = "${var.hammerspace.namePrefix}${var.hammerspace.data.machine.namePrefix}"
   resource_group_name          = azurerm_resource_group.hammerspace[0].name
   location                     = azurerm_resource_group.hammerspace[0].location
