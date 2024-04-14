@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.7.3"
+  required_version = ">= 1.8.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -88,7 +88,7 @@ data azurerm_subnet farm {
 }
 
 data azurerm_resource_group network {
-  name = data.azurerm_virtual_network.studio.resource_group_name
+  name = data.azurerm_virtual_network.studio_region.resource_group_name
 }
 
 locals {

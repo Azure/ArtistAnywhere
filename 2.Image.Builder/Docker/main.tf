@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.7.3"
+  required_version = ">= 1.8.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -53,7 +53,13 @@ data azurerm_subnet farm {
   virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }
 
-resource azurerm_resource_group docker {
+locals {
+  regionNames = [
+    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName if virtualNetwork.regionName != module.global.resourceLocation.region
+  ]
+}
+
+resource azurerm_resource_group image_docker {
   name     = var.resourceGroupName
   location = module.global.resourceLocation.region
 }

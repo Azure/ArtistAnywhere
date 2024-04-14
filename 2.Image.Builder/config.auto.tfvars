@@ -492,6 +492,6 @@ dataPlatform = {
 }
 
 binStorage = { # Required configuration for image building
-  host = ""
-  auth = ""
+  host = "https://xstudio.blob.core.windows.net/bin"
+  auth = "?sv=2023-01-03&st=2024-01-01T00%3A00%3A00Z&se=9999-12-31T00%3A00%3A00Z&sp=r&ss=btqf&srt=sco&sig=rBOirh1igdW1AoUWVKgKRj2oL%2FCKN6cLlSWbtIW1IVY%3D"
 }

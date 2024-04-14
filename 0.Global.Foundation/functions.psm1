@@ -1,5 +1,6 @@
 $fileSystemsMountPath = "C:\Users\Public\Downloads\fileSystems.bat"
 $jobSchedulerTaskName = "AAA Job Scheduler Initialize"
+Export-ModuleMember -Variable *
 
 function RunProcess ($filePath, $argumentList, $logFile) {
   if ($logFile) {
