@@ -55,15 +55,15 @@ resource azurerm_virtual_network_gateway vpn {
   active_active       = var.vpnGateway.enableActiveActive
   ip_configuration {
     name                 = "ipConfig1"
-    public_ip_address_id = azurerm_public_ip.vpn_gateway_1[each.value.name].id
     subnet_id            = "${each.value.id}/subnets/GatewaySubnet"
+    public_ip_address_id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.vpnGateway.ipAddress1.resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/${each.value.vpnGateway.ipAddress1.name}"
   }
   dynamic ip_configuration {
     for_each = var.vpnGateway.enableActiveActive ? [1] : []
     content {
       name                 = "ipConfig2"
-      public_ip_address_id = azurerm_public_ip.vpn_gateway_2[0].id
       subnet_id            = "${each.value.id}/subnets/GatewaySubnet"
+      public_ip_address_id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.vpnGateway.ipAddress2.resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/${each.value.vpnGateway.ipAddress2.name}"
     }
   }
   dynamic vpn_client_configuration {
@@ -77,9 +77,7 @@ resource azurerm_virtual_network_gateway vpn {
     }
   }
   depends_on = [
-    azurerm_subnet_network_security_group_association.studio,
-    azurerm_public_ip.vpn_gateway_1,
-    azurerm_public_ip.vpn_gateway_2
+    azurerm_subnet_network_security_group_association.studio
   ]
 }
 

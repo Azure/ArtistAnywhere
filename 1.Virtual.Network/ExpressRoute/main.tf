@@ -21,6 +21,13 @@ variable resourceGroupName {
   type = string
 }
 
+variable virtualNetwork {
+  type = object({
+    name              = string
+    resourceGroupName = string
+  })
+}
+
 resource azurerm_resource_group express_route {
   name     = var.resourceGroupName
   location = var.regionName

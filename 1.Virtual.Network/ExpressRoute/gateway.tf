@@ -4,16 +4,21 @@
 
 variable expressRouteGateway {
   type = object({
-    enable          = bool
-    name            = string
-    serviceSku      = string
-    networkSubnetId = string
+    enable     = bool
+    name       = string
+    serviceSku = string
     circuitConnection = object({
       circuitId        = string
       authorizationKey = string
       enableFastPath   = bool
     })
   })
+}
+
+data azurerm_subnet gateway {
+  name                 = "GatewaySubnet"
+  resource_group_name  = var.virtualNetwork.resourceGroupName
+  virtual_network_name = var.virtualNetwork.name
 }
 
 resource azurerm_public_ip express_route {
@@ -34,7 +39,7 @@ resource azurerm_virtual_network_gateway express_route {
   sku                 = var.expressRouteGateway.serviceSku
   ip_configuration {
     name                 = "ipConfig"
-    subnet_id            = var.expressRouteGateway.networkSubnetId
+    subnet_id            = data.azurerm_subnet.gateway.id
     public_ip_address_id = azurerm_public_ip.express_route[0].id
   }
 }

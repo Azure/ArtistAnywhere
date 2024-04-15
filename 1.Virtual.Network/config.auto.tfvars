@@ -143,6 +143,16 @@ virtualNetworks = [
         serviceDelegation = null
       }
     ]
+    vpnGateway = {
+      ipAddress1 = {
+        resourceGroupName = "Shared"
+        name              = "xstudio-west1"
+      }
+      ipAddress2 = {
+        resourceGroupName = ""
+        name              = ""
+      }
+    }
   },
   {
     enable     = true
@@ -282,6 +292,16 @@ virtualNetworks = [
         serviceDelegation = null
       }
     ]
+    vpnGateway = {
+      ipAddress1 = {
+        resourceGroupName = "Shared"
+        name              = "xstudio-east1"
+      }
+      ipAddress2 = {
+        resourceGroupName = ""
+        name              = ""
+      }
+    }
   }
 ]
 

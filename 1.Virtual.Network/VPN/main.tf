@@ -16,11 +16,11 @@ provider azurerm {
   }
 }
 
-variable resourceGroupName {
+variable regionName {
   type = string
 }
 
-variable regionName {
+variable resourceGroupName {
   type = string
 }
 
@@ -28,6 +28,16 @@ variable virtualNetwork {
   type = object({
     name              = string
     resourceGroupName = string
+    vpnGateway = object({
+      ipAddress1 = object({
+        name              = string
+        resourceGroupName = string
+      })
+      ipAddress2 = object({
+        name              = string
+        resourceGroupName = string
+      })
+    })
   })
 }
 

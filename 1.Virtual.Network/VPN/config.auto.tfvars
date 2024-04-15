@@ -1,22 +1,12 @@
-resourceGroupName = "ArtistAnywhere.Network" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
-
 regionName = "" # Set Azure region name from "az account list-locations --query [].name"
 
-#################################################################################################
-# Virtual Network (https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview) #
-#################################################################################################
-
-virtualNetwork = {
-  name              = ""
-  resourceGroupName = ""
-}
+resourceGroupName = "ArtistAnywhere.Network" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
 ###############################################################################################################
 # Virtual Network Gateway (VPN) (https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-about-vpngateways) #
 ###############################################################################################################
 
 vpnGateway = {
-  enable             = false
   sku                = "VpnGw2"
   type               = "RouteBased"
   generation         = "Generation2"
@@ -48,5 +38,26 @@ vpnGatewayLocal = {
     asn            = 0
     peerWeight     = 0
     peeringAddress = ""
+  }
+}
+
+#################################################################################################
+# Virtual Network (https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview) #
+#################################################################################################
+
+virtualNetwork = {
+  name              = ""
+  resourceGroupName = ""
+  vpnGateway = {
+    ipAddress1 = {
+      name              = ""
+      resourceGroupName = ""
+    }
+  }
+  vpnGateway = {
+    ipAddress2 = {
+      name              = ""
+      resourceGroupName = ""
+    }
   }
 }

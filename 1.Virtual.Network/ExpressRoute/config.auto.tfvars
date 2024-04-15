@@ -1,6 +1,6 @@
-resourceGroupName = "ArtistAnywhere.Network" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
-
 regionName = "" # Set Azure region name from "az account list-locations --query [].name"
+
+resourceGroupName = "ArtistAnywhere.Network" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
 #######################################################################################################
 # ExpressRoute         (https://learn.microsoft.com/azure/expressroute/expressroute-introduction      #
@@ -22,13 +22,21 @@ expressRouteCircuit = {
 #####################################################################################################################
 
 expressRouteGateway = {
-  enable          = false
-  name            = ""
-  serviceSku      = "Standard" # https://learn.microsoft.com/azure/expressroute/expressroute-about-virtual-network-gateways#gwsku
-  networkSubnetId = ""
+  enable     = false
+  name       = ""
+  serviceSku = "Standard" # https://learn.microsoft.com/azure/expressroute/expressroute-about-virtual-network-gateways#gwsku
   circuitConnection = {
     circuitId        = ""
     authorizationKey = ""
     enableFastPath   = false # https://learn.microsoft.com/azure/expressroute/about-fastpath
   }
+}
+
+#################################################################################################
+# Virtual Network (https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview) #
+#################################################################################################
+
+virtualNetwork = {
+  name              = ""
+  resourceGroupName = ""
 }

@@ -19,6 +19,16 @@ variable virtualNetworks {
         actions = list(string)
       })
     }))
+    vpnGateway = object({
+      ipAddress1 = object({
+        name              = string
+        resourceGroupName = string
+      })
+      ipAddress2 = object({
+        name              = string
+        resourceGroupName = string
+      })
+    })
   }))
 }
 
