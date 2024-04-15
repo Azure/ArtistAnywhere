@@ -28,7 +28,7 @@ variable virtualNetwork {
   type = object({
     name              = string
     resourceGroupName = string
-    vpnGateway = object({
+    gateway = object({
       ipAddress1 = object({
         name              = string
         resourceGroupName = string

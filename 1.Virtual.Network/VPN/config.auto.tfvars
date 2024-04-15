@@ -1,4 +1,4 @@
-regionName = "" # Set Azure region name from "az account list-locations --query [].name"
+regionName = "WestUS" # Set Azure region name from "az account list-locations --query [].name"
 
 resourceGroupName = "ArtistAnywhere.Network" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
@@ -46,18 +46,16 @@ vpnGatewayLocal = {
 #################################################################################################
 
 virtualNetwork = {
-  name              = ""
-  resourceGroupName = ""
-  vpnGateway = {
+  name              = "Studio-West"
+  resourceGroupName = "ArtistAnywhere.Network.West"
+  gateway = {
     ipAddress1 = {
-      name              = ""
-      resourceGroupName = ""
+      name              = "xstudio-west1"
+      resourceGroupName = "Shared"
     }
-  }
-  vpnGateway = {
     ipAddress2 = {
-      name              = ""
-      resourceGroupName = ""
+      name              = "xstudio-west2"
+      resourceGroupName = "Shared"
     }
   }
 }
