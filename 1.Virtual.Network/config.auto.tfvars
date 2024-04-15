@@ -143,14 +143,14 @@ virtualNetworks = [
         serviceDelegation = null
       }
     ]
-    vpnGateway = {
+    gateway = {
       ipAddress1 = {
         resourceGroupName = "Shared"
         name              = "xstudio-west1"
       }
       ipAddress2 = {
-        resourceGroupName = ""
-        name              = ""
+        resourceGroupName = "Shared"
+        name              = "xstudio-west2"
       }
     }
   },
@@ -292,14 +292,14 @@ virtualNetworks = [
         serviceDelegation = null
       }
     ]
-    vpnGateway = {
+    gateway = {
       ipAddress1 = {
         resourceGroupName = "Shared"
         name              = "xstudio-east1"
       }
       ipAddress2 = {
-        resourceGroupName = ""
-        name              = ""
+        resourceGroupName = "Shared"
+        name              = "xstudio-east2"
       }
     }
   }
