@@ -49,7 +49,7 @@ cosmosDB = {
   geoLocations = [
     {
       enable     = true
-      regionName = "WestUS"
+      regionName = "WestUS2"
       failover = {
         priority = 0
       }

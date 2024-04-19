@@ -16,23 +16,30 @@ variable containerRegistry {
 }
 
 resource azurerm_container_registry studio {
-  name                          = var.containerRegistry.name
-  resource_group_name           = azurerm_resource_group.image_docker.name
-  location                      = azurerm_resource_group.image_docker.location
-  sku                           = var.containerRegistry.type
-  admin_enabled                 = var.containerRegistry.adminUser.enable
-  public_network_access_enabled = false
+  name                = var.containerRegistry.name
+  resource_group_name = azurerm_resource_group.image_docker.name
+  location            = azurerm_resource_group.image_docker.location
+  sku                 = var.containerRegistry.type
+  admin_enabled       = var.containerRegistry.adminUser.enable
   identity {
     type = "UserAssigned"
     identity_ids = [
       data.azurerm_user_assigned_identity.studio.id
     ]
   }
+  network_rule_set {
+    default_action = "Deny"
+    ip_rule {
+      action   = "Allow"
+      ip_range = "${jsondecode(data.http.client_address.response_body).ip}/32"
+    }
+  }
   dynamic georeplications {
     for_each = local.regionNames
     content {
-      location                = georeplications.value
-      zone_redundancy_enabled = false
+      location                  = georeplications.value
+      regional_endpoint_enabled = true
+      zone_redundancy_enabled   = false
     }
   }
 }
@@ -70,9 +77,23 @@ resource azurerm_private_endpoint container_registry {
   }
 }
 
-################################################################################################
-# https://learn.microsoft.com/en-us/azure/container-registry/container-registry-tasks-overview #
-################################################################################################
+resource azurerm_eventgrid_system_topic container_registry {
+  name                   = azurerm_container_registry.studio.name
+  resource_group_name    = azurerm_container_registry.studio.resource_group_name
+  location               = azurerm_container_registry.studio.location
+  source_arm_resource_id = azurerm_container_registry.studio.id
+  topic_type             = "Microsoft.ContainerRegistry.Registries"
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
+  }
+}
+
+##########################################################################################
+# https://learn.microsoft.com/azure/container-registry/container-registry-tasks-overview #
+##########################################################################################
 
 resource azurerm_container_registry_task lnx_farmc_cmake {
   count                 = var.containerRegistry.tasks.enable ? 1 : 0

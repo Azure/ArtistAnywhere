@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.0"
+  required_version = ">= 1.8.1"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -21,6 +21,13 @@ provider azurerm {
     resource_group {
       prevent_deletion_if_contains_resources = false
     }
+    application_insights {
+      disable_generated_rule = false
+    }
+    app_configuration {
+      purge_soft_delete_on_destroy = true
+      recover_soft_deleted         = true
+    }
     key_vault {
       purge_soft_delete_on_destroy                            = true
       purge_soft_deleted_secrets_on_destroy                   = true
@@ -34,9 +41,6 @@ provider azurerm {
     }
     log_analytics_workspace {
       permanently_delete_on_destroy = true
-    }
-    application_insights {
-      disable_generated_rule = false
     }
   }
 }

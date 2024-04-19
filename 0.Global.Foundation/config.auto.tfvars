@@ -124,3 +124,14 @@ trafficManager = {
     enable = true
   }
 }
+
+##########################################################################################
+# App Configuration (https://learn.microsoft.com/azure/azure-app-configuration/overview) #
+##########################################################################################
+
+appConfig = {
+  tier = "standard"
+  encryption = {
+    enable = false
+  }
+}

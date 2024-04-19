@@ -24,6 +24,12 @@ resource azurerm_private_dns_zone key_vault {
   resource_group_name = azurerm_resource_group.network.name
 }
 
+resource azurerm_private_dns_zone app_config {
+  count               = module.global.appConfig.enable ? 1 : 0
+  name                = "privatelink.azconfig.io"
+  resource_group_name = azurerm_resource_group.network.name
+}
+
 resource azurerm_private_dns_zone_virtual_network_link storage_blob {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
@@ -70,6 +76,19 @@ resource azurerm_private_dns_zone_virtual_network_link key_vault {
   name                  = "${lower(each.value.name)}-key-vault"
   resource_group_name   = azurerm_private_dns_zone.key_vault[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.key_vault[0].name
+  virtual_network_id    = each.value.id
+  depends_on = [
+    azurerm_virtual_network.studio
+  ]
+}
+
+resource azurerm_private_dns_zone_virtual_network_link app_config {
+  for_each = {
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.appConfig.enable
+  }
+  name                  = "${lower(each.value.name)}-app-config"
+  resource_group_name   = azurerm_private_dns_zone.app_config[0].resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.app_config[0].name
   virtual_network_id    = each.value.id
   depends_on = [
     azurerm_virtual_network.studio

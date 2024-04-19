@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.0"
+  required_version = ">= 1.8.1"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -50,6 +50,12 @@ data azurerm_key_vault_secret gateway_connection {
   count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.gatewayConnection
   key_vault_id = data.azurerm_key_vault.studio[0].id
+}
+
+data azurerm_app_configuration studio {
+  count               = module.global.appConfig.enable ? 1 : 0
+  name                = module.global.appConfig.name
+  resource_group_name = module.global.resourceGroupName
 }
 
 resource azurerm_resource_group network {

@@ -230,6 +230,34 @@ resource azapi_resource mongo_cluster {
   schema_validation_enabled = false
 }
 
+resource azapi_resource mongo_cluster_firewall_rule_allow_azure {
+  count     = var.mongoDBvCore.enable ? 1 : 0
+  name      = "AllowAllAzureServicesAndResourcesWithinAzureIps"
+  type      = "Microsoft.DocumentDB/mongoClusters/firewallRules@2024-03-01-preview"
+  parent_id = azapi_resource.mongo_cluster[0].id
+  body = jsonencode({
+    properties = {
+      startIpAddress = "0.0.0.0"
+      endIpAddress = "0.0.0.0"
+    }
+  })
+  schema_validation_enabled = false
+}
+
+resource azapi_resource mongo_cluster_firewall_rule_allow_client {
+  count     = var.mongoDBvCore.enable ? 1 : 0
+  name      = "AllowClient"
+  type      = "Microsoft.DocumentDB/mongoClusters/firewallRules@2024-03-01-preview"
+  parent_id = azapi_resource.mongo_cluster[0].id
+  body = jsonencode({
+    properties = {
+      startIpAddress = jsondecode(data.http.client_address.response_body).ip
+      endIpAddress = jsondecode(data.http.client_address.response_body).ip
+    }
+  })
+  schema_validation_enabled = false
+}
+
 resource azurerm_private_dns_zone mongo_cluster {
   count               = var.mongoDBvCore.enable ? 1 : 0
   name                = "privatelink.mongocluster.cosmos.azure.com"

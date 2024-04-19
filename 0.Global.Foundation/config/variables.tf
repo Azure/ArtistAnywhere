@@ -1,8 +1,8 @@
 variable resourceLocation {
   default = {
-    region     = "WestUS"     # Set from "az account list-locations --query [].name"
-    edgeZone   = "LosAngeles" # Set to "" to disable Azure Edge Zone deployment
     nameSuffix = "West"
+    region     = "WestUS2" # Set from "az account list-locations --query [].name"
+    edgeZone   = ""        # Set to "" to disable Azure Edge Zone deployment
   }
 }
 
@@ -83,6 +83,17 @@ variable keyVault {
   }
 }
 
+##########################################################################################
+# App Configuration (https://learn.microsoft.com/azure/azure-app-configuration/overview) #
+##########################################################################################
+
+variable appConfig {
+  default = {
+    enable = false
+    name   = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
+  }
+}
+
 output resourceLocation {
   value = var.resourceLocation
 }
@@ -109,4 +120,8 @@ output search {
 
 output keyVault {
   value = var.keyVault
+}
+
+output appConfig {
+  value = var.appConfig
 }

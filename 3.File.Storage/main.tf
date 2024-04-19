@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.0"
+  required_version = ">= 1.8.1"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -37,11 +37,12 @@ provider azurerm {
     }
     virtual_machine {
       delete_os_disk_on_deletion     = true
-      graceful_shutdown              = false
       skip_shutdown_and_force_delete = false
+      graceful_shutdown              = false
     }
     virtual_machine_scale_set {
       force_delete                  = false
+      reimage_on_manual_upgrade     = true
       roll_instances_when_required  = true
       scale_to_zero_before_deletion = true
     }

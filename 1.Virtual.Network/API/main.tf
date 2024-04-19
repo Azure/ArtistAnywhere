@@ -5,13 +5,13 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~>3.99.0"
     }
-    http = {
-      source  = "hashicorp/http"
-      version = "~>3.4.2"
+    external = {
+      source  = "hashicorp/external"
+      version = "~>2.3.3"
     }
   }
   backend azurerm {
-    key = "2.Image.Builder.Docker"
+    key = "1.Virtual.Network.API"
   }
 }
 
@@ -20,6 +20,10 @@ provider azurerm {
     resource_group {
       prevent_deletion_if_contains_resources = false
     }
+    api_management {
+      purge_soft_delete_on_destroy = true
+      recover_soft_deleted         = true
+    }
   }
 }
 
@@ -27,27 +31,11 @@ module global {
   source = "../../0.Global.Foundation/config"
 }
 
-variable resourceGroupName {
-  type = string
-}
-
-data http client_address {
-  url = "https://api.ipify.org?format=json"
-}
+data azurerm_subscription studio {}
 
 data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name
   resource_group_name = module.global.resourceGroupName
-}
-
-data terraform_remote_state network {
-  backend = "azurerm"
-  config = {
-    resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.storage.accountName
-    container_name       = module.global.storage.containerName.terraformState
-    key                  = "1.Virtual.Network"
-  }
 }
 
 data azurerm_virtual_network studio_region {
@@ -61,13 +49,7 @@ data azurerm_subnet farm {
   virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }
 
-locals {
-  regionNames = [
-    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName if virtualNetwork.regionName != module.global.resourceLocation.region
-  ]
-}
-
-resource azurerm_resource_group image_docker {
-  name     = var.resourceGroupName
+resource azurerm_resource_group studio_api {
+  name     = "${module.global.resourceGroupName}.API"
   location = module.global.resourceLocation.region
 }

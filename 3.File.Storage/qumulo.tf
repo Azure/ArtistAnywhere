@@ -13,7 +13,7 @@ variable qumulo {
   })
 }
 
-data external user {
+data external account_user {
   count   = var.qumulo.enable ? 1 : 0
   program = ["az", "account", "show", "--query", "user"]
 }
@@ -45,7 +45,7 @@ resource azapi_resource qumulo {
         planId      = "azure-native-qumulo-hot-cold-iops-live"
       }
       userDetails = {
-        email = data.external.user[0].result.name
+        email = data.external.account_user[0].result.name
       }
       storageSku        = "Hot"
       initialCapacity   = var.qumulo.initialCapacity

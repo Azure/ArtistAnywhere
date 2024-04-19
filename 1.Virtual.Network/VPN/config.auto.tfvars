@@ -1,4 +1,4 @@
-regionName = "WestUS" # Set Azure region name from "az account list-locations --query [].name"
+regionName = "WestUS2" # Set Azure region name from "az account list-locations --query [].name"
 
 resourceGroupName = "ArtistAnywhere.Network" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
