@@ -138,11 +138,7 @@ data azurerm_virtual_network studio_region {
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
-locals {
-  edgeZone = module.global.resourceLocation.edgeZone != "" ? module.global.resourceLocation.edgeZone : null
-}
-
 resource azurerm_resource_group workstation {
   name     = "${var.resourceGroupName}.${module.global.resourceLocation.nameSuffix}"
-  location = module.global.resourceLocation.region
+  location = module.global.resourceLocation.regionName
 }

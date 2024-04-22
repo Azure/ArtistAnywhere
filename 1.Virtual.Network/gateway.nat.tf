@@ -9,10 +9,20 @@ variable natGateway {
 }
 
 locals {
-  natGatewayNetworks = var.natGateway.enable ? local.virtualNetworks : []
-  natGatewayNetworksSubnets = [
-    for subnet in local.virtualNetworksSubnets : subnet if var.natGateway.enable && subnet.name != "GatewaySubnet" && subnet.virtualNetworkEdgeZone == ""
+  natGatewayNetworks = !var.natGateway.enable ? [] : [
+    for virtualNetwork in local.virtualNetworks : virtualNetwork if virtualNetwork.edgeZone == ""
   ]
+  natGatewayNetworksSubnets = flatten([
+    for virtualNetwork in local.natGatewayNetworks : [
+      for subnet in virtualNetwork.subnets : merge(subnet, {
+        key                = "${virtualNetwork.name}-${subnet.name}"
+        regionName         = virtualNetwork.regionName
+        resourceGroupName  = virtualNetwork.resourceGroupName
+        virtualNetworkId   = virtualNetwork.id
+        virtualNetworkName = virtualNetwork.name
+      }) if virtualNetwork.edgeZone == "" && subnet.name != "GatewaySubnet"
+    ]
+  ])
 }
 
 resource azurerm_nat_gateway studio {

@@ -130,8 +130,8 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   name                            = each.value.name
   computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
   resource_group_name             = azurerm_resource_group.farm.name
-  location                        = azurerm_resource_group.farm.location
-  edge_zone                       = local.edgeZone
+  location                        = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.farm.location
+  edge_zone                       = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
   sku                             = each.value.machine.size
   instances                       = each.value.machine.count
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
@@ -269,8 +269,8 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   name                   = each.value.name
   computer_name_prefix   = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
   resource_group_name    = azurerm_resource_group.farm.name
-  location               = azurerm_resource_group.farm.location
-  edge_zone              = local.edgeZone
+  location               = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.farm.location
+  edge_zone              = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
   sku                    = each.value.machine.size
   instances              = each.value.machine.count
   source_image_id        = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"

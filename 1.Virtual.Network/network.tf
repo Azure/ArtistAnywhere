@@ -33,7 +33,7 @@ variable virtualNetworks {
 }
 
 locals {
-  virtualNetwork = module.global.resourceLocation.edgeZone != "" ? local.virtualNetworksExtended[0] : local.virtualNetworks[0]
+  virtualNetwork = module.global.resourceLocation.edgeZone.enable ? local.virtualNetworksExtended[0] : local.virtualNetworks[0]
   virtualNetworks = [
     for virtualNetwork in local.virtualNetworksNames : merge(virtualNetwork, {
       id              = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${virtualNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}"
@@ -42,18 +42,27 @@ locals {
   ]
   virtualNetworksNames = [
     for virtualNetwork in var.virtualNetworks : merge(virtualNetwork, {
-      regionName        = virtualNetwork.regionName != "" ? virtualNetwork.regionName : module.global.resourceLocation.region
+      name              = "${virtualNetwork.name}-${virtualNetwork.nameSuffix}"
+      resourceGroupName = "${var.resourceGroupName}.${virtualNetwork.nameSuffix}"
+      regionName        = virtualNetwork.regionName != "" ? virtualNetwork.regionName : module.global.resourceLocation.regionName
       edgeZone          = ""
-      name              = virtualNetwork.nameSuffix != "" ? "${virtualNetwork.name}-${virtualNetwork.nameSuffix}" : virtualNetwork.name
-      resourceGroupName = virtualNetwork.nameSuffix != "" ? "${var.resourceGroupName}.${virtualNetwork.nameSuffix}" : var.resourceGroupName
     }) if virtualNetwork.enable
   ]
-  virtualNetworksExtended = distinct(concat([module.global.resourceLocation.edgeZone == "" ? local.virtualNetworks[0] : merge(local.virtualNetworks[0], {
-    id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.virtualNetworks[0].resourceGroupName}.Edge/providers/Microsoft.Network/virtualNetworks/${local.virtualNetworks[0].name}-Edge"
-    name              = "${local.virtualNetworks[0].name}-Edge"
-    resourceGroupName = "${local.virtualNetworks[0].resourceGroupName}.Edge"
-    edgeZone          = module.global.resourceLocation.edgeZone
-  })], local.virtualNetworks))
+  virtualNetworksExtended = distinct(concat(local.virtualNetworks, !module.global.resourceLocation.edgeZone.enable ? concat([local.virtualNetworks[0]], [local.virtualNetworks[0]]) : [
+    merge(local.virtualNetworks[0], {
+      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.virtualNetworks[0].resourceGroupName}.Edge/providers/Microsoft.Network/virtualNetworks/${local.virtualNetworks[0].name}-Edge"
+      name              = "${local.virtualNetworks[0].name}-Edge"
+      resourceGroupName = "${local.virtualNetworks[0].resourceGroupName}.Edge"
+      regionName        = module.global.resourceLocation.edgeZone.regionName
+    }),
+    merge(local.virtualNetworks[0], {
+      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.virtualNetworks[0].resourceGroupName}.Edge/providers/Microsoft.Network/virtualNetworks/${local.virtualNetworks[0].name}-Edge-${module.global.resourceLocation.edgeZone.name}"
+      name              = "${local.virtualNetworks[0].name}-Edge-${module.global.resourceLocation.edgeZone.name}"
+      resourceGroupName = "${local.virtualNetworks[0].resourceGroupName}.Edge"
+      regionName        = module.global.resourceLocation.edgeZone.regionName
+      edgeZone          = module.global.resourceLocation.edgeZone.name
+    })
+  ]))
   virtualNetworksSubnets = flatten([
     for virtualNetwork in local.virtualNetworksExtended : [
       for subnet in virtualNetwork.subnets : merge(subnet, {
@@ -74,7 +83,7 @@ locals {
     for subnet in local.virtualNetworksSubnets : subnet if subnet.name == "Farm" && subnet.virtualNetworkEdgeZone == ""
   ]
   virtualNetworksSubnetsSecurity = [
-    for subnet in local.virtualNetworksSubnets : subnet if subnet.name != "GatewaySubnet" && subnet.name != "AzureBastionSubnet" && subnet.virtualNetworkEdgeZone == ""
+    for subnet in local.virtualNetworksSubnets : subnet if subnet.name != "GatewaySubnet" && subnet.name != "AzureBastionSubnet" && !strcontains(subnet.virtualNetworkName, "-Edge")
   ]
 }
 

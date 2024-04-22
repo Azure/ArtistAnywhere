@@ -38,6 +38,16 @@ data azurerm_user_assigned_identity studio {
   resource_group_name = module.global.resourceGroupName
 }
 
+data terraform_remote_state network {
+  backend = "azurerm"
+  config = {
+    resource_group_name  = module.global.resourceGroupName
+    storage_account_name = module.global.storage.accountName
+    container_name       = module.global.storage.containerName.terraformState
+    key                  = "1.Virtual.Network"
+  }
+}
+
 data azurerm_virtual_network studio_region {
   name                = data.terraform_remote_state.network.outputs.virtualNetworks[0].name
   resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
@@ -49,7 +59,12 @@ data azurerm_subnet farm {
   virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }
 
-resource azurerm_resource_group studio_api {
+locals {
+  virtualNetworks              = data.terraform_remote_state.network.outputs.virtualNetworks
+  virtualNetworksSubnetCompute = data.terraform_remote_state.network.outputs.virtualNetworksSubnetCompute
+}
+
+resource azurerm_resource_group api {
   name     = "${module.global.resourceGroupName}.API"
-  location = module.global.resourceLocation.region
+  location = module.global.resourceLocation.regionName
 }

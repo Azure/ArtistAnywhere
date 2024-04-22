@@ -101,8 +101,8 @@ resource azurerm_network_interface workstation {
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.workstation.name
-  location            = azurerm_resource_group.workstation.location
-  edge_zone           = local.edgeZone
+  location            = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.workstation.location
+  edge_zone           = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
   ip_configuration {
     name                          = "ipConfig"
     subnet_id                     = each.value.network.subnetId
@@ -117,8 +117,8 @@ resource azurerm_linux_virtual_machine workstation {
   }
   name                            = each.value.name
   resource_group_name             = azurerm_resource_group.workstation.name
-  location                        = azurerm_resource_group.workstation.location
-  edge_zone                       = local.edgeZone
+  location                        = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.workstation.location
+  edge_zone                       = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
   size                            = each.value.size
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username                  = each.value.adminLogin.userName
@@ -219,8 +219,8 @@ resource azurerm_windows_virtual_machine workstation {
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.workstation.name
-  location            = azurerm_resource_group.workstation.location
-  edge_zone           = local.edgeZone
+  location            = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.workstation.location
+  edge_zone           = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
   size                = each.value.size
   source_image_id     = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username      = each.value.adminLogin.userName

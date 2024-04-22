@@ -177,11 +177,7 @@ data azurerm_storage_account studio {
   resource_group_name = var.existingStorage.enable ? var.existingStorage.resourceGroupName : data.terraform_remote_state.storage.outputs.blobStorageAccount.resourceGroupName
 }
 
-locals {
-  edgeZone = module.global.resourceLocation.edgeZone != "" ? module.global.resourceLocation.edgeZone : null
-}
-
 resource azurerm_resource_group farm {
   name     = "${var.resourceGroupName}.${module.global.resourceLocation.nameSuffix}"
-  location = module.global.resourceLocation.region
+  location = module.global.resourceLocation.regionName
 }

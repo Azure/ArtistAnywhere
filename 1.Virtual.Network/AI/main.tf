@@ -122,7 +122,7 @@ locals {
 
 resource azurerm_resource_group ai {
   name     = "${module.global.resourceGroupName}.AI"
-  location = module.global.resourceLocation.region
+  location = module.global.resourceLocation.regionName
 }
 
 resource azurerm_cognitive_account ai {

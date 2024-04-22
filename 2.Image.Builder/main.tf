@@ -99,5 +99,5 @@ locals {
 
 resource azurerm_resource_group image {
   name     = var.resourceGroupName
-  location = module.global.resourceLocation.region
+  location = module.global.resourceLocation.regionName
 }

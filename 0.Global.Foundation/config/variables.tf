@@ -1,8 +1,12 @@
 variable resourceLocation {
   default = {
+    regionName = "WestUS2" # Set from "az account list-locations --query [].name"
     nameSuffix = "West"
-    region     = "WestUS2" # Set from "az account list-locations --query [].name"
-    edgeZone   = ""        # Set to "" to disable Azure Edge Zone deployment
+    edgeZone = {
+      enable     = false
+      name       = "LosAngeles"
+      regionName = "WestUS"
+    }
   }
 }
 

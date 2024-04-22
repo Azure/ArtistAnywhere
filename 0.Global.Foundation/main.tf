@@ -57,5 +57,5 @@ data azurerm_client_config studio {}
 
 resource azurerm_resource_group studio {
   name     = module.global.resourceGroupName
-  location = module.global.resourceLocation.region
+  location = module.global.resourceLocation.regionName
 }

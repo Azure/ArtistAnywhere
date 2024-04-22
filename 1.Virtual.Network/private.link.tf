@@ -32,7 +32,7 @@ resource azurerm_private_dns_zone app_config {
 
 resource azurerm_private_dns_zone_virtual_network_link storage_blob {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.name => virtualNetwork
   }
   name                  = "${lower(each.value.name)}-storage-blob"
   resource_group_name   = azurerm_private_dns_zone.storage_blob.resource_group_name
@@ -45,7 +45,7 @@ resource azurerm_private_dns_zone_virtual_network_link storage_blob {
 
 resource azurerm_private_dns_zone_virtual_network_link storage_file {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.name => virtualNetwork
   }
   name                  = "${lower(each.value.name)}-storage-file"
   resource_group_name   = azurerm_private_dns_zone.storage_file.resource_group_name
@@ -58,7 +58,7 @@ resource azurerm_private_dns_zone_virtual_network_link storage_file {
 
 resource azurerm_private_dns_zone_virtual_network_link search {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.search.enable
+    for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.name => virtualNetwork if module.global.search.enable
   }
   name                  = "${lower(each.value.name)}-search"
   resource_group_name   = azurerm_private_dns_zone.search[0].resource_group_name
@@ -71,7 +71,7 @@ resource azurerm_private_dns_zone_virtual_network_link search {
 
 resource azurerm_private_dns_zone_virtual_network_link key_vault {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.keyVault.enable
+    for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.name => virtualNetwork if module.global.keyVault.enable
   }
   name                  = "${lower(each.value.name)}-key-vault"
   resource_group_name   = azurerm_private_dns_zone.key_vault[0].resource_group_name
@@ -84,7 +84,7 @@ resource azurerm_private_dns_zone_virtual_network_link key_vault {
 
 resource azurerm_private_dns_zone_virtual_network_link app_config {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork if module.global.appConfig.enable
+    for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.name => virtualNetwork if module.global.appConfig.enable
   }
   name                  = "${lower(each.value.name)}-app-config"
   resource_group_name   = azurerm_private_dns_zone.app_config[0].resource_group_name

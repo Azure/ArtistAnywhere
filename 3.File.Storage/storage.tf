@@ -37,7 +37,8 @@ locals {
   storageAccounts = [
     for storageAccount in var.storageAccounts : merge(storageAccount, {
       resourceGroupName     = azurerm_resource_group.storage.name
-      resourceGroupLocation = azurerm_resource_group.storage.location
+      resourceGroupLocation = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.storage.location
+      edgeZoneName          = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
       storageAccountId      = "${azurerm_resource_group.storage.id}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
       storageAccountName    = storageAccount.name
     })
@@ -105,7 +106,7 @@ resource azurerm_storage_account studio {
   name                            = each.value.name
   resource_group_name             = each.value.resourceGroupName
   location                        = each.value.resourceGroupLocation
-  # edge_zone                       = local.edgeZone
+  edge_zone                       = each.value.edgeZoneName
   account_kind                    = each.value.type
   account_tier                    = each.value.tier
   account_replication_type        = each.value.redundancy
@@ -253,11 +254,12 @@ resource terraform_data file_share_load_blob {
 
 resource azurerm_private_endpoint storage {
   for_each = {
-    for privateEndpoint in local.privateEndpoints : privateEndpoint.key => privateEndpoint
+    for privateEndpoint in local.privateEndpoints : privateEndpoint.key => privateEndpoint if privateEndpoint.edgeZoneName == ""
   }
   name                = each.value.key
   resource_group_name = each.value.resourceGroupName
   location            = each.value.resourceGroupLocation
+  # edge_zone           = each.value.edgeZoneName != "" ? each.value.edgeZoneName : null
   subnet_id           = data.azurerm_subnet.storage_region.id
   private_service_connection {
     name                           = each.value.storageAccountName

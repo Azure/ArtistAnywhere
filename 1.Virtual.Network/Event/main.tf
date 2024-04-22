@@ -74,5 +74,5 @@ locals {
 
 resource azurerm_resource_group event {
   name     = "${module.global.resourceGroupName}.Event"
-  location = module.global.resourceLocation.region
+  location = module.global.resourceLocation.regionName
 }

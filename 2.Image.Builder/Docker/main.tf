@@ -63,11 +63,11 @@ data azurerm_subnet farm {
 
 locals {
   regionNames = [
-    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName if virtualNetwork.regionName != module.global.resourceLocation.region
+    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName if virtualNetwork.regionName != module.global.resourceLocation.regionName
   ]
 }
 
 resource azurerm_resource_group image_docker {
   name     = var.resourceGroupName
-  location = module.global.resourceLocation.region
+  location = module.global.resourceLocation.regionName
 }
