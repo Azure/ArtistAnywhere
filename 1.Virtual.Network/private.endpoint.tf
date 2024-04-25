@@ -19,7 +19,7 @@ resource azurerm_private_endpoint storage_blob {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.storage_blob[each.value.virtualNetworkName].name
+    name = azurerm_private_dns_zone_virtual_network_link.storage_blob[each.value.virtualNetworkKey].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.storage_blob.id
     ]
@@ -48,7 +48,7 @@ resource azurerm_private_endpoint storage_file {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.storage_file[each.value.virtualNetworkName].name
+    name = azurerm_private_dns_zone_virtual_network_link.storage_file[each.value.virtualNetworkKey].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.storage_file.id
     ]
@@ -77,7 +77,7 @@ resource azurerm_private_endpoint search {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.search[each.value.virtualNetworkName].name
+    name = azurerm_private_dns_zone_virtual_network_link.search[each.value.virtualNetworkKey].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.search[0].id
     ]
@@ -106,7 +106,7 @@ resource azurerm_private_endpoint key_vault {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.key_vault[each.value.virtualNetworkName].name
+    name = azurerm_private_dns_zone_virtual_network_link.key_vault[each.value.virtualNetworkKey].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.key_vault[0].id
     ]
@@ -135,7 +135,7 @@ resource azurerm_private_endpoint app_config {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.app_config[each.value.virtualNetworkName].name
+    name = azurerm_private_dns_zone_virtual_network_link.app_config[each.value.virtualNetworkKey].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.app_config[0].id
     ]

@@ -57,4 +57,7 @@ ai = {
     tier       = "S0"
     domainName = ""
   }
+  encryption = {
+    enable = false
+  }
 }

@@ -18,9 +18,9 @@ resource azurerm_private_dns_zone studio {
 
 resource azurerm_private_dns_zone_virtual_network_link studio {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork
   }
-  name                  = each.value.name
+  name                  = each.value.key
   resource_group_name   = azurerm_private_dns_zone.studio.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.studio.name
   virtual_network_id    = each.value.id
@@ -32,7 +32,7 @@ resource azurerm_private_dns_zone_virtual_network_link studio {
 
 output privateDns {
   value = {
-    name              = azurerm_private_dns_zone.studio.name
+    zoneName          = azurerm_private_dns_zone.studio.name
     resourceGroupName = azurerm_private_dns_zone.studio.resource_group_name
   }
 }

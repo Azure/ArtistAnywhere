@@ -4,7 +4,7 @@
 
 resource azurerm_network_security_group studio {
   for_each = {
-    for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet
+    for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet if subnet.name != "AzureBastionSubnet"
   }
   name                = "${each.value.virtualNetworkName}-${each.value.name}"
   resource_group_name = each.value.resourceGroupName
@@ -70,10 +70,10 @@ resource azurerm_network_security_group studio {
 
 resource azurerm_subnet_network_security_group_association studio {
   for_each = {
-    for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet
+    for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet if subnet.name != "AzureBastionSubnet" && subnet.virtualNetworkEdgeZone == ""
   }
   subnet_id                 = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
-  network_security_group_id = "${each.value.resourceGroupId}/providers/Microsoft.Network/networkSecurityGroups/${each.value.virtualNetworkName}-${each.value.name}"
+  network_security_group_id = azurerm_network_security_group.studio[each.value.key].id
   depends_on = [
     azurerm_subnet.studio,
     azurerm_network_security_group.studio

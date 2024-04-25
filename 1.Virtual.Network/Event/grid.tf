@@ -52,7 +52,7 @@ resource azurerm_private_dns_zone event_grid {
 
 resource azurerm_private_dns_zone_virtual_network_link event_grid {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork
   }
   name                  = "${lower(each.value.name)}-event-grid"
   resource_group_name   = azurerm_private_dns_zone.event_grid.resource_group_name

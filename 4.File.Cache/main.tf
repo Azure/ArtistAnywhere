@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.1"
+  required_version = ">= 1.8.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -69,20 +69,15 @@ variable dnsRecord {
 
 variable existingNetwork {
   type = object({
-    enable             = bool
-    name               = string
-    subnetName         = string
-    resourceGroupName  = string
-    privateDnsZoneName = string
-  })
-}
-
-variable existingStorageBlobNfs {
-  type = object({
     enable            = bool
-    accountName       = string
-    containerName     = string
+    name              = string
+    subnetName        = string
+    regionName        = string
     resourceGroupName = string
+    privateDns = object({
+      zoneName          = string
+      resourceGroupName = string
+    })
   })
 }
 
@@ -138,8 +133,8 @@ data terraform_remote_state storage {
 }
 
 data azurerm_virtual_network studio_region {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : local.virtualNetworks[0].name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : local.virtualNetworks[0].resourceGroupName
+  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetworks[0].name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
 data azurerm_subnet cache {
@@ -149,18 +144,15 @@ data azurerm_subnet cache {
 }
 
 data azurerm_private_dns_zone studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.terraform_remote_state.network.outputs.privateDns.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
+  name                = var.existingNetwork.enable ? var.existingNetwork.privateDns.zoneName : data.terraform_remote_state.network.outputs.privateDns.zoneName
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.privateDns.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
 }
 
 locals {
-  virtualNetworks = data.terraform_remote_state.network.outputs.virtualNetworks
+  blobStorageAccountNfs = data.terraform_remote_state.storage.outputs.blobStorageAccountNfs
 }
 
-resource azurerm_resource_group cache_regions {
-  for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
-  }
-  name     = "${var.resourceGroupName}.${each.value.nameSuffix}"
-  location = each.value.regionName
+resource azurerm_resource_group cache {
+  name     = var.resourceGroupName
+  location = var.existingNetwork.enable ? var.existingNetwork.regionName : module.global.resourceLocation.regionName
 }

@@ -50,7 +50,7 @@ locals {
 
 resource azurerm_resource_group netapp {
   count    = var.netApp.enable ? 1 : 0
-  name     = "${var.resourceGroupName}.${module.global.resourceLocation.nameSuffix}.NetApp"
+  name     = "${var.resourceGroupName}.NetApp"
   location = module.global.resourceLocation.region
 }
 

@@ -9,7 +9,10 @@ virtualNetworks = [
     enable     = true
     name       = "Studio"
     nameSuffix = "West"
-    regionName = ""
+    regionNames = [
+      "WestUS2",
+      "WestUS3"
+    ]
     addressSpace = [
       "10.0.0.0/16"
     ]
@@ -143,22 +146,15 @@ virtualNetworks = [
         serviceDelegation = null
       }
     ]
-    gateway = {
-      ipAddress1 = {
-        resourceGroupName = "Shared"
-        name              = "xstudio-west1"
-      }
-      ipAddress2 = {
-        resourceGroupName = "Shared"
-        name              = "xstudio-west2"
-      }
-    }
   },
   {
-    enable     = true
+    enable     = false
     name       = "Studio"
     nameSuffix = "East"
-    regionName = "EastUS"
+    regionNames = [
+      "EastUS",
+      "EastUS2"
+    ]
     addressSpace = [
       "10.1.0.0/16"
     ]
@@ -292,16 +288,6 @@ virtualNetworks = [
         serviceDelegation = null
       }
     ]
-    gateway = {
-      ipAddress1 = {
-        resourceGroupName = "Shared"
-        name              = "xstudio-east1"
-      }
-      ipAddress2 = {
-        resourceGroupName = "Shared"
-        name              = "xstudio-east2"
-      }
-    }
   }
 ]
 
@@ -314,26 +300,6 @@ privateDns = {
   autoRegistration = {
     enable = true
   }
-}
-
-##########################################################################################################################
-# Network Address Translation (NAT) Gateway (https://learn.microsoft.com/azure/virtual-network/nat-gateway/nat-overview) #
-##########################################################################################################################
-
-natGateway = {
-  enable = true
-}
-
-################################################################################################################
-# Virtual Network Peering (https://learn.microsoft.com/azure/virtual-network/virtual-network-peering-overview) #
-################################################################################################################
-
-networkPeering = {
-  enable                      = false
-  allowRemoteNetworkAccess    = true
-  allowRemoteForwardedTraffic = true
-  allowGatewayTransit         = false
-  useRemoteGateways           = false
 }
 
 ########################################################################
@@ -350,46 +316,6 @@ bastion = {
   enableTunneling     = true
   enablePerRegion     = false
   enableShareableLink = false
-}
-
-###############################################################################################################
-# Virtual Network Gateway (VPN) (https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-about-vpngateways) #
-###############################################################################################################
-
-vpnGateway = {
-  enable             = false
-  sku                = "VpnGw2"
-  type               = "RouteBased"
-  generation         = "Generation2"
-  sharedKey          = ""
-  enableBgp          = false
-  enablePerRegion    = false
-  enableActiveActive = false
-  pointToSiteClient = {
-    addressSpace = [
-    ]
-    rootCertificate = {
-      name = ""
-      data = ""
-    }
-  }
-}
-
-##########################################################################################################################
-# Local Network Gateway (VPN) (https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-about-vpn-gateway-settings#lng) #
-##########################################################################################################################
-
-vpnGatewayLocal = {
-  fqdn    = "" # Set the fully-qualified domain name (FQDN) of your on-premises VPN gateway device
-  address = "" # or set the public IP address. Do NOT set both "fqdn" and "address" parameters
-  addressSpace = [
-  ]
-  bgp = {
-    enable         = false
-    asn            = 0
-    peerWeight     = 0
-    peeringAddress = ""
-  }
 }
 
 ######################################################################

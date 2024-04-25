@@ -42,7 +42,7 @@ virtualMachines = [
       type = "Linux"
       disk = {
         storageType = "Premium_LRS"
-        cachingType = "ReadWrite"
+        cachingType = "ReadOnly"
         sizeGB      = 0
       }
     }
@@ -98,7 +98,7 @@ virtualMachines = [
       type = "Linux"
       disk = {
         storageType = "Premium_LRS"
-        cachingType = "ReadWrite"
+        cachingType = "ReadOnly"
         sizeGB      = 0
       }
     }
@@ -154,7 +154,7 @@ virtualMachines = [
       type = "Windows"
       disk = {
         storageType = "Premium_LRS"
-        cachingType = "ReadWrite"
+        cachingType = "ReadOnly"
         sizeGB      = 0
       }
     }
@@ -210,7 +210,7 @@ virtualMachines = [
       type = "Windows"
       disk = {
         storageType = "Premium_LRS"
-        cachingType = "ReadWrite"
+        cachingType = "ReadOnly"
         sizeGB      = 0
       }
     }
@@ -231,9 +231,9 @@ virtualMachines = [
   }
 ]
 
-#######################################################################
-# Resource dependency configuration for pre-existing deployments only #
-#######################################################################
+##################################################################
+# Resource dependency configuration for pre-existing deployments #
+##################################################################
 
 activeDirectory = {
   enable           = false

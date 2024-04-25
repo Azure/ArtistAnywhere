@@ -39,8 +39,8 @@ vfxtCache = {
   cluster = {
     nodeSize      = 1024 # Set to either 1024 GB (1 TB) or 4096 GB (4 TB) nodes
     nodeCount     = 3    # Set to a minimum of 3 nodes up to a maximum of 12 nodes
-    adminUsername = ""
-    adminPassword = ""
+    adminUsername = "xadmin"
+    adminPassword = "P@ssword1234"
     sshPublicKey  = ""
     localTimezone = "UTC"
     enableDevMode = false
@@ -92,21 +92,18 @@ storageTargets = [
   }
 ]
 
-#######################################################################
-# Resource dependency configuration for pre-existing deployments only #
-#######################################################################
+##################################################################
+# Resource dependency configuration for pre-existing deployments #
+##################################################################
 
 existingNetwork = {
-  enable             = false
-  name               = ""
-  subnetName         = ""
-  resourceGroupName  = ""
-  privateDnsZoneName = ""
-}
-
-existingStorageBlobNfs = {
   enable            = false
-  accountName       = ""
-  containerName     = ""
+  name              = ""
+  subnetName        = ""
+  regionName        = ""
   resourceGroupName = ""
+  privateDns = {
+    zoneName          = ""
+    resourceGroupName = ""
+  }
 }

@@ -4,6 +4,7 @@
 
 variable vpnGatewayLocal {
   type = object({
+    enable       = bool
     fqdn         = string
     address      = string
     addressSpace = list(string)
@@ -14,12 +15,17 @@ variable vpnGatewayLocal {
       peeringAddress = string
     })
   })
+  validation {
+    condition     = !var.vpnGatewayLocal.enable || (var.vpnGatewayLocal.fqdn != "" && var.vpnGatewayLocal.address == "") || (var.vpnGatewayLocal.fqdn == "" && var.vpnGatewayLocal.address != "")
+    error_message = "Either the vpnGatewayLocal.fqdn config or the vpnGatewayLocal.address config must be specified, but not both."
+  }
 }
 
 resource azurerm_local_network_gateway vpn {
-  name                = var.virtualNetwork.name
-  resource_group_name = azurerm_resource_group.network.name
-  location            = azurerm_resource_group.network.location
+  count               = var.vpnGatewayLocal.enable ? 1 : 0
+  name                = azurerm_virtual_network_gateway.vpn.name
+  resource_group_name = data.azurerm_resource_group.network.name
+  location            = data.azurerm_resource_group.network.location
   gateway_fqdn        = var.vpnGatewayLocal.address == "" ? var.vpnGatewayLocal.fqdn : null
   gateway_address     = var.vpnGatewayLocal.fqdn == "" ? var.vpnGatewayLocal.address : null
   address_space       = var.vpnGatewayLocal.addressSpace
@@ -34,12 +40,13 @@ resource azurerm_local_network_gateway vpn {
 }
 
 resource azurerm_virtual_network_gateway_connection site_to_site {
-  name                       = var.virtualNetwork.name
-  resource_group_name        = azurerm_resource_group.network.name
-  location                   = azurerm_resource_group.network.location
+  count                      = var.vpnGatewayLocal.enable ? 1 : 0
+  name                       = azurerm_virtual_network_gateway.vpn.name
+  resource_group_name        = data.azurerm_resource_group.network.name
+  location                   = data.azurerm_resource_group.network.location
   type                       = "IPsec"
   virtual_network_gateway_id = azurerm_virtual_network_gateway.vpn.id
-  local_network_gateway_id   = azurerm_local_network_gateway.vpn.id
+  local_network_gateway_id   = azurerm_local_network_gateway.vpn[0].id
   shared_key                 = var.vpnGateway.sharedKey
   enable_bgp                 = var.vpnGatewayLocal.bgp.enable
 }

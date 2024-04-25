@@ -158,10 +158,10 @@ imageBuilder = {
       }
       build = {
         machineType    = "Farm"
-        machineSize    = "Standard_F72s_v2" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                 # NVIDIA or AMD
+        machineSize    = "Standard_D96as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                  # NVIDIA or AMD
         imageVersion   = "2.0.0"
-        osDiskSizeGB   = 360
+        osDiskSizeGB   = 512
         timeoutMinutes = 240
         renderEngines = [
           "PBRT"
@@ -195,7 +195,7 @@ imageBuilder = {
         machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
         imageVersion   = "2.1.0"
-        osDiskSizeGB   = 360
+        osDiskSizeGB   = 512
         timeoutMinutes = 240
         renderEngines = [
           "PBRT",
@@ -230,7 +230,7 @@ imageBuilder = {
         machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
         imageVersion   = "3.0.0"
-        osDiskSizeGB   = 360
+        osDiskSizeGB   = 512
         timeoutMinutes = 240
         renderEngines = [
           "PBRT",
@@ -265,7 +265,7 @@ imageBuilder = {
         machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "AMD"                      # NVIDIA or AMD
         imageVersion   = "3.1.0"
-        osDiskSizeGB   = 360
+        osDiskSizeGB   = 512
         timeoutMinutes = 240
         renderEngines = [
           "PBRT",
@@ -330,10 +330,10 @@ imageBuilder = {
       }
       build = {
         machineType    = "Farm"
-        machineSize    = "Standard_F72s_v2" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                 # NVIDIA or AMD
+        machineSize    = "Standard_D96as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                  # NVIDIA or AMD
         imageVersion   = "2.0.0"
-        osDiskSizeGB   = 360
+        osDiskSizeGB   = 512
         timeoutMinutes = 360
         renderEngines = [
           "PBRT"

@@ -235,7 +235,6 @@ resource azapi_resource linux {
     ]
   }
   depends_on = [
-    azurerm_marketplace_agreement.linux,
     azurerm_role_assignment.identity,
     azurerm_role_assignment.network,
     azurerm_role_assignment.image

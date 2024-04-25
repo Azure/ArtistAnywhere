@@ -41,7 +41,7 @@ data azurerm_storage_account lustre {
 
 resource azurerm_resource_group lustre {
   count    = var.lustre.enable ? 1 : 0
-  name     = "${var.resourceGroupName}.${module.global.resourceLocation.nameSuffix}.Lustre"
+  name     = "${var.resourceGroupName}.Lustre"
   location = module.global.resourceLocation.region
 }
 

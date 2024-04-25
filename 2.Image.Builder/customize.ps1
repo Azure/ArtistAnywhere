@@ -449,6 +449,14 @@ if ($machineType -eq "Workstation") {
 }
 
 if ($machineType -ne "Scheduler") {
+  Write-Host "Customize (Start): Cinebench"
+  $versionPath = "2024"
+  $installFile = "Cinebench${versionPath}_win_x86_64.zip"
+  $downloadUrl = "$binStorageHost/Maxon/Cinebench/$versionPath/$installFile$binStorageAuth"
+  (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
+  Expand-Archive -Path $installFile
+  Write-Host "Customize (End): Cinebench"
+
   Write-Host "Customize (Start): WSL"
   $installFile = "wsl-ubuntu.appx"
   $downloadUrl = "https://aka.ms/wslubuntu"

@@ -53,12 +53,12 @@ locals {
       })
     ] if storageAccount.enable
   ])
-  blobStorageAccount = one([
+  blobStorageAccount = [
     for storageAccount in azurerm_storage_account.studio : storageAccount if storageAccount.nfsv3_enabled == false
-  ])
-  blobStorageAccountNfs = one([
+  ][0]
+  blobStorageAccountNfs = [
     for storageAccount in azurerm_storage_account.studio : storageAccount if storageAccount.nfsv3_enabled == true
-  ])
+  ][0]
   blobContainers = flatten([
     for storageAccount in local.storageAccounts : [
       for blobContainer in storageAccount.blobContainers : merge(storageAccount, blobContainer, {

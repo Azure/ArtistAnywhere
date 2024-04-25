@@ -10,7 +10,7 @@ virtualMachineScaleSets = [
     name   = "LnxFarmC"
     machine = {
       namePrefix = ""
-      size       = "Standard_HB120rs_v3"
+      size       = "Standard_HB120rs_v2"
       count      = 2
       image = {
         resourceGroupName = "ArtistAnywhere.Image"
@@ -180,7 +180,7 @@ virtualMachineScaleSets = [
     name   = "WinFarmC"
     machine = {
       namePrefix = ""
-      size       = "Standard_HB120rs_v3"
+      size       = "Standard_HB120rs_v2"
       count      = 2
       image = {
         resourceGroupName = "ArtistAnywhere.Image"
@@ -347,9 +347,9 @@ virtualMachineScaleSets = [
   }
 ]
 
-#######################################################################
-# Resource dependency configuration for pre-existing deployments only #
-#######################################################################
+##################################################################
+# Resource dependency configuration for pre-existing deployments #
+##################################################################
 
 activeDirectory = {
   enable           = false

@@ -3,13 +3,14 @@
 #########################################################################################
 
 resource azurerm_cognitive_account ai_text_analytics {
-  name                                        = var.ai.text.analytics.name
-  resource_group_name                         = azurerm_resource_group.ai.name
-  location                                    = azurerm_resource_group.ai.location
-  sku_name                                    = var.ai.text.analytics.tier
-  custom_subdomain_name                       = var.ai.text.analytics.domainName != "" ? var.ai.text.analytics.domainName : var.ai.text.analytics.name
-  custom_question_answering_search_service_id = module.global.search.enable ? data.azurerm_search_service.studio[0].id : null
-  kind                                        = "TextAnalytics"
+  name                                         = var.ai.text.analytics.name
+  resource_group_name                          = azurerm_resource_group.ai.name
+  location                                     = azurerm_resource_group.ai.location
+  sku_name                                     = var.ai.text.analytics.tier
+  custom_subdomain_name                        = var.ai.text.analytics.domainName != "" ? var.ai.text.analytics.domainName : var.ai.text.analytics.name
+  custom_question_answering_search_service_id  = module.global.search.enable ? data.azurerm_search_service.studio[0].id : null
+  custom_question_answering_search_service_key = module.global.search.enable ? data.azurerm_search_service.studio[0].query_keys[0].key : null
+  kind                                         = "TextAnalytics"
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -26,11 +27,18 @@ resource azurerm_cognitive_account ai_text_analytics {
     identity_client_id = data.azurerm_user_assigned_identity.studio.client_id
     storage_account_id = data.azurerm_storage_account.studio.id
   }
+  dynamic customer_managed_key {
+    for_each = module.global.keyVault.enable && var.ai.encryption.enable ? [1] : []
+    content {
+      identity_client_id = data.azurerm_user_assigned_identity.studio.client_id
+      key_vault_key_id   = data.azurerm_key_vault_key.data_encryption[0].id
+    }
+  }
 }
 
 resource azurerm_private_endpoint ai_text_analytics {
   for_each = {
-    for subnet in local.virtualNetworksSubnetCompute : subnet.key => subnet
+    for subnet in local.virtualNetworksSubnetCompute : subnet.key => subnet if subnet.virtualNetworkEdgeZone == ""
   }
   name                = "${lower(each.value.virtualNetworkName)}-ai-text-analytics"
   resource_group_name = each.value.resourceGroupName
@@ -45,7 +53,7 @@ resource azurerm_private_endpoint ai_text_analytics {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.ai[each.value.virtualNetworkName].name
+    name = azurerm_private_dns_zone_virtual_network_link.ai[each.value.virtualNetworkKey].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.ai.id
     ]
@@ -75,11 +83,18 @@ resource azurerm_cognitive_account ai_text_translator {
       jsondecode(data.http.client_address.response_body).ip
     ]
   }
+  dynamic customer_managed_key {
+    for_each = module.global.keyVault.enable && var.ai.encryption.enable ? [1] : []
+    content {
+      identity_client_id = data.azurerm_user_assigned_identity.studio.client_id
+      key_vault_key_id   = data.azurerm_key_vault_key.data_encryption[0].id
+    }
+  }
 }
 
 resource azurerm_private_endpoint ai_text_translator {
   for_each = {
-    for subnet in local.virtualNetworksSubnetCompute : subnet.key => subnet
+    for subnet in local.virtualNetworksSubnetCompute : subnet.key => subnet if subnet.virtualNetworkEdgeZone == ""
   }
   name                = "${lower(each.value.virtualNetworkName)}-ai-text-translator"
   resource_group_name = each.value.resourceGroupName
@@ -94,7 +109,7 @@ resource azurerm_private_endpoint ai_text_translator {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.ai[each.value.virtualNetworkName].name
+    name = azurerm_private_dns_zone_virtual_network_link.ai[each.value.virtualNetworkKey].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.ai.id
     ]

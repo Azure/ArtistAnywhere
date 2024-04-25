@@ -15,15 +15,14 @@ variable search {
 }
 
 resource azurerm_search_service studio {
-  count                        = module.global.search.enable ? 1 : 0
-  name                         = module.global.search.name
-  resource_group_name          = azurerm_resource_group.studio.name
-  location                     = azurerm_resource_group.studio.location
-  sku                          = var.search.tier
-  hosting_mode                 = var.search.hostingMode
-  replica_count                = var.search.replicaCount
-  partition_count              = var.search.partitionCount
-  local_authentication_enabled = false
+  count               = module.global.search.enable ? 1 : 0
+  name                = module.global.search.name
+  resource_group_name = azurerm_resource_group.studio.name
+  location            = azurerm_resource_group.studio.location
+  sku                 = var.search.tier
+  hosting_mode        = var.search.hostingMode
+  replica_count       = var.search.replicaCount
+  partition_count     = var.search.partitionCount
   # identity {
   #   type = "UserAssigned"
   #   identity_ids = [

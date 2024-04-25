@@ -62,12 +62,12 @@ weka = {
   }
   osDisk = {
     storageType = "Premium_LRS"
-    cachingType = "None"
+    cachingType = "ReadOnly"
     sizeGB      = 0
   }
   dataDisk = {
     storageType = "Premium_LRS"
-    cachingType = "ReadWrite"
+    cachingType = "None"
     sizeGB      = 256
   }
   dataProtection = {

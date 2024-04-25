@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.1"
+  required_version = ">= 1.8.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -52,11 +52,14 @@ variable activeDirectory {
 
 variable existingNetwork {
   type = object({
-    enable             = bool
-    name               = string
-    subnetName         = string
-    resourceGroupName  = string
-    privateDnsZoneName = string
+    enable            = bool
+    name              = string
+    subnetName        = string
+    resourceGroupName = string
+    privateDns = object({
+      zoneName          = string
+      resourceGroupName = string
+    })
   })
 }
 
@@ -122,12 +125,12 @@ data azurerm_virtual_network studio_region {
 }
 
 data azurerm_private_dns_zone studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.terraform_remote_state.network.outputs.privateDns.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
+  name                = var.existingNetwork.enable ? var.existingNetwork.privateDns.zoneName : data.terraform_remote_state.network.outputs.privateDns.zoneName
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.privateDns.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
 }
 
 resource azurerm_resource_group scheduler {
-  name     = "${var.resourceGroupName}.${module.global.resourceLocation.nameSuffix}"
+  name     = var.resourceGroupName
   location = module.global.resourceLocation.regionName
 }
 

@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.1"
+  required_version = ">= 1.8.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -153,11 +153,11 @@ data azurerm_subnet storage_region {
 }
 
 data azurerm_private_dns_zone studio {
-  name                = data.terraform_remote_state.network.outputs.privateDns.name
+  name                = data.terraform_remote_state.network.outputs.privateDns.zoneName
   resource_group_name = data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
 }
 
 resource azurerm_resource_group storage {
-  name     = "${var.resourceGroupName}.${module.global.resourceLocation.nameSuffix}"
+  name     = var.resourceGroupName
   location = module.global.resourceLocation.regionName
 }

@@ -33,7 +33,7 @@ resource azurerm_private_dns_zone event_hub {
 
 resource azurerm_private_dns_zone_virtual_network_link event_hub {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork
   }
   name                  = "${lower(each.value.name)}-event-hub"
   resource_group_name   = azurerm_private_dns_zone.event_hub.resource_group_name
@@ -43,7 +43,7 @@ resource azurerm_private_dns_zone_virtual_network_link event_hub {
 
 resource azurerm_private_endpoint event_hub {
   for_each = {
-    for subnet in local.virtualNetworksSubnetCompute : subnet.key => subnet
+    for subnet in local.virtualNetworksSubnetCompute : subnet.key => subnet if subnet.virtualNetworkEdgeZone == ""
   }
   name                = "${lower(each.value.virtualNetworkName)}-event-hub"
   resource_group_name = each.value.resourceGroupName
@@ -58,7 +58,7 @@ resource azurerm_private_endpoint event_hub {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.event_hub[each.value.virtualNetworkName].name
+    name = azurerm_private_dns_zone_virtual_network_link.event_hub[each.value.virtualNetworkKey].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.event_hub.id
     ]

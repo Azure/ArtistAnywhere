@@ -2,22 +2,17 @@
 # Network Address Translation (NAT) Gateway (https://learn.microsoft.com/azure/virtual-network/nat-gateway/nat-overview) #
 ##########################################################################################################################
 
-variable natGateway {
-  type = object({
-    enable = bool
-  })
-}
-
 locals {
-  natGatewayNetworks = !var.natGateway.enable ? [] : [
+  natGatewayNetworks = [
     for virtualNetwork in local.virtualNetworks : virtualNetwork if virtualNetwork.edgeZone == ""
   ]
   natGatewayNetworksSubnets = flatten([
     for virtualNetwork in local.natGatewayNetworks : [
       for subnet in virtualNetwork.subnets : merge(subnet, {
-        key                = "${virtualNetwork.name}-${subnet.name}"
+        key                = "${virtualNetwork.key}-${subnet.name}"
         regionName         = virtualNetwork.regionName
         resourceGroupName  = virtualNetwork.resourceGroupName
+        virtualNetworkKey  = virtualNetwork.key
         virtualNetworkId   = virtualNetwork.id
         virtualNetworkName = virtualNetwork.name
       }) if virtualNetwork.edgeZone == "" && subnet.name != "GatewaySubnet"
@@ -27,7 +22,7 @@ locals {
 
 resource azurerm_nat_gateway studio {
   for_each = {
-    for virtualNetwork in local.natGatewayNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.natGatewayNetworks : virtualNetwork.key => virtualNetwork
   }
   name                = "Gateway-NAT"
   resource_group_name = each.value.resourceGroupName
@@ -41,7 +36,7 @@ resource azurerm_subnet_nat_gateway_association studio {
   for_each = {
     for subnet in local.natGatewayNetworksSubnets : subnet.key => subnet
   }
-  nat_gateway_id = azurerm_nat_gateway.studio[each.value.virtualNetworkName].id
+  nat_gateway_id = azurerm_nat_gateway.studio[each.value.virtualNetworkKey].id
   subnet_id      = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
   depends_on = [
     azurerm_subnet.studio
@@ -54,7 +49,7 @@ resource azurerm_subnet_nat_gateway_association studio {
 
 resource azurerm_public_ip_prefix nat_gateway {
   for_each = {
-    for virtualNetwork in local.natGatewayNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.natGatewayNetworks : virtualNetwork.key => virtualNetwork
   }
   name                = "Gateway-NAT"
   resource_group_name = each.value.resourceGroupName
@@ -67,8 +62,8 @@ resource azurerm_public_ip_prefix nat_gateway {
 
 resource azurerm_nat_gateway_public_ip_prefix_association studio {
   for_each = {
-    for virtualNetwork in local.natGatewayNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.natGatewayNetworks : virtualNetwork.key => virtualNetwork
   }
-  nat_gateway_id      = azurerm_nat_gateway.studio[each.value.name].id
-  public_ip_prefix_id = azurerm_public_ip_prefix.nat_gateway[each.value.name].id
+  nat_gateway_id      = azurerm_nat_gateway.studio[each.value.key].id
+  public_ip_prefix_id = azurerm_public_ip_prefix.nat_gateway[each.value.key].id
 }

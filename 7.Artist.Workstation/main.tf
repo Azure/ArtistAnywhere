@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.1"
+  required_version = ">= 1.8.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -139,6 +139,6 @@ data azurerm_virtual_network studio_region {
 }
 
 resource azurerm_resource_group workstation {
-  name     = "${var.resourceGroupName}.${module.global.resourceLocation.nameSuffix}"
+  name     = var.resourceGroupName
   location = module.global.resourceLocation.regionName
 }

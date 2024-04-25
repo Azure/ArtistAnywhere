@@ -27,7 +27,7 @@ hammerspace = {
     }
     osDisk = {
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingType = "ReadOnly"
       sizeGB      = 128
     }
     dataDisk = {
@@ -57,7 +57,7 @@ hammerspace = {
     }
     osDisk = {
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingType = "ReadOnly"
       sizeGB      = 128
     }
     dataDisk = {

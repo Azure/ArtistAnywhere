@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.1"
+  required_version = ">= 1.8.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -16,17 +16,10 @@ provider azurerm {
   }
 }
 
-variable regionName {
-  type = string
-}
-
-variable resourceGroupName {
-  type = string
-}
-
 variable virtualNetwork {
   type = object({
     name              = string
+    edgeZoneName      = string
     resourceGroupName = string
     gateway = object({
       ipAddress1 = object({
@@ -43,7 +36,6 @@ variable virtualNetwork {
 
 data azurerm_client_config studio {}
 
-resource azurerm_resource_group network {
-  name     = var.resourceGroupName
-  location = var.regionName
+data azurerm_resource_group network {
+  name = var.virtualNetwork.resourceGroupName
 }

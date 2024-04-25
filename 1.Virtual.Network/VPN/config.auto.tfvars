@@ -1,19 +1,14 @@
-regionName = "WestUS2" # Set Azure region name from "az account list-locations --query [].name"
-
-resourceGroupName = "ArtistAnywhere.Network" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
-
 ###############################################################################################################
 # Virtual Network Gateway (VPN) (https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-about-vpngateways) #
 ###############################################################################################################
 
 vpnGateway = {
-  sku                = "VpnGw2"
-  type               = "RouteBased"
-  generation         = "Generation2"
-  sharedKey          = ""
-  enableBgp          = false
-  enablePerRegion    = false
-  enableActiveActive = false
+  name       = "Gateway-VPN"
+  sku        = "VpnGw2"
+  type       = "RouteBased"
+  generation = "Generation2"
+  sharedKey  = ""
+  enableBgp  = false
   pointToSiteClient = {
     addressSpace = [
     ]
@@ -29,8 +24,9 @@ vpnGateway = {
 ##########################################################################################################################
 
 vpnGatewayLocal = {
+  enable  = false
   fqdn    = "" # Set the fully-qualified domain name (FQDN) of your on-premises VPN gateway device
-  address = "" # or set the public IP address. Do NOT set both "fqdn" and "address" parameters
+  address = "" # or set the device public IP address. Do NOT set both configuration parameters.
   addressSpace = [
   ]
   bgp = {
@@ -47,15 +43,16 @@ vpnGatewayLocal = {
 
 virtualNetwork = {
   name              = "Studio-West"
-  resourceGroupName = "ArtistAnywhere.Network.West"
+  edgeZoneName      = ""
+  resourceGroupName = "ArtistAnywhere.Network.WestUS2"
   gateway = {
     ipAddress1 = {
-      name              = "xstudio-west1"
+      name              = "xstudio-west"
       resourceGroupName = "Shared"
     }
     ipAddress2 = {
-      name              = "xstudio-west2"
-      resourceGroupName = "Shared"
+      name              = ""
+      resourceGroupName = ""
     }
   }
 }

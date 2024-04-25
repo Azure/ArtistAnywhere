@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.1"
+  required_version = ">= 1.8.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -65,7 +65,7 @@ resource azurerm_resource_group network {
 
 resource azurerm_resource_group network_regions {
   for_each = {
-    for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.key => virtualNetwork
   }
   name     = each.value.resourceGroupName
   location = each.value.regionName

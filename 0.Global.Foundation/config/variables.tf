@@ -1,7 +1,6 @@
 variable resourceLocation {
   default = {
     regionName = "WestUS2" # Set from "az account list-locations --query [].name"
-    nameSuffix = "West"
     edgeZone = {
       enable     = false
       name       = "LosAngeles"
@@ -46,7 +45,7 @@ variable monitor {
     enable = true
     name   = "xstudio"
     agentVersion = {
-      linux   = "1.30"
+      linux   = "1.31"
       windows = "1.24"
     }
   }

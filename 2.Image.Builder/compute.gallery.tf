@@ -28,6 +28,12 @@ variable computeGallery {
   })
 }
 
+locals {
+  imageDefinitionLinux = [
+    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition if lower(imageDefinition.type) == "linux"
+  ]
+}
+
 resource azurerm_shared_image_gallery studio {
   name                = var.computeGallery.name
   resource_group_name = azurerm_resource_group.image.name
@@ -61,19 +67,10 @@ resource azurerm_gallery_application studio {
   supported_os_type = each.value.type
 }
 
-resource azurerm_marketplace_agreement linux {
-  for_each = {
-    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if var.computeGallery.platform.linux.enable && lower(imageDefinition.type) == "linux"
-  }
-  publisher = each.value.publisher
-  offer     = each.value.offer
-  plan      = each.value.sku
-}
-
 output linuxPlan {
-  value = {
-    publisher = lower(azurerm_marketplace_agreement.linux["Linux"].publisher)
-    offer     = lower(azurerm_marketplace_agreement.linux["Linux"].offer)
-    sku       = lower(azurerm_marketplace_agreement.linux["Linux"].plan)
+  value = !var.computeGallery.platform.linux.enable || length(local.imageDefinitionLinux) == 0 ? null : {
+    publisher = lower(local.imageDefinitionLinux[0].publisher)
+    offer     = lower(local.imageDefinitionLinux[0].offer)
+    sku       = lower(local.imageDefinitionLinux[0].sku)
   }
 }

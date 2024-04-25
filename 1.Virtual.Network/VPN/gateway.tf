@@ -4,13 +4,12 @@
 
 variable vpnGateway {
   type = object({
-    sku                = string
-    type               = string
-    generation         = string
-    sharedKey          = string
-    enableBgp          = bool
-    enablePerRegion    = bool
-    enableActiveActive = bool
+    name       = string
+    sku        = string
+    type       = string
+    generation = string
+    sharedKey  = string
+    enableBgp  = bool
     pointToSiteClient = object({
       addressSpace = list(string)
       rootCertificate = object({
@@ -22,22 +21,23 @@ variable vpnGateway {
 }
 
 resource azurerm_virtual_network_gateway vpn {
-  name                = "Gateway-VPN"
-  resource_group_name = azurerm_resource_group.network.name
-  location            = azurerm_resource_group.network.location
+  name                = var.vpnGateway.name
+  resource_group_name = data.azurerm_resource_group.network.name
+  location            = data.azurerm_resource_group.network.location
+  edge_zone           = var.virtualNetwork.edgeZoneName != "" ? var.virtualNetwork.edgeZoneName : null
   type                = "Vpn"
   sku                 = var.vpnGateway.sku
   vpn_type            = var.vpnGateway.type
   generation          = var.vpnGateway.generation
   enable_bgp          = var.vpnGateway.enableBgp
-  active_active       = var.vpnGateway.enableActiveActive
+  active_active       = var.virtualNetwork.gateway.ipAddress2.name != ""
   ip_configuration {
     name                 = "ipConfig1"
     subnet_id            = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.virtualNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${var.virtualNetwork.name}/subnets/GatewaySubnet"
     public_ip_address_id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.virtualNetwork.gateway.ipAddress1.resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/${var.virtualNetwork.gateway.ipAddress1.name}"
   }
   dynamic ip_configuration {
-    for_each = var.vpnGateway.enableActiveActive ? [1] : []
+    for_each = var.virtualNetwork.gateway.ipAddress2.name != "" ? [1] : []
     content {
       name                 = "ipConfig2"
       subnet_id            = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.virtualNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${var.virtualNetwork.name}/subnets/GatewaySubnet"

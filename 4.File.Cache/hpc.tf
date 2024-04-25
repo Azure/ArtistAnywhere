@@ -26,46 +26,6 @@ data azuread_service_principal hpc_cache {
   display_name = "HPC Cache Resource Provider"
 }
 
-locals {
-  blobStorageAccountNfs = !var.existingStorageBlobNfs.enable ? data.terraform_remote_state.storage.outputs.blobStorageAccountNfs : {
-    name              = var.existingStorageBlobNfs.accountName
-    resourceGroupName = var.existingStorageBlobNfs.resourceGroupName
-  }
-  storageCaches = distinct(var.existingNetwork.enable ? [
-    for virtualNetwork in local.virtualNetworks : merge(var.hpcCache, {
-      nameSuffix        = ""
-      regionName        = module.global.resourceLocation.region
-      resourceGroupName = var.resourceGroupName
-      virtualNetwork = {
-        subnetId          = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.existingNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${var.existingNetwork.name}/subnets/${var.existingNetwork.subnetName}"
-        dnsZoneName       = var.existingNetwork.privateDnsZoneName
-        resourceGroupName = var.existingNetwork.resourceGroupName
-      }
-    }) if var.hpcCache.enable
-  ] : [
-    for virtualNetwork in local.virtualNetworks : merge(var.hpcCache, {
-      name              = "${var.hpcCache.name}-${virtualNetwork.nameSuffix}"
-      nameSuffix        = virtualNetwork.nameSuffix
-      regionName        = virtualNetwork.regionName
-      resourceGroupName = "${var.resourceGroupName}.${virtualNetwork.nameSuffix}"
-      virtualNetwork = {
-        subnetId          = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${virtualNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}/subnets/Cache"
-        dnsZoneName       = data.terraform_remote_state.network.outputs.privateDns.name
-        resourceGroupName = virtualNetwork.resourceGroupName
-      }
-    }) if var.hpcCache.enable
-  ])
-  storageTargets = flatten([
-    for storageCache in local.storageCaches : [
-      for storageTarget in var.storageTargets : merge(storageTarget, {
-        name                   = "${storageCache.name}-${storageTarget.name}"
-        cacheName              = storageCache.name
-        cacheResourceGroupName = storageCache.resourceGroupName
-      }) if storageTarget.enable
-    ]
-  ])
-}
-
 resource azurerm_role_assignment storage_account_contributor {
   count                = var.hpcCache.enable ? 1 : 0
   role_definition_name = "Storage Account Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-account-contributor
@@ -81,17 +41,15 @@ resource azurerm_role_assignment storage_blob_data_contributor {
 }
 
 resource azurerm_hpc_cache studio {
-  for_each = {
-    for storageCache in local.storageCaches : storageCache.name => storageCache
-  }
-  name                = each.value.name
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
-  subnet_id           = each.value.virtualNetwork.subnetId
-  sku_name            = each.value.throughput
-  cache_size_in_gb    = each.value.size
-  mtu                 = each.value.mtuSize
-  ntp_server          = each.value.ntpHost != "" ? each.value.ntpHost : null
+  count               = var.hpcCache.enable ? 1 : 0
+  name                = var.hpcCache.name
+  resource_group_name = azurerm_resource_group.cache.name
+  location            = azurerm_resource_group.cache.location
+  subnet_id           = data.azurerm_subnet.cache.id
+  sku_name            = var.hpcCache.throughput
+  cache_size_in_gb    = var.hpcCache.size
+  mtu                 = var.hpcCache.mtuSize
+  ntp_server          = var.hpcCache.ntpHost != "" ? var.hpcCache.ntpHost : null
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -99,16 +57,15 @@ resource azurerm_hpc_cache studio {
     ]
   }
   dynamic dns {
-    for_each = length(each.value.dns.ipAddresses) > 0 || each.value.dns.searchDomain != "" ? [1] : []
+    for_each = length(var.hpcCache.dns.ipAddresses) > 0 || var.hpcCache.dns.searchDomain != "" ? [1] : []
     content {
-      servers       = each.value.dns.ipAddresses
-      search_domain = each.value.dns.searchDomain != "" ? each.value.dns.searchDomain : null
+      servers       = var.hpcCache.dns.ipAddresses
+      search_domain = var.hpcCache.dns.searchDomain != "" ? var.hpcCache.dns.searchDomain : null
     }
   }
-  key_vault_key_id                           = each.value.encryption.enable ? data.azurerm_key_vault_key.cache_encryption[0].id : null
-  automatically_rotate_key_to_latest_enabled = each.value.encryption.enable ? each.value.encryption.rotateKey : null
+  key_vault_key_id                           = var.hpcCache.encryption.enable ? data.azurerm_key_vault_key.cache_encryption[0].id : null
+  automatically_rotate_key_to_latest_enabled = var.hpcCache.encryption.enable ? var.hpcCache.encryption.rotateKey : null
   depends_on = [
-    azurerm_resource_group.cache_regions,
     azurerm_role_assignment.storage_account_contributor,
     azurerm_role_assignment.storage_blob_data_contributor
   ]
@@ -116,7 +73,7 @@ resource azurerm_hpc_cache studio {
 
 resource azurerm_hpc_cache_nfs_target storage {
   for_each = {
-    for storageTarget in local.storageTargets : storageTarget.name => storageTarget if storageTarget.containerName == ""
+    for storageTarget in var.storageTargets : storageTarget.name => storageTarget if var.hpcCache.enable && storageTarget.enable && storageTarget.containerName == ""
   }
   name                          = each.value.name
   resource_group_name           = each.value.resourceGroupName
@@ -140,7 +97,7 @@ resource azurerm_hpc_cache_nfs_target storage {
 
 resource azurerm_hpc_cache_blob_nfs_target storage {
   for_each = {
-    for storageTarget in local.storageTargets : storageTarget.name => storageTarget if storageTarget.containerName != ""
+    for storageTarget in var.storageTargets : storageTarget.name => storageTarget if var.hpcCache.enable && storageTarget.enable && storageTarget.containerName != ""
   }
   name                          = each.value.name
   resource_group_name           = each.value.cacheResourceGroupName
@@ -160,13 +117,11 @@ resource azurerm_hpc_cache_blob_nfs_target storage {
 ############################################################################
 
 resource azurerm_private_dns_a_record cache_hpc {
-  for_each = {
-    for storageCache in local.storageCaches : storageCache.name => storageCache
-  }
-  name                = lower(each.value.name)
+  count               = var.hpcCache.enable ? 1 : 0
+  name                = "cache"
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.azurerm_private_dns_zone.studio.resource_group_name
-  zone_name           = var.existingNetwork.enable ? var.existingNetwork.privateDnsZoneName : data.azurerm_private_dns_zone.studio.name
-  records             = azurerm_hpc_cache.studio[each.value.name].mount_addresses
+  zone_name           = var.existingNetwork.enable ? var.existingNetwork.privateDns.zoneName : data.azurerm_private_dns_zone.studio.name
+  records             = azurerm_hpc_cache.studio[0].mount_addresses
   ttl                 = var.dnsRecord.ttlSeconds
 }
 

@@ -43,7 +43,7 @@ resource azurerm_private_dns_zone api_management {
 
 resource azurerm_private_dns_zone_virtual_network_link api_management {
   for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.name => virtualNetwork
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork
   }
   name                  = "${lower(each.value.name)}-api-management"
   resource_group_name   = azurerm_private_dns_zone.api_management.resource_group_name
@@ -53,7 +53,7 @@ resource azurerm_private_dns_zone_virtual_network_link api_management {
 
 resource azurerm_private_endpoint api_management {
   for_each = {
-    for subnet in local.virtualNetworksSubnetCompute : subnet.key => subnet
+    for subnet in local.virtualNetworksSubnetCompute : subnet.key => subnet if subnet.virtualNetworkEdgeZone == ""
   }
   name                = "${lower(each.value.virtualNetworkName)}-api-management"
   resource_group_name = each.value.resourceGroupName
@@ -68,7 +68,7 @@ resource azurerm_private_endpoint api_management {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.api_management[each.value.virtualNetworkName].name
+    name = azurerm_private_dns_zone_virtual_network_link.api_management[each.value.virtualNetworkKey].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.api_management.id
     ]

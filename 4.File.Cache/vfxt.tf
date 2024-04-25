@@ -44,8 +44,8 @@ module vfxt_controller {
   count                          = var.vfxtCache.enable ? 1 : 0
   source                         = "github.com/Azure/Avere/src/terraform/modules/controller3"
   create_resource_group          = false
-  resource_group_name            = azurerm_resource_group.cache_regions[0].name
-  location                       = azurerm_resource_group.cache_regions[0].location
+  resource_group_name            = azurerm_resource_group.cache.name
+  location                       = azurerm_resource_group.cache.location
   admin_username                 = var.vfxtCache.cluster.adminUsername != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
   admin_password                 = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
   ssh_key_data                   = var.vfxtCache.cluster.sshPublicKey != "" ? var.vfxtCache.cluster.sshPublicKey : null
@@ -54,13 +54,16 @@ module vfxt_controller {
   virtual_network_subnet_name    = data.azurerm_subnet.cache.name
   static_ip_address              = local.vfxtControllerAddress
   image_id                       = var.vfxtCache.cluster.imageId.controller
+  depends_on = [
+    azurerm_resource_group.cache
+  ]
 }
 
 resource avere_vfxt cache {
   count                           = var.vfxtCache.enable ? 1 : 0
   vfxt_cluster_name               = lower(var.vfxtCache.name)
-  azure_resource_group            = azurerm_resource_group.cache_regions[0].name
-  location                        = azurerm_resource_group.cache_regions[0].location
+  azure_resource_group            = azurerm_resource_group.cache.name
+  location                        = azurerm_resource_group.cache.location
   node_cache_size                 = var.vfxtCache.cluster.nodeSize
   vfxt_node_count                 = var.vfxtCache.cluster.nodeCount
   image_id                        = var.vfxtCache.cluster.imageId.node
@@ -110,7 +113,7 @@ resource avere_vfxt cache {
 
 resource azurerm_private_dns_a_record cache_vfxt {
   count               = var.vfxtCache.enable ? 1 : 0
-  name                = lower(var.vfxtCache.name)
+  name                = "cache"
   resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = data.azurerm_private_dns_zone.studio.name
   records             = avere_vfxt.cache[0].vserver_ip_addresses
