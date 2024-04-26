@@ -31,7 +31,7 @@ The following installation process is required for local deployment orchestratio
 
 ## Module Configuration & Deployment
 
-For each module, here is the recommended configuration and deployment process. **IMPORTANT**: [Key Vault](https://learn.microsoft.com/azure/key-vault/general/overview) is a core security service integrated throughout the Azure Artist Anywhere solution deployment framework. Therefore, the current user deploying the solution must have the [Key Vault Administrator](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#key-vault-administrator) role assigned via [Role-Based Access Control (RBAC)](https://learn.microsoft.com/azure/role-based-access-control/overview).
+For each module, here is the recommended configuration and deployment process.
 
 1. Review and edit the config values in `config.\*.auto.tfvars` as needed for your target deployment.
    * For module `0 Global Foundation`, review and edit the following config files.
