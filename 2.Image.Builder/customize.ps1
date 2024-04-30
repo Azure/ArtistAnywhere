@@ -456,16 +456,6 @@ if ($machineType -ne "Scheduler") {
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   Expand-Archive -Path $installFile
   Write-Host "Customize (End): Cinebench"
-
-  Write-Host "Customize (Start): WSL"
-  $installFile = "wsl-ubuntu.appx"
-  $downloadUrl = "https://aka.ms/wslubuntu"
-  Install-PackageProvider -Name NuGet -Force
-  Install-Module -Name PSWindowsUpdate -Force
-  Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -IgnoreReboot
-  (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
-  dism /Online /NoRestart /LogPath:"$binDirectory\wsl-appx" /Add-ProvisionedAppxPackage /PackagePath:$installFile /SkipLicense
-  Write-Host "Customize (End): WSL"
 }
 
 Write-Host "Customize (PATH): $($binPaths.substring(1))"
