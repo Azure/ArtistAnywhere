@@ -49,6 +49,14 @@ vfxtCache = {
       node       = ""
     }
   }
+  activeDirectory = {
+    enable            = false
+    domainName        = ""
+    domainNameNetBIOS = ""
+    domainControllers = "" # 1-3 space-separated IP addresses
+    domainUsername = ""
+    domainPassword = ""
+  }
   support = {                    # https://privacy.microsoft.com/privacystatement
     companyName      = ""        # https://github.com/Azure/Avere/tree/main/src/terraform/providers/terraform-provider-avere#support_uploads_company_name
     enableLogUpload  = true      # https://github.com/Azure/Avere/tree/main/src/terraform/providers/terraform-provider-avere#enable_support_uploads
@@ -77,7 +85,7 @@ storageTargets = [
     usageModel        = "READ_ONLY" # https://learn.microsoft.com/azure/hpc-cache/cache-usage-models
     hostName          = "xstudio2"
     containerName     = "content"
-    resourceGroupName = "ArtistAnywhere.Storage.West"
+    resourceGroupName = "ArtistAnywhere.Storage"
     fileIntervals = {
       verificationSeconds = 30
       writeBackSeconds    = null

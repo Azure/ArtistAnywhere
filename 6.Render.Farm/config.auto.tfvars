@@ -85,7 +85,7 @@ virtualMachineScaleSets = [
         name   = "Monitor"
       }
     }
-    flexibleOrchestration = {
+    flexMode = {
       enable           = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
       faultDomainCount = 1     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
     }
@@ -170,7 +170,7 @@ virtualMachineScaleSets = [
         name   = "Monitor"
       }
     }
-    flexibleOrchestration = {
+    flexMode = {
       enable           = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
       faultDomainCount = 1     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
     }
@@ -247,7 +247,7 @@ virtualMachineScaleSets = [
         enable      = true
         name        = "Health"
         protocol    = "tcp"
-        port        = 111
+        port        = 445
         requestPath = ""
       }
       monitor = {
@@ -255,7 +255,7 @@ virtualMachineScaleSets = [
         name   = "Monitor"
       }
     }
-    flexibleOrchestration = {
+    flexMode = {
       enable           = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
       faultDomainCount = 1     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
     }
@@ -332,7 +332,7 @@ virtualMachineScaleSets = [
         enable      = true
         name        = "Health"
         protocol    = "tcp"
-        port        = 111
+        port        = 445
         requestPath = ""
       }
       monitor = {
@@ -340,7 +340,7 @@ virtualMachineScaleSets = [
         name   = "Monitor"
       }
     }
-    flexibleOrchestration = {
+    flexMode = {
       enable           = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
       faultDomainCount = 1     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
     }

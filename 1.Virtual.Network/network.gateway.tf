@@ -9,12 +9,9 @@ locals {
   natGatewayNetworksSubnets = flatten([
     for virtualNetwork in local.natGatewayNetworks : [
       for subnet in virtualNetwork.subnets : merge(subnet, {
-        key                = "${virtualNetwork.key}-${subnet.name}"
-        regionName         = virtualNetwork.regionName
-        resourceGroupName  = virtualNetwork.resourceGroupName
-        virtualNetworkKey  = virtualNetwork.key
-        virtualNetworkId   = virtualNetwork.id
-        virtualNetworkName = virtualNetwork.name
+        key               = "${virtualNetwork.key}-${subnet.name}"
+        virtualNetworkKey = virtualNetwork.key
+        virtualNetworkId  = virtualNetwork.id
       }) if virtualNetwork.edgeZone == "" && subnet.name != "GatewaySubnet"
     ]
   ])

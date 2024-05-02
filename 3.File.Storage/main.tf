@@ -122,17 +122,8 @@ data terraform_remote_state image {
   }
 }
 
-data azurerm_resource_group network {
-  name = data.azurerm_virtual_network.studio.resource_group_name
-}
-
 data azurerm_resource_group dns {
   name = data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
-}
-
-data azurerm_virtual_network studio {
-  name                = data.terraform_remote_state.network.outputs.virtualNetwork.name
-  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroupName
 }
 
 data azurerm_virtual_network studio_region {
@@ -140,17 +131,22 @@ data azurerm_virtual_network studio_region {
   resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
-# data azurerm_subnet storage {
-#   name                 = "Storage"
-#   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-#   virtual_network_name = data.azurerm_virtual_network.studio.name
-# }
+data azurerm_virtual_network studio_edge {
+  name                = reverse(data.terraform_remote_state.network.outputs.virtualNetworks)[0].name
+  resource_group_name = reverse(data.terraform_remote_state.network.outputs.virtualNetworks)[0].resourceGroupName
+}
 
 data azurerm_subnet storage_region {
   name                 = "Storage"
   resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }
+
+# data azurerm_subnet storage_edge {
+#   name                 = "Storage"
+#   resource_group_name  = data.azurerm_virtual_network.studio_edge.resource_group_name
+#   virtual_network_name = data.azurerm_virtual_network.studio_edge.name
+# }
 
 data azurerm_private_dns_zone studio {
   name                = data.terraform_remote_state.network.outputs.privateDns.zoneName

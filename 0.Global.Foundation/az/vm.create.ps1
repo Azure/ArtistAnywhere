@@ -95,7 +95,7 @@ $virtualNetwork = @{
 }
 $virtualMachine = @{
   name    = if ($osTypeWindows) {"WinFarmC"} else {"LnxFarmC"}
-  size    = "Standard_HB120rs_v2" # Standard_D96as_v5
+  size    = "Standard_HB120rs_v2"
   imageId = if ($osTypeWindows) {"MicrosoftWindowsDesktop:Windows-10:Win10-22H2-Ent-G2:Latest"} else {"RESF:RockyLinux-x86_64:8-Base:Latest"}
   adminLogin = @{
     username = "xadmin"
@@ -109,16 +109,18 @@ $virtualMachine = @{
       placement = "ResourceDisk"
     }
   }
-  priorityMode   = "Spot"
-  evictionPolicy = "Delete"
+  spot = @{
+    enable         = $true
+    evictionPolicy = "Delete"
+  }
 }
 az group create --name $resourceGroupName --location $resourceLocation.region
 $edgeZone = if ($extendedLocation) {" --edge-zone $($resourceLocation.edgeZone)"} else {""}
+$priority = if ($virtualMachine.spot.enable) {"Spot"} else {"Regular"}
 $subnetId = "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)"
-$vmCreate = "az vm create --resource-group $resourceGroupName$edgeZone --name $($virtualMachine.name) --size $($virtualMachine.size) --os-disk-size-gb $($virtualMachine.osDisk.sizeGB) --os-disk-caching $($virtualMachine.osDisk.caching) --image $($virtualMachine.imageId) --admin-username $($virtualMachine.adminLogin.username) --admin-password $($virtualMachine.adminLogin.password) --subnet $subnetId --public-ip-address '""""' --nsg '""""' --priority $($virtualMachine.priorityMode) --eviction-policy $($virtualMachine.evictionPolicy)"
-if ($virtualMachine.osDisk.ephemeral.enable) {
-  $vmCreate = $vmCreate + " --ephemeral-os-disk $($virtualMachine.osDisk.ephemeral.enable) --ephemeral-os-disk-placement $($virtualMachine.osDisk.ephemeral.placement)"
-}
+$vmCreate = "az vm create --resource-group $resourceGroupName$edgeZone --name $($virtualMachine.name) --size $($virtualMachine.size) --os-disk-size-gb $($virtualMachine.osDisk.sizeGB) --os-disk-caching $($virtualMachine.osDisk.caching) --image $($virtualMachine.imageId) --admin-username $($virtualMachine.adminLogin.username) --admin-password $($virtualMachine.adminLogin.password) --subnet $subnetId --public-ip-address '""""' --nsg '""""' --priority $priority"
+$vmCreate = if ($virtualMachine.osDisk.ephemeral.enable) {"$vmCreate --ephemeral-os-disk $($virtualMachine.osDisk.ephemeral.enable) --ephemeral-os-disk-placement $($virtualMachine.osDisk.ephemeral.placement)"} else {$vmCreate}
+$vmCreate = if ($virtualMachine.spot.enable) {"$vmCreate --eviction-policy $($virtualMachine.spot.evictionPolicy)"} else {$vmCreate}
 Invoke-Expression -Command $vmCreate
 
 $osTypeWindows     = $false
@@ -150,16 +152,18 @@ $virtualMachine = @{
       placement = "ResourceDisk"
     }
   }
-  priorityMode   = "Spot"
-  evictionPolicy = "Delete"
+  spot = @{
+    enable         = $true
+    evictionPolicy = "Delete"
+  }
 }
 az group create --name $resourceGroupName --location $resourceLocation.region
 $edgeZone = if ($extendedLocation) {" --edge-zone $($resourceLocation.edgeZone)"} else {""}
+$priority = if ($virtualMachine.spot.enable) {"Spot"} else {"Regular"}
 $subnetId = "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)"
-$vmCreate = "az vm create --resource-group $resourceGroupName$edgeZone --name $($virtualMachine.name) --size $($virtualMachine.size) --os-disk-size-gb $($virtualMachine.osDisk.sizeGB) --os-disk-caching $($virtualMachine.osDisk.caching) --image $($virtualMachine.imageId) --admin-username $($virtualMachine.adminLogin.username) --admin-password $($virtualMachine.adminLogin.password) --subnet $subnetId --public-ip-address '""""' --nsg '""""' --priority $($virtualMachine.priorityMode) --eviction-policy $($virtualMachine.evictionPolicy)"
-if ($virtualMachine.osDisk.ephemeral.enable) {
-  $vmCreate = $vmCreate + " --ephemeral-os-disk $($virtualMachine.osDisk.ephemeral.enable) --ephemeral-os-disk-placement $($virtualMachine.osDisk.ephemeral.placement)"
-}
+$vmCreate = "az vm create --resource-group $resourceGroupName$edgeZone --name $($virtualMachine.name) --size $($virtualMachine.size) --os-disk-size-gb $($virtualMachine.osDisk.sizeGB) --os-disk-caching $($virtualMachine.osDisk.caching) --image $($virtualMachine.imageId) --admin-username $($virtualMachine.adminLogin.username) --admin-password $($virtualMachine.adminLogin.password) --subnet $subnetId --public-ip-address '""""' --nsg '""""' --priority $priority"
+$vmCreate = if ($virtualMachine.osDisk.ephemeral.enable) {"$vmCreate --ephemeral-os-disk $($virtualMachine.osDisk.ephemeral.enable) --ephemeral-os-disk-placement $($virtualMachine.osDisk.ephemeral.placement)"} else {$vmCreate}
+$vmCreate = if ($virtualMachine.spot.enable) {"$vmCreate --eviction-policy $($virtualMachine.spot.evictionPolicy)"} else {$vmCreate}
 Invoke-Expression -Command $vmCreate
 
 ######################

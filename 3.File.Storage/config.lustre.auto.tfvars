@@ -13,7 +13,7 @@ lustre = {
   }
   blobStorage = {
     enable            = false
-    resourceGroupName = "ArtistAnywhere.Storage.West"
+    resourceGroupName = "ArtistAnywhere.Storage"
     accountName       = "xstudio2"
     containerName = {
       archive = "lustre"

@@ -9,6 +9,10 @@ terraform {
       source = "azure/azapi"
       version = "~>1.12.1"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = "~>3.4.2"
+    }
   }
   backend azurerm {
     key = "2.Image.Builder"
@@ -29,6 +33,10 @@ module global {
 
 variable resourceGroupName {
   type = string
+}
+
+data http client_address {
+  url = "https://api.ipify.org?format=json"
 }
 
 data azurerm_user_assigned_identity studio {
@@ -92,12 +100,18 @@ data azurerm_resource_group network {
 }
 
 locals {
-  regionNames = [
+  regionNames = distinct([
     for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
-  ]
+  ])
 }
 
 resource azurerm_resource_group image {
   name     = var.resourceGroupName
+  location = module.global.resourceLocation.regionName
+}
+
+resource azurerm_resource_group image_registry {
+  count    = var.containerRegistry.enable ? 1 : 0
+  name     = "${var.resourceGroupName}.Registry"
   location = module.global.resourceLocation.regionName
 }

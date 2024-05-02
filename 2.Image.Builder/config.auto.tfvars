@@ -161,7 +161,7 @@ imageBuilder = {
         machineSize    = "Standard_D96as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                  # NVIDIA or AMD
         imageVersion   = "2.0.0"
-        osDiskSizeGB   = 512
+        osDiskSizeGB   = 480
         timeoutMinutes = 240
         renderEngines = [
           "PBRT"
@@ -333,7 +333,7 @@ imageBuilder = {
         machineSize    = "Standard_D96as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                  # NVIDIA or AMD
         imageVersion   = "2.0.0"
-        osDiskSizeGB   = 512
+        osDiskSizeGB   = 480
         timeoutMinutes = 360
         renderEngines = [
           "PBRT"
@@ -491,7 +491,25 @@ dataPlatform = {
   }
 }
 
-binStorage = { # Required configuration for image building
+binStorage = {
   host = ""
   auth = ""
+}
+
+######################################################################################################
+# Container Registry (https://learn.microsoft.com/azure/container-registry/container-registry-intro) #
+######################################################################################################
+
+containerRegistry = {
+  enable = true
+  name = "xstudio"
+  type = "Premium"
+  adminUser = {
+    enable = true
+  }
+  agentPool = {
+    enable        = false
+    tier          = "S1"
+    instanceCount = 1
+  }
 }

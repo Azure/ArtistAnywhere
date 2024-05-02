@@ -71,6 +71,10 @@ locals {
   virtualMachines = flatten([
     for virtualMachine in var.virtualMachines : [
       for i in range(virtualMachine.count) : merge(virtualMachine, {
+        resourceLocation = {
+          regionName = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : module.global.resourceLocation.regionName
+          edgeZone   = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+        }
         name = "${virtualMachine.name}${i}"
         image = merge(virtualMachine.image, {
           plan = {
@@ -80,7 +84,7 @@ locals {
           }
         })
         network = merge(virtualMachine.network, {
-          subnetId = "${virtualMachine.network.locationEdge.enable ? data.azurerm_virtual_network.studio.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
+          subnetId = "${virtualMachine.network.locationEdge.enable ? data.azurerm_virtual_network.studio_edge.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
         })
         adminLogin = merge(virtualMachine.adminLogin, {
           userName     = virtualMachine.adminLogin.userName != "" || !module.global.keyVault.enable ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
@@ -101,8 +105,8 @@ resource azurerm_network_interface workstation {
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.workstation.name
-  location            = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.workstation.location
-  edge_zone           = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+  location            = each.value.resourceLocation.regionName
+  edge_zone           = each.value.resourceLocation.edgeZone
   ip_configuration {
     name                          = "ipConfig"
     subnet_id                     = each.value.network.subnetId
@@ -117,8 +121,8 @@ resource azurerm_linux_virtual_machine workstation {
   }
   name                            = each.value.name
   resource_group_name             = azurerm_resource_group.workstation.name
-  location                        = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.workstation.location
-  edge_zone                       = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+  location                        = each.value.resourceLocation.regionName
+  edge_zone                       = each.value.resourceLocation.edgeZone
   size                            = each.value.size
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username                  = each.value.adminLogin.userName
@@ -139,7 +143,7 @@ resource azurerm_linux_virtual_machine workstation {
     ]
   }
   dynamic plan {
-    for_each = each.value.image.publisher != "" ? [1] : []
+    for_each = each.value.image.plan.publisher != "" ? [1] : []
     content {
       publisher = each.value.image.plan.publisher
       product   = each.value.image.plan.product
@@ -219,8 +223,8 @@ resource azurerm_windows_virtual_machine workstation {
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.workstation.name
-  location            = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.workstation.location
-  edge_zone           = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+  location            = each.value.resourceLocation.regionName
+  edge_zone           = each.value.resourceLocation.edgeZone
   size                = each.value.size
   source_image_id     = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username      = each.value.adminLogin.userName

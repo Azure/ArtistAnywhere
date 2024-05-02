@@ -19,6 +19,14 @@ variable vfxtCache {
         node       = string
       })
     })
+    activeDirectory = object({
+      enable            = bool
+      domainName        = string
+      domainNameNetBIOS = string
+      domainControllers = string
+      domainUsername    = string
+      domainPassword    = string
+    })
     support = object({
       companyName      = string
       enableLogUpload  = bool
@@ -35,9 +43,9 @@ locals {
       adminPassword = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
     })
   })
-  vfxtControllerAddress   = cidrhost(data.azurerm_subnet.cache.address_prefixes[0], 39)
-  vfxtVServerFirstAddress = cidrhost(data.azurerm_subnet.cache.address_prefixes[0], 40)
-  vfxtVServerAddressCount = 12
+  reserveDNSAddresses = split("/", data.azurerm_subnet.cache.address_prefixes[0])[1] <= 26
+  vServerAddressCount = local.reserveDNSAddresses ? 12 : null
+  vServerFirstAddress = local.reserveDNSAddresses ? cidrhost(data.azurerm_subnet.cache.address_prefixes[0], -local.vServerAddressCount - 1) : null
 }
 
 module vfxt_controller {
@@ -52,7 +60,7 @@ module vfxt_controller {
   virtual_network_name           = data.azurerm_virtual_network.studio_region.name
   virtual_network_resource_group = data.azurerm_virtual_network.studio_region.resource_group_name
   virtual_network_subnet_name    = data.azurerm_subnet.cache.name
-  static_ip_address              = local.vfxtControllerAddress
+  static_ip_address              = cidrhost(data.azurerm_subnet.cache.address_prefixes[0], 4)
   image_id                       = var.vfxtCache.cluster.imageId.controller
   depends_on = [
     azurerm_resource_group.cache
@@ -75,15 +83,21 @@ resource avere_vfxt cache {
   controller_admin_password       = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
   vfxt_admin_password             = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
   vfxt_ssh_key_data               = var.vfxtCache.cluster.sshPublicKey != "" ? var.vfxtCache.cluster.sshPublicKey : null
+  cifs_ad_domain                  = var.vfxtCache.activeDirectory.enable ? var.vfxtCache.activeDirectory.domainName : null
+  cifs_netbios_domain_name        = var.vfxtCache.activeDirectory.enable ? var.vfxtCache.activeDirectory.domainNameNetBIOS : null
+  cifs_dc_addreses                = var.vfxtCache.activeDirectory.enable ? var.vfxtCache.activeDirectory.domainControllers : null
+  cifs_server_name                = var.vfxtCache.activeDirectory.enable ? lower(var.vfxtCache.name) : null
+  cifs_username                   = var.vfxtCache.activeDirectory.enable ? var.vfxtCache.activeDirectory.domainUsername : null
+  cifs_password                   = var.vfxtCache.activeDirectory.enable ? var.vfxtCache.activeDirectory.domainPassword : null
   support_uploads_company_name    = var.vfxtCache.support.companyName
   enable_support_uploads          = var.vfxtCache.support.enableLogUpload
   enable_secure_proactive_support = var.vfxtCache.support.enableProactive
   enable_rolling_trace_data       = var.vfxtCache.support.rollingTraceFlag != ""
   rolling_trace_flag              = var.vfxtCache.support.rollingTraceFlag
-  vserver_first_ip                = local.vfxtVServerFirstAddress
-  vserver_ip_count                = local.vfxtVServerAddressCount
   timezone                        = var.vfxtCache.cluster.localTimezone
   node_size                       = var.vfxtCache.cluster.enableDevMode ? "unsupported_test_SKU" : "prod_sku"
+  vserver_ip_count                = local.vServerAddressCount
+  vserver_first_ip                = local.vServerFirstAddress
   dynamic core_filer {
     for_each = {
       for storageTarget in var.storageTargets : storageTarget.name => storageTarget if storageTarget.enable

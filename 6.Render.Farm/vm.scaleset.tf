@@ -83,7 +83,7 @@ variable virtualMachineScaleSets {
         name   = string
       })
     })
-    flexibleOrchestration = object({
+    flexMode = object({
       enable           = bool
       faultDomainCount = number
     })
@@ -99,6 +99,10 @@ locals {
   ]
   virtualMachineScaleSets = [
     for virtualMachineScaleSet in var.virtualMachineScaleSets : merge(virtualMachineScaleSet, {
+      resourceLocation = {
+        regionName = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : module.global.resourceLocation.regionName
+        edgeZone   = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+      }
       machine = merge(virtualMachineScaleSet.machine, {
         image = merge(virtualMachineScaleSet.machine.image, {
           plan = {
@@ -109,7 +113,7 @@ locals {
         })
       })
       network = merge(virtualMachineScaleSet.network, {
-        subnetId = "${virtualMachineScaleSet.network.locationEdge.enable ? data.azurerm_virtual_network.studio.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
+        subnetId = "${virtualMachineScaleSet.network.locationEdge.enable ? data.azurerm_virtual_network.studio_edge.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
       })
       adminLogin = merge(virtualMachineScaleSet.adminLogin, {
         userName     = virtualMachineScaleSet.adminLogin.userName != "" || !module.global.keyVault.enable ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
@@ -125,13 +129,13 @@ locals {
 
 resource azurerm_linux_virtual_machine_scale_set farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexibleOrchestration.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexMode.enable
   }
   name                            = each.value.name
   computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
   resource_group_name             = azurerm_resource_group.farm.name
-  location                        = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.farm.location
-  edge_zone                       = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+  location                        = each.value.resourceLocation.regionName
+  edge_zone                       = each.value.resourceLocation.edgeZone
   sku                             = each.value.machine.size
   instances                       = each.value.machine.count
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
@@ -154,7 +158,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
     ip_configuration {
       name      = "ipConfig"
       primary   = true
-      subnet_id = "${data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : each.value.network.subnetName}"
+      subnet_id = each.value.network.subnetId
     }
     enable_accelerated_networking = each.value.network.acceleration.enable
   }
@@ -256,7 +260,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm_linux {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexibleOrchestration.enable && module.global.monitor.enable && virtualMachineScaleSet.extension.monitor.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexMode.enable && module.global.monitor.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_linux_virtual_machine_scale_set.farm[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
@@ -264,13 +268,13 @@ resource azurerm_monitor_data_collection_rule_association farm_linux {
 
 resource azurerm_windows_virtual_machine_scale_set farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexibleOrchestration.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexMode.enable
   }
   name                   = each.value.name
   computer_name_prefix   = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
   resource_group_name    = azurerm_resource_group.farm.name
-  location               = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.farm.location
-  edge_zone              = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+  location               = each.value.resourceLocation.regionName
+  edge_zone              = each.value.resourceLocation.edgeZone
   sku                    = each.value.machine.size
   instances              = each.value.machine.count
   source_image_id        = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
@@ -292,7 +296,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
     ip_configuration {
       name      = "ipConfig"
       primary   = true
-      subnet_id = "${data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : each.value.network.subnetName}"
+      subnet_id = each.value.network.subnetId
     }
     enable_accelerated_networking = each.value.network.acceleration.enable
   }
@@ -380,7 +384,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm_windows {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexibleOrchestration.enable && module.global.monitor.enable && virtualMachineScaleSet.extension.monitor.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexMode.enable && module.global.monitor.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_windows_virtual_machine_scale_set.farm[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
@@ -388,17 +392,18 @@ resource azurerm_monitor_data_collection_rule_association farm_windows {
 
 resource azurerm_orchestrated_virtual_machine_scale_set farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexibleOrchestration.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable
   }
   name                        = each.value.name
   resource_group_name         = azurerm_resource_group.farm.name
-  location                    = azurerm_resource_group.farm.location
+  location                    = each.value.resourceLocation.regionName
+  # edge_zone                   = each.value.resourceLocation.edgeZone
   sku_name                    = each.value.machine.size
   instances                   = each.value.machine.count
   source_image_id             = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   priority                    = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy             = each.value.spot.enable ? each.value.spot.evictionPolicy : null
-  platform_fault_domain_count = each.value.flexibleOrchestration.faultDomainCount
+  platform_fault_domain_count = each.value.flexMode.faultDomainCount
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -411,7 +416,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
     ip_configuration {
       name      = "ipConfig"
       primary   = true
-      subnet_id = "${data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : each.value.network.subnetName}"
+      subnet_id = each.value.network.subnetId
     }
     enable_accelerated_networking = each.value.network.acceleration.enable
   }
@@ -454,7 +459,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
     }
   }
   dynamic plan {
-    for_each = each.value.machine.image.plan.publisher != "" ? [1] : []
+    for_each = lower(each.value.operatingSystem.type) == "linux" && each.value.machine.image.plan.publisher != "" ? [1] : []
     content {
       publisher = each.value.machine.image.plan.publisher
       product   = each.value.machine.image.plan.product
@@ -528,7 +533,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexibleOrchestration.enable && module.global.monitor.enable && virtualMachineScaleSet.extension.monitor.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable && module.global.monitor.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.farm[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id

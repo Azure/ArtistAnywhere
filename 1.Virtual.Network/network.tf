@@ -23,7 +23,6 @@ variable virtualNetworks {
 }
 
 locals {
-  virtualNetwork = module.global.resourceLocation.edgeZone.enable ? local.virtualNetworksExtended[0] : local.virtualNetworks[0]
   virtualNetworks = [
     for virtualNetwork in local.virtualNetworksNames : merge(virtualNetwork, {
       id              = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${virtualNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}"
@@ -124,26 +123,15 @@ resource azurerm_subnet studio {
   ]
 }
 
-output virtualNetwork {
-  value = {
-    key               = local.virtualNetwork.key
-    id                = local.virtualNetwork.id
-    name              = local.virtualNetwork.name
-    regionName        = local.virtualNetwork.regionName
-    edgeZone          = local.virtualNetwork.edgeZone
-    resourceGroupName = local.virtualNetwork.resourceGroupName
-  }
-}
-
 output virtualNetworks {
   value = [
-    for virtualNetwork in local.virtualNetworks : {
+    for virtualNetwork in local.virtualNetworksExtended : {
       key               = virtualNetwork.key
       id                = virtualNetwork.id
       name              = virtualNetwork.name
+      resourceGroupName = virtualNetwork.resourceGroupName
       regionName        = virtualNetwork.regionName
       edgeZone          = virtualNetwork.edgeZone
-      resourceGroupName = virtualNetwork.resourceGroupName
     }
   ]
 }
@@ -152,13 +140,9 @@ output virtualNetworksSubnetStorage {
   value = flatten([
     for virtualNetwork in local.virtualNetworks : [
       for subnet in virtualNetwork.subnets : {
-        name                   = subnet.name
-        virtualNetworkKey      = virtualNetwork.key
-        virtualNetworkId       = virtualNetwork.id
-        virtualNetworkName     = virtualNetwork.name
-        virtualNetworkEdgeZone = virtualNetwork.edgeZone
-        regionName             = virtualNetwork.regionName
-        resourceGroupName      = virtualNetwork.resourceGroupName
+        name               = subnet.name
+        resourceGroupName  = virtualNetwork.resourceGroupName
+        virtualNetworkName = virtualNetwork.name
       } if contains(subnet.serviceEndpoints, "Microsoft.Storage.Global")
     ]
   ])
