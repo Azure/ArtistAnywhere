@@ -86,9 +86,9 @@ virtualMachineScaleSets = [
       }
     }
     flexMode = {
-      enable           = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
-      faultDomainCount = 1     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
+      enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
     }
+    faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
   },
   {
     enable = false
@@ -171,9 +171,9 @@ virtualMachineScaleSets = [
       }
     }
     flexMode = {
-      enable           = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
-      faultDomainCount = 1     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
+      enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
     }
+    faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
   },
   {
     enable = false
@@ -256,9 +256,9 @@ virtualMachineScaleSets = [
       }
     }
     flexMode = {
-      enable           = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
-      faultDomainCount = 1     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
+      enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
     }
+    faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
   },
   {
     enable = false
@@ -341,9 +341,9 @@ virtualMachineScaleSets = [
       }
     }
     flexMode = {
-      enable           = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
-      faultDomainCount = 1     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
+      enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
     }
+    faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
   }
 ]
 

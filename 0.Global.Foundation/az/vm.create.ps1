@@ -53,7 +53,7 @@ $resourceLocation = @{
 }
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)"
+  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.edgeZone)"})"
   name              = "Studio-West"
   subnetName        = "Farm"
 }
@@ -89,7 +89,7 @@ $resourceLocation = @{
 }
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)"
+  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.edgeZone)"})"
   name              = "Studio-West"
   subnetName        = "Farm"
 }
@@ -179,7 +179,7 @@ $resourceLocation = @{
 }
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)"
+  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.edgeZone)"})"
   name              = "Studio-West"
   subnetName        = "Workstation"
 }

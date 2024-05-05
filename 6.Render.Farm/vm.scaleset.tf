@@ -84,9 +84,9 @@ variable virtualMachineScaleSets {
       })
     })
     flexMode = object({
-      enable           = bool
-      faultDomainCount = number
+      enable = bool
     })
+    faultDomainCount = number
   }))
 }
 
@@ -144,6 +144,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
   priority                        = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy                 = each.value.spot.enable ? each.value.spot.evictionPolicy : null
+  platform_fault_domain_count     = each.value.faultDomainCount
   single_placement_group          = false
   overprovision                   = false
   identity {
@@ -270,20 +271,21 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexMode.enable
   }
-  name                   = each.value.name
-  computer_name_prefix   = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
-  resource_group_name    = azurerm_resource_group.farm.name
-  location               = each.value.resourceLocation.regionName
-  edge_zone              = each.value.resourceLocation.edgeZone
-  sku                    = each.value.machine.size
-  instances              = each.value.machine.count
-  source_image_id        = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
-  admin_username         = each.value.adminLogin.userName
-  admin_password         = each.value.adminLogin.userPassword
-  priority               = each.value.spot.enable ? "Spot" : "Regular"
-  eviction_policy        = each.value.spot.enable ? each.value.spot.evictionPolicy : null
-  single_placement_group = false
-  overprovision          = false
+  name                        = each.value.name
+  computer_name_prefix        = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
+  resource_group_name         = azurerm_resource_group.farm.name
+  location                    = each.value.resourceLocation.regionName
+  edge_zone                   = each.value.resourceLocation.edgeZone
+  sku                         = each.value.machine.size
+  instances                   = each.value.machine.count
+  source_image_id             = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+  admin_username              = each.value.adminLogin.userName
+  admin_password              = each.value.adminLogin.userPassword
+  priority                    = each.value.spot.enable ? "Spot" : "Regular"
+  eviction_policy             = each.value.spot.enable ? each.value.spot.evictionPolicy : null
+  platform_fault_domain_count = each.value.faultDomainCount
+  single_placement_group      = false
+  overprovision               = false
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -403,7 +405,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
   source_image_id             = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   priority                    = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy             = each.value.spot.enable ? each.value.spot.evictionPolicy : null
-  platform_fault_domain_count = each.value.flexMode.faultDomainCount
+  platform_fault_domain_count = each.value.faultDomainCount
   identity {
     type = "UserAssigned"
     identity_ids = [

@@ -45,7 +45,7 @@ resource azurerm_private_dns_zone_virtual_network_link api_management {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork
   }
-  name                  = "${lower(each.value.name)}-api-management"
+  name                  = "${lower(each.value.key)}-api-management"
   resource_group_name   = azurerm_private_dns_zone.api_management.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.api_management.name
   virtual_network_id    = each.value.id

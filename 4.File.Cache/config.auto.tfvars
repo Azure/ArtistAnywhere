@@ -54,8 +54,8 @@ vfxtCache = {
     domainName        = ""
     domainNameNetBIOS = ""
     domainControllers = "" # 1-3 space-separated IP addresses
-    domainUsername = ""
-    domainPassword = ""
+    domainUsername    = ""
+    domainPassword    = ""
   }
   support = {                    # https://privacy.microsoft.com/privacystatement
     companyName      = ""        # https://github.com/Azure/Avere/tree/main/src/terraform/providers/terraform-provider-avere#support_uploads_company_name

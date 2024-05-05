@@ -54,7 +54,7 @@ resource azurerm_private_dns_zone_virtual_network_link event_grid {
   for_each = {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork
   }
-  name                  = "${lower(each.value.name)}-event-grid"
+  name                  = "${lower(each.value.key)}-event-grid"
   resource_group_name   = azurerm_private_dns_zone.event_grid.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.event_grid.name
   virtual_network_id    = each.value.id
