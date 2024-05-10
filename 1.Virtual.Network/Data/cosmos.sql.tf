@@ -1,6 +1,6 @@
-########################################################################
-# Cosmos DB NoSQL (https://learn.microsoft.com/azure/cosmos-db/nosql/) #
-########################################################################
+#######################################################################
+# Cosmos DB NoSQL (https://learn.microsoft.com/azure/cosmos-db/nosql) #
+#######################################################################
 
 variable noSQL {
   type = object({
@@ -152,14 +152,14 @@ locals {
   ])
 }
 
-resource azurerm_cosmosdb_sql_dedicated_gateway no_sql {
+resource azurerm_cosmosdb_sql_dedicated_gateway sql {
   count               = var.noSQL.enable && var.noSQL.account.dedicatedGateway.enable ? 1 : 0
   cosmosdb_account_id = azurerm_cosmosdb_account.studio["sql"].id
   instance_size       = var.noSQL.account.dedicatedGateway.size
   instance_count      = var.noSQL.account.dedicatedGateway.count
 }
 
-resource azurerm_cosmosdb_sql_database no_sql {
+resource azurerm_cosmosdb_sql_database sql {
   for_each = {
     for database in var.noSQL.databases : database.name => database if var.noSQL.enable && database.enable
   }
@@ -175,7 +175,7 @@ resource azurerm_cosmosdb_sql_database no_sql {
   }
 }
 
-resource azurerm_cosmosdb_sql_container no_sql {
+resource azurerm_cosmosdb_sql_container sql {
   for_each = {
     for container in local.containers : container.key => container if var.noSQL.enable
   }
@@ -239,11 +239,11 @@ resource azurerm_cosmosdb_sql_container no_sql {
     conflict_resolution_procedure = each.value.conflictResolutionPolicy.procedure != "" ? each.value.conflictResolutionPolicy.procedure : null
   }
   depends_on = [
-    azurerm_cosmosdb_sql_database.no_sql
+    azurerm_cosmosdb_sql_database.sql
   ]
 }
 
-resource azurerm_cosmosdb_sql_stored_procedure no_sql {
+resource azurerm_cosmosdb_sql_stored_procedure sql {
   for_each = {
     for storedProcedure in local.storedProcedures : storedProcedure.key => storedProcedure if var.noSQL.enable
   }
@@ -254,11 +254,11 @@ resource azurerm_cosmosdb_sql_stored_procedure no_sql {
   container_name      = each.value.containerName
   body                = each.value.body
   depends_on = [
-    azurerm_cosmosdb_sql_container.no_sql
+    azurerm_cosmosdb_sql_container.sql
   ]
 }
 
-resource azurerm_cosmosdb_sql_trigger no_sql {
+resource azurerm_cosmosdb_sql_trigger sql {
   for_each = {
     for trigger in local.triggers : trigger.key => trigger if var.noSQL.enable
   }
@@ -268,11 +268,11 @@ resource azurerm_cosmosdb_sql_trigger no_sql {
   operation    = each.value.operation
   body         = each.value.body
   depends_on = [
-    azurerm_cosmosdb_sql_container.no_sql
+    azurerm_cosmosdb_sql_container.sql
   ]
 }
 
-resource azurerm_cosmosdb_sql_function no_sql {
+resource azurerm_cosmosdb_sql_function sql {
   for_each = {
     for function in local.functions : function.key => function if var.noSQL.enable
   }
@@ -280,11 +280,11 @@ resource azurerm_cosmosdb_sql_function no_sql {
   container_id = each.value.containerId
   body         = each.value.body
   depends_on = [
-    azurerm_cosmosdb_sql_container.no_sql
+    azurerm_cosmosdb_sql_container.sql
   ]
 }
 
-resource azurerm_cosmosdb_sql_role_definition no_sql {
+resource azurerm_cosmosdb_sql_role_definition sql {
   for_each = {
     for role in var.noSQL.roles : role.name => role if var.noSQL.enable && role.enable
   }
@@ -299,7 +299,7 @@ resource azurerm_cosmosdb_sql_role_definition no_sql {
     data_actions = each.value.permissions
   }
 }
-resource azurerm_cosmosdb_sql_role_assignment no_sql {
+resource azurerm_cosmosdb_sql_role_assignment sql {
   for_each = {
     for roleAssignment in var.noSQL.roleAssignments : "${roleAssignment.role.id}-${roleAssignment.role.name}" => roleAssignment if var.noSQL.enable && roleAssignment.enable
   }
@@ -307,26 +307,26 @@ resource azurerm_cosmosdb_sql_role_assignment no_sql {
   account_name        = azurerm_cosmosdb_account.studio["sql"].name
   scope               = "${azurerm_cosmosdb_account.studio["sql"].id}${each.value.scopePath}"
   principal_id        = each.value.principalId
-  role_definition_id  = each.value.role.id != "" ? "${azurerm_cosmosdb_account.studio["sql"].id}/sqlRoleDefinitions/${each.value.role.id}" : azurerm_cosmosdb_sql_role_definition.no_sql[each.value.role.Name].id
+  role_definition_id  = each.value.role.id != "" ? "${azurerm_cosmosdb_account.studio["sql"].id}/sqlRoleDefinitions/${each.value.role.id}" : azurerm_cosmosdb_sql_role_definition.sql[each.value.role.Name].id
 }
 
-resource azurerm_private_dns_zone no_sql {
+resource azurerm_private_dns_zone sql {
   count               = var.noSQL.enable || var.gremlin.enable || var.table.enable ? 1 : 0
   name                = var.noSQL.account.dedicatedGateway.enable ? "privatelink.sqlx.cosmos.azure.com" : "privatelink.documents.azure.com"
   resource_group_name = azurerm_resource_group.data.name
 }
 
-resource azurerm_private_dns_zone_virtual_network_link no_sql {
+resource azurerm_private_dns_zone_virtual_network_link sql {
   count                 = var.noSQL.enable || var.gremlin.enable || var.table.enable ? 1 : 0
-  name                  = "no-sql"
-  resource_group_name   = azurerm_private_dns_zone.no_sql[0].resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.no_sql[0].name
+  name                  = "sql"
+  resource_group_name   = azurerm_private_dns_zone.sql[0].resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.sql[0].name
   virtual_network_id    = data.azurerm_virtual_network.studio_region.id
 }
 
-resource azurerm_private_endpoint no_sql {
+resource azurerm_private_endpoint sql {
   count               = var.noSQL.enable ? 1 : 0
-  name                = azurerm_cosmosdb_account.studio["sql"].name
+  name                = "${azurerm_cosmosdb_account.studio["sql"].name}-${azurerm_private_dns_zone_virtual_network_link.sql[0].name}"
   resource_group_name = azurerm_cosmosdb_account.studio["sql"].resource_group_name
   location            = azurerm_cosmosdb_account.studio["sql"].location
   subnet_id           = data.azurerm_subnet.data.id
@@ -339,9 +339,9 @@ resource azurerm_private_endpoint no_sql {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.no_sql[0].name
+    name = azurerm_private_dns_zone_virtual_network_link.sql[0].name
     private_dns_zone_ids = [
-      azurerm_private_dns_zone.no_sql[0].id
+      azurerm_private_dns_zone.sql[0].id
     ]
   }
 }

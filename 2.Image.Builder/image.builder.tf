@@ -126,13 +126,13 @@ resource azapi_resource linux {
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"
   parent_id = azurerm_resource_group.image.id
   location  = azurerm_resource_group.image.location
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
+  }
   body = jsonencode({
-    identity = {
-      type = "UserAssigned"
-      userAssignedIdentities = {
-        "${data.azurerm_user_assigned_identity.studio.id}" : {}
-      }
-    }
     properties = {
       buildTimeoutInMinutes = each.value.build.timeoutMinutes
       vmProfile = {
@@ -249,13 +249,13 @@ resource azapi_resource windows {
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"
   parent_id = azurerm_resource_group.image.id
   location  = azurerm_resource_group.image.location
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
+  }
   body = jsonencode({
-    identity = {
-      type = "UserAssigned"
-      userAssignedIdentities = {
-        "${data.azurerm_user_assigned_identity.studio.id}" : {}
-      }
-    }
     properties = {
       buildTimeoutInMinutes = each.value.build.timeoutMinutes
       vmProfile = {

@@ -18,12 +18,6 @@ variable functionApp {
   })
 }
 
-data azurerm_application_insights studio {
-  count               = module.global.monitor.enable && var.noSQL.enable ? 1 : 0
-  name                = module.global.monitor.name
-  resource_group_name = module.global.resourceGroupName
-}
-
 data azurerm_storage_account studio {
   count               = var.noSQL.enable ? 1 : 0
   name                = module.global.storage.accountName

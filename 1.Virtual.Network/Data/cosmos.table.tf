@@ -77,9 +77,9 @@ resource azurerm_private_endpoint table_sql {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.no_sql[0].name
+    name = azurerm_private_dns_zone_virtual_network_link.sql[0].name
     private_dns_zone_ids = [
-      azurerm_private_dns_zone.no_sql[0].id
+      azurerm_private_dns_zone.sql[0].id
     ]
   }
 }

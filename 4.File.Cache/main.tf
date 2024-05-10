@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.101.0"
+      version = "~>3.102.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -88,12 +88,6 @@ data azurerm_user_assigned_identity studio {
   resource_group_name = module.global.resourceGroupName
 }
 
-data azurerm_key_vault_key cache_encryption {
-  count        = module.global.keyVault.enable && var.hpcCache.encryption.enable ? 1 : 0
-  name         = module.global.keyVault.keyName.cacheEncryption
-  key_vault_id = data.azurerm_key_vault.studio[0].id
-}
-
 data azurerm_key_vault studio {
   count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
@@ -109,6 +103,12 @@ data azurerm_key_vault_secret admin_username {
 data azurerm_key_vault_secret admin_password {
   count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminPassword
+  key_vault_id = data.azurerm_key_vault.studio[0].id
+}
+
+data azurerm_key_vault_key cache_encryption {
+  count        = module.global.keyVault.enable && var.hpcCache.encryption.enable ? 1 : 0
+  name         = module.global.keyVault.keyName.cacheEncryption
   key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 

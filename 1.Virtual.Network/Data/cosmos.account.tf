@@ -102,7 +102,7 @@ resource azurerm_cosmosdb_account studio {
   mongo_server_version             = each.value.type == "mongo" ? var.mongoDB.account.version : null
   offer_type                       = var.cosmosDB.tier
   key_vault_key_id                 = var.cosmosDB.encryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
-  analytical_storage_enabled       = var.data.analytics.enable
+  analytical_storage_enabled       = var.data.analytics.cosmosDB.enable
   partition_merge_enabled          = var.cosmosDB.partitionMerge.enable
   multiple_write_locations_enabled = var.cosmosDB.multiRegionWrite.enable
   automatic_failover_enabled       = var.cosmosDB.automaticFailover.enable
@@ -138,9 +138,9 @@ resource azurerm_cosmosdb_account studio {
     }
   }
   dynamic analytical_storage {
-    for_each = var.data.analytics.enable ? [1] : []
+    for_each = var.data.analytics.cosmosDB.enable ? [1] : []
     content {
-      schema_type = var.data.analytics.schemaType
+      schema_type = var.data.analytics.cosmosDB.schemaType
     }
   }
   dynamic capabilities {

@@ -2,6 +2,12 @@
 # Purview (https://learn.microsoft.com/purview/purview) #
 #########################################################
 
+resource azurerm_resource_group data_governance {
+  count    = var.data.governance.enable ? 1 : 0
+  name     = "${azurerm_resource_group.data.name}.Governance"
+  location = azurerm_resource_group.data.location
+}
+
 resource azurerm_purview_account data {
   count               = var.data.governance.enable ? 1 : 0
   name                = var.data.governance.name

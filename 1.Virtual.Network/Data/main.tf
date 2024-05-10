@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.101.0"
+      version = "~>3.102.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -11,7 +11,7 @@ terraform {
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>1.12.1"
+      version = "~>1.13.1"
     }
     http = {
       source  = "hashicorp/http"
@@ -41,6 +41,15 @@ variable resourceGroupName {
 
 variable data {
   type = object({
+    lake = object({
+      paths = list(string)
+      storageAccount = object({
+        name        = string
+        type        = string
+        redundancy  = string
+        performance = string
+      })
+    })
     factory = object({
       enable = bool
       name   = string
@@ -49,26 +58,45 @@ variable data {
       })
     })
     analytics = object({
-      enable     = bool
-      schemaType = string
+      cosmosDB = object({
+        enable     = bool
+        schemaType = string
+      })
+      synapse = object({
+        enable = bool
+      })
+      databricks = object({
+        enable = bool
+        workspace = object({
+          tier = string
+        })
+        serverless = object({
+          enable = bool
+        })
+      })
+      stream = object({
+        enable = bool
+        cluster = object({
+          name = string
+          size = number
+        })
+      })
       workspace = object({
         name = string
-        authentication = object({
-          azureADOnly = bool
-        })
         adminLogin = object({
           userName     = string
           userPassword = string
         })
-        storageAccount = object({
-          name        = string
-          type        = string
-          redundancy  = string
-          performance = string
-        })
         encryption = object({
           enable = bool
         })
+      })
+    })
+    machineLearning = object({
+      enable = bool
+      workspace = object({
+        name = string
+        tier = string
       })
     })
     governance = object({
@@ -123,6 +151,12 @@ data azurerm_key_vault_key data_encryption {
   key_vault_id = data.azurerm_key_vault.studio[0].id
 }
 
+data azurerm_application_insights studio {
+  count               = module.global.monitor.enable ? 1 : 0
+  name                = module.global.monitor.name
+  resource_group_name = module.global.resourceGroupName
+}
+
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
@@ -153,22 +187,4 @@ data azurerm_subnet data_cassandra {
 resource azurerm_resource_group data {
   name     = var.resourceGroupName
   location = var.cosmosDB.geoLocations[0].regionName
-}
-
-resource azurerm_resource_group data_factory {
-  count    = var.data.factory.enable ? 1 : 0
-  name     = "${azurerm_resource_group.data.name}.Factory"
-  location = azurerm_resource_group.data.location
-}
-
-resource azurerm_resource_group data_analytics {
-  count    = var.data.analytics.enable ? 1 : 0
-  name     = "${azurerm_resource_group.data.name}.Analytics"
-  location = azurerm_resource_group.data.location
-}
-
-resource azurerm_resource_group data_governance {
-  count    = var.data.governance.enable ? 1 : 0
-  name     = "${azurerm_resource_group.data.name}.Governance"
-  location = azurerm_resource_group.data.location
 }

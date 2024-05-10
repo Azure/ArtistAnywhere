@@ -238,7 +238,7 @@ resource azapi_resource mongo_cluster_firewall_rule_allow_azure {
   body = jsonencode({
     properties = {
       startIpAddress = "0.0.0.0"
-      endIpAddress = "0.0.0.0"
+      endIpAddress   = "0.0.0.0"
     }
   })
   schema_validation_enabled = false

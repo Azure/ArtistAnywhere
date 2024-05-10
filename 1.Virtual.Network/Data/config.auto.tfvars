@@ -1,6 +1,18 @@
 resourceGroupName = "ArtistAnywhere.Data" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
 data = {
+  lake = {
+    paths = [
+      "synapse",
+      "databricks"
+    ]
+    storageAccount = {
+      name        = "xstudio1"
+      type        = "StorageV2"
+      redundancy  = "LRS"
+      performance = "Standard"
+    }
+  }
   factory = {
     enable = true
     name   = "xstudio"
@@ -9,26 +21,45 @@ data = {
     }
   }
   analytics = {
-    enable     = true
-    schemaType = "FullFidelity" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#schema_type
+    cosmosDB = {
+      enable     = true
+      schemaType = "FullFidelity" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#schema_type
+    }
+    synapse = {
+      enable = true
+    }
+    databricks = {
+      enable = true
+      workspace = {
+        tier = "standard"
+      }
+      serverless = {
+        enable = true
+      }
+    }
+    stream = {
+      enable = false
+      cluster = {
+        name = "xstudio"
+        size = 36
+      }
+    }
     workspace = {
       name = "xstudio"
-      authentication = {
-        azureADOnly = false
-      }
       adminLogin = {
         userName     = "xadmin"
         userPassword = "P@ssword1234"
       }
-      storageAccount = {
-        name        = "xstudio1"
-        type        = "StorageV2"
-        redundancy  = "LRS"
-        performance = "Standard"
-      }
       encryption = {
         enable = false
       }
+    }
+  }
+  machineLearning = {
+    enable = false
+    workspace = {
+      name = "xstudio"
+      tier = "Default"
     }
   }
   governance = {
@@ -99,9 +130,9 @@ cosmosDB = {
   }
 }
 
-########################################################################
-# Cosmos DB NoSQL (https://learn.microsoft.com/azure/cosmos-db/nosql/) #
-########################################################################
+#######################################################################
+# Cosmos DB NoSQL (https://learn.microsoft.com/azure/cosmos-db/nosql) #
+#######################################################################
 
 noSQL = {
   enable = true
