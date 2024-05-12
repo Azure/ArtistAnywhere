@@ -1,5 +1,11 @@
+# 2024-04-01-preview
+az provider show --namespace Microsoft.VideoIndexer --query "resourceTypes[?resourceType=='accounts'].apiVersions[]"
+
 # 2024-03-01-preview
 az provider show --namespace Microsoft.DocumentDB --query "resourceTypes[?resourceType=='mongoClusters'].apiVersions[]"
+
+# 2020-03-01
+az provider show --namespace Microsoft.StreamAnalytics --query "resourceTypes[?resourceType=='clusters'].apiVersions[]"
 
 # 2023-07-01
 az provider show --namespace Microsoft.VirtualMachineImages --query "resourceTypes[?resourceType=='imageTemplates'].apiVersions[]"
@@ -16,7 +22,6 @@ az account show
 az account list-locations --query [?name=='losangeles'] --include-extended-locations
 az account list-locations --query [?name=='westus']
 az account list-locations --query [?name=='westus2']
-az account list-locations --query [?name=='westus3']
 
 az account list-locations --query [?name=='westus']|[0]
 {

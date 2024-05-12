@@ -32,6 +32,7 @@ variable storage {
     accountName = "xstudio0" # Set to a globally unique name (lowercase alphanumeric)
     containerName = {
       terraformState = "terraform-state"
+      videoIndexer   = "video-indexer"
     }
   }
 }
@@ -48,17 +49,6 @@ variable monitor {
       linux   = "1.31"
       windows = "1.24"
     }
-  }
-}
-
-#################################################################################
-# Search (https://learn.microsoft.com/azure/search/search-what-is-azure-search) #
-#################################################################################
-
-variable search {
-  default = {
-    enable = false
-    name   = "xstudio" # Set to a globally unique name (lowercase alphanumeric)
   }
 }
 
@@ -86,6 +76,17 @@ variable keyVault {
   }
 }
 
+######################################################################
+# Event Grid (https://learn.microsoft.com/azure/event-grid/overview) #
+######################################################################
+
+variable eventGrid {
+  default = {
+    enable = true
+    name   = "xstudio"
+  }
+}
+
 ##########################################################################################
 # App Configuration (https://learn.microsoft.com/azure/azure-app-configuration/overview) #
 ##########################################################################################
@@ -93,7 +94,28 @@ variable keyVault {
 variable appConfig {
   default = {
     enable = false
-    name   = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
+    name   = "xstudio"
+  }
+}
+
+################################################################################################
+# Traffic Manager (https://learn.microsoft.com/azure/traffic-manager/traffic-manager-overview) #
+################################################################################################
+
+variable trafficManager {
+  default = {
+    enable = false
+    name   = "xstudio"
+  }
+}
+
+####################################################################################
+# AI Services (https://learn.microsoft.com/azure/ai-services/what-are-ai-services) #
+####################################################################################
+
+variable ai {
+  default = {
+    enable = false
   }
 }
 
@@ -117,14 +139,22 @@ output monitor {
   value = var.monitor
 }
 
-output search {
-  value = var.search
-}
-
 output keyVault {
   value = var.keyVault
 }
 
+output eventGrid {
+  value = var.eventGrid
+}
+
 output appConfig {
   value = var.appConfig
+}
+
+output trafficManager {
+  value = var.trafficManager
+}
+
+output ai {
+  value = var.ai
 }

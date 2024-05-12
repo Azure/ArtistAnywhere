@@ -41,7 +41,7 @@ data = {
       enable = false
       cluster = {
         name = "xstudio"
-        size = 36
+        size = 120
       }
     }
     workspace = {
@@ -53,13 +53,6 @@ data = {
       encryption = {
         enable = false
       }
-    }
-  }
-  machineLearning = {
-    enable = false
-    workspace = {
-      name = "xstudio"
-      tier = "Default"
     }
   }
   governance = {
@@ -537,6 +530,16 @@ table = {
       throughput = null
     }
   ]
+}
+
+##############################################################################
+# Event Hub  (https://learn.microsoft.com/azure/event-hubs/event-hubs-about) #
+##############################################################################
+
+eventHub = {
+  enable = false
+  name   = "xstudio"
+  tier   = "Standard"
 }
 
 #################################################################

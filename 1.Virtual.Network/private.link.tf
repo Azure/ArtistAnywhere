@@ -12,15 +12,15 @@ resource azurerm_private_dns_zone storage_file {
   resource_group_name = azurerm_resource_group.network.name
 }
 
-resource azurerm_private_dns_zone search {
-  count               = module.global.search.enable ? 1 : 0
-  name                = "privatelink.search.windows.net"
-  resource_group_name = azurerm_resource_group.network.name
-}
-
 resource azurerm_private_dns_zone key_vault {
   count               = module.global.keyVault.enable ? 1 : 0
   name                = "privatelink.vaultcore.azure.net"
+  resource_group_name = azurerm_resource_group.network.name
+}
+
+resource azurerm_private_dns_zone event_grid {
+  count               = module.global.eventGrid.enable ? 1 : 0
+  name                = "privatelink.eventgrid.azure.net"
   resource_group_name = azurerm_resource_group.network.name
 }
 
@@ -56,19 +56,6 @@ resource azurerm_private_dns_zone_virtual_network_link storage_file {
   ]
 }
 
-resource azurerm_private_dns_zone_virtual_network_link search {
-  for_each = {
-    for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.key => virtualNetwork if module.global.search.enable
-  }
-  name                  = "${lower(each.value.key)}-search"
-  resource_group_name   = azurerm_private_dns_zone.search[0].resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.search[0].name
-  virtual_network_id    = each.value.id
-  depends_on = [
-    azurerm_virtual_network.studio
-  ]
-}
-
 resource azurerm_private_dns_zone_virtual_network_link key_vault {
   for_each = {
     for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.key => virtualNetwork if module.global.keyVault.enable
@@ -76,6 +63,19 @@ resource azurerm_private_dns_zone_virtual_network_link key_vault {
   name                  = "${lower(each.value.key)}-key-vault"
   resource_group_name   = azurerm_private_dns_zone.key_vault[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.key_vault[0].name
+  virtual_network_id    = each.value.id
+  depends_on = [
+    azurerm_virtual_network.studio
+  ]
+}
+
+resource azurerm_private_dns_zone_virtual_network_link event_grid {
+  for_each = {
+    for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.key => virtualNetwork if module.global.eventGrid.enable
+  }
+  name                  = "${lower(each.value.key)}-event-grid"
+  resource_group_name   = azurerm_private_dns_zone.event_grid[0].resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.event_grid[0].name
   virtual_network_id    = each.value.id
   depends_on = [
     azurerm_virtual_network.studio

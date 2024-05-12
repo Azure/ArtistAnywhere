@@ -10,8 +10,7 @@ virtualNetworks = [
     name       = "Studio"
     nameSuffix = "West"
     regionNames = [
-      "WestUS2",
-      "WestUS3"
+      "WestUS2"
     ]
     addressSpace = [
       "10.0.0.0/16"
@@ -152,8 +151,7 @@ virtualNetworks = [
     name       = "Studio"
     nameSuffix = "East"
     regionNames = [
-      "EastUS",
-      "EastUS2"
+      "EastUS"
     ]
     addressSpace = [
       "10.1.0.0/16"
@@ -324,4 +322,18 @@ bastion = {
 
 monitor = {
   enable = true
+}
+
+################################################################################################
+# API Management (https://learn.microsoft.com/azure/api-management/api-management-key-concepts #
+################################################################################################
+
+apiManagement = {
+  enable = false
+  name   = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
+  tier   = "Developer_1"
+  publisher = {
+    name  = ""
+    email = ""
+  }
 }

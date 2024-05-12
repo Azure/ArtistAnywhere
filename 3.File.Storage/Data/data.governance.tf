@@ -8,16 +8,17 @@ resource azurerm_resource_group data_governance {
   location = azurerm_resource_group.data.location
 }
 
-resource azurerm_purview_account data {
-  count               = var.data.governance.enable ? 1 : 0
-  name                = var.data.governance.name
-  resource_group_name = azurerm_resource_group.data_governance[0].name
-  location            = azurerm_resource_group.data_governance[0].location
+resource azurerm_purview_account data_governance {
+  count                       = var.data.governance.enable ? 1 : 0
+  name                        = var.data.governance.name
+  resource_group_name         = azurerm_resource_group.data_governance[0].name
+  location                    = azurerm_resource_group.data_governance[0].location
+  managed_resource_group_name = "${azurerm_resource_group.data_governance[0].name}.Managed"
   identity {
-    type = "SystemAssigned" # "UserAssigned"
-    # identity_ids = [
-    #   data.azurerm_user_assigned_identity.studio.id
-    # ]
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
   }
 }
 
@@ -37,13 +38,13 @@ resource azurerm_private_dns_zone_virtual_network_link purview {
 
 resource azurerm_private_endpoint purview {
   count               = var.data.governance.enable ? 1 : 0
-  name                = "${azurerm_purview_account.data[0].name}-${azurerm_private_dns_zone_virtual_network_link.purview[0].name}"
+  name                = "${azurerm_purview_account.data_governance[0].name}-${azurerm_private_dns_zone_virtual_network_link.purview[0].name}"
   resource_group_name = azurerm_resource_group.data_governance[0].name
   location            = azurerm_resource_group.data_governance[0].location
   subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
-    name                           = azurerm_purview_account.data[0].name
-    private_connection_resource_id = azurerm_purview_account.data[0].id
+    name                           = azurerm_purview_account.data_governance[0].name
+    private_connection_resource_id = azurerm_purview_account.data_governance[0].id
     is_manual_connection           = false
     subresource_names = [
       "account"

@@ -29,14 +29,13 @@ variable resourceGroupName {
 
 data azurerm_client_config studio {}
 
-data azurerm_storage_account studio {
-  name                = module.global.storage.accountName
+data azurerm_user_assigned_identity studio {
+  name                = module.global.managedIdentity.name
   resource_group_name = module.global.resourceGroupName
 }
 
-data azurerm_search_service studio {
-  count               = module.global.search.enable ? 1 : 0
-  name                = module.global.search.name
+data azurerm_storage_account studio {
+  name                = module.global.storage.accountName
   resource_group_name = module.global.resourceGroupName
 }
 

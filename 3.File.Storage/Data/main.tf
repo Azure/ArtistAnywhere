@@ -7,7 +7,7 @@ terraform {
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.48.0"
+      version = "~>2.49.0"
     }
     azapi = {
       source = "azure/azapi"
@@ -19,7 +19,7 @@ terraform {
     }
   }
   backend azurerm {
-    key = "1.Virtual.Network.Data"
+    key = "3.File.Storage.Data"
   }
 }
 
@@ -92,13 +92,6 @@ variable data {
         })
       })
     })
-    machineLearning = object({
-      enable = bool
-      workspace = object({
-        name = string
-        tier = string
-      })
-    })
     governance = object({
       enable = bool
       name   = string
@@ -109,6 +102,8 @@ variable data {
 data http client_address {
   url = "https://api.ipify.org?format=json"
 }
+
+data azurerm_client_config studio {}
 
 data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name
@@ -157,6 +152,12 @@ data azurerm_application_insights studio {
   resource_group_name = module.global.resourceGroupName
 }
 
+# data azurerm_machine_learning_workspace studio {
+#   count               = module.global.ai.enable ? 1 : 0
+#   name                = module.global.ai.name
+#   resource_group_name = module.global.resourceGroupName
+# }
+
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
@@ -182,6 +183,11 @@ data azurerm_subnet data_cassandra {
   name                 = "DataCassandra"
   resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio_region.name
+}
+
+locals {
+  virtualNetworks              = data.terraform_remote_state.network.outputs.virtualNetworks
+  virtualNetworksSubnetCompute = data.terraform_remote_state.network.outputs.virtualNetworksSubnetCompute
 }
 
 resource azurerm_resource_group data {

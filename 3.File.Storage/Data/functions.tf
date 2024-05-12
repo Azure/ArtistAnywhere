@@ -18,17 +18,11 @@ variable functionApp {
   })
 }
 
-data azurerm_storage_account studio {
-  count               = var.noSQL.enable ? 1 : 0
-  name                = module.global.storage.accountName
-  resource_group_name = module.global.resourceGroupName
-}
-
 resource azurerm_storage_share studio {
   count                = var.noSQL.enable ? 1 : 0
   name                 = var.functionApp.fileShare.name
   quota                = var.functionApp.fileShare.sizeGB
-  storage_account_name = data.azurerm_storage_account.studio[0].name
+  storage_account_name = azurerm_storage_account.datalake.name
 }
 
 resource azurerm_service_plan studio {
@@ -46,7 +40,7 @@ resource azurerm_windows_function_app studio {
   resource_group_name                            = azurerm_resource_group.data.name
   location                                       = azurerm_resource_group.data.location
   service_plan_id                                = azurerm_service_plan.studio[0].id
-  storage_account_name                           = data.azurerm_storage_account.studio[0].name
+  storage_account_name                           = azurerm_storage_account.datalake.name
   storage_uses_managed_identity                  = true
   builtin_logging_enabled                        = true
   https_only                                     = true

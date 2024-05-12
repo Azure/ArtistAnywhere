@@ -16,7 +16,7 @@ resource azurerm_synapse_workspace studio {
   managed_resource_group_name          = "${azurerm_resource_group.data_analytics_synapse[0].name}.Managed"
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.studio.id
   compute_subnet_id                    = data.azurerm_subnet.data.id
-  purview_id                           = var.data.governance.enable ? azurerm_purview_account.data[0].id : null
+  purview_id                           = var.data.governance.enable ? azurerm_purview_account.data_governance[0].id : null
   sql_administrator_login              = var.data.analytics.workspace.adminLogin.userName != "" || !module.global.keyVault.enable ? var.data.analytics.workspace.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
   sql_administrator_login_password     = var.data.analytics.workspace.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.data.analytics.workspace.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
   identity {
@@ -24,6 +24,12 @@ resource azurerm_synapse_workspace studio {
     identity_ids = [
       data.azurerm_user_assigned_identity.studio.id
     ]
+  }
+  github_repo {
+    account_name    = "Azure"
+    repository_name = "ArtistAnywhere"
+    branch_name     = "main"
+    root_folder     = "/1.Virtual.Network/Data/SynapseStudio"
   }
   dynamic customer_managed_key {
     for_each = var.data.analytics.workspace.encryption.enable && module.global.keyVault.enable ? [1] : []

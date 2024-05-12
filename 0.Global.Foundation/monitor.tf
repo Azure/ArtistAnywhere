@@ -14,16 +14,24 @@ variable monitor {
   })
 }
 
-data azuread_service_principal diagnostic_services {
+data azuread_service_principal monitor_diagnostics {
   count        = module.global.monitor.enable ? 1 : 0
   display_name = "Diagnostic Services Trusted Storage Access"
 }
 
-resource azurerm_role_assignment diagnostic_services {
+resource azurerm_role_assignment monitor_diagnostics {
   count                = module.global.monitor.enable ? 1 : 0
   role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor
-  principal_id         = data.azuread_service_principal.diagnostic_services[0].object_id
+  principal_id         = data.azuread_service_principal.monitor_diagnostics[0].object_id
   scope                = azurerm_storage_account.studio.id
+}
+
+resource time_sleep monitor_diagnostics_rbac {
+  count           = module.global.monitor.enable ? 1 : 0
+  create_duration = "30s"
+  depends_on = [
+    azurerm_role_assignment.monitor_diagnostics
+  ]
 }
 
 resource azurerm_log_analytics_workspace studio {
@@ -54,7 +62,7 @@ resource azurerm_application_insights studio {
   internet_ingestion_enabled = false
   internet_query_enabled     = false
   depends_on = [
-    azurerm_role_assignment.diagnostic_services
+    time_sleep.monitor_diagnostics_rbac
   ]
 }
 

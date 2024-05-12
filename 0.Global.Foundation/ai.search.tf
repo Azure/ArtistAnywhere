@@ -2,27 +2,15 @@
 # Search (https://learn.microsoft.com/azure/search/search-what-is-azure-search) #
 #################################################################################
 
-variable search {
-  type = object({
-    tier           = string
-    hostingMode    = string
-    replicaCount   = number
-    partitionCount = number
-    sharedPrivateAccess = object({
-      enable = bool
-    })
-  })
-}
-
 resource azurerm_search_service studio {
-  count               = module.global.search.enable ? 1 : 0
-  name                = module.global.search.name
-  resource_group_name = azurerm_resource_group.studio.name
-  location            = azurerm_resource_group.studio.location
-  sku                 = var.search.tier
-  hosting_mode        = var.search.hostingMode
-  replica_count       = var.search.replicaCount
-  partition_count     = var.search.partitionCount
+  count               = var.ai.search.enable && module.global.ai.enable ? 1 : 0
+  name                = var.ai.search.name
+  resource_group_name = azurerm_resource_group.studio_ai[0].name
+  location            = azurerm_resource_group.studio_ai[0].location
+  sku                 = var.ai.search.tier
+  hosting_mode        = var.ai.search.hostingMode
+  replica_count       = var.ai.search.replicaCount
+  partition_count     = var.ai.search.partitionCount
   # identity {
   #   type = "UserAssigned"
   #   identity_ids = [
@@ -35,7 +23,7 @@ resource azurerm_search_service studio {
 }
 
 resource azurerm_search_shared_private_link_service studio {
-  count              = module.global.search.enable && var.search.sharedPrivateAccess.enable ? 1 : 0
+  count              = var.ai.search.enable && var.ai.search.sharedPrivateAccess.enable && module.global.ai.enable ? 1 : 0
   name               = azurerm_search_service.studio[0].name
   search_service_id  = azurerm_search_service.studio[0].id
   target_resource_id = azurerm_storage_account.studio.id
