@@ -28,16 +28,25 @@ data azuread_service_principal hpc_cache {
 
 resource azurerm_role_assignment storage_account_contributor {
   count                = var.hpcCache.enable ? 1 : 0
-  role_definition_name = "Storage Account Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-account-contributor
+  role_definition_name = "Storage Account Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-account-contributor
   principal_id         = data.azuread_service_principal.hpc_cache[0].object_id
   scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.blobStorageAccountNfs.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.blobStorageAccountNfs.name}"
 }
 
 resource azurerm_role_assignment storage_blob_data_contributor {
   count                = var.hpcCache.enable ? 1 : 0
-  role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor
+  role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
   principal_id         = data.azuread_service_principal.hpc_cache[0].object_id
   scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.blobStorageAccountNfs.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.blobStorageAccountNfs.name}"
+}
+
+resource time_sleep hpc_cache_storage_rbac {
+  count           = var.hpcCache.enable ? 1 : 0
+  create_duration = "30s"
+  depends_on = [
+    azurerm_role_assignment.storage_account_contributor,
+    azurerm_role_assignment.storage_blob_data_contributor
+  ]
 }
 
 resource azurerm_hpc_cache studio {
@@ -65,10 +74,6 @@ resource azurerm_hpc_cache studio {
   }
   key_vault_key_id                           = var.hpcCache.encryption.enable ? data.azurerm_key_vault_key.cache_encryption[0].id : null
   automatically_rotate_key_to_latest_enabled = var.hpcCache.encryption.enable ? var.hpcCache.encryption.rotateKey : null
-  depends_on = [
-    azurerm_role_assignment.storage_account_contributor,
-    azurerm_role_assignment.storage_blob_data_contributor
-  ]
 }
 
 resource azurerm_hpc_cache_nfs_target storage {
@@ -108,7 +113,8 @@ resource azurerm_hpc_cache_blob_nfs_target storage {
   write_back_timer_in_seconds   = each.value.fileIntervals.writeBackSeconds
   storage_container_id          = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${each.value.hostName}/blobServices/default/containers/${each.value.containerName}"
   depends_on = [
-    azurerm_hpc_cache.studio
+    azurerm_hpc_cache.studio,
+    time_sleep.hpc_cache_storage_rbac
   ]
 }
 

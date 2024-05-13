@@ -100,22 +100,31 @@ locals {
   }
 }
 
-resource azurerm_role_assignment identity {
-  role_definition_name = "Managed Identity Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#managed-identity-operator
+resource azurerm_role_assignment managed_identity_operator {
+  role_definition_name = "Managed Identity Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/identity#managed-identity-operator
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_user_assigned_identity.studio.id
 }
 
-resource azurerm_role_assignment network {
-  role_definition_name = "Virtual Machine Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#virtual-machine-contributor
+resource azurerm_role_assignment virtual_machine_contributor {
+  role_definition_name = "Virtual Machine Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/compute#virtual-machine-contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_resource_group.network.id
 }
 
-resource azurerm_role_assignment image {
-  role_definition_name = "Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#contributor
+resource azurerm_role_assignment resource_group_contributor {
+  role_definition_name = "Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/general#contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = azurerm_resource_group.image.id
+}
+
+resource time_sleep image_builder_rbac {
+  create_duration = "30s"
+  depends_on = [
+    azurerm_role_assignment.managed_identity_operator,
+    azurerm_role_assignment.virtual_machine_contributor,
+    azurerm_role_assignment.resource_group_contributor
+  ]
 }
 
 resource azapi_resource linux {
@@ -235,9 +244,7 @@ resource azapi_resource linux {
     ]
   }
   depends_on = [
-    azurerm_role_assignment.identity,
-    azurerm_role_assignment.network,
-    azurerm_role_assignment.image
+    time_sleep.image_builder_rbac
   ]
 }
 
@@ -380,8 +387,6 @@ resource azapi_resource windows {
     ]
   }
   depends_on = [
-    azurerm_role_assignment.identity,
-    azurerm_role_assignment.network,
-    azurerm_role_assignment.image
+    time_sleep.image_builder_rbac
   ]
 }

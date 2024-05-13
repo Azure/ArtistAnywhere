@@ -537,7 +537,7 @@ table = {
 ##############################################################################
 
 eventHub = {
-  enable = false
+  enable = true
   name   = "xstudio"
   tier   = "Standard"
 }

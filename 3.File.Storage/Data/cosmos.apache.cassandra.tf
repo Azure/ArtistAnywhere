@@ -161,11 +161,19 @@ resource azurerm_private_endpoint cassandra {
 # Apache Cassandra Managed Instance (https://learn.microsoft.com/azure/managed-instance-apache-cassandra/introduction) #
 ########################################################################################################################
 
-resource azurerm_role_assignment cassandra {
+resource azurerm_role_assignment network_contributor {
   count                = var.apacheCassandra.enable ? 1 : 0
-  role_definition_name = "Network Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#network-contributor
+  role_definition_name = "Network Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/networking#network-contributor
   principal_id         = data.azuread_service_principal.cosmos_db.object_id
   scope                = data.azurerm_virtual_network.studio_region.id
+}
+
+resource time_sleep cassandra_cluster_rbac {
+  count           = var.apacheCassandra.enable ? 1 : 0
+  create_duration = "30s"
+  depends_on = [
+    azurerm_role_assignment.network_contributor
+  ]
 }
 
 resource azurerm_cosmosdb_cassandra_cluster cassandra {
@@ -181,7 +189,7 @@ resource azurerm_cosmosdb_cassandra_cluster cassandra {
     type = "SystemAssigned"
   }
   depends_on = [
-    azurerm_role_assignment.cassandra
+    time_sleep.cassandra_cluster_rbac
   ]
 }
 

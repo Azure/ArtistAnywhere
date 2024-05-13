@@ -45,18 +45,27 @@ resource azurerm_resource_group lustre {
   location = module.global.resourceLocation.region
 }
 
-resource azurerm_role_assignment storage_account_contributor {
+resource azurerm_role_assignment lustre_storage_account_contributor {
   count                = var.lustre.enable && var.lustre.blobStorage.enable ? 1 : 0
-  role_definition_name = "Storage Account Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-account-contributor
+  role_definition_name = "Storage Account Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-account-contributor
   principal_id         = data.azuread_service_principal.lustre[0].object_id
   scope                = data.azurerm_storage_account.lustre[0].id
 }
 
-resource azurerm_role_assignment storage_blob_data_contributor {
+resource azurerm_role_assignment lustre_storage_blob_data_contributor {
   count                = var.lustre.enable && var.lustre.blobStorage.enable ? 1 : 0
-  role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor
+  role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
   principal_id         = data.azuread_service_principal.lustre[0].object_id
   scope                = data.azurerm_storage_account.lustre[0].id
+}
+
+resource time_sleep lustre_storage_rbac {
+  count           = var.lustre.enable && var.lustre.blobStorage.enable ? 1 : 0
+  create_duration = "30s"
+  depends_on = [
+    azurerm_role_assignment.lustre_storage_account_contributor,
+    azurerm_role_assignment.lustre_storage_blob_data_contributor
+  ]
 }
 
 resource azurerm_managed_lustre_file_system lab {
@@ -95,8 +104,7 @@ resource azurerm_managed_lustre_file_system lab {
   }
   depends_on = [
     azurerm_storage_account.studio,
-    azurerm_role_assignment.storage_account_contributor,
-    azurerm_role_assignment.storage_blob_data_contributor
+    time_sleep.lustre_storage_rbac
   ]
 }
 

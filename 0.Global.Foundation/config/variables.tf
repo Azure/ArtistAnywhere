@@ -82,7 +82,7 @@ variable keyVault {
 
 variable eventGrid {
   default = {
-    enable = true
+    enable = false
     name   = "xstudio"
   }
 }
@@ -106,16 +106,6 @@ variable trafficManager {
   default = {
     enable = false
     name   = "xstudio"
-  }
-}
-
-####################################################################################
-# AI Services (https://learn.microsoft.com/azure/ai-services/what-are-ai-services) #
-####################################################################################
-
-variable ai {
-  default = {
-    enable = false
   }
 }
 
@@ -153,8 +143,4 @@ output appConfig {
 
 output trafficManager {
   value = var.trafficManager
-}
-
-output ai {
-  value = var.ai
 }

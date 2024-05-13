@@ -19,9 +19,9 @@ data azuread_service_principal monitor_diagnostics {
   display_name = "Diagnostic Services Trusted Storage Access"
 }
 
-resource azurerm_role_assignment monitor_diagnostics {
+resource azurerm_role_assignment storage_blob_data_contributor {
   count                = module.global.monitor.enable ? 1 : 0
-  role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor
+  role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
   principal_id         = data.azuread_service_principal.monitor_diagnostics[0].object_id
   scope                = azurerm_storage_account.studio.id
 }
@@ -30,7 +30,7 @@ resource time_sleep monitor_diagnostics_rbac {
   count           = module.global.monitor.enable ? 1 : 0
   create_duration = "30s"
   depends_on = [
-    azurerm_role_assignment.monitor_diagnostics
+    azurerm_role_assignment.storage_blob_data_contributor
   ]
 }
 

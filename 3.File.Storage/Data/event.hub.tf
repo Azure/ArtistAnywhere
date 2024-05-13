@@ -48,23 +48,19 @@ resource azurerm_private_dns_zone event_hub {
 }
 
 resource azurerm_private_dns_zone_virtual_network_link event_hub {
-  for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork if var.eventHub.enable
-  }
-  name                  = "${lower(each.value.key)}-event-hub"
+  count                 = var.eventHub.enable ? 1 : 0
+  name                  = "event-hub"
   resource_group_name   = azurerm_private_dns_zone.event_hub[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.event_hub[0].name
-  virtual_network_id    = each.value.id
+  virtual_network_id    = data.azurerm_virtual_network.studio_region.id
 }
 
 resource azurerm_private_endpoint event_hub {
-  for_each = {
-    for subnet in local.virtualNetworksSubnetCompute : subnet.key => subnet if var.eventHub.enable && subnet.virtualNetworkEdgeZone == ""
-  }
-  name                = "${lower(each.value.virtualNetworkKey)}-event-hub"
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
-  subnet_id           = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
+  count               = var.eventHub.enable ? 1 : 0
+  name                = "${azurerm_eventhub_namespace.data[0].name}-${azurerm_private_dns_zone_virtual_network_link.event_hub[0].name}"
+  resource_group_name = azurerm_eventhub_namespace.data[0].resource_group_name
+  location            = azurerm_eventhub_namespace.data[0].location
+  subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azurerm_eventhub_namespace.data[0].name
     private_connection_resource_id = azurerm_eventhub_namespace.data[0].id
@@ -74,7 +70,7 @@ resource azurerm_private_endpoint event_hub {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.event_hub[each.value.virtualNetworkKey].name
+    name = azurerm_private_dns_zone_virtual_network_link.event_hub[0].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.event_hub[0].id
     ]

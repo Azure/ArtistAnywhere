@@ -188,16 +188,25 @@ resource azurerm_resource_group weka {
 
 resource azurerm_role_assignment weka_virtual_machine_contributor {
   count                = var.weka.enable ? 1 : 0
-  role_definition_name = "Virtual Machine Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#virtual-machine-contributor
+  role_definition_name = "Virtual Machine Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/compute#virtual-machine-contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = azurerm_resource_group.weka[0].id
 }
 
 resource azurerm_role_assignment weka_private_dns_zone_contributor {
   count                = var.weka.enable ? 1 : 0
-  role_definition_name = "Private DNS Zone Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#private-dns-zone-contributor
+  role_definition_name = "Private DNS Zone Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/networking#private-dns-zone-contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${data.azurerm_virtual_network.studio_region.resource_group_name}"
+}
+
+resource time_sleep weka_rbac {
+  count           = var.weka.enable ? 1 : 0
+  create_duration = "30s"
+  depends_on = [
+    azurerm_role_assignment.weka_virtual_machine_contributor,
+    azurerm_role_assignment.weka_private_dns_zone_contributor
+  ]
 }
 
 resource azurerm_proximity_placement_group weka {
@@ -331,8 +340,7 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     }
   }
   depends_on = [
-    azurerm_role_assignment.weka_virtual_machine_contributor,
-    azurerm_role_assignment.weka_private_dns_zone_contributor
+    time_sleep.weka_rbac
   ]
 }
 

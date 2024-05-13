@@ -84,11 +84,19 @@ locals {
   ]
 }
 
-resource azurerm_role_assignment key_vault {
+resource azurerm_role_assignment key_vault_crypto_service_encryption_user {
   count                = var.cosmosDB.encryption.enable && module.global.keyVault.enable ? 1 : 0
-  role_definition_name = "Key Vault Crypto Service Encryption User" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#key-vault-crypto-service-encryption-user
+  role_definition_name = "Key Vault Crypto Service Encryption User" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/security#key-vault-crypto-service-encryption-user
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_key_vault.studio[0].id
+}
+
+resource time_sleep cosmos_account_key_vault_rbac {
+  count           = var.cosmosDB.encryption.enable && module.global.keyVault.enable ? 1 : 0
+  create_duration = "30s"
+  depends_on = [
+    azurerm_role_assignment.key_vault_crypto_service_encryption_user
+  ]
 }
 
 resource azurerm_cosmosdb_account studio {
@@ -180,6 +188,6 @@ resource azurerm_cosmosdb_account studio {
     }
   }
   depends_on = [
-    azurerm_role_assignment.key_vault
+    time_sleep.cosmos_account_key_vault_rbac
   ]
 }

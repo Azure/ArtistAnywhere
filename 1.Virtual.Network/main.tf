@@ -57,6 +57,16 @@ data azurerm_app_configuration studio {
   resource_group_name = module.global.resourceGroupName
 }
 
+data terraform_remote_state ai {
+  backend = "azurerm"
+  config = {
+    resource_group_name  = module.global.resourceGroupName
+    storage_account_name = module.global.storage.accountName
+    container_name       = module.global.storage.containerName.terraformState
+    key                  = "0.Global.Foundation.AI"
+  }
+}
+
 resource azurerm_resource_group network {
   name     = var.resourceGroupName
   location = local.virtualNetworks[0].regionName

@@ -20,7 +20,7 @@ resource azurerm_databricks_workspace studio {
     virtual_network_id            = !var.data.analytics.databricks.serverless.enable ? data.azurerm_virtual_network.studio_region.id : null
     vnet_address_prefix           = !var.data.analytics.databricks.serverless.enable ? data.azurerm_virtual_network.studio_region.address_space[0] : null
     private_subnet_name           = !var.data.analytics.databricks.serverless.enable ? data.azurerm_subnet.data.name : null
-    # machine_learning_workspace_id = module.global.ai.machineLearning.enable ? data.azurerm_machine_learning_workspace.studio.id : null
+    machine_learning_workspace_id = try(data.terraform_remote_state.ai.outputs.ai.machineLearning.id, null)
   }
 }
 

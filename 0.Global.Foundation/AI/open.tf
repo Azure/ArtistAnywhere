@@ -3,17 +3,17 @@
 ##########################################################################
 
 resource azurerm_cognitive_account ai_open {
-  count                 = var.ai.open.enable && module.global.ai.enable ? 1 : 0
+  count                 = var.ai.open.enable ? 1 : 0
   name                  = var.ai.open.name
-  resource_group_name   = azurerm_resource_group.studio_ai[0].name
-  location              = azurerm_resource_group.studio_ai[0].location
+  resource_group_name   = azurerm_resource_group.studio_ai.name
+  location              = azurerm_resource_group.studio_ai.location
   sku_name              = var.ai.open.tier
   custom_subdomain_name = var.ai.open.domainName != "" ? var.ai.open.domainName : var.ai.open.name
   kind                  = "OpenAI"
   identity {
     type = "UserAssigned"
     identity_ids = [
-      azurerm_user_assigned_identity.studio.id
+      data.azurerm_user_assigned_identity.studio.id
     ]
   }
   network_acls {

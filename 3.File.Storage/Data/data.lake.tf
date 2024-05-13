@@ -19,17 +19,24 @@ resource azurerm_storage_account datalake {
   }
 }
 
-resource azurerm_role_assignment datalake {
-  role_definition_name = "Storage Blob Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-blob-data-owner
+resource azurerm_role_assignment storage_blob_data_owner {
+  role_definition_name = "Storage Blob Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-owner
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = azurerm_storage_account.datalake.id
+}
+
+resource time_sleep datalake_filesystem_rbac {
+  create_duration = "30s"
+  depends_on = [
+    azurerm_role_assignment.storage_blob_data_owner
+  ]
 }
 
 resource azurerm_storage_data_lake_gen2_filesystem studio {
   name               = azurerm_storage_account.datalake.name
   storage_account_id = azurerm_storage_account.datalake.id
   depends_on = [
-    azurerm_role_assignment.datalake
+    time_sleep.datalake_filesystem_rbac
   ]
 }
 

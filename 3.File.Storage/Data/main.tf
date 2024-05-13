@@ -7,7 +7,7 @@ terraform {
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.49.0"
+      version = "~>2.49.1"
     }
     azapi = {
       source = "azure/azapi"
@@ -152,11 +152,15 @@ data azurerm_application_insights studio {
   resource_group_name = module.global.resourceGroupName
 }
 
-# data azurerm_machine_learning_workspace studio {
-#   count               = module.global.ai.enable ? 1 : 0
-#   name                = module.global.ai.name
-#   resource_group_name = module.global.resourceGroupName
-# }
+data terraform_remote_state ai {
+  backend = "azurerm"
+  config = {
+    resource_group_name  = module.global.resourceGroupName
+    storage_account_name = module.global.storage.accountName
+    container_name       = module.global.storage.containerName.terraformState
+    key                  = "0.Global.Foundation.AI"
+  }
+}
 
 data terraform_remote_state network {
   backend = "azurerm"
@@ -183,11 +187,6 @@ data azurerm_subnet data_cassandra {
   name                 = "DataCassandra"
   resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio_region.name
-}
-
-locals {
-  virtualNetworks              = data.terraform_remote_state.network.outputs.virtualNetworks
-  virtualNetworksSubnetCompute = data.terraform_remote_state.network.outputs.virtualNetworksSubnetCompute
 }
 
 resource azurerm_resource_group data {

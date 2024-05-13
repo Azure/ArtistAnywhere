@@ -119,12 +119,7 @@ virtualNetworks = [
         serviceEndpoints = [
           "Microsoft.CognitiveServices"
         ]
-        serviceDelegation = {
-          service = "Microsoft.Web/serverFarms"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/action"
-          ]
-        }
+        serviceDelegation = null
       },
       {
         name = "GatewaySubnet"
@@ -260,12 +255,7 @@ virtualNetworks = [
         serviceEndpoints = [
           "Microsoft.CognitiveServices"
         ]
-        serviceDelegation = {
-          service = "Microsoft.Web/serverFarms"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/action"
-          ]
-        }
+        serviceDelegation = null
       },
       {
         name = "GatewaySubnet"

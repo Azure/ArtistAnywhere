@@ -3,17 +3,17 @@
 ###############################################################################################
 
 resource azurerm_cognitive_account ai_vision {
-  count                 = var.ai.vision.enable && module.global.ai.enable ? 1 : 0
+  count                 = var.ai.vision.enable ? 1 : 0
   name                  = var.ai.vision.name
-  resource_group_name   = azurerm_resource_group.studio_ai[0].name
-  location              = azurerm_resource_group.studio_ai[0].location
+  resource_group_name   = azurerm_resource_group.studio_ai.name
+  location              = azurerm_resource_group.studio_ai.location
   sku_name              = var.ai.vision.tier
   custom_subdomain_name = var.ai.vision.domainName != "" ? var.ai.vision.domainName : var.ai.vision.name
   kind                  = "ComputerVision"
   identity {
     type = "UserAssigned"
     identity_ids = [
-      azurerm_user_assigned_identity.studio.id
+      data.azurerm_user_assigned_identity.studio.id
     ]
   }
   network_acls {
@@ -35,17 +35,17 @@ resource azurerm_cognitive_account ai_vision {
 ###################################################################################################
 
 resource azurerm_cognitive_account ai_vision_training {
-  count                 = var.ai.vision.training.enable && module.global.ai.enable ? 1 : 0
+  count                 = var.ai.vision.training.enable ? 1 : 0
   name                  = var.ai.vision.training.name
-  resource_group_name   = azurerm_resource_group.studio_ai[0].name
-  location              = azurerm_resource_group.studio_ai[0].location
+  resource_group_name   = azurerm_resource_group.studio_ai.name
+  location              = azurerm_resource_group.studio_ai.location
   sku_name              = var.ai.vision.training.tier
   custom_subdomain_name = var.ai.vision.training.domainName != "" ? var.ai.vision.training.domainName : var.ai.vision.training.name
   kind                  = "CustomVision.Training"
   identity {
     type = "UserAssigned"
     identity_ids = [
-      azurerm_user_assigned_identity.studio.id
+      data.azurerm_user_assigned_identity.studio.id
     ]
   }
   network_acls {
@@ -63,17 +63,17 @@ resource azurerm_cognitive_account ai_vision_training {
 }
 
 resource azurerm_cognitive_account ai_vision_prediction {
-  count                 = var.ai.vision.prediction.enable && module.global.ai.enable ? 1 : 0
+  count                 = var.ai.vision.prediction.enable ? 1 : 0
   name                  = var.ai.vision.prediction.name
-  resource_group_name   = azurerm_resource_group.studio_ai[0].name
-  location              = azurerm_resource_group.studio_ai[0].location
+  resource_group_name   = azurerm_resource_group.studio_ai.name
+  location              = azurerm_resource_group.studio_ai.location
   sku_name              = var.ai.vision.prediction.tier
   custom_subdomain_name = var.ai.vision.prediction.domainName != "" ? var.ai.vision.prediction.domainName : var.ai.vision.prediction.name
   kind                  = "CustomVision.Prediction"
   identity {
     type = "UserAssigned"
     identity_ids = [
-      azurerm_user_assigned_identity.studio.id
+      data.azurerm_user_assigned_identity.studio.id
     ]
   }
   network_acls {

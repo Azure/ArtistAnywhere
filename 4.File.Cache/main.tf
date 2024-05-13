@@ -7,11 +7,15 @@ terraform {
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.49.0"
+      version = "~>2.49.1"
     }
     avere = {
       source  = "hashicorp/avere"
       version = "~>1.3.3"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~>0.11.1"
     }
   }
   backend azurerm {

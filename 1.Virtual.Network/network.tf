@@ -74,9 +74,6 @@ locals {
   virtualNetworksSubnetStorage = [
     for subnet in local.virtualNetworksSubnets : subnet if subnet.name == "Storage" && subnet.virtualNetworkEdgeZone == ""
   ]
-  virtualNetworksSubnetCompute = [
-    for subnet in local.virtualNetworksSubnets : subnet if subnet.name == "Farm" && subnet.virtualNetworkEdgeZone == ""
-  ]
   virtualNetworksSubnetsSecurity = [
     for subnet in local.virtualNetworksSubnets : subnet if subnet.name != "GatewaySubnet"
   ]
@@ -146,8 +143,4 @@ output virtualNetworksSubnetStorage {
       } if contains(subnet.serviceEndpoints, "Microsoft.Storage.Global")
     ]
   ])
-}
-
-output virtualNetworksSubnetCompute {
-  value = local.virtualNetworksSubnetCompute
 }

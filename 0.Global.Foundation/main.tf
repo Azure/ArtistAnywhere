@@ -7,11 +7,7 @@ terraform {
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.49.0"
-    }
-    azapi = {
-      source = "azure/azapi"
-      version = "~>1.13.1"
+      version = "~>2.49.1"
     }
     http = {
       source  = "hashicorp/http"
@@ -57,104 +53,6 @@ module global {
   source = "./config"
 }
 
-variable ai {
-  type = object({
-    video = object({
-      enable = bool
-      name   = string
-    })
-    open = object({
-      enable     = bool
-      name       = string
-      tier       = string
-      domainName = string
-    })
-    cognitive = object({
-      enable     = bool
-      name       = string
-      tier       = string
-      domainName = string
-    })
-    speech = object({
-      enable     = bool
-      name       = string
-      tier       = string
-      domainName = string
-    })
-    language = object({
-      conversational = object({
-        enable     = bool
-        name       = string
-        tier       = string
-        domainName = string
-      })
-      textAnalytics = object({
-        enable     = bool
-        name       = string
-        tier       = string
-        domainName = string
-      })
-      textTranslation = object({
-        enable     = bool
-        name       = string
-        tier       = string
-        domainName = string
-      })
-    })
-    vision = object({
-      enable     = bool
-      name       = string
-      tier       = string
-      domainName = string
-      training = object({
-        enable     = bool
-        name       = string
-        tier       = string
-        domainName = string
-      })
-      prediction = object({
-        enable     = bool
-        name       = string
-        tier       = string
-        domainName = string
-      })
-    })
-    face = object({
-      enable     = bool
-      name       = string
-      tier       = string
-      domainName = string
-    })
-    document = object({
-      enable     = bool
-      name       = string
-      tier       = string
-      domainName = string
-    })
-    search = object({
-      enable         = bool
-      name           = string
-      tier           = string
-      hostingMode    = string
-      replicaCount   = number
-      partitionCount = number
-      sharedPrivateAccess = object({
-        enable = bool
-      })
-    })
-    machineLearning = object({
-      enable = bool
-      workspace = object({
-        name = string
-        tier = string
-      })
-    })
-    encryption = object({
-      enable = bool
-    })
-  })
-}
-
 data http client_address {
   url = "https://api.ipify.org?format=json"
 }
@@ -164,10 +62,4 @@ data azurerm_client_config studio {}
 resource azurerm_resource_group studio {
   name     = module.global.resourceGroupName
   location = module.global.resourceLocation.regionName
-}
-
-resource azurerm_resource_group studio_ai {
-  count    = module.global.ai.enable ? 1 : 0
-  name     = "${azurerm_resource_group.studio.name}.AI"
-  location = azurerm_resource_group.studio.location
 }

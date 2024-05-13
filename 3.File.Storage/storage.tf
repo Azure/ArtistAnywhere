@@ -75,11 +75,23 @@ locals {
   ])
 }
 
-resource azurerm_role_assignment storage_contributor {
+resource azurerm_role_assignment storage_blob_data_owner {
   for_each = {
     for storageAccount in local.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
   }
-  role_definition_name = "Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#contributor
+  role_definition_name = "Storage Blob Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-owner
+  principal_id         = data.azurerm_client_config.studio.object_id
+  scope                = each.value.storageAccountId
+  depends_on = [
+    azurerm_storage_account.studio
+  ]
+}
+
+resource azurerm_role_assignment storage_blob_data_contributor {
+  for_each = {
+    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
+  }
+  role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = each.value.storageAccountId
   depends_on = [
@@ -87,15 +99,11 @@ resource azurerm_role_assignment storage_contributor {
   ]
 }
 
-resource azurerm_role_assignment storage_blob_data_owner {
-  for_each = {
-    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
-  }
-  role_definition_name = "Storage Blob Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#storage-blob-data-owner
-  principal_id         = data.azurerm_client_config.studio.object_id
-  scope                = each.value.storageAccountId
+resource time_sleep storage_rbac {
+  create_duration = "30s"
   depends_on = [
-    azurerm_storage_account.studio
+    azurerm_role_assignment.storage_blob_data_owner,
+    azurerm_role_assignment.storage_blob_data_contributor
   ]
 }
 
@@ -134,7 +142,7 @@ resource azurerm_storage_container core {
   name                 = each.value.name
   storage_account_name = each.value.storageAccountName
   depends_on = [
-    azurerm_role_assignment.storage_blob_data_owner
+    time_sleep.storage_rbac
   ]
 }
 
