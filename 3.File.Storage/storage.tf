@@ -12,6 +12,7 @@ variable storageAccounts {
     enableHttpsOnly      = bool
     enableBlobNfsV3      = bool
     enableLargeFileShare = bool
+    enableEdgeZoneDeploy = bool
     privateEndpointTypes = list(string)
     blobContainers = list(object({
       enable = bool
@@ -37,8 +38,8 @@ locals {
   storageAccounts = [
     for storageAccount in var.storageAccounts : merge(storageAccount, {
       resourceGroupName     = azurerm_resource_group.storage.name
-      resourceGroupLocation = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.storage.location
-      edgeZoneName          = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+      resourceGroupLocation = storageAccount.enableEdgeZoneDeploy && module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.storage.location
+      edgeZoneName          = storageAccount.enableEdgeZoneDeploy && module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
       storageAccountId      = "${azurerm_resource_group.storage.id}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
       storageAccountName    = storageAccount.name
     })
