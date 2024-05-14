@@ -3,13 +3,10 @@
 ###############################################################################################
 
 resource azurerm_private_endpoint storage_blob {
-  for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork
-  }
-  name                = "${lower(each.value.key)}-blob"
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
-  subnet_id           = "${each.value.id}/subnets/Storage"
+  name                = "${lower(data.azurerm_storage_account.studio.name)}-blob"
+  resource_group_name = data.azurerm_storage_account.studio.resource_group_name
+  location            = data.azurerm_storage_account.studio.location
+  subnet_id           = "${local.virtualNetwork.id}/subnets/Storage"
   private_service_connection {
     name                           = data.azurerm_storage_account.studio.name
     private_connection_resource_id = data.azurerm_storage_account.studio.id
@@ -19,7 +16,7 @@ resource azurerm_private_endpoint storage_blob {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.storage_blob[each.value.key].name
+    name = azurerm_private_dns_zone_virtual_network_link.storage_blob.name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.storage_blob.id
     ]
@@ -31,13 +28,10 @@ resource azurerm_private_endpoint storage_blob {
 }
 
 resource azurerm_private_endpoint storage_file {
-  for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork
-  }
-  name                = "${lower(each.value.key)}-file"
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
-  subnet_id           = "${each.value.id}/subnets/Storage"
+  name                = "${lower(data.azurerm_storage_account.studio.name)}-file"
+  resource_group_name = data.azurerm_storage_account.studio.resource_group_name
+  location            = data.azurerm_storage_account.studio.location
+  subnet_id           = "${local.virtualNetwork.id}/subnets/Storage"
   private_service_connection {
     name                           = data.azurerm_storage_account.studio.name
     private_connection_resource_id = data.azurerm_storage_account.studio.id
@@ -47,7 +41,7 @@ resource azurerm_private_endpoint storage_file {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.storage_file[each.value.key].name
+    name = azurerm_private_dns_zone_virtual_network_link.storage_file.name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.storage_file.id
     ]
@@ -59,13 +53,11 @@ resource azurerm_private_endpoint storage_file {
 }
 
 resource azurerm_private_endpoint key_vault {
-  for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork if module.global.keyVault.enable
-  }
-  name                = "${lower(each.value.key)}-vault"
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
-  subnet_id           = "${each.value.id}/subnets/Storage"
+  count               = module.global.keyVault.enable ? 1 : 0
+  name                = "${lower(data.azurerm_key_vault.studio[0].name)}-key-vault"
+  resource_group_name = data.azurerm_key_vault.studio[0].resource_group_name
+  location            = data.azurerm_key_vault.studio[0].location
+  subnet_id           = "${local.virtualNetwork.id}/subnets/Storage"
   private_service_connection {
     name                           = data.azurerm_key_vault.studio[0].name
     private_connection_resource_id = data.azurerm_key_vault.studio[0].id
@@ -75,7 +67,7 @@ resource azurerm_private_endpoint key_vault {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.key_vault[each.value.key].name
+    name = azurerm_private_dns_zone_virtual_network_link.key_vault[0].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.key_vault[0].id
     ]
@@ -87,13 +79,11 @@ resource azurerm_private_endpoint key_vault {
 }
 
 resource azurerm_private_endpoint app_config {
-  for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork if module.global.appConfig.enable
-  }
-  name                = "${lower(each.value.key)}-app-config"
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
-  subnet_id           = "${each.value.id}/subnets/Storage"
+  count               = module.global.appConfig.enable ? 1 : 0
+  name                = "${lower(data.azurerm_app_configuration.studio[0].name)}-app-config"
+  resource_group_name = data.azurerm_app_configuration.studio[0].resource_group_name
+  location            = data.azurerm_app_configuration.studio[0].location
+  subnet_id           = "${local.virtualNetwork.id}/subnets/Storage"
   private_service_connection {
     name                           = data.azurerm_app_configuration.studio[0].name
     private_connection_resource_id = data.azurerm_app_configuration.studio[0].id
@@ -103,7 +93,7 @@ resource azurerm_private_endpoint app_config {
     ]
   }
   private_dns_zone_group {
-    name = azurerm_private_dns_zone_virtual_network_link.app_config[each.value.key].name
+    name = azurerm_private_dns_zone_virtual_network_link.app_config[0].name
     private_dns_zone_ids = [
       azurerm_private_dns_zone.app_config[0].id
     ]

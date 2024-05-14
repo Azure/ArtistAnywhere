@@ -3,13 +3,6 @@
 ####################################################################################
 
 ai = {
-  bot = {
-    enable        = false
-    name          = "xstudio"
-    displayName   = ""
-    tier          = "S1"
-    applicationId = ""
-  }
   video = {
     enable = true
     name   = "xstudio"

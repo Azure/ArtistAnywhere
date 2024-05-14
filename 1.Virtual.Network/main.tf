@@ -69,7 +69,7 @@ data terraform_remote_state ai {
 
 resource azurerm_resource_group network {
   name     = var.resourceGroupName
-  location = local.virtualNetworks[0].regionName
+  location = local.virtualNetwork.regionName
 }
 
 resource azurerm_resource_group network_regions {

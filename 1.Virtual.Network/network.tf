@@ -23,6 +23,7 @@ variable virtualNetworks {
 }
 
 locals {
+  virtualNetwork = local.virtualNetworks[0]
   virtualNetworks = [
     for virtualNetwork in local.virtualNetworksNames : merge(virtualNetwork, {
       id              = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${virtualNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}"
@@ -40,17 +41,17 @@ locals {
       }) if virtualNetwork.enable
     ]
   ])
-  virtualNetworksExtended = distinct(concat(local.virtualNetworks, !module.global.resourceLocation.edgeZone.enable ? concat([local.virtualNetworks[0]], [local.virtualNetworks[0]]) : [
-    merge(local.virtualNetworks[0], {
-      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetworks[0].name}"
-      key               = "${local.virtualNetworks[0].name}-${module.global.resourceLocation.edgeZone.regionName}"
+  virtualNetworksExtended = distinct(concat(local.virtualNetworks, !module.global.resourceLocation.edgeZone.enable ? concat([local.virtualNetwork], [local.virtualNetwork]) : [
+    merge(local.virtualNetwork, {
+      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetwork.name}"
+      key               = "${local.virtualNetwork.name}-${module.global.resourceLocation.edgeZone.regionName}"
       resourceGroupId   = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}"
       resourceGroupName = "${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}"
       regionName        = module.global.resourceLocation.edgeZone.regionName
     }),
-    merge(local.virtualNetworks[0], {
-      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}.${module.global.resourceLocation.edgeZone.name}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetworks[0].name}"
-      key               = "${local.virtualNetworks[0].name}-${module.global.resourceLocation.edgeZone.regionName}-${module.global.resourceLocation.edgeZone.name}"
+    merge(local.virtualNetwork, {
+      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}.${module.global.resourceLocation.edgeZone.name}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetwork.name}"
+      key               = "${local.virtualNetwork.name}-${module.global.resourceLocation.edgeZone.regionName}-${module.global.resourceLocation.edgeZone.name}"
       resourceGroupId   = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}.${module.global.resourceLocation.edgeZone.name}"
       resourceGroupName = "${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}.${module.global.resourceLocation.edgeZone.name}"
       regionName        = module.global.resourceLocation.edgeZone.regionName

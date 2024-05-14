@@ -15,7 +15,7 @@ variable apiManagement {
 }
 
 locals {
-  apiManagementSubnetId = "${local.virtualNetworks[0].id}/subnets/Farm"
+  apiManagementSubnetId = "${local.virtualNetwork.id}/subnets/Farm"
 }
 
 resource azurerm_api_management studio {
@@ -52,7 +52,7 @@ resource azurerm_private_dns_zone_virtual_network_link api_management {
   name                  = "api-management"
   resource_group_name   = azurerm_private_dns_zone.api_management[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.api_management[0].name
-  virtual_network_id    = local.virtualNetworks[0].id
+  virtual_network_id    = local.virtualNetwork.id
   depends_on = [
     azurerm_virtual_network.studio
   ]

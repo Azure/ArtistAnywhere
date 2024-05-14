@@ -37,13 +37,6 @@ module global {
 
 variable ai {
   type = object({
-    bot = object({
-      enable        = bool
-      name          = string
-      displayName   = string
-      tier          = string
-      applicationId = string
-    })
     video = object({
       enable = bool
       name   = string
@@ -191,11 +184,8 @@ resource azurerm_resource_group studio_ai {
 
 output ai {
   value = {
-    bot = {
-      enable = var.ai.bot.enable
-      id     = var.ai.bot.enable ? azurerm_bot_service_azure_bot.ai[0].id : null
-      name   = var.ai.bot.enable ? azurerm_bot_service_azure_bot.ai[0].name : null
-    }
+    resourceGroupName = azurerm_resource_group.studio_ai.name
+    regionName        = azurerm_resource_group.studio_ai.location
     video = {
       enable = var.ai.video.enable
       id     = var.ai.video.enable ? azapi_resource.ai_video_indexer[0].id : null
