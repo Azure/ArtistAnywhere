@@ -126,6 +126,16 @@ data terraform_remote_state network {
   }
 }
 
+data terraform_remote_state image {
+  backend = "azurerm"
+  config = {
+    resource_group_name  = module.global.resourceGroupName
+    storage_account_name = module.global.storage.accountName
+    container_name       = module.global.storage.containerName.terraformState
+    key                  = "2.Image.Builder"
+  }
+}
+
 data terraform_remote_state storage {
   backend = "azurerm"
   config = {

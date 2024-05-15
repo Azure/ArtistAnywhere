@@ -1,5 +1,41 @@
 resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
+#############################################################
+# Arcitecta Mediaflux (https://www.arcitecta.com/mediaflux) #
+#############################################################
+
+mediaflux = {
+  enable = false
+  name   = "xstudio-cache"
+  node = {
+    size  = "Standard_E32s_v3"
+    count = 3
+    image = {
+      resourceGroupName = "ArtistAnywhere.Image"
+      galleryName       = "xstudio"
+      definitionName    = "Linux"
+      versionId         = "0.0.0"
+      plan = {
+        publisher = ""
+        product   = ""
+        name      = ""
+      }
+    }
+    osDisk = {
+      storageType = "Premium_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+    }
+    dataDisk = {
+      size = 1024 # Set to either 1024 GB (1 TB) or 4096 GB (4 TB) nodes
+    }
+    adminLogin = {
+      userName     = "xadmin"
+      userPassword = "P@ssword1234"
+    }
+  }
+}
+
 ##############################################################################
 # HPC Cache (https://learn.microsoft.com/azure/hpc-cache/hpc-cache-overview) #
 ##############################################################################

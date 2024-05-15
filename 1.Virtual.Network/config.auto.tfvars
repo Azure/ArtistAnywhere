@@ -313,17 +313,3 @@ bastion = {
 monitor = {
   enable = true
 }
-
-################################################################################################
-# API Management (https://learn.microsoft.com/azure/api-management/api-management-key-concepts #
-################################################################################################
-
-apiManagement = {
-  enable = false
-  name   = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
-  tier   = "Developer_1"
-  publisher = {
-    name  = ""
-    email = ""
-  }
-}
