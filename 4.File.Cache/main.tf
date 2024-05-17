@@ -167,6 +167,7 @@ locals {
 }
 
 resource azurerm_resource_group cache {
+  count    = var.hpcCache.enable || var.vfxtCache.enable ? 1 : 0
   name     = var.resourceGroupName
   location = var.existingNetwork.enable ? var.existingNetwork.regionName : module.global.resourceLocation.regionName
 }

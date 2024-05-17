@@ -51,13 +51,33 @@ locals {
   ]
 }
 
+resource azurerm_resource_group arcitecta {
+  name     = "${var.resourceGroupName}.Arcitecta"
+  location = var.existingNetwork.enable ? var.existingNetwork.regionName : module.global.resourceLocation.regionName
+}
+
+resource azurerm_proximity_placement_group mediaflux {
+  count               = var.mediaflux.enable ? 1 : 0
+  name                = var.mediaflux.name
+  resource_group_name = azurerm_resource_group.arcitecta.name
+  location            = azurerm_resource_group.arcitecta.location
+}
+
+resource azurerm_availability_set mediaflux {
+  count                        = var.mediaflux.enable ? 1 : 0
+  name                         = var.mediaflux.name
+  resource_group_name          = azurerm_resource_group.arcitecta.name
+  location                     = azurerm_resource_group.arcitecta.location
+  proximity_placement_group_id = azurerm_proximity_placement_group.mediaflux[0].id
+}
+
 resource azurerm_network_interface mediaflux {
   for_each = {
     for cacheNode in local.cacheCluster : cacheNode.name => cacheNode
   }
   name                = each.value.name
-  resource_group_name = azurerm_resource_group.cache.name
-  location            = azurerm_resource_group.cache.location
+  resource_group_name = azurerm_resource_group.arcitecta.name
+  location            = azurerm_resource_group.arcitecta.location
   ip_configuration {
     name                          = "ipConfig"
     subnet_id                     = data.azurerm_subnet.cache.id
@@ -74,15 +94,17 @@ resource azurerm_linux_virtual_machine mediaflux {
     for cacheNode in local.cacheCluster : cacheNode.name => cacheNode if var.mediaflux.enable
   }
   name                            = each.value.name
-  resource_group_name             = azurerm_resource_group.cache.name
-  location                        = azurerm_resource_group.cache.location
+  resource_group_name             = azurerm_resource_group.arcitecta.name
+  location                        = azurerm_resource_group.arcitecta.location
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                            = each.value.size
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
+  availability_set_id             = azurerm_availability_set.mediaflux[0].id
+  proximity_placement_group_id    = azurerm_proximity_placement_group.mediaflux[0].id
   disable_password_authentication = false
   network_interface_ids = [
-    "${azurerm_resource_group.cache.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
+    "${azurerm_resource_group.arcitecta.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
   ]
   os_disk {
     storage_account_type = each.value.osDisk.storageType
@@ -109,7 +131,7 @@ resource azurerm_linux_virtual_machine mediaflux {
 }
 
 output macAddresses {
-  value = [
+  value = var.mediaflux.enable ? [
     for nic in azurerm_network_interface.mediaflux : nic.mac_address
-  ]
+  ] : null
 }

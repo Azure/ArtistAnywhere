@@ -52,8 +52,8 @@ resource time_sleep hpc_cache_storage_rbac {
 resource azurerm_hpc_cache studio {
   count               = var.hpcCache.enable ? 1 : 0
   name                = var.hpcCache.name
-  resource_group_name = azurerm_resource_group.cache.name
-  location            = azurerm_resource_group.cache.location
+  resource_group_name = azurerm_resource_group.cache[0].name
+  location            = azurerm_resource_group.cache[0].location
   subnet_id           = data.azurerm_subnet.cache.id
   sku_name            = var.hpcCache.throughput
   cache_size_in_gb    = var.hpcCache.size
