@@ -19,10 +19,10 @@ resource azurerm_eventgrid_system_topic subscription {
 
 resource azurerm_eventgrid_system_topic storage {
   count                  = module.global.eventGrid.enable ? 1 : 0
-  name                   = azurerm_storage_account.studio.name
-  resource_group_name    = azurerm_storage_account.studio.resource_group_name
-  location               = azurerm_storage_account.studio.location
-  source_arm_resource_id = azurerm_storage_account.studio.id
+  name                   = azurerm_storage_account.studio[0].name
+  resource_group_name    = azurerm_storage_account.studio[0].resource_group_name
+  location               = azurerm_storage_account.studio[0].location
+  source_arm_resource_id = azurerm_storage_account.studio[0].id
   topic_type             = "Microsoft.Storage.StorageAccounts"
   identity {
     type = "UserAssigned"

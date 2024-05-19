@@ -3,13 +3,14 @@
 ###############################################################################################
 
 resource azurerm_private_endpoint storage_blob {
-  name                = "${lower(data.azurerm_storage_account.studio.name)}-blob"
-  resource_group_name = data.azurerm_storage_account.studio.resource_group_name
-  location            = data.azurerm_storage_account.studio.location
+  count               = terraform.workspace != "shared" ? 1 : 0
+  name                = "${lower(data.azurerm_storage_account.studio[0].name)}-blob"
+  resource_group_name = data.azurerm_storage_account.studio[0].resource_group_name
+  location            = data.azurerm_storage_account.studio[0].location
   subnet_id           = "${local.virtualNetwork.id}/subnets/Storage"
   private_service_connection {
-    name                           = data.azurerm_storage_account.studio.name
-    private_connection_resource_id = data.azurerm_storage_account.studio.id
+    name                           = data.azurerm_storage_account.studio[0].name
+    private_connection_resource_id = data.azurerm_storage_account.studio[0].id
     is_manual_connection           = false
     subresource_names = [
       "blob"
@@ -28,13 +29,14 @@ resource azurerm_private_endpoint storage_blob {
 }
 
 resource azurerm_private_endpoint storage_file {
-  name                = "${lower(data.azurerm_storage_account.studio.name)}-file"
-  resource_group_name = data.azurerm_storage_account.studio.resource_group_name
-  location            = data.azurerm_storage_account.studio.location
+  count               = terraform.workspace != "shared" ? 1 : 0
+  name                = "${lower(data.azurerm_storage_account.studio[0].name)}-file"
+  resource_group_name = data.azurerm_storage_account.studio[0].resource_group_name
+  location            = data.azurerm_storage_account.studio[0].location
   subnet_id           = "${local.virtualNetwork.id}/subnets/Storage"
   private_service_connection {
-    name                           = data.azurerm_storage_account.studio.name
-    private_connection_resource_id = data.azurerm_storage_account.studio.id
+    name                           = data.azurerm_storage_account.studio[0].name
+    private_connection_resource_id = data.azurerm_storage_account.studio[0].id
     is_manual_connection           = false
     subresource_names = [
       "file"

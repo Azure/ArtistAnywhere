@@ -35,6 +35,7 @@ data azurerm_user_assigned_identity studio {
 }
 
 data azurerm_storage_account studio {
+  count               = terraform.workspace != "shared" ? 1 : 0
   name                = module.global.storage.accountName
   resource_group_name = module.global.resourceGroupName
 }
@@ -58,6 +59,7 @@ data azurerm_app_configuration studio {
 }
 
 data terraform_remote_state ai {
+  count   = terraform.workspace != "shared" ? 1 : 0
   backend = "azurerm"
   config = {
     resource_group_name  = module.global.resourceGroupName

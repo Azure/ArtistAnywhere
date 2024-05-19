@@ -1,9 +1,9 @@
 
 locals {
-  aiEnable                = try(data.terraform_remote_state.ai.outputs.ai.cognitive.enable, false) || try(data.terraform_remote_state.ai.outputs.ai.speech.enable, false) || try(data.terraform_remote_state.ai.outputs.ai.language.conversational.enable, false) || try(data.terraform_remote_state.ai.outputs.ai.language.textAnalytics.enable, false) || try(data.terraform_remote_state.ai.outputs.ai.language.textTranslation.enable, false) || try(data.terraform_remote_state.ai.outputs.ai.vision.enable, false) || try(data.terraform_remote_state.ai.outputs.ai.vision.training.enable, false) || try(data.terraform_remote_state.ai.outputs.ai.vision.prediction.enable, false) || try(data.terraform_remote_state.ai.outputs.ai.face.enable, false) || try(data.terraform_remote_state.ai.outputs.ai.document.enable, false) || try(data.terraform_remote_state.ai.outputs.ai.contentSafety.enable, false) || try(data.terraform_remote_state.ai.outputs.ai.immersiveReader.enable, false)
-  aiOpenEnable            = try(data.terraform_remote_state.ai.outputs.ai.open.enable, false)
-  aiSearchEnable          = try(data.terraform_remote_state.ai.outputs.ai.search.enable, false)
-  aiMachineLearningEnable = try(data.terraform_remote_state.ai.outputs.ai.machineLearning.enable, false)
+  aiEnable                = try(data.terraform_remote_state.ai[0].outputs.ai.cognitive.enable, false) || try(data.terraform_remote_state.ai[0].outputs.ai.speech.enable, false) || try(data.terraform_remote_state.ai[0].outputs.ai.language.conversational.enable, false) || try(data.terraform_remote_state.ai[0].outputs.ai.language.textAnalytics.enable, false) || try(data.terraform_remote_state.ai[0].outputs.ai.language.textTranslation.enable, false) || try(data.terraform_remote_state.ai[0].outputs.ai.vision.enable, false) || try(data.terraform_remote_state.ai[0].outputs.ai.vision.training.enable, false) || try(data.terraform_remote_state.ai[0].outputs.ai.vision.prediction.enable, false) || try(data.terraform_remote_state.ai[0].outputs.ai.face.enable, false) || try(data.terraform_remote_state.ai[0].outputs.ai.document.enable, false) || try(data.terraform_remote_state.ai[0].outputs.ai.contentSafety.enable, false) || try(data.terraform_remote_state.ai[0].outputs.ai.immersiveReader.enable, false)
+  aiOpenEnable            = try(data.terraform_remote_state.ai[0].outputs.ai.open.enable, false)
+  aiSearchEnable          = try(data.terraform_remote_state.ai[0].outputs.ai.search.enable, false)
+  aiMachineLearningEnable = try(data.terraform_remote_state.ai[0].outputs.ai.machineLearning.enable, false)
 }
 
 resource azurerm_private_dns_zone ai {
@@ -77,14 +77,14 @@ resource azurerm_private_dns_zone_virtual_network_link ai_machine_learning_noteb
 }
 
 resource azurerm_private_endpoint ai {
-  count               = try(data.terraform_remote_state.ai.outputs.ai.cognitive.enable, false) ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.cognitive.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  count               = try(data.terraform_remote_state.ai[0].outputs.ai.cognitive.enable, false) ? 1 : 0
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.cognitive.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.cognitive.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.cognitive.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.cognitive.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.cognitive.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -100,13 +100,13 @@ resource azurerm_private_endpoint ai {
 
 resource azurerm_private_endpoint ai_open {
   count               = local.aiOpenEnable ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.open.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.open.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.open.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.open.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.open.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.open.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -121,14 +121,14 @@ resource azurerm_private_endpoint ai_open {
 }
 
 resource azurerm_private_endpoint ai_vision {
-  count               = try(data.terraform_remote_state.ai.outputs.ai.vision.enable, false) ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.vision.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  count               = try(data.terraform_remote_state.ai[0].outputs.ai.vision.enable, false) ? 1 : 0
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.vision.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.vision.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.vision.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.vision.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.vision.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -143,14 +143,14 @@ resource azurerm_private_endpoint ai_vision {
 }
 
 resource azurerm_private_endpoint ai_vision_training {
-  count               = try(data.terraform_remote_state.ai.outputs.ai.vision.training.enable, false) ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.vision.training.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  count               = try(data.terraform_remote_state.ai[0].outputs.ai.vision.training.enable, false) ? 1 : 0
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.vision.training.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.vision.training.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.vision.training.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.vision.training.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.vision.training.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -165,14 +165,14 @@ resource azurerm_private_endpoint ai_vision_training {
 }
 
 resource azurerm_private_endpoint ai_vision_prediction {
-  count               = try(data.terraform_remote_state.ai.outputs.ai.vision.prediction.enable, false) ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.vision.prediction.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  count               = try(data.terraform_remote_state.ai[0].outputs.ai.vision.prediction.enable, false) ? 1 : 0
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.vision.prediction.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.vision.prediction.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.vision.prediction.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.vision.prediction.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.vision.prediction.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -187,14 +187,14 @@ resource azurerm_private_endpoint ai_vision_prediction {
 }
 
 resource azurerm_private_endpoint ai_face {
-  count               = try(data.terraform_remote_state.ai.outputs.ai.face.enable, false) ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.face.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  count               = try(data.terraform_remote_state.ai[0].outputs.ai.face.enable, false) ? 1 : 0
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.face.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.face.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.face.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.face.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.face.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -209,14 +209,14 @@ resource azurerm_private_endpoint ai_face {
 }
 
 resource azurerm_private_endpoint ai_speech {
-  count               = try(data.terraform_remote_state.ai.outputs.ai.speech.enable, false) ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.speech.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  count               = try(data.terraform_remote_state.ai[0].outputs.ai.speech.enable, false) ? 1 : 0
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.speech.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.speech.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.speech.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.speech.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.speech.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -231,14 +231,14 @@ resource azurerm_private_endpoint ai_speech {
 }
 
 resource azurerm_private_endpoint ai_language_conversational {
-  count               = try(data.terraform_remote_state.ai.outputs.ai.language.conversational.enable, false) ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.language.conversational.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  count               = try(data.terraform_remote_state.ai[0].outputs.ai.language.conversational.enable, false) ? 1 : 0
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.language.conversational.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.language.conversational.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.language.conversational.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.language.conversational.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.language.conversational.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -253,14 +253,14 @@ resource azurerm_private_endpoint ai_language_conversational {
 }
 
 resource azurerm_private_endpoint ai_language_text_analytics {
-  count               = try(data.terraform_remote_state.ai.outputs.ai.language.textAnalytics.enable, false) ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.language.textAnalytics.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  count               = try(data.terraform_remote_state.ai[0].outputs.ai.language.textAnalytics.enable, false) ? 1 : 0
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.language.textAnalytics.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.language.textAnalytics.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.language.textAnalytics.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.language.textAnalytics.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.language.textAnalytics.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -275,14 +275,14 @@ resource azurerm_private_endpoint ai_language_text_analytics {
 }
 
 resource azurerm_private_endpoint ai_language_text_translation {
-  count               = try(data.terraform_remote_state.ai.outputs.ai.language.textTranslation.enable, false) ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.language.textTranslation.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  count               = try(data.terraform_remote_state.ai[0].outputs.ai.language.textTranslation.enable, false) ? 1 : 0
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.language.textTranslation.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.language.textTranslation.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.language.textTranslation.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.language.textTranslation.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.language.textTranslation.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -297,14 +297,14 @@ resource azurerm_private_endpoint ai_language_text_translation {
 }
 
 resource azurerm_private_endpoint ai_document {
-  count               = try(data.terraform_remote_state.ai.outputs.ai.document.enable, false) ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.document.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  count               = try(data.terraform_remote_state.ai[0].outputs.ai.document.enable, false) ? 1 : 0
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.document.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.document.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.document.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.document.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.document.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -320,13 +320,13 @@ resource azurerm_private_endpoint ai_document {
 
 resource azurerm_private_endpoint ai_search {
   count               = local.aiSearchEnable ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.search.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.search.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.search.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.search.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.search.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.search.id
     is_manual_connection           = false
     subresource_names = [
       "searchService"
@@ -341,14 +341,14 @@ resource azurerm_private_endpoint ai_search {
 }
 
 resource azurerm_private_endpoint ai_content_safety {
-  count               = try(data.terraform_remote_state.ai.outputs.ai.contentSafety.enable, false) ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.contentSafety.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  count               = try(data.terraform_remote_state.ai[0].outputs.ai.contentSafety.enable, false) ? 1 : 0
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.contentSafety.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.contentSafety.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.contentSafety.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.contentSafety.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.contentSafety.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -363,14 +363,14 @@ resource azurerm_private_endpoint ai_content_safety {
 }
 
 resource azurerm_private_endpoint ai_immersive_reader {
-  count               = try(data.terraform_remote_state.ai.outputs.ai.immersiveReader.enable, false) ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.immersiveReader.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  count               = try(data.terraform_remote_state.ai[0].outputs.ai.immersiveReader.enable, false) ? 1 : 0
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.immersiveReader.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.immersiveReader.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.immersiveReader.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.immersiveReader.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.immersiveReader.id
     is_manual_connection           = false
     subresource_names = [
       "account"
@@ -386,13 +386,13 @@ resource azurerm_private_endpoint ai_immersive_reader {
 
 resource azurerm_private_endpoint ai_machine_learning {
   count               = local.aiMachineLearningEnable ? 1 : 0
-  name                = lower(data.terraform_remote_state.ai.outputs.ai.machineLearning.name)
-  resource_group_name = data.terraform_remote_state.ai.outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai.outputs.ai.regionName
+  name                = lower(data.terraform_remote_state.ai[0].outputs.ai.machineLearning.name)
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
-    name                           = data.terraform_remote_state.ai.outputs.ai.machineLearning.name
-    private_connection_resource_id = data.terraform_remote_state.ai.outputs.ai.machineLearning.id
+    name                           = data.terraform_remote_state.ai[0].outputs.ai.machineLearning.name
+    private_connection_resource_id = data.terraform_remote_state.ai[0].outputs.ai.machineLearning.id
     is_manual_connection           = false
     subresource_names = [
       "amlworkspace"

@@ -30,8 +30,14 @@ locals {
       resourceGroupId = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${virtualNetwork.resourceGroupName}"
     })
   ]
+  virtualNetworksConfig = [
+    for virtualNetwork in var.virtualNetworks : merge(virtualNetwork, {
+      nameSuffix  = virtualNetwork.nameSuffix == "" ? module.global.resourceLocation.nameSuffix : virtualNetwork.nameSuffix
+      regionNames = length(virtualNetwork.regionNames) == 0 ? [module.global.resourceLocation.regionName] : virtualNetwork.regionNames
+    })
+  ]
   virtualNetworksNames = flatten([
-    for virtualNetwork in var.virtualNetworks : [
+    for virtualNetwork in local.virtualNetworksConfig : [
       for regionName in virtualNetwork.regionNames : merge(virtualNetwork, {
         key               = "${virtualNetwork.name}-${virtualNetwork.nameSuffix}-${regionName}"
         name              = "${virtualNetwork.name}-${virtualNetwork.nameSuffix}"

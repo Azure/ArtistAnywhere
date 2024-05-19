@@ -1,6 +1,7 @@
 variable resourceLocation {
   default = {
     regionName = "WestUS2" # Set from "az account list-locations --query [].name"
+    nameSuffix = "West"
     edgeZone = {
       enable     = false
       name       = "LosAngeles"
@@ -110,7 +111,13 @@ variable trafficManager {
 }
 
 output resourceLocation {
-  value = var.resourceLocation
+  value = terraform.workspace != "shared" ? var.resourceLocation : merge(var.resourceLocation, {
+    regionName = "EastUS"
+    nameSuffix = "East"
+    edgeZone = {
+      enable = false
+    }
+  })
 }
 
 output resourceGroupName {
@@ -126,21 +133,31 @@ output storage {
 }
 
 output monitor {
-  value = var.monitor
+  value = terraform.workspace != "shared" ? var.monitor : merge(var.monitor, {
+    enable = false
+  })
 }
 
 output keyVault {
-  value = var.keyVault
+  value = terraform.workspace != "shared" ? var.keyVault : merge(var.keyVault, {
+    enable = false
+  })
 }
 
 output eventGrid {
-  value = var.eventGrid
+  value = terraform.workspace != "shared" ? var.eventGrid : merge(var.eventGrid, {
+    enable = false
+  })
 }
 
 output appConfig {
-  value = var.appConfig
+  value = terraform.workspace != "shared" ? var.appConfig : merge(var.appConfig, {
+    enable = false
+  })
 }
 
 output trafficManager {
-  value = var.trafficManager
+  value = terraform.workspace != "shared" ? var.trafficManager : merge(var.trafficManager, {
+    enable = false
+  })
 }

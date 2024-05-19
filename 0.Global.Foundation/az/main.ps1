@@ -13,9 +13,10 @@ az provider show --namespace Microsoft.VirtualMachineImages --query "resourceTyp
 # 2024-01-30-preview
 az provider show --namespace Qumulo.Storage --query "resourceTypes[?resourceType=='fileSystems'].apiVersions[]"
 
-$tenantId       = ""
-$subscriptionId = ""
+$tenantId = ""
 az login --tenant $tenantId
+
+$subscriptionId = ""
 az account set --subscription $subscriptionId
 az account show
 

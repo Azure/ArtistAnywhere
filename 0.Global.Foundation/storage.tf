@@ -11,6 +11,7 @@ variable storage {
 }
 
 resource azurerm_storage_account studio {
+  count                           = terraform.workspace != "shared" ? 1 : 0
   name                            = module.global.storage.accountName
   resource_group_name             = azurerm_resource_group.studio.name
   location                        = azurerm_resource_group.studio.location
@@ -33,7 +34,9 @@ resource azurerm_storage_account studio {
 }
 
 resource azurerm_storage_container studio {
-  for_each             = module.global.storage.containerName
+  for_each = {
+    for containerName in module.global.storage.containerName : containerName => containerName if terraform.workspace != "shared"
+  }
   name                 = each.value
-  storage_account_name = azurerm_storage_account.studio.name
+  storage_account_name = azurerm_storage_account.studio[0].name
 }
