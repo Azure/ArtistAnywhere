@@ -30,11 +30,15 @@ data = {
     }
     databricks = {
       enable = true
+      serverless = {
+        enable = true
+      }
       workspace = {
         tier = "standard"
       }
-      serverless = {
-        enable = true
+      storageAccount = {
+        name = "xstudio4"
+        type = "Standard_LRS"
       }
     }
     stream = {

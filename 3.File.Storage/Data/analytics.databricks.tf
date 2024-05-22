@@ -9,19 +9,39 @@ resource azurerm_resource_group data_analytics_databricks {
 }
 
 resource azurerm_databricks_workspace studio {
-  count                       = var.data.analytics.databricks.enable ? 1 : 0
-  name                        = var.data.analytics.workspace.name
-  resource_group_name         = azurerm_resource_group.data_analytics_databricks[0].name
-  location                    = azurerm_resource_group.data_analytics_databricks[0].location
-  sku                         = var.data.analytics.databricks.workspace.tier
-  managed_resource_group_name = "${azurerm_resource_group.data_analytics_databricks[0].name}.Managed"
+  count                                 = var.data.analytics.databricks.enable ? 1 : 0
+  name                                  = var.data.analytics.workspace.name
+  resource_group_name                   = azurerm_resource_group.data_analytics_databricks[0].name
+  location                              = azurerm_resource_group.data_analytics_databricks[0].location
+  sku                                   = var.data.analytics.databricks.workspace.tier
+  managed_resource_group_name           = "${azurerm_resource_group.data_analytics_databricks[0].name}.Managed"
+  load_balancer_backend_address_pool_id = !var.data.analytics.databricks.serverless.enable ? azurerm_lb_backend_address_pool.databricks[0].id : null
   custom_parameters {
-    no_public_ip                  = true
+    storage_account_name          = var.data.analytics.databricks.storageAccount.name
+    storage_account_sku_name      = var.data.analytics.databricks.storageAccount.type
     virtual_network_id            = !var.data.analytics.databricks.serverless.enable ? data.azurerm_virtual_network.studio_region.id : null
     vnet_address_prefix           = !var.data.analytics.databricks.serverless.enable ? data.azurerm_virtual_network.studio_region.address_space[0] : null
     private_subnet_name           = !var.data.analytics.databricks.serverless.enable ? data.azurerm_subnet.data.name : null
     machine_learning_workspace_id = try(data.terraform_remote_state.ai.outputs.ai.machineLearning.id, null)
   }
+}
+
+resource azurerm_lb databricks {
+  count               = var.data.analytics.databricks.enable && !var.data.analytics.databricks.serverless.enable ? 1 : 0
+  name                = var.data.analytics.workspace.name
+  resource_group_name = azurerm_resource_group.data_analytics_databricks[0].name
+  location            = azurerm_resource_group.data_analytics_databricks[0].location
+  sku                 = "Standard"
+  frontend_ip_configuration {
+    name      = "ipConfigFrontend"
+    subnet_id = data.azurerm_subnet.data.id
+  }
+}
+
+resource azurerm_lb_backend_address_pool databricks {
+  count           = var.data.analytics.databricks.enable && !var.data.analytics.databricks.serverless.enable ? 1 : 0
+  name            = var.data.analytics.workspace.name
+  loadbalancer_id = azurerm_lb.databricks[0].id
 }
 
 resource azurerm_databricks_virtual_network_peering studio {

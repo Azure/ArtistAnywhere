@@ -61,12 +61,12 @@ weka = {
     loadFiles    = false
   }
   osDisk = {
-    storageType = "Premium_LRS"
+    storageType = "Standard_LRS"
     cachingType = "ReadOnly"
     sizeGB      = 0
   }
   dataDisk = {
-    storageType = "Premium_LRS"
+    storageType = "Standard_LRS"
     cachingType = "None"
     sizeGB      = 256
   }

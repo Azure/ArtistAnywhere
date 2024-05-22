@@ -51,7 +51,7 @@ locals {
 resource azurerm_resource_group netapp {
   count    = var.netApp.enable ? 1 : 0
   name     = "${var.resourceGroupName}.NetApp"
-  location = module.global.resourceLocation.region
+  location = module.global.resourceLocation.regionName
 }
 
 resource azurerm_netapp_account storage {

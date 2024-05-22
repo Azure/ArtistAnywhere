@@ -104,7 +104,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Premium_LRS"
+        storageAccountType = "Standard_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -137,7 +137,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Premium_LRS"
+        storageAccountType = "Standard_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -171,7 +171,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Premium_LRS"
+        storageAccountType = "Standard_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -206,7 +206,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Premium_LRS"
+        storageAccountType = "Standard_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -241,7 +241,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Premium_LRS"
+        storageAccountType = "Standard_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -276,7 +276,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Premium_LRS"
+        storageAccountType = "Standard_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -309,7 +309,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Premium_LRS"
+        storageAccountType = "Standard_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -343,7 +343,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Premium_LRS"
+        storageAccountType = "Standard_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -379,7 +379,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Premium_LRS"
+        storageAccountType = "Standard_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -415,7 +415,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Premium_LRS"
+        storageAccountType = "Standard_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -451,7 +451,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Premium_LRS"
+        storageAccountType = "Standard_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"

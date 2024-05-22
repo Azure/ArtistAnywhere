@@ -41,7 +41,7 @@ virtualMachines = [
     operatingSystem = {
       type = "Linux"
       disk = {
-        storageType = "Premium_LRS"
+        storageType = "Standard_LRS"
         cachingType = "ReadOnly"
         sizeGB      = 0
       }
@@ -97,7 +97,7 @@ virtualMachines = [
     operatingSystem = {
       type = "Linux"
       disk = {
-        storageType = "Premium_LRS"
+        storageType = "Standard_LRS"
         cachingType = "ReadOnly"
         sizeGB      = 0
       }
@@ -153,7 +153,7 @@ virtualMachines = [
     operatingSystem = {
       type = "Windows"
       disk = {
-        storageType = "Premium_LRS"
+        storageType = "Standard_LRS"
         cachingType = "ReadOnly"
         sizeGB      = 0
       }
@@ -209,7 +209,7 @@ virtualMachines = [
     operatingSystem = {
       type = "Windows"
       disk = {
-        storageType = "Premium_LRS"
+        storageType = "Standard_LRS"
         cachingType = "ReadOnly"
         sizeGB      = 0
       }

@@ -29,7 +29,7 @@ $virtualMachine = @{
     count   = 1
     sizeGB  = 512
     caching = "None"
-    type    = "Premium_LRS"
+    type    = "Standard_LRS"
   }
 }
 $subnetId = "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)"

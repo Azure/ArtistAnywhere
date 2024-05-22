@@ -28,12 +28,12 @@ hammerspace = {
       }
     }
     osDisk = {
-      storageType = "Premium_LRS"
+      storageType = "Standard_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 128
     }
     dataDisk = {
-      storageType = "Premium_LRS"
+      storageType = "Standard_LRS"
       cachingType = "None"
       sizeGB      = 256
     }
@@ -58,12 +58,12 @@ hammerspace = {
       }
     }
     osDisk = {
-      storageType = "Premium_LRS"
+      storageType = "Standard_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 128
     }
     dataDisk = {
-      storageType = "Premium_LRS"
+      storageType = "Standard_LRS"
       cachingType = "None"
       enableRaid0 = false
       sizeGB      = 256
@@ -94,7 +94,7 @@ mediaflux = {
       }
     }
     osDisk = {
-      storageType = "Premium_LRS"
+      storageType = "Standard_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 0
     }

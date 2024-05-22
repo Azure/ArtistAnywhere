@@ -110,7 +110,7 @@ resource azurerm_subnet studio {
   virtual_network_name                          = each.value.virtualNetworkName
   address_prefixes                              = each.value.addressSpace
   service_endpoints                             = each.value.serviceEndpoints
-  private_endpoint_network_policies_enabled     = each.value.name == "GatewaySubnet"
+  private_endpoint_network_policies             = each.value.name == "GatewaySubnet" ? "Enabled" : "Disabled"
   private_link_service_network_policies_enabled = each.value.name == "GatewaySubnet"
   dynamic delegation {
     for_each = each.value.serviceDelegation != null ? [1] : []
