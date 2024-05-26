@@ -25,8 +25,8 @@ The following installation process is required for local deployment orchestratio
 
 1. Make sure the [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) is installed locally and accessible in your PATH environment variable.
 1. Make sure the [Terraform CLI](https://developer.hashicorp.com/terraform/downloads) is installed locally and accessible in your PATH environment variable.
-1. Run `az login` locally to authenticate into your Azure account. This is how Terraform connects to Azure.
-1. Run `az account show` to ensure your current Azure *subscription* context is set as expected.<br/>To change your current Azure subscription context, run `az account set --subscription <subscriptionId>`
+1. Run `az login` locally to authenticate to your Azure account. This is how Terraform connects to Azure.
+1. Run `az account show` to confirm your current Azure *subscription* context is set as expected locally.<br/>To change your current Azure subscription context, run `az account set --subscription <subscriptionId>`
 1. Clone this GitHub repo to your local workstation for module configuration and deployment orchestration.
 
 ## Module Configuration & Deployment
@@ -37,10 +37,9 @@ For each module, here is the recommended configuration and deployment process.
    * For module `0 Global Foundation`, review and edit the following config files.
       * `module/backend.config`
       * `module/variables.tf`
-   * For modules `2 Image Builder`, `5 Render Manager`, `6 Render Farm` and `7 Artist Workstation`,
-      * Make sure you have sufficient compute cores quota available on your Azure subscription for each configured virtual machine size.
-      * By default, [Spot](https://learn.microsoft.com/azure/virtual-machines/spot-vms) is enabled in module `6 Render Farm` configuration. Therefore, Spot cores quota should be approved for your Azure subscription and target region(s).
-   * For modules `5 Render Manager`, `6 Render Farm` and `7 Artist Workstation`, make sure each **image** config references the correct custom image in your Azure subscription.
+   * For modules `2 Image Builder`, `5 Render Manager` and `7 Artist Workstation`, make sure you have sufficient **Standard** compute cores quota available on your Azure subscription for each configured virtual machine type / size.
+   * For module `6 Render Farm`, make sure you have sufficient [Spot](https://learn.microsoft.com/azure/virtual-machines/spot-vms) compute cores quota available on your Azure subscription for each configured virtual machine type / size.
+   * For modules `5 Render Manager`, `6 Render Farm` and `7 Artist Workstation`, make sure each **image** config references the correct [Compute Gallery](https://learn.microsoft.com/azure/virtual-machines/shared-image-galleries) custom image in your Azure subscription.
 1. For module `0 Global Foundation`, run `terraform init` to initialize the module local directory (append `-upgrade` if older providers are detected).
 1. For all modules except `0 Global Foundation`, run `terraform init -backend-config ../0.Global.Foundation/config/backend.config` to initialize the module local directory (append `-upgrade` if older providers are detected).
 1. Run `terraform apply` to generate the Terraform deployment [Plan](https://www.terraform.io/docs/cli/run/index.html#planning) (append `-destroy` to delete Azure resources).
