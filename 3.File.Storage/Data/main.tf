@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.2"
+  required_version = ">= 1.8.4"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -9,13 +9,13 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~>2.50.0"
     }
-    azapi = {
-      source = "azure/azapi"
-      version = "~>1.13.1"
-    }
     http = {
       source  = "hashicorp/http"
       version = "~>3.4.2"
+    }
+    azapi = {
+      source = "azure/azapi"
+      version = "~>1.13.1"
     }
   }
   backend azurerm {
@@ -64,6 +64,30 @@ variable data {
       })
       synapse = object({
         enable = bool
+        sqlPools = list(object({
+          enable = bool
+          name   = string
+          size   = string
+        }))
+        sparkPools = list(object({
+          enable  = bool
+          name    = string
+          version = string
+          node = object({
+            size       = string
+            sizeFamily = string
+          })
+          cache = object({
+            sizePercent = number
+          })
+          autoScale = object({
+            nodeCountMin = number
+            nodeCountMax = number
+          })
+          autoPause = object({
+            idleMinutes = number
+          })
+        }))
       })
       databricks = object({
         enable = bool
@@ -195,5 +219,10 @@ data azurerm_subnet data_cassandra {
 
 resource azurerm_resource_group data {
   name     = var.resourceGroupName
+  location = var.cosmosDB.geoLocations[0].regionName
+}
+
+resource azurerm_resource_group data_integration {
+  name     = "${var.resourceGroupName}.Integration"
   location = var.cosmosDB.geoLocations[0].regionName
 }

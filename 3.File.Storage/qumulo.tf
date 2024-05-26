@@ -34,7 +34,7 @@ resource azurerm_resource_group qumulo {
 resource azapi_resource qumulo {
   count     = var.qumulo.enable ? 1 : 0
   name      = var.qumulo.accountName
-  type      = "Qumulo.Storage/fileSystems@2024-01-30-preview"
+  type      = "Qumulo.Storage/fileSystems@2024-02-01-preview"
   parent_id = azurerm_resource_group.qumulo[0].id
   location  = azurerm_resource_group.qumulo[0].location
   body = jsonencode({

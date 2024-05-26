@@ -5,8 +5,8 @@
 resource azurerm_data_factory studio {
   count                            = var.data.factory.enable ? 1 : 0
   name                             = var.data.factory.name
-  resource_group_name              = azurerm_resource_group.data.name
-  location                         = azurerm_resource_group.data.location
+  resource_group_name              = azurerm_resource_group.data_integration.name
+  location                         = azurerm_resource_group.data_integration.location
   customer_managed_key_id          = var.data.factory.encryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
   customer_managed_key_identity_id = var.data.factory.encryption.enable ? data.azurerm_user_assigned_identity.studio.id : null
   identity {

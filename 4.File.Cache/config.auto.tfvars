@@ -79,7 +79,7 @@ hammerspace = {
 mediaflux = {
   enable = false
   name   = "xstudio-cache"
-  node = {
+  machine = {
     size  = "Standard_E32s_v3"
     count = 3
     image = {
@@ -93,18 +93,23 @@ mediaflux = {
         name      = ""
       }
     }
-    osDisk = {
-      storageType = "Standard_LRS"
-      cachingType = "ReadOnly"
-      sizeGB      = 0
+  }
+  network = {
+    acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+      enable = true
     }
-    dataDisk = {
-      size = 1024 # Set to either 1024 GB (1 TB) or 4096 GB (4 TB) nodes
-    }
-    adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-    }
+  }
+  osDisk = {
+    storageType = "Standard_LRS"
+    cachingType = "ReadOnly"
+    sizeGB      = 0
+  }
+  dataDisk = {
+    size = 1024 # Set to either 1024 GB (1 TB) or 4096 GB (4 TB) nodes
+  }
+  adminLogin = {
+    userName     = "xadmin"
+    userPassword = "P@ssword1234"
   }
 }
 

@@ -24,3 +24,10 @@ resource azurerm_machine_learning_workspace ai {
     ]
   }
 }
+
+# resource azurerm_machine_learning_compute_cluster ai {
+#   count                   = var.ai.machineLearning.enable ? 1 : 0
+#   name                    = var.ai.machineLearning.workspace.name
+#   resource_group_name     = azurerm_resource_group.ai_machine_learning[0].name
+#   location                = azurerm_resource_group.ai_machine_learning[0].location
+# }

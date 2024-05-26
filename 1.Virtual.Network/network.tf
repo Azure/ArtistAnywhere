@@ -6,7 +6,6 @@ variable virtualNetworks {
   type = list(object({
     enable       = bool
     name         = string
-    nameSuffix   = string
     regionNames  = list(string)
     addressSpace = list(string)
     dnsAddresses = list(string)
@@ -32,15 +31,13 @@ locals {
   ]
   virtualNetworksConfig = [
     for virtualNetwork in var.virtualNetworks : merge(virtualNetwork, {
-      nameSuffix  = virtualNetwork.nameSuffix == "" ? module.global.resourceLocation.nameSuffix : virtualNetwork.nameSuffix
       regionNames = length(virtualNetwork.regionNames) == 0 ? [module.global.resourceLocation.regionName] : virtualNetwork.regionNames
     })
   ]
   virtualNetworksNames = flatten([
     for virtualNetwork in local.virtualNetworksConfig : [
       for regionName in virtualNetwork.regionNames : merge(virtualNetwork, {
-        key               = "${virtualNetwork.name}-${virtualNetwork.nameSuffix}-${regionName}"
-        name              = "${virtualNetwork.name}-${virtualNetwork.nameSuffix}"
+        key               = "${virtualNetwork.name}-${regionName}"
         resourceGroupName = "${var.resourceGroupName}.${regionName}"
         regionName        = regionName
         edgeZone          = ""

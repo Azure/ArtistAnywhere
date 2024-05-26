@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.2"
+  required_version = ">= 1.8.4"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -9,9 +9,17 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~>2.50.0"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "~>2.5.1"
+    }
     http = {
       source  = "hashicorp/http"
       version = "~>3.4.2"
+    }
+    azapi = {
+      source = "azure/azapi"
+      version = "~>1.13.1"
     }
   }
   backend azurerm {
@@ -175,6 +183,15 @@ data azurerm_virtual_network studio_edge {
 data azurerm_storage_account studio {
   name                = var.existingStorage.enable ? var.existingStorage.name : data.terraform_remote_state.storage.outputs.blobStorageAccount.name
   resource_group_name = var.existingStorage.enable ? var.existingStorage.resourceGroupName : data.terraform_remote_state.storage.outputs.blobStorageAccount.resourceGroupName
+}
+
+locals {
+  fileSystemsLinux = [
+    for fileSystem in var.fileSystems.linux : fileSystem if fileSystem.enable
+  ]
+  fileSystemsWindows = [
+    for fileSystem in var.fileSystems.windows : fileSystem if fileSystem.enable
+  ]
 }
 
 resource azurerm_resource_group farm {

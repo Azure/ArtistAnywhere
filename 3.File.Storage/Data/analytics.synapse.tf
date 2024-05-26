@@ -41,6 +41,44 @@ resource azurerm_synapse_workspace studio {
   }
 }
 
+resource azurerm_synapse_linked_service cosmos_db {
+  count                = var.data.analytics.synapse.enable ? 1 : 0
+  name                 = var.data.analytics.workspace.name
+  synapse_workspace_id = azurerm_synapse_workspace.studio[0].id
+  type                 = "CosmosDb"
+  type_properties_json = jsonencode({
+    connectionString = "${azurerm_cosmosdb_account.studio["sql"].primary_readonly_sql_connection_string}Database=${var.noSQL.databases[0].name}"
+  })
+}
+
+resource azurerm_synapse_sql_pool studio {
+  for_each = {
+    for sqlPool in var.data.analytics.synapse.sqlPools : sqlPool.name => sqlPool if var.data.analytics.synapse.enable && sqlPool.enable
+  }
+  name                 = each.value.name
+  synapse_workspace_id = azurerm_synapse_workspace.studio[0].id
+  sku_name             = each.value.size
+}
+
+resource azurerm_synapse_spark_pool studio {
+  for_each = {
+    for sparkPool in var.data.analytics.synapse.sparkPools : sparkPool.name => sparkPool if var.data.analytics.synapse.enable && sparkPool.enable
+  }
+  name                 = each.value.name
+  synapse_workspace_id = azurerm_synapse_workspace.studio[0].id
+  spark_version        = each.value.version
+  node_size            = each.value.node.size
+  node_size_family     = each.value.node.sizeFamily
+  cache_size           = each.value.cache.sizePercent > 0 ? each.value.cache.sizePercent : null
+  auto_scale {
+    min_node_count = each.value.autoScale.nodeCountMin
+    max_node_count = each.value.autoScale.nodeCountMax
+  }
+  auto_pause {
+    delay_in_minutes = each.value.autoPause.idleMinutes
+  }
+}
+
 resource azurerm_synapse_firewall_rule allow_admin {
   count                = var.data.analytics.synapse.enable ? 1 : 0
   name                 = var.data.analytics.workspace.name

@@ -10,17 +10,11 @@ variable eventHub {
   })
 }
 
-resource azurerm_resource_group data_event_hub {
-  count    = var.eventHub.enable ? 1 : 0
-  name     = "${azurerm_resource_group.data.name}.EventHub"
-  location = var.cosmosDB.geoLocations[0].regionName
-}
-
 resource azurerm_eventhub_namespace data {
   count                         = var.eventHub.enable ? 1 : 0
   name                          = var.eventHub.name
-  resource_group_name           = azurerm_resource_group.data_event_hub[0].name
-  location                      = azurerm_resource_group.data_event_hub[0].location
+  resource_group_name           = azurerm_resource_group.data_integration.name
+  location                      = azurerm_resource_group.data_integration.location
   sku                           = var.eventHub.tier
   public_network_access_enabled = true
   identity {
@@ -44,7 +38,7 @@ resource azurerm_eventhub_namespace data {
 resource azurerm_private_dns_zone event_hub {
   count               = var.eventHub.enable ? 1 : 0
   name                = "privatelink.servicebus.windows.net"
-  resource_group_name = azurerm_resource_group.data_event_hub[0].name
+  resource_group_name = azurerm_resource_group.data_integration.name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link event_hub {

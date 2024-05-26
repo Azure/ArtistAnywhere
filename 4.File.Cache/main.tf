@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.2"
+  required_version = ">= 1.8.4"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -163,7 +163,7 @@ data azurerm_private_dns_zone studio {
 }
 
 locals {
-  blobStorageAccountNfs = data.terraform_remote_state.storage.outputs.blobStorageAccountNfs
+  blobStorageAccountNfs = try(data.terraform_remote_state.storage.outputs.blobStorageAccountNfs, {})
 }
 
 resource azurerm_resource_group cache {

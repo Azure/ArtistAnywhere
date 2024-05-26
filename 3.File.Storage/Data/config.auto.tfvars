@@ -27,6 +27,34 @@ data = {
     }
     synapse = {
       enable = true
+      sqlPools = [
+        {
+          enable = false
+          name   = "xstudio"
+          size   = "DW100c"
+        }
+      ]
+      sparkPools = [
+        {
+          enable  = false
+          name    = "xstudio"
+          version = "3.4"
+          node = {
+            size       = "Small"
+            sizeFamily = "MemoryOptimized"
+          }
+          cache = {
+            sizePercent = 0
+          }
+          autoScale = {
+            nodeCountMin = 3
+            nodeCountMax = 10
+          }
+          autoPause = {
+            idleMinutes = 60
+          }
+        }
+      ]
     }
     databricks = {
       enable = true

@@ -91,12 +91,6 @@ variable virtualMachineScaleSets {
 }
 
 locals {
-  fileSystemsLinux = [
-    for fileSystem in var.fileSystems.linux : fileSystem if fileSystem.enable
-  ]
-  fileSystemsWindows = [
-    for fileSystem in var.fileSystems.windows : fileSystem if fileSystem.enable
-  ]
   virtualMachineScaleSets = [
     for virtualMachineScaleSet in var.virtualMachineScaleSets : merge(virtualMachineScaleSet, {
       resourceLocation = {

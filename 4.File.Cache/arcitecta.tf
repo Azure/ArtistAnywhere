@@ -6,7 +6,7 @@ variable mediaflux {
   type = object({
     enable = bool
     name   = string
-    node = object({
+    machine = object({
       size  = string
       count = number
       image = object({
@@ -20,32 +20,39 @@ variable mediaflux {
           name      = string
         })
       })
-      osDisk = object({
-        storageType = string
-        cachingType = string
-        sizeGB      = number
+    })
+    network = object({
+      acceleration = object({
+        enable = bool
       })
-      dataDisk = object({
-        size = number
-      })
-      adminLogin = object({
-        userName     = string
-        userPassword = string
-      })
+    })
+    osDisk = object({
+      storageType = string
+      cachingType = string
+      sizeGB      = number
+    })
+    dataDisk = object({
+      size = number
+    })
+    adminLogin = object({
+      userName     = string
+      userPassword = string
     })
   })
 }
 
 locals {
-  cacheCluster = [
-    for i in range(var.mediaflux.node.count) : merge(var.mediaflux.node, {
-      name = "${var.mediaflux.name}-${i}"
-      image = merge(var.mediaflux.node.image, {
-        plan = {
-          publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher, var.mediaflux.node.image.plan.publisher)
-          product   = try(data.terraform_remote_state.image.outputs.linuxPlan.offer, var.mediaflux.node.image.plan.product)
-          name      = try(data.terraform_remote_state.image.outputs.linuxPlan.sku, var.mediaflux.node.image.plan.name)
-        }
+  mediaflux = [
+    for i in range(var.mediaflux.machine.count) : merge(var.mediaflux, {
+      machine = merge(var.mediaflux.machine, {
+        name = "${var.mediaflux.name}-${i}"
+        image = merge(var.mediaflux.machine.image, {
+          plan = {
+            publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher, var.mediaflux.machine.image.plan.publisher)
+            product   = try(data.terraform_remote_state.image.outputs.linuxPlan.offer, var.mediaflux.machine.image.plan.product)
+            name      = try(data.terraform_remote_state.image.outputs.linuxPlan.sku, var.mediaflux.machine.image.plan.name)
+          }
+        })
       })
     })
   ]
@@ -74,9 +81,9 @@ resource azurerm_availability_set mediaflux {
 
 resource azurerm_network_interface mediaflux {
   for_each = {
-    for cacheNode in local.cacheCluster : cacheNode.name => cacheNode if var.mediaflux.enable
+    for cacheNode in local.mediaflux : cacheNode.machine.name => cacheNode if var.mediaflux.enable
   }
-  name                = each.value.name
+  name                = each.value.machine.name
   resource_group_name = azurerm_resource_group.arcitecta[0].name
   location            = azurerm_resource_group.arcitecta[0].location
   ip_configuration {
@@ -84,7 +91,7 @@ resource azurerm_network_interface mediaflux {
     subnet_id                     = data.azurerm_subnet.cache.id
     private_ip_address_allocation = "Dynamic"
   }
-  enable_accelerated_networking = true
+  enable_accelerated_networking = each.value.network.acceleration.enable
   lifecycle {
     prevent_destroy = true
   }
@@ -92,20 +99,20 @@ resource azurerm_network_interface mediaflux {
 
 resource azurerm_linux_virtual_machine mediaflux {
   for_each = {
-    for cacheNode in local.cacheCluster : cacheNode.name => cacheNode if var.mediaflux.enable
+    for cacheNode in local.mediaflux : cacheNode.machine.name => cacheNode if var.mediaflux.enable
   }
-  name                            = each.value.name
+  name                            = each.value.machine.name
   resource_group_name             = azurerm_resource_group.arcitecta[0].name
   location                        = azurerm_resource_group.arcitecta[0].location
-  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
-  size                            = each.value.size
+  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+  size                            = each.value.machine.size
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
   availability_set_id             = azurerm_availability_set.mediaflux[0].id
   proximity_placement_group_id    = azurerm_proximity_placement_group.mediaflux[0].id
   disable_password_authentication = false
   network_interface_ids = [
-    "${azurerm_resource_group.arcitecta[0].id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
+    "${azurerm_resource_group.arcitecta[0].id}/providers/Microsoft.Network/networkInterfaces/${each.value.machine.name}"
   ]
   os_disk {
     storage_account_type = each.value.osDisk.storageType
@@ -119,11 +126,11 @@ resource azurerm_linux_virtual_machine mediaflux {
     ]
   }
   dynamic plan {
-    for_each = each.value.image.plan.publisher != "" ? [1] : []
+    for_each = each.value.machine.image.plan.publisher != "" ? [1] : []
     content {
-      publisher = each.value.image.plan.publisher
-      product   = each.value.image.plan.product
-      name      = each.value.image.plan.name
+      publisher = each.value.machine.image.plan.publisher
+      product   = each.value.machine.image.plan.product
+      name      = each.value.machine.image.plan.name
     }
   }
   depends_on = [

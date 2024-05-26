@@ -1,3 +1,6 @@
+# 2024-05-01-preview
+az provider show --namespace Microsoft.AzureFleet --query "resourceTypes[?resourceType=='fleets'].apiVersions[]"
+
 # 2024-04-01-preview
 az provider show --namespace Microsoft.VideoIndexer --query "resourceTypes[?resourceType=='accounts'].apiVersions[]"
 
@@ -10,7 +13,7 @@ az provider show --namespace Microsoft.StreamAnalytics --query "resourceTypes[?r
 # 2023-07-01
 az provider show --namespace Microsoft.VirtualMachineImages --query "resourceTypes[?resourceType=='imageTemplates'].apiVersions[]"
 
-# 2024-01-30-preview
+# 2024-02-01-preview
 az provider show --namespace Qumulo.Storage --query "resourceTypes[?resourceType=='fileSystems'].apiVersions[]"
 
 $tenantId = ""

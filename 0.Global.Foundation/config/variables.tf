@@ -1,7 +1,6 @@
 variable resourceLocation {
   default = {
     regionName = "WestUS2" # Set from "az account list-locations --query [].name"
-    nameSuffix = "West"
     edgeZone = {
       enable     = false
       name       = "LosAngeles"
@@ -111,13 +110,7 @@ variable trafficManager {
 }
 
 output resourceLocation {
-  value = terraform.workspace != "shared" ? var.resourceLocation : merge(var.resourceLocation, {
-    regionName = "EastUS"
-    nameSuffix = "East"
-    edgeZone = {
-      enable = false
-    }
-  })
+  value = var.resourceLocation
 }
 
 output resourceGroupName {
