@@ -102,7 +102,7 @@ resource azurerm_network_interface scheduler {
     private_ip_address            = each.value.network.staticIpAddress != "" ? each.value.network.staticIpAddress : null
     private_ip_address_allocation = each.value.network.staticIpAddress != "" ? "Static" : "Dynamic"
   }
-  enable_accelerated_networking = each.value.network.acceleration.enable
+  accelerated_networking_enabled = each.value.network.acceleration.enable
 }
 
 resource azurerm_linux_virtual_machine scheduler {
@@ -113,7 +113,7 @@ resource azurerm_linux_virtual_machine scheduler {
   resource_group_name             = azurerm_resource_group.scheduler.name
   location                        = each.value.resourceLocation.regionName
   edge_zone                       = each.value.resourceLocation.edgeZone
-  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
+  source_image_id                 = "/subscriptions/${local.subscriptionId.computeGallery}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                            = each.value.size
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
@@ -213,7 +213,7 @@ resource azurerm_windows_virtual_machine scheduler {
   resource_group_name = azurerm_resource_group.scheduler.name
   location            = each.value.resourceLocation.regionName
   edge_zone           = each.value.resourceLocation.edgeZone
-  source_image_id     = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
+  source_image_id     = "/subscriptions/${local.subscriptionId.computeGallery}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                = each.value.size
   admin_username      = each.value.adminLogin.userName
   admin_password      = each.value.adminLogin.userPassword

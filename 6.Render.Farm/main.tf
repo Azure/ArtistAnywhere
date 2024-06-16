@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.104.0"
+      version = "~>3.108.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.50.0"
+      version = "~>2.52.0"
     }
     local = {
       source  = "hashicorp/local"
@@ -15,7 +15,7 @@ terraform {
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.2"
+      version = "~>3.4.3"
     }
     azapi = {
       source = "azure/azapi"
@@ -89,23 +89,16 @@ variable existingNetwork {
   type = object({
     enable            = bool
     name              = string
-    subnetNameFarm    = string
-    subnetNameAI      = string
+    subnetName        = string
     resourceGroupName = string
   })
 }
 
-variable existingStorage {
+variable subscriptionId {
   type = object({
-    enable            = bool
-    name              = string
-    resourceGroupName = string
-    fileShareName     = string
+    terraformState = string
+    computeGallery = string
   })
-}
-
-data http client_address {
-  url = "https://api.ipify.org?format=json"
 }
 
 data azurerm_client_config studio {}
@@ -142,31 +135,22 @@ data azurerm_key_vault_secret admin_password {
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
+    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
-    key                  = "1.Virtual.Network"
+    key                  = "1.Virtual.Network${lower(terraform.workspace) == "shared" ? "env:shared" : ""}"
   }
 }
 
 data terraform_remote_state image {
   backend = "azurerm"
   config = {
+    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
     key                  = "2.Image.Builder"
-  }
-}
-
-
-data terraform_remote_state storage {
-  backend = "azurerm"
-  config = {
-    resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.storage.accountName
-    container_name       = module.global.storage.containerName.terraformState
-    key                  = "3.File.Storage"
   }
 }
 
@@ -180,12 +164,11 @@ data azurerm_virtual_network studio_edge {
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : reverse(data.terraform_remote_state.network.outputs.virtualNetworks)[0].resourceGroupName
 }
 
-data azurerm_storage_account studio {
-  name                = var.existingStorage.enable ? var.existingStorage.name : data.terraform_remote_state.storage.outputs.blobStorageAccount.name
-  resource_group_name = var.existingStorage.enable ? var.existingStorage.resourceGroupName : data.terraform_remote_state.storage.outputs.blobStorageAccount.resourceGroupName
-}
-
 locals {
+  subscriptionId = {
+    terraformState = var.subscriptionId.terraformState != "" ? var.subscriptionId.terraformState : data.azurerm_client_config.studio.subscription_id
+    computeGallery = var.subscriptionId.computeGallery != "" ? var.subscriptionId.computeGallery : data.azurerm_client_config.studio.subscription_id
+  }
   fileSystemsLinux = [
     for fileSystem in var.fileSystems.linux : fileSystem if fileSystem.enable
   ]

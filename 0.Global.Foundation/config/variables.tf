@@ -47,7 +47,7 @@ variable monitor {
     name   = "xstudio"
     agentVersion = {
       linux   = "1.31"
-      windows = "1.24"
+      windows = "1.26"
     }
   }
 }
@@ -58,7 +58,7 @@ variable monitor {
 
 variable keyVault {
   default = {
-    enable = false
+    enable = true
     name   = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
     secretName = {
       adminUsername     = "AdminUsername"

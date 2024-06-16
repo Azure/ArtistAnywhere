@@ -202,7 +202,7 @@ resource azurerm_network_interface storage_primary {
     subnet_id                     = data.azurerm_subnet.cache.id
     private_ip_address_allocation = "Dynamic"
   }
-  enable_accelerated_networking = each.value.network.acceleration.enable
+  accelerated_networking_enabled = each.value.network.acceleration.enable
 }
 
 resource azurerm_network_interface storage_secondary {
@@ -217,7 +217,7 @@ resource azurerm_network_interface storage_secondary {
     subnet_id                     = data.azurerm_subnet.cache.id
     private_ip_address_allocation = "Dynamic"
   }
-  enable_accelerated_networking = each.value.network.acceleration.enable
+  accelerated_networking_enabled = each.value.network.acceleration.enable
 }
 
 resource azurerm_managed_disk storage {

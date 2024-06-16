@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.104.0"
+      version = "~>3.108.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.50.0"
+      version = "~>2.52.0"
     }
     avere = {
       source  = "hashicorp/avere"
@@ -15,7 +15,7 @@ terraform {
     }
     time = {
       source  = "hashicorp/time"
-      version = "~>0.11.1"
+      version = "~>0.11.2"
     }
   }
   backend azurerm {
@@ -85,6 +85,12 @@ variable existingNetwork {
   })
 }
 
+variable subscriptionId {
+  type = object({
+    terraformState = string
+  })
+}
+
 data azurerm_client_config studio {}
 
 data azurerm_user_assigned_identity studio {
@@ -119,16 +125,18 @@ data azurerm_key_vault_key cache_encryption {
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
+    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
-    key                  = "1.Virtual.Network"
+    key                  = "1.Virtual.Network${lower(terraform.workspace) == "shared" ? "env:shared" : ""}"
   }
 }
 
 data terraform_remote_state image {
   backend = "azurerm"
   config = {
+    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
@@ -139,6 +147,7 @@ data terraform_remote_state image {
 data terraform_remote_state storage {
   backend = "azurerm"
   config = {
+    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
@@ -163,6 +172,9 @@ data azurerm_private_dns_zone studio {
 }
 
 locals {
+  subscriptionId = {
+    terraformState = var.subscriptionId.terraformState != "" ? var.subscriptionId.terraformState : data.azurerm_client_config.studio.subscription_id
+  }
   blobStorageAccountNfs = try(data.terraform_remote_state.storage.outputs.blobStorageAccountNfs, {})
 }
 

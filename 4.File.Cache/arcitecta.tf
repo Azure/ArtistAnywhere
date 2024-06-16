@@ -91,7 +91,7 @@ resource azurerm_network_interface mediaflux {
     subnet_id                     = data.azurerm_subnet.cache.id
     private_ip_address_allocation = "Dynamic"
   }
-  enable_accelerated_networking = each.value.network.acceleration.enable
+  accelerated_networking_enabled = each.value.network.acceleration.enable
   lifecycle {
     prevent_destroy = true
   }

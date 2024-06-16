@@ -32,7 +32,9 @@ computeFleets = [
           evictionPolicy     = "Delete"
           capacityTarget     = 2
           capacityMinimum    = 2
-          capacityMaintain   = true
+          capacityMaintain = {
+            enable = true
+          }
         }
       }
       image = {
@@ -89,7 +91,9 @@ computeFleets = [
           evictionPolicy     = "Delete"
           capacityTarget     = 2
           capacityMinimum    = 2
-          capacityMaintain   = true
+          capacityMaintain = {
+            enable = true
+          }
         }
       }
       image = {
@@ -468,9 +472,9 @@ virtualMachineScaleSets = [
   }
 ]
 
-##################################################################
-# Resource dependency configuration for pre-existing deployments #
-##################################################################
+##################################################
+# Pre-Existing Resource Dependency Configuration #
+##################################################
 
 activeDirectory = {
   enable           = false
@@ -484,14 +488,15 @@ activeDirectory = {
 existingNetwork = {
   enable            = false
   name              = ""
-  subnetNameFarm    = ""
-  subnetNameAI      = ""
+  subnetName        = ""
   resourceGroupName = ""
 }
 
-existingStorage = {
-  enable            = false
-  name              = ""
-  resourceGroupName = ""
-  fileShareName     = ""
+#################################################
+# Non-Default Terraform Workspace Configuration #
+#################################################
+
+subscriptionId = {
+  terraformState = ""
+  computeGallery = ""
 }

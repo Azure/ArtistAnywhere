@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.104.0"
+      version = "~>3.108.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.50.0"
+      version = "~>2.52.0"
     }
     external = {
       source  = "hashicorp/external"
@@ -15,7 +15,7 @@ terraform {
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.2"
+      version = "~>3.4.3"
     }
     azapi = {
       source = "azure/azapi"
@@ -67,6 +67,12 @@ variable fileLoadSource {
   })
 }
 
+variable subscriptionId {
+  type = object({
+    terraformState = string
+  })
+}
+
 data http client_address {
   url = "https://api.ipify.org?format=json"
 }
@@ -105,16 +111,18 @@ data azurerm_key_vault_key data_encryption {
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
+    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
-    key                  = "1.Virtual.Network"
+    key                  = "1.Virtual.Network${lower(terraform.workspace) == "shared" ? "env:shared" : ""}"
   }
 }
 
 data terraform_remote_state image {
   backend = "azurerm"
   config = {
+    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
@@ -151,6 +159,12 @@ data azurerm_subnet storage_region {
 data azurerm_private_dns_zone studio {
   name                = data.terraform_remote_state.network.outputs.privateDns.zoneName
   resource_group_name = data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
+}
+
+locals {
+  subscriptionId = {
+    terraformState = var.subscriptionId.terraformState != "" ? var.subscriptionId.terraformState : data.azurerm_client_config.studio.subscription_id
+  }
 }
 
 resource azurerm_resource_group storage {

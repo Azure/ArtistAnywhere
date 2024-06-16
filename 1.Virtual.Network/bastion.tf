@@ -5,7 +5,7 @@
 variable bastion {
   type = object({
     enable              = bool
-    sku                 = string
+    tier                = string
     scaleUnitCount      = number
     enableFileCopy      = bool
     enableCopyPaste     = bool
@@ -161,7 +161,7 @@ resource azurerm_bastion_host studio {
   name                   = "Bastion-${each.value.name}"
   resource_group_name    = each.value.resourceGroupName
   location               = each.value.regionName
-  sku                    = var.bastion.sku
+  sku                    = var.bastion.tier
   scale_units            = var.bastion.scaleUnitCount
   file_copy_enabled      = var.bastion.enableFileCopy
   copy_paste_enabled     = var.bastion.enableCopyPaste

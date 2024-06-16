@@ -231,9 +231,9 @@ virtualMachines = [
   }
 ]
 
-##################################################################
-# Resource dependency configuration for pre-existing deployments #
-##################################################################
+##################################################
+# Pre-Existing Resource Dependency Configuration #
+##################################################
 
 activeDirectory = {
   enable           = false
@@ -249,4 +249,13 @@ existingNetwork = {
   name              = ""
   subnetName        = ""
   resourceGroupName = ""
+}
+
+#################################################
+# Non-Default Terraform Workspace Configuration #
+#################################################
+
+subscriptionId = {
+  terraformState = ""
+  computeGallery = ""
 }

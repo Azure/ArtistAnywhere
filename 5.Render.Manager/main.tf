@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.104.0"
+      version = "~>3.108.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.50.0"
+      version = "~>2.52.0"
     }
   }
   backend azurerm {
@@ -63,6 +63,13 @@ variable existingNetwork {
   })
 }
 
+variable subscriptionId {
+  type = object({
+    terraformState = string
+    computeGallery = string
+  })
+}
+
 data azurerm_client_config studio {}
 
 data azurerm_user_assigned_identity studio {
@@ -97,16 +104,18 @@ data azurerm_key_vault_secret admin_password {
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
+    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
-    key                  = "1.Virtual.Network"
+    key                  = "1.Virtual.Network${lower(terraform.workspace) == "shared" ? "env:shared" : ""}"
   }
 }
 
 data terraform_remote_state image {
   backend = "azurerm"
   config = {
+    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
@@ -127,6 +136,13 @@ data azurerm_virtual_network studio_edge {
 data azurerm_private_dns_zone studio {
   name                = var.existingNetwork.enable ? var.existingNetwork.privateDns.zoneName : data.terraform_remote_state.network.outputs.privateDns.zoneName
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.privateDns.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
+}
+
+locals {
+  subscriptionId = {
+    terraformState = var.subscriptionId.terraformState != "" ? var.subscriptionId.terraformState : data.azurerm_client_config.studio.subscription_id
+    computeGallery = var.subscriptionId.computeGallery != "" ? var.subscriptionId.computeGallery : data.azurerm_client_config.studio.subscription_id
+  }
 }
 
 resource azurerm_resource_group scheduler {

@@ -13,10 +13,10 @@ storage = {
 ######################################################################
 
 monitor = {
-  workspace = {
-    sku = "PerGB2018"
+  logWorkspace = {
+    tier = "PerGB2018"
   }
-  insight = {
+  appInsight = {
     type = "web"
   }
   retentionDays = 90

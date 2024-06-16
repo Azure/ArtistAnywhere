@@ -513,3 +513,11 @@ containerRegistry = {
     instanceCount = 1
   }
 }
+
+#################################################
+# Non-Default Terraform Workspace Configuration #
+#################################################
+
+subscriptionId = {
+  terraformState = ""
+}

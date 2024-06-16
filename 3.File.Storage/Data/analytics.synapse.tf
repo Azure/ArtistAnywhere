@@ -41,6 +41,31 @@ resource azurerm_synapse_workspace studio {
   }
 }
 
+resource azurerm_synapse_firewall_rule allow_admin {
+  count                = var.data.analytics.synapse.enable ? 1 : 0
+  name                 = var.data.analytics.workspace.name
+  synapse_workspace_id = azurerm_synapse_workspace.studio[0].id
+  start_ip_address     = jsondecode(data.http.client_address.response_body).ip
+  end_ip_address       = jsondecode(data.http.client_address.response_body).ip
+}
+
+resource azurerm_synapse_firewall_rule allow_azure {
+  count                = var.data.analytics.synapse.enable ? 1 : 0
+  name                 = "AllowAllWindowsAzureIps"
+  synapse_workspace_id = azurerm_synapse_workspace.studio[0].id
+  start_ip_address     = "0.0.0.0"
+  end_ip_address       = "0.0.0.0"
+}
+
+resource time_sleep synapse_workspace_rbac {
+  count           = var.data.analytics.synapse.enable ? 1 : 0
+  create_duration = "30s"
+  depends_on = [
+    azurerm_synapse_firewall_rule.allow_admin,
+    azurerm_synapse_firewall_rule.allow_azure
+  ]
+}
+
 resource azurerm_synapse_linked_service cosmos_db {
   count                = var.data.analytics.synapse.enable ? 1 : 0
   name                 = var.data.analytics.workspace.name
@@ -49,6 +74,9 @@ resource azurerm_synapse_linked_service cosmos_db {
   type_properties_json = jsonencode({
     connectionString = "${azurerm_cosmosdb_account.studio["sql"].primary_readonly_sql_connection_string}Database=${var.noSQL.databases[0].name}"
   })
+  depends_on = [
+    time_sleep.synapse_workspace_rbac
+  ]
 }
 
 resource azurerm_synapse_sql_pool studio {
@@ -77,22 +105,6 @@ resource azurerm_synapse_spark_pool studio {
   auto_pause {
     delay_in_minutes = each.value.autoPause.idleMinutes
   }
-}
-
-resource azurerm_synapse_firewall_rule allow_admin {
-  count                = var.data.analytics.synapse.enable ? 1 : 0
-  name                 = var.data.analytics.workspace.name
-  synapse_workspace_id = azurerm_synapse_workspace.studio[0].id
-  start_ip_address     = jsondecode(data.http.client_address.response_body).ip
-  end_ip_address       = jsondecode(data.http.client_address.response_body).ip
-}
-
-resource azurerm_synapse_firewall_rule allow_azure {
-  count                = var.data.analytics.synapse.enable ? 1 : 0
-  name                 = "AllowAllWindowsAzureIps"
-  synapse_workspace_id = azurerm_synapse_workspace.studio[0].id
-  start_ip_address     = "0.0.0.0"
-  end_ip_address       = "0.0.0.0"
 }
 
 resource azurerm_private_dns_zone synapse {

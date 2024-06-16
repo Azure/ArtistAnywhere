@@ -5,7 +5,7 @@
 variable vpnGateway {
   type = object({
     name       = string
-    sku        = string
+    tier       = string
     type       = string
     generation = string
     sharedKey  = string
@@ -26,7 +26,7 @@ resource azurerm_virtual_network_gateway vpn {
   location            = data.azurerm_resource_group.network.location
   edge_zone           = var.virtualNetwork.edgeZoneName != "" ? var.virtualNetwork.edgeZoneName : null
   type                = "Vpn"
-  sku                 = var.vpnGateway.sku
+  sku                 = var.vpnGateway.tier
   vpn_type            = var.vpnGateway.type
   generation          = var.vpnGateway.generation
   enable_bgp          = var.vpnGateway.enableBgp

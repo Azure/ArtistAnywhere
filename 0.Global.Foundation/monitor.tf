@@ -4,10 +4,10 @@
 
 variable monitor {
   type = object({
-    workspace = object({
-      sku = string
+    logWorkspace = object({
+      tier = string
     })
-    insight = object({
+    appInsight = object({
       type = string
     })
     retentionDays = number
@@ -39,7 +39,7 @@ resource azurerm_log_analytics_workspace studio {
   name                       = module.global.monitor.name
   resource_group_name        = azurerm_resource_group.studio.name
   location                   = azurerm_resource_group.studio.location
-  sku                        = var.monitor.workspace.sku
+  sku                        = var.monitor.logWorkspace.tier
   retention_in_days          = var.monitor.retentionDays
   internet_ingestion_enabled = false
   internet_query_enabled     = false
@@ -57,7 +57,7 @@ resource azurerm_application_insights studio {
   resource_group_name        = azurerm_resource_group.studio.name
   location                   = azurerm_resource_group.studio.location
   workspace_id               = azurerm_log_analytics_workspace.studio[0].id
-  application_type           = var.monitor.insight.type
+  application_type           = var.monitor.appInsight.type
   retention_in_days          = var.monitor.retentionDays
   internet_ingestion_enabled = false
   internet_query_enabled     = false

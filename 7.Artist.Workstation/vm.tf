@@ -62,12 +62,6 @@ variable virtualMachines {
 }
 
 locals {
-  fileSystemsLinux = [
-    for fileSystem in var.fileSystems.linux : fileSystem if fileSystem.enable
-  ]
-  fileSystemsWindows = [
-    for fileSystem in var.fileSystems.windows : fileSystem if fileSystem.enable
-  ]
   virtualMachines = flatten([
     for virtualMachine in var.virtualMachines : [
       for i in range(virtualMachine.count) : merge(virtualMachine, {
@@ -112,7 +106,7 @@ resource azurerm_network_interface workstation {
     subnet_id                     = each.value.network.subnetId
     private_ip_address_allocation = "Dynamic"
   }
-  enable_accelerated_networking = each.value.network.acceleration.enable
+  accelerated_networking_enabled = each.value.network.acceleration.enable
 }
 
 resource azurerm_linux_virtual_machine workstation {
@@ -124,7 +118,7 @@ resource azurerm_linux_virtual_machine workstation {
   location                        = each.value.resourceLocation.regionName
   edge_zone                       = each.value.resourceLocation.edgeZone
   size                            = each.value.size
-  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
+  source_image_id                 = "/subscriptions/${local.subscriptionId.computeGallery}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
@@ -226,7 +220,7 @@ resource azurerm_windows_virtual_machine workstation {
   location            = each.value.resourceLocation.regionName
   edge_zone           = each.value.resourceLocation.edgeZone
   size                = each.value.size
-  source_image_id     = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
+  source_image_id     = "/subscriptions/${local.subscriptionId.computeGallery}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username      = each.value.adminLogin.userName
   admin_password      = each.value.adminLogin.userPassword
   network_interface_ids = [

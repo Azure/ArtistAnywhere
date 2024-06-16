@@ -4,7 +4,7 @@
 
 vpnGateway = {
   name       = "Gateway-VPN"
-  sku        = "VpnGw2"
+  tier       = "VpnGw2"
   type       = "RouteBased"
   generation = "Generation2"
   sharedKey  = ""

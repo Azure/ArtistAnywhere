@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.104.0"
+      version = "~>3.108.0"
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.2"
+      version = "~>3.4.3"
     }
     azapi = {
       source = "azure/azapi"
@@ -35,9 +35,17 @@ variable resourceGroupName {
   type = string
 }
 
+variable subscriptionId {
+  type = object({
+    terraformState = string
+  })
+}
+
 data http client_address {
   url = "https://api.ipify.org?format=json"
 }
+
+data azurerm_client_config studio {}
 
 data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name
@@ -77,10 +85,11 @@ data azurerm_key_vault_secret database_password {
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
+    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
-    key                  = "1.Virtual.Network"
+    key                  = "1.Virtual.Network${lower(terraform.workspace) == "shared" ? "env:shared" : ""}"
   }
 }
 
@@ -100,6 +109,9 @@ data azurerm_resource_group network {
 }
 
 locals {
+  subscriptionId = {
+    terraformState = var.subscriptionId.terraformState != "" ? var.subscriptionId.terraformState : data.azurerm_client_config.studio.subscription_id
+  }
   regionNames = distinct([
     for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
   ])

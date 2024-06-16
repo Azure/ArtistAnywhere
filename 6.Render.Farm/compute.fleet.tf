@@ -22,7 +22,9 @@ variable computeFleets {
           evictionPolicy     = string
           capacityTarget     = number
           capacityMinimum    = number
-          capacityMaintain   = bool
+          capacityMaintain = object({
+            enable = bool
+          })
         })
       })
       image = object({
@@ -99,7 +101,7 @@ resource terraform_data virtual_network_provider {
   }
 }
 
-resource azapi_resource farm {
+resource azapi_resource fleet {
   for_each = {
     for computeFleet in local.computeFleets : computeFleet.name => computeFleet
   }
@@ -113,7 +115,7 @@ resource azapi_resource farm {
         baseVirtualMachineProfile = {
           storageProfile = {
             imageReference = {
-              id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+              id = "/subscriptions/${local.subscriptionId.computeGallery}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
             }
           }
           osProfile = {
@@ -153,7 +155,7 @@ resource azapi_resource farm {
         allocationStrategy = each.value.machine.priority.spot.allocationStrategy
         evictionPolicy     = each.value.machine.priority.spot.evictionPolicy
         capacity           = each.value.machine.priority.spot.capacityTarget
-        maintain           = each.value.machine.priority.spot.capacityMaintain
+        maintain           = each.value.machine.priority.spot.capacityMaintain.enable
       }
       vmSizesProfile = each.value.machine.sizes
     }

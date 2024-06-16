@@ -293,7 +293,7 @@ privateDns = {
 
 bastion = {
   enable              = true
-  sku                 = "Standard"
+  tier                = "Standard"
   scaleUnitCount      = 2
   enableFileCopy      = true
   enableCopyPaste     = true
@@ -309,4 +309,12 @@ bastion = {
 
 monitor = {
   enable = true
+}
+
+#################################################
+# Non-Default Terraform Workspace Configuration #
+#################################################
+
+subscriptionId = {
+  terraformState = ""
 }

@@ -141,9 +141,9 @@ activeDirectory = {
   domainName = "artist.studio"
 }
 
-##################################################################
-# Resource dependency configuration for pre-existing deployments #
-##################################################################
+##################################################
+# Pre-Existing Resource Dependency Configuration #
+##################################################
 
 existingNetwork = {
   enable            = false
@@ -154,4 +154,13 @@ existingNetwork = {
     zoneName          = ""
     resourceGroupName = ""
   }
+}
+
+#################################################
+# Non-Default Terraform Workspace Configuration #
+#################################################
+
+subscriptionId = {
+  terraformState = ""
+  computeGallery = ""
 }
