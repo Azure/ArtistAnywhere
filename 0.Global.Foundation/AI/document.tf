@@ -10,6 +10,7 @@ resource azurerm_cognitive_account ai_document {
   sku_name              = var.ai.document.tier
   custom_subdomain_name = var.ai.document.domainName != "" ? var.ai.document.domainName : var.ai.document.name
   kind                  = "FormRecognizer"
+  local_auth_enabled    = false
   identity {
     type = "UserAssigned"
     identity_ids = [

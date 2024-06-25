@@ -10,6 +10,7 @@ resource azurerm_cognitive_account ai_vision {
   sku_name              = var.ai.vision.tier
   custom_subdomain_name = var.ai.vision.domainName != "" ? var.ai.vision.domainName : var.ai.vision.name
   kind                  = "ComputerVision"
+  local_auth_enabled    = false
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -42,6 +43,7 @@ resource azurerm_cognitive_account ai_vision_training {
   sku_name              = var.ai.vision.training.tier
   custom_subdomain_name = var.ai.vision.training.domainName != "" ? var.ai.vision.training.domainName : var.ai.vision.training.name
   kind                  = "CustomVision.Training"
+  local_auth_enabled    = false
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -70,6 +72,7 @@ resource azurerm_cognitive_account ai_vision_prediction {
   sku_name              = var.ai.vision.prediction.tier
   custom_subdomain_name = var.ai.vision.prediction.domainName != "" ? var.ai.vision.prediction.domainName : var.ai.vision.prediction.name
   kind                  = "CustomVision.Prediction"
+  local_auth_enabled    = false
   identity {
     type = "UserAssigned"
     identity_ids = [

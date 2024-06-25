@@ -10,6 +10,7 @@ resource azurerm_cognitive_account ai_content_safety {
   sku_name              = var.ai.contentSafety.tier
   custom_subdomain_name = var.ai.contentSafety.domainName != "" ? var.ai.contentSafety.domainName : var.ai.contentSafety.name
   kind                  = "ContentSafety"
+  local_auth_enabled    = false
   identity {
     type = "UserAssigned"
     identity_ids = [

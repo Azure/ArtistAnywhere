@@ -10,6 +10,7 @@ resource azurerm_cognitive_account ai_speech {
   sku_name              = var.ai.speech.tier
   custom_subdomain_name = var.ai.speech.domainName != "" ? var.ai.speech.domainName : var.ai.speech.name
   kind                  = "SpeechServices"
+  local_auth_enabled    = false
   identity {
     type = "UserAssigned"
     identity_ids = [

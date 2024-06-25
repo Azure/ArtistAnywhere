@@ -10,6 +10,7 @@ resource azurerm_cognitive_account ai_face {
   sku_name              = var.ai.face.tier
   custom_subdomain_name = var.ai.face.domainName != "" ? var.ai.face.domainName : var.ai.face.name
   kind                  = "Face"
+  local_auth_enabled    = false
   identity {
     type = "UserAssigned"
     identity_ids = [

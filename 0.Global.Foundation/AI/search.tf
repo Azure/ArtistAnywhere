@@ -3,14 +3,15 @@
 ####################################################################################
 
 resource azurerm_search_service ai {
-  count               = var.ai.search.enable ? 1 : 0
-  name                = var.ai.search.name
-  resource_group_name = azurerm_resource_group.studio_ai.name
-  location            = azurerm_resource_group.studio_ai.location
-  sku                 = var.ai.search.tier
-  hosting_mode        = var.ai.search.hostingMode
-  replica_count       = var.ai.search.replicaCount
-  partition_count     = var.ai.search.partitionCount
+  count                        = var.ai.search.enable ? 1 : 0
+  name                         = var.ai.search.name
+  resource_group_name          = azurerm_resource_group.studio_ai.name
+  location                     = azurerm_resource_group.studio_ai.location
+  sku                          = var.ai.search.tier
+  hosting_mode                 = var.ai.search.hostingMode
+  replica_count                = var.ai.search.replicaCount
+  partition_count              = var.ai.search.partitionCount
+  local_authentication_enabled = false
   # identity {
   #   type = "UserAssigned"
   #   identity_ids = [

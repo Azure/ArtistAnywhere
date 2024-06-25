@@ -10,6 +10,7 @@ resource azurerm_cognitive_account ai_language_conversational {
   sku_name              = var.ai.language.conversational.tier
   custom_subdomain_name = var.ai.language.conversational.domainName != "" ? var.ai.language.conversational.domainName : var.ai.language.conversational.name
   kind                  = "ConversationalLanguageUnderstanding"
+  local_auth_enabled    = false
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -44,6 +45,7 @@ resource azurerm_cognitive_account ai_language_text_analytics {
   custom_question_answering_search_service_id  = var.ai.search.enable ? azurerm_search_service.ai[0].id : null
   custom_question_answering_search_service_key = var.ai.search.enable ? azurerm_search_service.ai[0].query_keys[0].key : null
   kind                                         = "TextAnalytics"
+  local_auth_enabled                           = false
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -81,6 +83,7 @@ resource azurerm_cognitive_account ai_language_text_translation {
   sku_name              = var.ai.language.textTranslation.tier
   custom_subdomain_name = var.ai.language.textTranslation.domainName != "" ? var.ai.language.textTranslation.domainName : var.ai.language.textTranslation.name
   kind                  = "TextTranslation"
+  local_auth_enabled    = false
   identity {
     type = "UserAssigned"
     identity_ids = [

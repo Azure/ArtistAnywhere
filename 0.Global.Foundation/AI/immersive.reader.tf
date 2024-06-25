@@ -10,6 +10,7 @@ resource azurerm_cognitive_account ai_immersive_reader {
   sku_name              = var.ai.immersiveReader.tier
   custom_subdomain_name = var.ai.immersiveReader.domainName != "" ? var.ai.immersiveReader.domainName : var.ai.immersiveReader.name
   kind                  = "ImmersiveReader"
+  local_auth_enabled    = false
   identity {
     type = "UserAssigned"
     identity_ids = [

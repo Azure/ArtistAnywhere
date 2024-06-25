@@ -133,9 +133,11 @@ resource azurerm_private_endpoint monitor {
 }
 
 resource azurerm_monitor_private_link_scope monitor {
-  count               = module.global.monitor.enable && var.monitor.enable ? 1 : 0
-  name                = module.global.monitor.name
-  resource_group_name = azurerm_resource_group.network.name
+  count                 = module.global.monitor.enable && var.monitor.enable ? 1 : 0
+  name                  = module.global.monitor.name
+  resource_group_name   = azurerm_resource_group.network.name
+  ingestion_access_mode = "PrivateOnly"
+  query_access_mode     = "PrivateOnly"
 }
 
 resource azurerm_monitor_private_link_scoped_service monitor_workspace {
