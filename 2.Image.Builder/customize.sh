@@ -44,8 +44,11 @@ echo "Customize (End): Image Build Parameters"
 echo "Customize (Start): Image Build Platform"
 # systemctl --now disable firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-dnf -y install gcc gcc-c++ perl cmake git docker
-dnf -y install kernel-devel-$(uname -r) python3-devel
+installFile="kernel-devel-4.18.0-513.5.1.el8_9.x86_64.rpm"
+downloadUrl="https://download.rockylinux.org/vault/rocky/8.9/BaseOS/x86_64/os/Packages/k/$installFile"
+curl -o $installFile -L $downloadUrl
+rpm -i $installFile
+dnf -y install gcc gcc-c++ perl cmake git docker python3-devel
 export AZNFS_NONINTERACTIVE_INSTALL=1
 curl -L https://github.com/Azure/AZNFS-mount/releases/download/2.0.4/aznfs_install.sh | bash
 if [ $machineType == Workstation ]; then
