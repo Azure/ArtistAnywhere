@@ -99,8 +99,6 @@ imageBuilder = {
         timeoutMinutes = 120
         renderEngines = [
         ]
-        customization = [
-        ]
       }
       distribute = {
         replicaCount       = 3
@@ -131,8 +129,6 @@ imageBuilder = {
         osDiskSizeGB   = 30
         timeoutMinutes = 120
         renderEngines = [
-        ]
-        customization = [
         ]
       }
       distribute = {
@@ -165,8 +161,6 @@ imageBuilder = {
         timeoutMinutes = 240
         renderEngines = [
           "PBRT"
-        ]
-        customization = [
         ]
       }
       distribute = {
@@ -201,8 +195,6 @@ imageBuilder = {
           "PBRT",
           "Blender"
         ]
-        customization = [
-        ]
       }
       distribute = {
         replicaCount       = 3
@@ -235,8 +227,6 @@ imageBuilder = {
         renderEngines = [
           "PBRT",
           "Blender"
-        ]
-        customization = [
         ]
       }
       distribute = {
@@ -271,8 +261,6 @@ imageBuilder = {
           "PBRT",
           "Blender"
         ]
-        customization = [
-        ]
       }
       distribute = {
         replicaCount       = 3
@@ -303,8 +291,6 @@ imageBuilder = {
         osDiskSizeGB   = 0
         timeoutMinutes = 240
         renderEngines = [
-        ]
-        customization = [
         ]
       }
       distribute = {
@@ -337,8 +323,6 @@ imageBuilder = {
         timeoutMinutes = 360
         renderEngines = [
           "PBRT"
-        ]
-        customization = [
         ]
       }
       distribute = {
@@ -374,8 +358,6 @@ imageBuilder = {
           "Blender",
           # "Unreal"
         ]
-        customization = [
-        ]
       }
       distribute = {
         replicaCount       = 3
@@ -410,8 +392,6 @@ imageBuilder = {
           "Blender",
           # "Unreal+PixelStream"
         ]
-        customization = [
-        ]
       }
       distribute = {
         replicaCount       = 3
@@ -445,8 +425,6 @@ imageBuilder = {
           "PBRT",
           "Blender",
           # "Unreal+PixelStream"
-        ]
-        customization = [
         ]
       }
       distribute = {

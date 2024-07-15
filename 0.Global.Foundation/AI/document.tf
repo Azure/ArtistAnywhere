@@ -5,8 +5,8 @@
 resource azurerm_cognitive_account ai_document {
   count                 = var.ai.document.enable ? 1 : 0
   name                  = var.ai.document.name
-  resource_group_name   = azurerm_resource_group.studio_ai.name
-  location              = azurerm_resource_group.studio_ai.location
+  resource_group_name   = azurerm_resource_group.ai.name
+  location              = azurerm_resource_group.ai.location
   sku_name              = var.ai.document.tier
   custom_subdomain_name = var.ai.document.domainName != "" ? var.ai.document.domainName : var.ai.document.name
   kind                  = "FormRecognizer"

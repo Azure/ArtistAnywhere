@@ -33,7 +33,7 @@ resource time_sleep datalake_filesystem_rbac {
 }
 
 resource azurerm_storage_data_lake_gen2_filesystem studio {
-  name               = azurerm_storage_account.datalake.name
+  name               = var.data.lake.fileSystem.name
   storage_account_id = azurerm_storage_account.datalake.id
   depends_on = [
     time_sleep.datalake_filesystem_rbac
@@ -42,11 +42,11 @@ resource azurerm_storage_data_lake_gen2_filesystem studio {
 
 resource azurerm_storage_data_lake_gen2_path studio {
   for_each = {
-    for path in var.data.lake.paths : path => path
+    for path in var.data.lake.fileSystem.paths : path => path
   }
   path               = each.value
   filesystem_name    = azurerm_storage_data_lake_gen2_filesystem.studio.name
-  storage_account_id = azurerm_storage_account.datalake.id
+  storage_account_id = azurerm_storage_data_lake_gen2_filesystem.studio.storage_account_id
   resource           = "directory"
 }
 

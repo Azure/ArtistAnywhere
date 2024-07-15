@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.8.4"
+  required_version = ">= 1.9.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.109.0"
+      version = "~>3.112.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -15,7 +15,7 @@ terraform {
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>1.13.1"
+      version = "~>1.14.0"
     }
   }
   backend azurerm {
@@ -27,6 +27,12 @@ provider azurerm {
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
+    }
+    cognitive_account {
+      purge_soft_delete_on_destroy = true
+    }
+    machine_learning {
+      purge_soft_deleted_workspace_on_destroy = true
     }
   }
 }
@@ -136,6 +142,7 @@ variable ai {
       enable = bool
       workspace = object({
         name = string
+        type = string
         tier = string
       })
     })
@@ -177,15 +184,15 @@ data azurerm_application_insights studio {
   resource_group_name = module.global.resourceGroupName
 }
 
-resource azurerm_resource_group studio_ai {
+resource azurerm_resource_group ai {
   name     = "${module.global.resourceGroupName}.AI"
   location = module.global.resourceLocation.regionName
 }
 
 output ai {
   value = {
-    resourceGroupName = azurerm_resource_group.studio_ai.name
-    regionName        = azurerm_resource_group.studio_ai.location
+    resourceGroupName = azurerm_resource_group.ai.name
+    regionName        = azurerm_resource_group.ai.location
     video = {
       enable = var.ai.video.enable
       id     = var.ai.video.enable ? azapi_resource.ai_video_indexer[0].id : null
@@ -264,9 +271,11 @@ output ai {
       name   = var.ai.immersiveReader.enable ? azurerm_cognitive_account.ai_immersive_reader[0].name : null
     }
     machineLearning = {
-      enable = var.ai.machineLearning.enable
-      id     = var.ai.machineLearning.enable ? azurerm_machine_learning_workspace.ai[0].id : null
-      name   = var.ai.machineLearning.enable ? azurerm_machine_learning_workspace.ai[0].name : null
+      enable            = var.ai.machineLearning.enable
+      id                = var.ai.machineLearning.enable ? azurerm_machine_learning_workspace.ai[0].id : null
+      name              = var.ai.machineLearning.enable ? azurerm_machine_learning_workspace.ai[0].name : null
+      resourceGroupName = var.ai.machineLearning.enable ? azurerm_resource_group.ai_machine_learning[0].name : null
+      regionName        = var.ai.machineLearning.enable ? azurerm_resource_group.ai_machine_learning[0].location : null
     }
   }
 }

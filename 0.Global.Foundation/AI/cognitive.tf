@@ -5,8 +5,8 @@
 resource azurerm_cognitive_account ai {
   count                 = var.ai.cognitive.enable ? 1 : 0
   name                  = var.ai.cognitive.name
-  resource_group_name   = azurerm_resource_group.studio_ai.name
-  location              = azurerm_resource_group.studio_ai.location
+  resource_group_name   = azurerm_resource_group.ai.name
+  location              = azurerm_resource_group.ai.location
   sku_name              = var.ai.cognitive.tier
   custom_subdomain_name = var.ai.cognitive.domainName != "" ? var.ai.cognitive.domainName : var.ai.cognitive.name
   kind                  = "CognitiveServices"

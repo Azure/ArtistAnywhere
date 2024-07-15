@@ -5,8 +5,8 @@
 resource azurerm_cognitive_account ai_open {
   count                 = var.ai.open.enable ? 1 : 0
   name                  = var.ai.open.name
-  resource_group_name   = azurerm_resource_group.studio_ai.name
-  location              = azurerm_resource_group.studio_ai.location
+  resource_group_name   = azurerm_resource_group.ai.name
+  location              = azurerm_resource_group.ai.location
   sku_name              = var.ai.open.tier
   custom_subdomain_name = var.ai.open.domainName != "" ? var.ai.open.domainName : var.ai.open.name
   kind                  = "OpenAI"

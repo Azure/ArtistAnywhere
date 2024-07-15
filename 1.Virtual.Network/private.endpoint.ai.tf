@@ -387,8 +387,8 @@ resource azurerm_private_endpoint ai_immersive_reader {
 resource azurerm_private_endpoint ai_machine_learning {
   count               = local.aiMachineLearningEnable ? 1 : 0
   name                = lower(data.terraform_remote_state.ai[0].outputs.ai.machineLearning.name)
-  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.resourceGroupName
-  location            = data.terraform_remote_state.ai[0].outputs.ai.regionName
+  resource_group_name = data.terraform_remote_state.ai[0].outputs.ai.machineLearning.resourceGroupName
+  location            = data.terraform_remote_state.ai[0].outputs.ai.machineLearning.regionName
   subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
   private_service_connection {
     name                           = data.terraform_remote_state.ai[0].outputs.ai.machineLearning.name

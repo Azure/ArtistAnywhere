@@ -40,7 +40,17 @@ virtualNetworks = [
       {
         name = "Storage"
         addressSpace = [
-          "10.0.192.0/24"
+          "10.0.192.0/25"
+        ]
+        serviceEndpoints = [
+          "Microsoft.Storage.Global"
+        ]
+        serviceDelegation = null
+      },
+      {
+        name = "Storage2"
+        addressSpace = [
+          "10.0.192.128/25"
         ]
         serviceEndpoints = [
           "Microsoft.Storage.Global"
@@ -120,6 +130,15 @@ virtualNetworks = [
         serviceDelegation = null
       },
       {
+        name = "API"
+        addressSpace = [
+          "10.0.199.0/24"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = null
+      },
+      {
         name = "GatewaySubnet"
         addressSpace = [
           "10.0.255.0/26"
@@ -175,7 +194,17 @@ virtualNetworks = [
       {
         name = "Storage"
         addressSpace = [
-          "10.1.192.0/24"
+          "10.1.192.0/25"
+        ]
+        serviceEndpoints = [
+          "Microsoft.Storage.Global"
+        ]
+        serviceDelegation = null
+      },
+      {
+        name = "Storage2"
+        addressSpace = [
+          "10.1.192.128/25"
         ]
         serviceEndpoints = [
           "Microsoft.Storage.Global"
@@ -251,6 +280,15 @@ virtualNetworks = [
         ]
         serviceEndpoints = [
           "Microsoft.CognitiveServices"
+        ]
+        serviceDelegation = null
+      },
+      {
+        name = "API"
+        addressSpace = [
+          "10.0.199.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = null
       },

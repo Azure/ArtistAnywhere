@@ -5,8 +5,8 @@
 resource azurerm_cognitive_account ai_immersive_reader {
   count                 = var.ai.immersiveReader.enable ? 1 : 0
   name                  = var.ai.immersiveReader.name
-  resource_group_name   = azurerm_resource_group.studio_ai.name
-  location              = azurerm_resource_group.studio_ai.location
+  resource_group_name   = azurerm_resource_group.ai.name
+  location              = azurerm_resource_group.ai.location
   sku_name              = var.ai.immersiveReader.tier
   custom_subdomain_name = var.ai.immersiveReader.domainName != "" ? var.ai.immersiveReader.domainName : var.ai.immersiveReader.name
   kind                  = "ImmersiveReader"

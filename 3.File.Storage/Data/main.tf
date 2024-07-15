@@ -1,13 +1,13 @@
 terraform {
-  required_version = ">= 1.8.4"
+  required_version = ">= 1.9.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.109.0"
+      version = "~>3.112.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.52.0"
+      version = "~>2.53.1"
     }
     http = {
       source  = "hashicorp/http"
@@ -19,7 +19,7 @@ terraform {
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>1.13.1"
+      version = "~>1.14.0"
     }
   }
   backend azurerm {
@@ -46,19 +46,15 @@ variable resourceGroupName {
 variable data {
   type = object({
     lake = object({
-      paths = list(string)
       storageAccount = object({
         name        = string
         type        = string
         redundancy  = string
         performance = string
       })
-    })
-    factory = object({
-      enable = bool
-      name   = string
-      encryption = object({
-        enable = bool
+      fileSystem = object({
+        name  = string
+        paths = list(string)
       })
     })
     analytics = object({
@@ -122,6 +118,14 @@ variable data {
         encryption = object({
           enable = bool
         })
+      })
+    })
+    integration = object({
+      enable = bool
+      name   = string
+      tier   = string
+      encryption = object({
+        enable = bool
       })
     })
     governance = object({
@@ -227,6 +231,7 @@ resource azurerm_resource_group data {
 }
 
 resource azurerm_resource_group data_integration {
+  count    = var.data.integration.enable ? 1 : 0
   name     = "${var.resourceGroupName}.Integration"
   location = var.cosmosDB.geoLocations[0].regionName
 }

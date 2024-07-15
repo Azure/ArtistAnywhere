@@ -24,7 +24,6 @@ variable imageBuilder {
         osDiskSizeGB   = number
         timeoutMinutes = number
         renderEngines  = list(string)
-        customization  = list(string)
       })
       distribute = object({
         replicaCount       = number
@@ -132,7 +131,7 @@ resource azapi_resource linux {
     for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.platform.linux.enable && imageTemplate.enable && lower(imageTemplate.source.imageDefinition.name) == "linux"
   }
   name      = each.value.name
-  type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"
+  type      = "Microsoft.VirtualMachineImages/imageTemplates@2024-02-01"
   parent_id = azurerm_resource_group.image.id
   location  = azurerm_resource_group.image.location
   identity {
@@ -181,27 +180,19 @@ resource azapi_resource linux {
             type        = "File"
             sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.sh"
             destination = "/tmp/functions.sh"
-            inline      = null
           },
           {
             type        = "File"
             sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/customize.sh"
             destination = "/tmp/customize.sh"
-            inline      = null
           },
           {
             type        = "File"
             sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/terminate.sh"
             destination = "/tmp/terminate.sh"
-            inline      = null
           }
-        ], length(each.value.build.customization) > 0 ?
+        ],
         [
-          {
-            type   = "Shell"
-            inline = each.value.build.customization
-          }
-        ] : [
           {
             type = "Shell"
             inline = [
@@ -253,7 +244,7 @@ resource azapi_resource windows {
     for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.platform.windows.enable && imageTemplate.enable && startswith(imageTemplate.source.imageDefinition.name, "Win")
   }
   name      = each.value.name
-  type      = "Microsoft.VirtualMachineImages/imageTemplates@2023-07-01"
+  type      = "Microsoft.VirtualMachineImages/imageTemplates@2024-02-01"
   parent_id = azurerm_resource_group.image.id
   location  = azurerm_resource_group.image.location
   identity {
@@ -297,35 +288,19 @@ resource azapi_resource windows {
             type        = "File"
             sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.ps1"
             destination = "C:\\AzureData\\functions.ps1"
-            inline      = null
-            runElevated = false
-            runAsSystem = false
           },
           {
             type        = "File"
             sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/customize.ps1"
             destination = "C:\\AzureData\\customize.ps1"
-            inline      = null
-            runElevated = false
-            runAsSystem = false
           },
           {
             type        = "File"
             sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/terminate.ps1"
             destination = "C:\\AzureData\\terminate.ps1"
-            inline      = null
-            runElevated = false
-            runAsSystem = false
           }
-        ], length(each.value.build.customization) > 0 ?
+        ],
         [
-          {
-            type        = "PowerShell"
-            inline      = each.value.build.customization
-            runElevated = false
-            runAsSystem = false
-          }
-        ] : [
           {
             type = "PowerShell"
             inline = [
@@ -334,14 +309,9 @@ resource azapi_resource windows {
               "dism /Online /NoRestart /Enable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /All",
               "exit 0"
             ]
-            runElevated = false
-            runAsSystem = false
           },
           {
-            type        = "WindowsRestart"
-            inline      = null
-            runElevated = false
-            runAsSystem = false
+            type = "WindowsRestart"
           },
           {
             type = "PowerShell"
@@ -352,10 +322,7 @@ resource azapi_resource windows {
             runAsSystem = true
           },
           {
-            type        = "WindowsRestart"
-            inline      = null
-            runElevated = false
-            runAsSystem = false
+            type = "WindowsRestart"
           }
         ]
       )

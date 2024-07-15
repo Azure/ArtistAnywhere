@@ -10,7 +10,7 @@ $resourceLocation = @{
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
   resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)"
-  name              = "Studio-West"
+  name              = "Studio"
   subnetName        = "Storage"
 }
 $virtualMachine = @{
@@ -54,7 +54,7 @@ $resourceLocation = @{
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
   resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.edgeZone)"})"
-  name              = "Studio-West"
+  name              = "Studio"
   subnetName        = "Farm"
 }
 $virtualMachine = @{
@@ -90,7 +90,7 @@ $resourceLocation = @{
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
   resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.edgeZone)"})"
-  name              = "Studio-West"
+  name              = "Studio"
   subnetName        = "Farm"
 }
 $virtualMachine = @{
@@ -133,7 +133,7 @@ $resourceLocation = @{
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
   resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)"
-  name              = "Studio-West"
+  name              = "Studio"
   subnetName        = "Farm"
 }
 $virtualMachine = @{
@@ -180,7 +180,7 @@ $resourceLocation = @{
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
   resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.edgeZone)"})"
-  name              = "Studio-West"
+  name              = "Studio"
   subnetName        = "Workstation"
 }
 $virtualMachine = @{
@@ -215,7 +215,7 @@ $resourceLocation = @{
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
   resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)"
-  name              = "Studio-West"
+  name              = "Studio"
   subnetName        = "Workstation"
 }
 $virtualMachine = @{

@@ -12,7 +12,7 @@ $resourceLocation = @{
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
   resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.edgeZone)"})"
-  name              = "Studio-West"
+  name              = "Studio"
   subnetName        = "Farm"
 }
 $virtualMachine = @{

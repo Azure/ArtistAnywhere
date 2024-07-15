@@ -5,8 +5,8 @@
 resource azurerm_cognitive_account ai_vision {
   count                 = var.ai.vision.enable ? 1 : 0
   name                  = var.ai.vision.name
-  resource_group_name   = azurerm_resource_group.studio_ai.name
-  location              = azurerm_resource_group.studio_ai.location
+  resource_group_name   = azurerm_resource_group.ai.name
+  location              = azurerm_resource_group.ai.location
   sku_name              = var.ai.vision.tier
   custom_subdomain_name = var.ai.vision.domainName != "" ? var.ai.vision.domainName : var.ai.vision.name
   kind                  = "ComputerVision"
@@ -38,8 +38,8 @@ resource azurerm_cognitive_account ai_vision {
 resource azurerm_cognitive_account ai_vision_training {
   count                 = var.ai.vision.training.enable ? 1 : 0
   name                  = var.ai.vision.training.name
-  resource_group_name   = azurerm_resource_group.studio_ai.name
-  location              = azurerm_resource_group.studio_ai.location
+  resource_group_name   = azurerm_resource_group.ai.name
+  location              = azurerm_resource_group.ai.location
   sku_name              = var.ai.vision.training.tier
   custom_subdomain_name = var.ai.vision.training.domainName != "" ? var.ai.vision.training.domainName : var.ai.vision.training.name
   kind                  = "CustomVision.Training"
@@ -67,8 +67,8 @@ resource azurerm_cognitive_account ai_vision_training {
 resource azurerm_cognitive_account ai_vision_prediction {
   count                 = var.ai.vision.prediction.enable ? 1 : 0
   name                  = var.ai.vision.prediction.name
-  resource_group_name   = azurerm_resource_group.studio_ai.name
-  location              = azurerm_resource_group.studio_ai.location
+  resource_group_name   = azurerm_resource_group.ai.name
+  location              = azurerm_resource_group.ai.location
   sku_name              = var.ai.vision.prediction.tier
   custom_subdomain_name = var.ai.vision.prediction.domainName != "" ? var.ai.vision.prediction.domainName : var.ai.vision.prediction.name
   kind                  = "CustomVision.Prediction"

@@ -42,7 +42,7 @@ vpnGatewayLocal = {
 #################################################################################################
 
 virtualNetwork = {
-  name              = "Studio-West"
+  name              = "Studio"
   edgeZoneName      = ""
   resourceGroupName = "ArtistAnywhere.Network.WestUS2"
   gateway = {

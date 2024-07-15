@@ -2,20 +2,12 @@
 # Event Hub (https://learn.microsoft.com/azure/event-hubs/event-hubs-about) #
 #############################################################################
 
-variable eventHub {
-  type = object({
-    enable = bool
-    name   = string
-    tier   = string
-  })
-}
-
 resource azurerm_eventhub_namespace data {
-  count                         = var.eventHub.enable ? 1 : 0
-  name                          = var.eventHub.name
-  resource_group_name           = azurerm_resource_group.data_integration.name
-  location                      = azurerm_resource_group.data_integration.location
-  sku                           = var.eventHub.tier
+  count                         = var.data.integration.enable ? 1 : 0
+  name                          = var.data.integration.name
+  resource_group_name           = azurerm_resource_group.data_integration[0].name
+  location                      = azurerm_resource_group.data_integration[0].location
+  sku                           = var.data.integration.tier
   public_network_access_enabled = true
   identity {
     type = "UserAssigned"
@@ -36,13 +28,13 @@ resource azurerm_eventhub_namespace data {
 }
 
 resource azurerm_private_dns_zone event_hub {
-  count               = var.eventHub.enable ? 1 : 0
+  count               = var.data.integration.enable ? 1 : 0
   name                = "privatelink.servicebus.windows.net"
-  resource_group_name = azurerm_resource_group.data_integration.name
+  resource_group_name = azurerm_resource_group.data_integration[0].name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link event_hub {
-  count                 = var.eventHub.enable ? 1 : 0
+  count                 = var.data.integration.enable ? 1 : 0
   name                  = "event-hub"
   resource_group_name   = azurerm_private_dns_zone.event_hub[0].resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.event_hub[0].name
@@ -50,7 +42,7 @@ resource azurerm_private_dns_zone_virtual_network_link event_hub {
 }
 
 resource azurerm_private_endpoint event_hub {
-  count               = var.eventHub.enable ? 1 : 0
+  count               = var.data.integration.enable ? 1 : 0
   name                = "${azurerm_eventhub_namespace.data[0].name}-${azurerm_private_dns_zone_virtual_network_link.event_hub[0].name}"
   resource_group_name = azurerm_eventhub_namespace.data[0].resource_group_name
   location            = azurerm_eventhub_namespace.data[0].location

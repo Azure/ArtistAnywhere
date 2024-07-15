@@ -118,3 +118,23 @@ trafficManager = {
     enable = true
   }
 }
+
+#################################################################
+# Functions - https://learn.microsoft.com/azure/azure-functions #
+#################################################################
+
+functionApp = {
+  name = "xstudio"
+  servicePlan = {
+    osType      = "Linux"
+    computeType = "FC1"
+  }
+  runtime = {
+    name    = "dotnet-isolated"
+    version = "8.0"
+  }
+  instance = {
+    memoryMB = 512
+    maxCount = 40
+  }
+}

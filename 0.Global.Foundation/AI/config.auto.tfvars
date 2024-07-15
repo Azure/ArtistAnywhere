@@ -99,10 +99,11 @@ ai = {
     domainName = ""
   }
   machineLearning = {
-    enable = false
+    enable = true
     workspace = {
       name = "xstudio"
-      tier = "Default"
+      type = "Default"
+      tier = "Basic"
     }
   }
   encryption = {

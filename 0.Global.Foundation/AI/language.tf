@@ -5,8 +5,8 @@
 resource azurerm_cognitive_account ai_language_conversational {
   count                 = var.ai.language.conversational.enable ? 1 : 0
   name                  = var.ai.language.conversational.name
-  resource_group_name   = azurerm_resource_group.studio_ai.name
-  location              = azurerm_resource_group.studio_ai.location
+  resource_group_name   = azurerm_resource_group.ai.name
+  location              = azurerm_resource_group.ai.location
   sku_name              = var.ai.language.conversational.tier
   custom_subdomain_name = var.ai.language.conversational.domainName != "" ? var.ai.language.conversational.domainName : var.ai.language.conversational.name
   kind                  = "ConversationalLanguageUnderstanding"
@@ -38,8 +38,8 @@ resource azurerm_cognitive_account ai_language_conversational {
 resource azurerm_cognitive_account ai_language_text_analytics {
   count                                        = var.ai.language.textAnalytics.enable ? 1 : 0
   name                                         = var.ai.language.textAnalytics.name
-  resource_group_name                          = azurerm_resource_group.studio_ai.name
-  location                                     = azurerm_resource_group.studio_ai.location
+  resource_group_name                          = azurerm_resource_group.ai.name
+  location                                     = azurerm_resource_group.ai.location
   sku_name                                     = var.ai.language.textAnalytics.tier
   custom_subdomain_name                        = var.ai.language.textAnalytics.domainName != "" ? var.ai.language.textAnalytics.domainName : var.ai.language.textAnalytics.name
   custom_question_answering_search_service_id  = var.ai.search.enable ? azurerm_search_service.ai[0].id : null
@@ -78,8 +78,8 @@ resource azurerm_cognitive_account ai_language_text_analytics {
 resource azurerm_cognitive_account ai_language_text_translation {
   count                 = var.ai.language.textTranslation.enable ? 1 : 0
   name                  = var.ai.language.textTranslation.name
-  resource_group_name   = azurerm_resource_group.studio_ai.name
-  location              = azurerm_resource_group.studio_ai.location
+  resource_group_name   = azurerm_resource_group.ai.name
+  location              = azurerm_resource_group.ai.location
   sku_name              = var.ai.language.textTranslation.tier
   custom_subdomain_name = var.ai.language.textTranslation.domainName != "" ? var.ai.language.textTranslation.domainName : var.ai.language.textTranslation.name
   kind                  = "TextTranslation"

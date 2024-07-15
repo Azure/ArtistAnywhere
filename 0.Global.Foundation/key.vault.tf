@@ -38,6 +38,20 @@ variable keyVault {
   })
 }
 
+resource azurerm_role_assignment key_vault_reader {
+  count                = module.global.keyVault.enable ? 1 : 0
+  role_definition_name = "Key Vault Reader" # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/security#key-vault-reader
+  principal_id         = azurerm_user_assigned_identity.studio.principal_id
+  scope                = azurerm_key_vault.studio[0].id
+}
+
+resource azurerm_role_assignment key_vault_crypto_service_encryption_user {
+  count                = module.global.keyVault.enable ? 1 : 0
+  role_definition_name = "Key Vault Crypto Service Encryption User" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/security#key-vault-crypto-service-encryption-user
+  principal_id         = azurerm_user_assigned_identity.studio.principal_id
+  scope                = azurerm_key_vault.studio[0].id
+}
+
 resource azurerm_key_vault studio {
   count                           = module.global.keyVault.enable ? 1 : 0
   name                            = module.global.keyVault.name

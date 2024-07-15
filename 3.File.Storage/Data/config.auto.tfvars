@@ -2,22 +2,17 @@ resourceGroupName = "ArtistAnywhere.Data" # Alphanumeric, underscores, hyphens, 
 
 data = {
   lake = {
-    paths = [
-      "synapse",
-      "databricks"
-    ]
     storageAccount = {
       name        = "xstudio1"
       type        = "StorageV2"
       redundancy  = "LRS"
       performance = "Standard"
     }
-  }
-  factory = {
-    enable = true
-    name   = "xstudio"
-    encryption = {
-      enable = false
+    fileSystem = {
+      name = "datalake"
+      paths = [
+        "synapse"
+      ]
     }
   }
   analytics = {
@@ -85,6 +80,14 @@ data = {
       encryption = {
         enable = false
       }
+    }
+  }
+  integration = {
+    enable = true
+    name   = "xstudio"
+    tier   = "Standard"
+    encryption = {
+      enable = false
     }
   }
   governance = {
@@ -562,32 +565,4 @@ table = {
       throughput = null
     }
   ]
-}
-
-##############################################################################
-# Event Hub  (https://learn.microsoft.com/azure/event-hubs/event-hubs-about) #
-##############################################################################
-
-eventHub = {
-  enable = true
-  name   = "xstudio"
-  tier   = "Standard"
-}
-
-#################################################################
-# Functions - https://learn.microsoft.com/azure/azure-functions #
-#################################################################
-
-functionApp = {
-  name = "xstudio"
-  servicePlan = {
-    computeType = "Y1"
-  }
-  fileShare = {
-    name   = "functions"
-    sizeGB = 5
-  }
-  siteConfig = {
-    alwaysOn = false
-  }
 }

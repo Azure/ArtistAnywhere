@@ -28,9 +28,9 @@ resource time_sleep ai_video_indexer_rbac {
 resource azapi_resource ai_video_indexer {
   count     = var.ai.video.enable ? 1 : 0
   name      = var.ai.video.name
-  type      = "Microsoft.VideoIndexer/accounts@2024-04-01-preview"
-  parent_id = azurerm_resource_group.studio_ai.id
-  location  = azurerm_resource_group.studio_ai.location
+  type      = "Microsoft.VideoIndexer/accounts@2024-06-01-preview"
+  parent_id = azurerm_resource_group.ai.id
+  location  = azurerm_resource_group.ai.location
   identity {
     type = "UserAssigned"
     identity_ids = [
