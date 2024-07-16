@@ -1,130 +1,5 @@
 resourceGroupName = "ArtistAnywhere.Farm" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
-##################################################################################
-# Compute Fleet (https://learn.microsoft.com/azure/azure-compute-fleet/overview) #
-##################################################################################
-
-computeFleets = [
-  {
-    enable = false
-    name   = "LnxFarmC"
-    machine = {
-      namePrefix = ""
-      sizes = [
-        {
-          name = "Standard_HB120rs_v2"
-        },
-        {
-          name = "Standard_HB120-96rs_v2"
-        },
-        {
-          name = "Standard_HB120-64rs_v2"
-        }
-      ]
-      priority = {
-        standard = {
-          allocationStrategy = "LowestPrice"
-          capacityTarget     = 0
-          capacityMinimum    = 0
-        }
-        spot = {
-          allocationStrategy = "PriceCapacityOptimized"
-          evictionPolicy     = "Delete"
-          capacityTarget     = 2
-          capacityMinimum    = 2
-          capacityMaintain = {
-            enable = true
-          }
-        }
-      }
-      image = {
-        resourceGroupName = "ArtistAnywhere.Image"
-        galleryName       = "xstudio"
-        definitionName    = "Linux"
-        versionId         = "2.0.0"
-        plan = {
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
-      }
-    }
-    network = {
-      subnetName = "Farm"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-      locationEdge = {
-        enable = false
-      }
-    }
-    adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
-    }
-  },
-  {
-    enable = false
-    name   = "WinFarmC"
-    machine = {
-      namePrefix = ""
-      sizes = [
-        {
-          name = "Standard_HB120rs_v2"
-        },
-        {
-          name = "Standard_HB120-96rs_v2"
-        },
-        {
-          name = "Standard_HB120-64rs_v2"
-        }
-      ]
-      priority = {
-        standard = {
-          allocationStrategy = "LowestPrice"
-          capacityTarget     = 0
-          capacityMinimum    = 0
-        }
-        spot = {
-          allocationStrategy = "PriceCapacityOptimized"
-          evictionPolicy     = "Delete"
-          capacityTarget     = 2
-          capacityMinimum    = 2
-          capacityMaintain = {
-            enable = true
-          }
-        }
-      }
-      image = {
-        resourceGroupName = "ArtistAnywhere.Image"
-        galleryName       = "xstudio"
-        definitionName    = "WinFarm"
-        versionId         = "2.0.0"
-        plan = {
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
-      }
-    }
-    network = {
-      subnetName = "Farm"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-      locationEdge = {
-        enable = false
-      }
-    }
-    adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
-    }
-  }
-]
-
 ######################################################################################################
 # Virtual Machine Scale Sets (https://learn.microsoft.com/azure/virtual-machine-scale-sets/overview) #
 ######################################################################################################
@@ -469,6 +344,131 @@ virtualMachineScaleSets = [
       enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
     }
     faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
+  }
+]
+
+##################################################################################
+# Compute Fleet (https://learn.microsoft.com/azure/azure-compute-fleet/overview) #
+##################################################################################
+
+computeFleets = [
+  {
+    enable = false
+    name   = "LnxFarmC"
+    machine = {
+      namePrefix = ""
+      sizes = [
+        {
+          name = "Standard_HB120rs_v2"
+        },
+        {
+          name = "Standard_HB120-96rs_v2"
+        },
+        {
+          name = "Standard_HB120-64rs_v2"
+        }
+      ]
+      priority = {
+        standard = {
+          allocationStrategy = "LowestPrice"
+          capacityTarget     = 0
+          capacityMinimum    = 0
+        }
+        spot = {
+          allocationStrategy = "PriceCapacityOptimized"
+          evictionPolicy     = "Delete"
+          capacityTarget     = 2
+          capacityMinimum    = 2
+          capacityMaintain = {
+            enable = true
+          }
+        }
+      }
+      image = {
+        resourceGroupName = "ArtistAnywhere.Image"
+        galleryName       = "xstudio"
+        definitionName    = "Linux"
+        versionId         = "2.0.0"
+        plan = {
+          publisher = ""
+          product   = ""
+          name      = ""
+        }
+      }
+    }
+    network = {
+      subnetName = "Farm"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
+      }
+    }
+    adminLogin = {
+      userName     = "xadmin"
+      userPassword = "P@ssword1234"
+      sshPublicKey = "" # "ssh-rsa ..."
+    }
+  },
+  {
+    enable = false
+    name   = "WinFarmC"
+    machine = {
+      namePrefix = ""
+      sizes = [
+        {
+          name = "Standard_HB120rs_v2"
+        },
+        {
+          name = "Standard_HB120-96rs_v2"
+        },
+        {
+          name = "Standard_HB120-64rs_v2"
+        }
+      ]
+      priority = {
+        standard = {
+          allocationStrategy = "LowestPrice"
+          capacityTarget     = 0
+          capacityMinimum    = 0
+        }
+        spot = {
+          allocationStrategy = "PriceCapacityOptimized"
+          evictionPolicy     = "Delete"
+          capacityTarget     = 2
+          capacityMinimum    = 2
+          capacityMaintain = {
+            enable = true
+          }
+        }
+      }
+      image = {
+        resourceGroupName = "ArtistAnywhere.Image"
+        galleryName       = "xstudio"
+        definitionName    = "WinFarm"
+        versionId         = "2.0.0"
+        plan = {
+          publisher = ""
+          product   = ""
+          name      = ""
+        }
+      }
+    }
+    network = {
+      subnetName = "Farm"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
+      }
+    }
+    adminLogin = {
+      userName     = "xadmin"
+      userPassword = "P@ssword1234"
+      sshPublicKey = "" # "ssh-rsa ..."
+    }
   }
 ]
 
