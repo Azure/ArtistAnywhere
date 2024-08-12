@@ -15,7 +15,7 @@ resource azurerm_machine_learning_workspace ai {
   location                       = azurerm_resource_group.ai_machine_learning[0].location
   kind                           = var.ai.machineLearning.workspace.type
   sku_name                       = var.ai.machineLearning.workspace.tier
-  key_vault_id                   = data.azurerm_key_vault.studio[0].id
+  key_vault_id                   = data.azurerm_key_vault.studio.id
   storage_account_id             = data.azurerm_storage_account.studio.id
   primary_user_assigned_identity = data.azurerm_user_assigned_identity.studio.id
   application_insights_id        = data.azurerm_application_insights.studio[0].id

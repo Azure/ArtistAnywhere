@@ -1,17 +1,13 @@
 terraform {
-  required_version = ">= 1.9.2"
+  required_version = ">= 1.9.4"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.112.0"
+      version = "~>3.115.0"
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.3"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "~>0.11.2"
+      version = "~>3.4.4"
     }
     azapi = {
       source = "azure/azapi"
@@ -19,7 +15,8 @@ terraform {
     }
   }
   backend azurerm {
-    key = "0.Global.Foundation.AI"
+    key              = "0.Global.Foundation.AI"
+    use_azuread_auth = true
   }
 }
 
@@ -35,6 +32,7 @@ provider azurerm {
       purge_soft_deleted_workspace_on_destroy = true
     }
   }
+  storage_use_azuread = true
 }
 
 module global {
@@ -66,12 +64,6 @@ variable ai {
       domainName = string
     })
     language = object({
-      conversational = object({
-        enable     = bool
-        name       = string
-        tier       = string
-        domainName = string
-      })
       textAnalytics = object({
         enable     = bool
         name       = string
@@ -79,6 +71,12 @@ variable ai {
         domainName = string
       })
       textTranslation = object({
+        enable     = bool
+        name       = string
+        tier       = string
+        domainName = string
+      })
+      conversational = object({
         enable     = bool
         name       = string
         tier       = string
@@ -146,6 +144,9 @@ variable ai {
         tier = string
       })
     })
+    privateEndpoint = object({
+      enable = bool
+    })
     encryption = object({
       enable = bool
     })
@@ -167,15 +168,13 @@ data azurerm_storage_account studio {
 }
 
 data azurerm_key_vault studio {
-  count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
   resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault_key data_encryption {
-  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.keyName.dataEncryption
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_application_insights studio {
@@ -276,6 +275,9 @@ output ai {
       name              = var.ai.machineLearning.enable ? azurerm_machine_learning_workspace.ai[0].name : null
       resourceGroupName = var.ai.machineLearning.enable ? azurerm_resource_group.ai_machine_learning[0].name : null
       regionName        = var.ai.machineLearning.enable ? azurerm_resource_group.ai_machine_learning[0].location : null
+    }
+    privateEndpoint = {
+      enable = var.ai.privateEndpoint.enable
     }
   }
 }

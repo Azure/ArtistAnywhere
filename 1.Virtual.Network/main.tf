@@ -1,13 +1,14 @@
 terraform {
-  required_version = ">= 1.9.2"
+  required_version = ">= 1.9.4"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.112.0"
+      version = "~>3.115.0"
     }
   }
   backend azurerm {
-    key = "1.Virtual.Network"
+    key              = "1.Virtual.Network"
+    use_azuread_auth = true
   }
 }
 
@@ -17,6 +18,7 @@ provider azurerm {
       prevent_deletion_if_contains_resources = false
     }
   }
+  storage_use_azuread = true
 }
 
 module global {
@@ -41,31 +43,26 @@ data azurerm_user_assigned_identity studio {
 }
 
 data azurerm_storage_account studio {
-  count               = terraform.workspace != "shared" ? 1 : 0
   name                = module.global.storage.accountName
   resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault studio {
-  count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
   resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret gateway_connection {
-  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.gatewayConnection
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_app_configuration studio {
-  count               = module.global.appConfig.enable ? 1 : 0
   name                = module.global.appConfig.name
   resource_group_name = module.global.resourceGroupName
 }
 
 data terraform_remote_state ai {
-  count   = terraform.workspace != "shared" ? 1 : 0
   backend = "azurerm"
   config = {
     subscription_id      = local.subscriptionId.terraformState
@@ -73,6 +70,7 @@ data terraform_remote_state ai {
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
     key                  = "0.Global.Foundation.AI"
+    use_azuread_auth     = true
   }
 }
 

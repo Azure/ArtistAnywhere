@@ -208,7 +208,7 @@ resource azurerm_private_endpoint mongo_db {
 resource azapi_resource mongo_cluster {
   count     = var.mongoDBvCore.enable ? 1 : 0
   name      = var.mongoDBvCore.cluster.name
-  type      = "Microsoft.DocumentDB/mongoClusters@2024-03-01-preview"
+  type      = "Microsoft.DocumentDB/mongoClusters@2024-06-01-preview"
   parent_id = azurerm_resource_group.data.id
   location  = azurerm_resource_group.data.location
   body = jsonencode({
@@ -223,8 +223,8 @@ resource azapi_resource mongo_cluster {
         }
       ]
       serverVersion              = var.mongoDBvCore.cluster.version
-      administratorLogin         = var.mongoDBvCore.cluster.adminLogin.userName != "" || !module.global.keyVault.enable ? var.mongoDBvCore.cluster.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
-      administratorLoginPassword = var.mongoDBvCore.cluster.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.mongoDBvCore.cluster.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+      administratorLogin         = var.mongoDBvCore.cluster.adminLogin.userName != "" ? var.mongoDBvCore.cluster.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+      administratorLoginPassword = var.mongoDBvCore.cluster.adminLogin.userPassword != "" ? var.mongoDBvCore.cluster.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
     }
   })
   schema_validation_enabled = false
@@ -233,7 +233,7 @@ resource azapi_resource mongo_cluster {
 resource azapi_resource mongo_cluster_firewall_rule_allow_azure {
   count     = var.mongoDBvCore.enable ? 1 : 0
   name      = "AllowAllAzureServicesAndResourcesWithinAzureIps"
-  type      = "Microsoft.DocumentDB/mongoClusters/firewallRules@2024-03-01-preview"
+  type      = "Microsoft.DocumentDB/mongoClusters/firewallRules@2024-06-01-preview"
   parent_id = azapi_resource.mongo_cluster[0].id
   body = jsonencode({
     properties = {
@@ -247,7 +247,7 @@ resource azapi_resource mongo_cluster_firewall_rule_allow_azure {
 resource azapi_resource mongo_cluster_firewall_rule_allow_client {
   count     = var.mongoDBvCore.enable ? 1 : 0
   name      = "AllowClient"
-  type      = "Microsoft.DocumentDB/mongoClusters/firewallRules@2024-03-01-preview"
+  type      = "Microsoft.DocumentDB/mongoClusters/firewallRules@2024-06-01-preview"
   parent_id = azapi_resource.mongo_cluster[0].id
   body = jsonencode({
     properties = {

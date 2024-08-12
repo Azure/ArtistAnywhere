@@ -8,10 +8,12 @@ computeGallery = {
   name = "xstudio"
   platform = {
     linux = {
-      enable = true
+      enable  = true
+      version = "9.3.20231113"
     }
     windows = {
-      enable = true
+      enable  = true
+      version = "Latest"
     }
   }
   imageDefinitions = [
@@ -21,7 +23,7 @@ computeGallery = {
       generation = "V2"
       publisher  = "RESF"
       offer      = "RockyLinux-x86_64"
-      sku        = "8-Base"
+      sku        = "9-LVM"
     },
     {
       name       = "WinServer"
@@ -83,8 +85,7 @@ imageBuilder = {
       name   = "LnxStorage"
       source = {
         imageDefinition = {
-          name    = "Linux"
-          version = "Latest"
+          name = "Linux"
         }
         # imageVersion = {
         #   id = ""
@@ -114,8 +115,7 @@ imageBuilder = {
       name   = "LnxScheduler"
       source = {
         imageDefinition = {
-          name    = "Linux"
-          version = "Latest"
+          name = "Linux"
         }
         # imageVersion = {
         #   id = ""
@@ -145,8 +145,7 @@ imageBuilder = {
       name   = "LnxFarmC"
       source = {
         imageDefinition = {
-          name    = "Linux"
-          version = "Latest"
+          name = "Linux"
         }
         # imageVersion = {
         #   id = ""
@@ -177,8 +176,7 @@ imageBuilder = {
       name   = "LnxFarmG"
       source = {
         imageDefinition = {
-          name    = "Linux"
-          version = "Latest"
+          name = "Linux"
         }
         # imageVersion = {
         #   id = ""
@@ -210,8 +208,7 @@ imageBuilder = {
       name   = "LnxArtistN"
       source = {
         imageDefinition = {
-          name    = "Linux"
-          version = "Latest"
+          name = "Linux"
         }
         # imageVersion = {
         #   id = ""
@@ -243,8 +240,7 @@ imageBuilder = {
       name   = "LnxArtistA"
       source = {
         imageDefinition = {
-          name    = "Linux"
-          version = "Latest"
+          name = "Linux"
         }
         # imageVersion = {
         #   id = ""
@@ -276,8 +272,7 @@ imageBuilder = {
       name   = "WinScheduler"
       source = {
         imageDefinition = {
-          name    = "WinServer"
-          version = "Latest"
+          name = "WinServer"
         }
         # imageVersion = {
         #   id = ""
@@ -307,8 +302,7 @@ imageBuilder = {
       name   = "WinFarmC"
       source = {
         imageDefinition = {
-          name    = "WinFarm"
-          version = "Latest"
+          name = "WinFarm"
         }
         # imageVersion = {
         #   id = ""
@@ -339,8 +333,7 @@ imageBuilder = {
       name   = "WinFarmG"
       source = {
         imageDefinition = {
-          name    = "WinFarm"
-          version = "Latest"
+          name = "WinFarm"
         }
         # imageVersion = {
         #   id = ""
@@ -373,8 +366,7 @@ imageBuilder = {
       name   = "WinArtistN"
       source = {
         imageDefinition = {
-          name    = "WinArtist"
-          version = "Latest"
+          name = "WinArtist"
         }
         # imageVersion = {
         #   id = ""
@@ -407,8 +399,7 @@ imageBuilder = {
       name   = "WinArtistA"
       source = {
         imageDefinition = {
-          name    = "WinArtist"
-          version = "Latest"
+          name = "WinArtist"
         }
         # imageVersion = {
         #   id = ""
@@ -444,32 +435,32 @@ versionPath = {
   nvidiaCUDAToolkit = "v12.3"
   nvidiaOptiX       = "8.0.0"
   renderPBRT        = "v4"
-  renderBlender     = "4.1.1"
+  renderBlender     = "4.2.0"
   renderMaya        = "2024_0_1"
   renderHoudini     = "20.0.506"
   renderUnrealVS    = "2022"
   renderUnreal      = "5.3.2"
   renderUnrealPixel = "5.3-1.0.1"
   jobScheduler      = "10.3.2.1"
-  pcoipAgent        = "23.12.8"
+  pcoipAgent        = "24.07.3"
 }
 
 dataPlatform = {
   adminLogin = {
-    userName     = "xadmin"
-    userPassword = "P@ssword1234"
+    userName     = ""
+    userPassword = ""
   }
   jobDatabase = {
     host = ""
     port = 27017 # 10255
     serviceLogin = {
-      userName     = "dbuser"
-      userPassword = "P@ssword1234"
+      userName     = ""
+      userPassword = ""
     }
   }
 }
 
-binStorage = {
+binStorage = { # Required for image build customization
   host = ""
   auth = ""
 }
@@ -479,7 +470,7 @@ binStorage = {
 ######################################################################################################
 
 containerRegistry = {
-  enable = true
+  enable = false
   name = "xstudio"
   type = "Premium"
   adminUser = {

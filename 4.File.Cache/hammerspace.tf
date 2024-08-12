@@ -1,6 +1,6 @@
-#######################################################################################################
-# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace_4_6_5) #
-#######################################################################################################
+######################################################################################################
+# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) #
+######################################################################################################
 
 variable hammerspace {
   type = object({
@@ -16,7 +16,7 @@ variable hammerspace {
       adminLogin = object({
         userName     = string
         userPassword = string
-        sshPublicKey = string
+        sshKeyPublic = string
         passwordAuth = object({
           disable = bool
         })
@@ -46,7 +46,7 @@ variable hammerspace {
       adminLogin = object({
         userName     = string
         userPassword = string
-        sshPublicKey = string
+        sshKeyPublic = string
         passwordAuth = object({
           disable = bool
         })
@@ -72,49 +72,43 @@ variable hammerspace {
   })
 }
 
-resource azurerm_resource_group hammerspace {
-  count    = var.hammerspace.enable ? 1 : 0
-  name     = "${var.resourceGroupName}.Hammerspace"
-  location = var.existingNetwork.enable ? var.existingNetwork.regionName : module.global.resourceLocation.regionName
-}
-
 resource azurerm_proximity_placement_group hammerspace {
   count               = var.hammerspace.enable ? 1 : 0
   name                = var.hammerspace.namePrefix
-  location            = azurerm_resource_group.hammerspace[0].location
-  resource_group_name = azurerm_resource_group.hammerspace[0].name
+  location            = azurerm_resource_group.cache.location
+  resource_group_name = azurerm_resource_group.cache.name
 }
 
 resource azurerm_availability_set hammerspace_metadata {
   count                        = var.hammerspace.enable ? 1 : 0
   name                         = "${var.hammerspace.namePrefix}${var.hammerspace.metadata.machine.namePrefix}"
-  resource_group_name          = azurerm_resource_group.hammerspace[0].name
-  location                     = azurerm_resource_group.hammerspace[0].location
+  resource_group_name          = azurerm_resource_group.cache.name
+  location                     = azurerm_resource_group.cache.location
   proximity_placement_group_id = azurerm_proximity_placement_group.hammerspace[0].id
 }
 
 resource azurerm_availability_set hammerspace_data {
   count                        = var.hammerspace.enable ? 1 : 0
   name                         = "${var.hammerspace.namePrefix}${var.hammerspace.data.machine.namePrefix}"
-  resource_group_name          = azurerm_resource_group.hammerspace[0].name
-  location                     = azurerm_resource_group.hammerspace[0].location
+  resource_group_name          = azurerm_resource_group.cache.name
+  location                     = azurerm_resource_group.cache.location
   proximity_placement_group_id = azurerm_proximity_placement_group.hammerspace[0].id
 }
 
 locals {
   hammerspaceImage = {
     publisher = "hammerspace"
-    product   = "hammerspace-4-6-5-byol"
-    name      = "planformacc-byol-4_6_6"
-    version   = "22.08.18"
+    product   = "hammerspace_byol_5_0"
+    name      = "hammerspace_5_0"
+    version   = "24.06.19"
   }
   hammerspaceMetadataNodes = [
     for i in range(var.hammerspace.metadata.machine.count) : merge({
       index = i
       name  = "${var.hammerspace.namePrefix}${var.hammerspace.metadata.machine.namePrefix}${i + 1}"
       adminLogin = {
-        userName     = var.hammerspace.metadata.adminLogin.userName != "" || !module.global.keyVault.enable ? var.hammerspace.metadata.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
-        userPassword = var.hammerspace.metadata.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.hammerspace.metadata.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+        userName     = var.hammerspace.metadata.adminLogin.userName != "" ? var.hammerspace.metadata.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+        userPassword = var.hammerspace.metadata.adminLogin.userPassword != "" ? var.hammerspace.metadata.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
       }},
       var.hammerspace.metadata
     ) if var.hammerspace.enable
@@ -124,8 +118,8 @@ locals {
       index = i
       name  = "${var.hammerspace.namePrefix}${var.hammerspace.data.machine.namePrefix}${i + 1}"
       adminLogin = {
-        userName     = var.hammerspace.data.adminLogin.userName != "" || !module.global.keyVault.enable ? var.hammerspace.data.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
-        userPassword = var.hammerspace.data.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.hammerspace.data.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+        userName     = var.hammerspace.data.adminLogin.userName != "" ? var.hammerspace.data.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+        userPassword = var.hammerspace.data.adminLogin.userPassword != "" ? var.hammerspace.data.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
       }},
       var.hammerspace.data
     ) if var.hammerspace.enable
@@ -195,8 +189,8 @@ resource azurerm_network_interface storage_primary {
     for node in concat(local.hammerspaceMetadataNodes, local.hammerspaceDataNodes) : node.name => node
   }
   name                = each.value.name
-  resource_group_name = azurerm_resource_group.hammerspace[0].name
-  location            = azurerm_resource_group.hammerspace[0].location
+  resource_group_name = azurerm_resource_group.cache.name
+  location            = azurerm_resource_group.cache.location
   ip_configuration {
     name                          = "ipConfig"
     subnet_id                     = data.azurerm_subnet.cache.id
@@ -210,8 +204,8 @@ resource azurerm_network_interface storage_secondary {
     for metadataNode in local.hammerspaceMetadataNodes : metadataNode.name => metadataNode if local.hammerspaceEnableHighAvailability
   }
   name                = "${each.value.name}HA"
-  resource_group_name = azurerm_resource_group.hammerspace[0].name
-  location            = azurerm_resource_group.hammerspace[0].location
+  resource_group_name = azurerm_resource_group.cache.name
+  location            = azurerm_resource_group.cache.location
   ip_configuration {
     name                          = "ipConfig"
     subnet_id                     = data.azurerm_subnet.cache.id
@@ -225,8 +219,8 @@ resource azurerm_managed_disk storage {
     for machineDisk in concat(local.hammerspaceMetadataNodes, local.hammerspaceDataDisks) : machineDisk.name => machineDisk
   }
   name                 = each.value.name
-  resource_group_name  = azurerm_resource_group.hammerspace[0].name
-  location             = azurerm_resource_group.hammerspace[0].location
+  resource_group_name  = azurerm_resource_group.cache.name
+  location             = azurerm_resource_group.cache.location
   storage_account_type = each.value.dataDisk.storageType
   disk_size_gb         = each.value.dataDisk.sizeGB
   create_option        = "Empty"
@@ -237,8 +231,8 @@ resource azurerm_linux_virtual_machine hammerspace_metadata {
     for metadataNode in local.hammerspaceMetadataNodes : metadataNode.name => metadataNode
   }
   name                            = each.value.name
-  resource_group_name             = azurerm_resource_group.hammerspace[0].name
-  location                        = azurerm_resource_group.hammerspace[0].location
+  resource_group_name             = azurerm_resource_group.cache.name
+  location                        = azurerm_resource_group.cache.location
   size                            = each.value.machine.size
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
@@ -250,11 +244,11 @@ resource azurerm_linux_virtual_machine hammerspace_metadata {
   #   replace(jsonencode(local.hammerspaceMetadataNodeConfig), "@HOSTNAME@", each.value.name)
   # )
   network_interface_ids = distinct(local.hammerspaceEnableHighAvailability ? [
-    "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}",
-    "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}HA"
+    "${azurerm_resource_group.cache.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}",
+    "${azurerm_resource_group.cache.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}HA"
   ] : [
-    "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}",
-    "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
+    "${azurerm_resource_group.cache.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}",
+    "${azurerm_resource_group.cache.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
   ])
   os_disk {
     storage_account_type = var.hammerspace.metadata.osDisk.storageType
@@ -284,8 +278,8 @@ resource azurerm_linux_virtual_machine hammerspace_data {
     for dataNode in local.hammerspaceDataNodes : dataNode.name => dataNode
   }
   name                            = each.value.name
-  resource_group_name             = azurerm_resource_group.hammerspace[0].name
-  location                        = azurerm_resource_group.hammerspace[0].location
+  resource_group_name             = azurerm_resource_group.cache.name
+  location                        = azurerm_resource_group.cache.location
   size                            = each.value.machine.size
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
@@ -296,7 +290,7 @@ resource azurerm_linux_virtual_machine hammerspace_data {
   #   replace(replace(jsonencode(local.hammerspaceDataNodeConfig), "@METADATA_HOST_IP@", var.hammerspace.metadata.machine.count > 1 ? azurerm_lb.storage[0].frontend_ip_configuration[0].private_ip_address : azurerm_linux_virtual_machine.hammerspace_metadata["${var.hammerspace.namePrefix}${var.hammerspace.metadata.machine.namePrefix}1"].private_ip_address), "@HOSTNAME@", each.value.name)
   # )
   network_interface_ids = [
-    "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
+    "${azurerm_resource_group.cache.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
   ]
   os_disk {
     storage_account_type = each.value.osDisk.storageType
@@ -325,8 +319,8 @@ resource azurerm_virtual_machine_data_disk_attachment hammerspace_metadata {
   for_each = {
     for metadataDisk in local.hammerspaceMetadataNodes : metadataDisk.name => metadataDisk
   }
-  virtual_machine_id = "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
-  managed_disk_id    = "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Compute/disks/${each.value.name}"
+  virtual_machine_id = "${azurerm_resource_group.cache.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
+  managed_disk_id    = "${azurerm_resource_group.cache.id}/providers/Microsoft.Compute/disks/${each.value.name}"
   caching            = each.value.dataDisk.cachingType
   lun                = each.value.index
   depends_on = [
@@ -339,8 +333,8 @@ resource azurerm_virtual_machine_data_disk_attachment hammerspace_data {
   for_each = {
     for dataDisk in local.hammerspaceDataDisks : dataDisk.name => dataDisk
   }
-  virtual_machine_id = "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Compute/virtualMachines/${each.value.machineName}"
-  managed_disk_id    = "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Compute/disks/${each.value.name}"
+  virtual_machine_id = "${azurerm_resource_group.cache.id}/providers/Microsoft.Compute/virtualMachines/${each.value.machineName}"
+  managed_disk_id    = "${azurerm_resource_group.cache.id}/providers/Microsoft.Compute/disks/${each.value.name}"
   caching            = each.value.dataDisk.cachingType
   lun                = each.value.index
   depends_on = [
@@ -359,12 +353,12 @@ resource azurerm_virtual_machine_data_disk_attachment hammerspace_data {
 #   type_handler_version       = "2.1"
 #   automatic_upgrade_enabled  = false
 #   auto_upgrade_minor_version = true
-#   virtual_machine_id         = "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
+#   virtual_machine_id         = "${azurerm_resource_group.cache.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
 #   protected_settings = jsonencode({
 #     script = base64encode(
 #       <<BASH
 #         #!/bin/bash -x
-#         ADMIN_PASSWORD=${each.value.adminLogin.userPassword != "" || !module.global.keyVault.enable ? each.value.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value} /usr/bin/hs-init-admin-pw
+#         ADMIN_PASSWORD=${each.value.adminLogin.userPassword != "" ? each.value.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value} /usr/bin/hs-init-admin-pw
 #       BASH
 #     )
 #   })
@@ -377,8 +371,8 @@ resource azurerm_virtual_machine_data_disk_attachment hammerspace_data {
 # resource azurerm_lb storage {
 #   count               = local.hammerspaceEnableHighAvailability ? 1 : 0
 #   name                = var.hammerspace.namePrefix
-#   resource_group_name = azurerm_resource_group.hammerspace[0].name
-#   location            = azurerm_resource_group.hammerspace[0].location
+#   resource_group_name = azurerm_resource_group.cache.name
+#   location            = azurerm_resource_group.cache.location
 #   sku                 = "Standard"
 #   frontend_ip_configuration {
 #     name      = "ipConfigFrontend"
@@ -397,7 +391,7 @@ resource azurerm_virtual_machine_data_disk_attachment hammerspace_data {
 #     for metadataNode in local.hammerspaceMetadataNodes : metadataNode.name => metadataNode if local.hammerspaceEnableHighAvailability
 #   }
 #   backend_address_pool_id = azurerm_lb_backend_address_pool.storage[0].id
-#   network_interface_id    = "${azurerm_resource_group.hammerspace[0].id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
+#   network_interface_id    = "${azurerm_resource_group.cache.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
 #   ip_configuration_name   = "ipConfig"
 #   depends_on = [
 #     azurerm_network_interface.storage_primary

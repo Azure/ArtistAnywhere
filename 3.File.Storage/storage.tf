@@ -119,7 +119,7 @@ resource azurerm_storage_account studio {
   account_kind                    = each.value.type
   account_tier                    = each.value.tier
   account_replication_type        = each.value.redundancy
-  enable_https_traffic_only       = each.value.enableHttpsOnly
+  https_traffic_only_enabled      = each.value.enableHttpsOnly
   is_hns_enabled                  = each.value.enableBlobNfsV3
   nfsv3_enabled                   = each.value.enableBlobNfsV3
   large_file_share_enabled        = each.value.enableLargeFileShare ? true : null

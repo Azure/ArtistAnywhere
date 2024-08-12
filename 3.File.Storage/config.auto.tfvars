@@ -15,7 +15,7 @@ fileLoadSource = { # Applies to Storage and Weka only
 storageAccounts = [
   {
     enable               = true
-    name                 = "xstudio2"         # Name must be globally unique (lowercase alphanumeric)
+    name                 = "xstudio1"         # Name must be globally unique (lowercase alphanumeric)
     type                 = "BlockBlobStorage" # https://learn.microsoft.com/azure/storage/common/storage-account-overview
     tier                 = "Premium"          # https://learn.microsoft.com/azure/storage/common/storage-account-overview#performance-tiers
     redundancy           = "LRS"              # https://learn.microsoft.com/azure/storage/common/storage-redundancy
@@ -42,7 +42,7 @@ storageAccounts = [
   },
   {
     enable               = true
-    name                 = "xstudio3"    # Name must be globally unique (lowercase alphanumeric)
+    name                 = "xstudio2"    # Name must be globally unique (lowercase alphanumeric)
     type                 = "FileStorage" # https://learn.microsoft.com/azure/storage/common/storage-account-overview
     tier                 = "Premium"     # https://learn.microsoft.com/azure/storage/common/storage-account-overview#performance-tiers
     redundancy           = "LRS"         # https://learn.microsoft.com/azure/storage/common/storage-redundancy

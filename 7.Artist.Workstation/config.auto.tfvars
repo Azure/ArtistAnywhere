@@ -31,11 +31,11 @@ virtualMachines = [
       }
     }
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
       passwordAuth = {
-        disable = false
+        disable = true
       }
     }
     operatingSystem = {
@@ -87,11 +87,11 @@ virtualMachines = [
       }
     }
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
       passwordAuth = {
-        disable = false
+        disable = true
       }
     }
     operatingSystem = {
@@ -143,9 +143,9 @@ virtualMachines = [
       }
     }
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
       passwordAuth = {
         disable = false
       }
@@ -199,9 +199,9 @@ virtualMachines = [
       }
     }
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
       passwordAuth = {
         disable = false
       }

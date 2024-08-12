@@ -51,20 +51,12 @@ variable computeFleets {
     adminLogin = object({
       userName     = string
       userPassword = string
-      sshPublicKey = string
+      sshKeyPublic = string
     })
   }))
 }
 
-data local_file virtual_network_provider {
-  filename = local.vnetProvider
-  depends_on = [
-    terraform_data.virtual_network_provider
-  ]
-}
-
 locals {
-  vnetProvider = "compute.fleet.vnet.json"
   computeFleets = [
     for computeFleet in var.computeFleets : merge(computeFleet, {
       resourceLocation = {
@@ -84,21 +76,15 @@ locals {
         subnetId = "${computeFleet.network.locationEdge.enable ? data.azurerm_virtual_network.studio_edge.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : computeFleet.network.subnetName}"
       })
       adminLogin = merge(computeFleet.adminLogin, {
-        userName     = computeFleet.adminLogin.userName != "" || !module.global.keyVault.enable ? computeFleet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
-        userPassword = computeFleet.adminLogin.userPassword != "" || !module.global.keyVault.enable ? computeFleet.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+        userName     = computeFleet.adminLogin.userName != "" ? computeFleet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+        userPassword = computeFleet.adminLogin.userPassword != "" ? computeFleet.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
       })
       activeDirectory = merge(var.activeDirectory, {
-        adminUsername = var.activeDirectory.adminUsername != "" || !module.global.keyVault.enable ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
-        adminPassword = var.activeDirectory.adminPassword != "" || !module.global.keyVault.enable ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
+        adminUsername = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value
+        adminPassword = var.activeDirectory.adminPassword != "" ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password.value
       })
     }) if computeFleet.enable
   ]
-}
-
-resource terraform_data virtual_network_provider {
-  provisioner local-exec {
-    command = "az provider show --namespace Microsoft.Network --query resourceTypes[?resourceType=='virtualNetworks'] > ${local.vnetProvider}"
-  }
 }
 
 resource azapi_resource fleet {
@@ -109,6 +95,12 @@ resource azapi_resource fleet {
   type      = "Microsoft.AzureFleet/fleets@2024-05-01-preview"
   parent_id = azurerm_resource_group.farm.id
   location  = azurerm_resource_group.farm.location
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
+  }
   body = jsonencode({
     properties = {
       computeProfile = {
@@ -124,7 +116,7 @@ resource azapi_resource fleet {
             adminPassword      = each.value.adminLogin.userPassword
           }
           networkProfile = {
-            networkApiVersion = jsondecode(data.local_file.virtual_network_provider.content)[0].apiVersions[0]
+            #networkApiVersion = "2024-03-01"
             networkInterfaceConfigurations = [
               {
                 name = "nic"
@@ -161,7 +153,4 @@ resource azapi_resource fleet {
     }
   })
   schema_validation_enabled = false
-  depends_on = [
-    data.local_file.virtual_network_provider
-  ]
 }

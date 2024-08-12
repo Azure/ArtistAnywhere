@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.9.2"
+  required_version = ">= 1.9.4"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.112.0"
+      version = "~>3.115.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -11,15 +11,15 @@ terraform {
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.3"
+      version = "~>3.4.4"
     }
     time = {
       source  = "hashicorp/time"
-      version = "~>0.11.2"
+      version = "~>0.12.0"
     }
-    azapi = {
-      source = "azure/azapi"
-      version = "~>1.14.0"
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~>4.0.5"
     }
   }
 }
@@ -37,20 +37,23 @@ provider azurerm {
       recover_soft_deleted         = true
     }
     key_vault {
-      purge_soft_delete_on_destroy                            = true
-      purge_soft_deleted_secrets_on_destroy                   = true
-      purge_soft_deleted_keys_on_destroy                      = true
-      purge_soft_deleted_certificates_on_destroy              = true
-      purge_soft_deleted_hardware_security_modules_on_destroy = true
-      recover_soft_deleted_key_vaults                         = true
-      recover_soft_deleted_secrets                            = true
-      recover_soft_deleted_keys                               = true
-      recover_soft_deleted_certificates                       = true
+      purge_soft_delete_on_destroy                                = true
+      purge_soft_deleted_secrets_on_destroy                       = true
+      purge_soft_deleted_keys_on_destroy                          = true
+      purge_soft_deleted_certificates_on_destroy                  = true
+      purge_soft_deleted_hardware_security_modules_on_destroy     = true
+      purge_soft_deleted_hardware_security_module_keys_on_destroy = true
+      recover_soft_deleted_key_vaults                             = true
+      recover_soft_deleted_secrets                                = true
+      recover_soft_deleted_keys                                   = true
+      recover_soft_deleted_certificates                           = true
+      recover_soft_deleted_hardware_security_module_keys          = true
     }
     log_analytics_workspace {
-      permanently_delete_on_destroy = true
+      permanently_delete_on_destroy = false
     }
   }
+  storage_use_azuread = true
 }
 
 module global {

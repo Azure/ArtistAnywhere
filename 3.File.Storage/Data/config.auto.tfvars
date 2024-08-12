@@ -3,7 +3,7 @@ resourceGroupName = "ArtistAnywhere.Data" # Alphanumeric, underscores, hyphens, 
 data = {
   lake = {
     storageAccount = {
-      name        = "xstudio1"
+      name        = "xlake"
       type        = "StorageV2"
       redundancy  = "LRS"
       performance = "Standard"
@@ -60,7 +60,7 @@ data = {
         tier = "standard"
       }
       storageAccount = {
-        name = "xstudio4"
+        name = "xstudio3"
         type = "Standard_LRS"
       }
     }
@@ -74,8 +74,8 @@ data = {
     workspace = {
       name = "xstudio"
       adminLogin = {
-        userName     = "xadmin"
-        userPassword = "P@ssword1234"
+        userName     = ""
+        userPassword = ""
       }
       encryption = {
         enable = false
@@ -108,7 +108,7 @@ cosmosDB = {
   geoLocations = [
     {
       enable     = true
-      regionName = "WestUS2"
+      regionName = "EastUS"
       failover = {
         priority = 0
       }
@@ -118,7 +118,7 @@ cosmosDB = {
     },
     {
       enable     = false
-      regionName = "EastUS"
+      regionName = "WestUS"
       failover = {
         priority = 1
       }
@@ -234,7 +234,7 @@ noSQL = {
             {
               enable = false
               name   = "helloCosmos"
-              body   = <<BODY
+              body = <<BODY
                 function () {
                   var context = getContext();
                   var response = context.getResponse();
@@ -374,8 +374,8 @@ mongoDBvCore = {
     tier    = "M30"
     version = "6.0"
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
+      userName     = ""
+      userPassword = ""
     }
   }
   node = {
@@ -398,7 +398,7 @@ postgreSQL = {
     version      = "16"
     versionCitus = "12.1"
     adminLogin = {
-      userPassword = "P@ssword1234"
+      userPassword = ""
     }
     firewallRules = [
       {
@@ -501,7 +501,7 @@ apacheCassandra = {
     name    = "xstudio"
     version = "4.0"
     adminLogin = {
-      userPassword = "P@ssword1234"
+      userPassword = ""
     }
   }
   datacenter = {

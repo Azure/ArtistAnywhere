@@ -90,8 +90,8 @@ resource azurerm_managed_lustre_file_system lab {
   dynamic encryption_key {
     for_each = var.lustre.encryption.enable ? [1] : []
     content {
-      source_vault_id = data.azurerm_key_vault.studio[0].id
-      key_url         = data.azurerm_key_vault_key.data_encryption[0].id
+      source_vault_id = data.azurerm_key_vault.studio.id
+      key_url         = data.azurerm_key_vault_key.data_encryption.id
     }
   }
   dynamic hsm_setting {

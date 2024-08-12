@@ -10,7 +10,7 @@ virtualMachineScaleSets = [
     name   = "LnxFarmC"
     machine = {
       namePrefix = ""
-      size       = "Standard_HB120rs_v2"
+      size       = "Standard_HB176rs_v4"
       count      = 2
       image = {
         resourceGroupName = "ArtistAnywhere.Image"
@@ -34,11 +34,11 @@ virtualMachineScaleSets = [
       }
     }
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
       passwordAuth = {
-        disable = false
+        disable = true
       }
     }
     operatingSystem = {
@@ -119,11 +119,11 @@ virtualMachineScaleSets = [
       }
     }
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
       passwordAuth = {
-        disable = false
+        disable = true
       }
     }
     operatingSystem = {
@@ -180,7 +180,7 @@ virtualMachineScaleSets = [
     name   = "WinFarmC"
     machine = {
       namePrefix = ""
-      size       = "Standard_HB120rs_v2"
+      size       = "Standard_HB176rs_v4"
       count      = 2
       image = {
         resourceGroupName = "ArtistAnywhere.Image"
@@ -204,9 +204,9 @@ virtualMachineScaleSets = [
       }
     }
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
       passwordAuth = {
         disable = false
       }
@@ -289,9 +289,9 @@ virtualMachineScaleSets = [
       }
     }
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
       passwordAuth = {
         disable = false
       }
@@ -359,13 +359,13 @@ computeFleets = [
       namePrefix = ""
       sizes = [
         {
-          name = "Standard_HB120rs_v2"
+          name = "Standard_HB176rs_v4"
         },
         {
-          name = "Standard_HB120-96rs_v2"
+          name = "Standard_HB176-144rs_v4"
         },
         {
-          name = "Standard_HB120-64rs_v2"
+          name = "Standard_HB176-96rs_v4"
         }
       ]
       priority = {
@@ -406,9 +406,9 @@ computeFleets = [
       }
     }
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
     }
   },
   {
@@ -418,13 +418,13 @@ computeFleets = [
       namePrefix = ""
       sizes = [
         {
-          name = "Standard_HB120rs_v2"
+          name = "Standard_HB176rs_v4"
         },
         {
-          name = "Standard_HB120-96rs_v2"
+          name = "Standard_HB176-144rs_v4"
         },
         {
-          name = "Standard_HB120-64rs_v2"
+          name = "Standard_HB176-96rs_v4"
         }
       ]
       priority = {
@@ -465,12 +465,27 @@ computeFleets = [
       }
     }
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
     }
   }
 ]
+
+##############################################################################
+# Container Apps (https://learn.microsoft.com/azure/container-apps/overview) #
+##############################################################################
+
+containerApp = {
+  enable = false
+  environment = {
+    name = "xstudio"
+    workloadProfile = {
+      name = "Consumption"
+      type = "Consumption"
+    }
+  }
+}
 
 ##################################################
 # Pre-Existing Resource Dependency Configuration #

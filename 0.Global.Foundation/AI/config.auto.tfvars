@@ -26,12 +26,6 @@ ai = {
     domainName = ""
   }
   language = {
-    conversational = {
-      enable     = true
-      name       = "xstudio-language-conversational"
-      tier       = "S"
-      domainName = ""
-    }
     textAnalytics = {
       enable     = true
       name       = "xstudio-text-analytics"
@@ -42,6 +36,12 @@ ai = {
       enable     = true
       name       = "xstudio-text-translation"
       tier       = "S1"
+      domainName = ""
+    }
+    conversational = {
+      enable     = false
+      name       = "xstudio-language-conversational"
+      tier       = "S"
       domainName = ""
     }
   }
@@ -99,12 +99,15 @@ ai = {
     domainName = ""
   }
   machineLearning = {
-    enable = true
+    enable = false
     workspace = {
       name = "xstudio"
       type = "Default"
       tier = "Basic"
     }
+  }
+  privateEndpoint = {
+    enable = false
   }
   encryption = {
     enable = false

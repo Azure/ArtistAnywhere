@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.9.2"
+  required_version = ">= 1.9.4"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.112.0"
+      version = "~>3.115.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -11,11 +11,11 @@ terraform {
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.3"
+      version = "~>3.4.4"
     }
     time = {
       source  = "hashicorp/time"
-      version = "~>0.11.2"
+      version = "~>0.12.0"
     }
     azapi = {
       source = "azure/azapi"
@@ -23,7 +23,8 @@ terraform {
     }
   }
   backend azurerm {
-    key = "3.File.Storage.Data"
+    key              = "3.File.Storage.Data"
+    use_azuread_auth = true
   }
 }
 
@@ -33,6 +34,7 @@ provider azurerm {
       prevent_deletion_if_contains_resources = false
     }
   }
+  storage_use_azuread = true
 }
 
 module global {
@@ -147,39 +149,33 @@ data azurerm_user_assigned_identity studio {
 }
 
 data azurerm_key_vault studio {
-  count               = module.global.keyVault.enable ? 1 : 0
   name                = module.global.keyVault.name
   resource_group_name = module.global.resourceGroupName
 }
 
 data azurerm_key_vault_secret admin_username {
-  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault_secret admin_password {
-  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
-data azurerm_key_vault_secret database_username {
-  count        = module.global.keyVault.enable ? 1 : 0
-  name         = module.global.keyVault.secretName.databaseUsername
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+data azurerm_key_vault_secret service_username {
+  name         = module.global.keyVault.secretName.serviceUsername
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
-data azurerm_key_vault_secret database_password {
-  count        = module.global.keyVault.enable ? 1 : 0
-  name         = module.global.keyVault.secretName.databasePassword
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+data azurerm_key_vault_secret service_password {
+  name         = module.global.keyVault.secretName.servicePassword
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault_key data_encryption {
-  count        = module.global.keyVault.enable ? 1 : 0
   name         = module.global.keyVault.keyName.dataEncryption
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_application_insights studio {
@@ -195,6 +191,7 @@ data terraform_remote_state ai {
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
     key                  = "0.Global.Foundation.AI"
+    use_azuread_auth     = true
   }
 }
 
@@ -205,6 +202,7 @@ data terraform_remote_state network {
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
     key                  = "1.Virtual.Network"
+    use_azuread_auth     = true
   }
 }
 

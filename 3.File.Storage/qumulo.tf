@@ -50,7 +50,7 @@ resource azapi_resource qumulo {
       storageSku        = "Hot"
       initialCapacity   = var.qumulo.initialCapacity
       delegatedSubnetId = data.azurerm_subnet.storage_qumulo[0].id
-      adminPassword     = var.qumulo.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.qumulo.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+      adminPassword     = var.qumulo.adminLogin.userPassword != "" ? var.qumulo.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
     }
   })
   schema_validation_enabled = false

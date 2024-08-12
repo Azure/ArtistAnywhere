@@ -1,6 +1,6 @@
 variable resourceLocation {
   default = {
-    regionName = "WestUS2" # Set from "az account list-locations --query [].name"
+    regionName = "EastUS" # Set from "az account list-locations --query [].name"
     edgeZone = {
       enable     = false
       name       = "LosAngeles"
@@ -37,39 +37,24 @@ variable storage {
   }
 }
 
-######################################################################
-# Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
-######################################################################
-
-variable monitor {
-  default = {
-    enable = true
-    name   = "xstudio"
-    agentVersion = {
-      linux   = "1.31"
-      windows = "1.26"
-    }
-  }
-}
-
 ############################################################################
 # Key Vault (https://learn.microsoft.com/azure/key-vault/general/overview) #
 ############################################################################
 
 variable keyVault {
   default = {
-    enable = true
-    name   = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
+    name = "xstudio" # Set to a globally unique name (alphanumeric, hyphens)
     secretName = {
+      sshKeyPublic      = "SSHKeyPublic"
+      sshKeyPrivate     = "SSHKeyPrivate"
       adminUsername     = "AdminUsername"
       adminPassword     = "AdminPassword"
-      databaseUsername  = "DatabaseUsername"
-      databasePassword  = "DatabasePassword"
+      serviceUsername   = "ServiceUsername"
+      servicePassword   = "ServicePassword"
       gatewayConnection = "GatewayConnection"
     }
     keyName = {
-      dataEncryption  = "DataEncryption"
-      cacheEncryption = "CacheEncryption"
+      dataEncryption = "DataEncryption"
     }
     certificateName = {
     }
@@ -82,8 +67,7 @@ variable keyVault {
 
 variable eventGrid {
   default = {
-    enable = false
-    name   = "xstudio"
+    name = "xstudio"
   }
 }
 
@@ -93,19 +77,22 @@ variable eventGrid {
 
 variable appConfig {
   default = {
-    enable = false
-    name   = "xstudio"
+    name = "xstudio"
   }
 }
 
-################################################################################################
-# Traffic Manager (https://learn.microsoft.com/azure/traffic-manager/traffic-manager-overview) #
-################################################################################################
+######################################################################
+# Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
+######################################################################
 
-variable trafficManager {
+variable monitor {
   default = {
-    enable = false
+    enable = true
     name   = "xstudio"
+    agentVersion = {
+      linux   = "1.32"
+      windows = "1.29"
+    }
   }
 }
 
@@ -125,32 +112,18 @@ output storage {
   value = var.storage
 }
 
-output monitor {
-  value = terraform.workspace != "shared" ? var.monitor : merge(var.monitor, {
-    enable = false
-  })
-}
-
 output keyVault {
-  value = terraform.workspace != "shared" ? var.keyVault : merge(var.keyVault, {
-    enable = false
-  })
+  value = var.keyVault
 }
 
 output eventGrid {
-  value = terraform.workspace != "shared" ? var.eventGrid : merge(var.eventGrid, {
-    enable = false
-  })
+  value = var.eventGrid
 }
 
 output appConfig {
-  value = terraform.workspace != "shared" ? var.appConfig : merge(var.appConfig, {
-    enable = false
-  })
+  value = var.appConfig
 }
 
-output trafficManager {
-  value = terraform.workspace != "shared" ? var.trafficManager : merge(var.trafficManager, {
-    enable = false
-  })
+output monitor {
+  value = var.monitor
 }

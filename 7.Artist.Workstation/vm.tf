@@ -31,7 +31,7 @@ variable virtualMachines {
     adminLogin = object({
       userName     = string
       userPassword = string
-      sshPublicKey = string
+      sshKeyPublic = string
       passwordAuth = object({
         disable = bool
       })
@@ -81,12 +81,12 @@ locals {
           subnetId = "${virtualMachine.network.locationEdge.enable ? data.azurerm_virtual_network.studio_edge.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
         })
         adminLogin = merge(virtualMachine.adminLogin, {
-          userName     = virtualMachine.adminLogin.userName != "" || !module.global.keyVault.enable ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
-          userPassword = virtualMachine.adminLogin.userPassword != "" || !module.global.keyVault.enable ? virtualMachine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+          userName     = virtualMachine.adminLogin.userName != "" ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+          userPassword = virtualMachine.adminLogin.userPassword != "" ? virtualMachine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
         })
         activeDirectory = merge(var.activeDirectory, {
-          adminUsername = var.activeDirectory.adminUsername != "" || !module.global.keyVault.enable ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
-          adminPassword = var.activeDirectory.adminPassword != "" || !module.global.keyVault.enable ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
+          adminUsername = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value
+          adminPassword = var.activeDirectory.adminPassword != "" ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password.value
         })
       })
     ]
@@ -145,10 +145,10 @@ resource azurerm_linux_virtual_machine workstation {
     }
   }
   dynamic admin_ssh_key {
-    for_each = each.value.adminLogin.sshPublicKey != "" ? [1] : []
+    for_each = each.value.adminLogin.sshKeyPublic != "" ? [1] : []
     content {
       username   = each.value.adminLogin.userName
-      public_key = each.value.adminLogin.sshPublicKey
+      public_key = each.value.adminLogin.sshKeyPublic
     }
   }
   depends_on = [

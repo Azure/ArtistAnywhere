@@ -39,21 +39,18 @@ variable keyVault {
 }
 
 resource azurerm_role_assignment key_vault_reader {
-  count                = module.global.keyVault.enable ? 1 : 0
-  role_definition_name = "Key Vault Reader" # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/security#key-vault-reader
+  role_definition_name = "Key Vault Reader" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/security#key-vault-reader
   principal_id         = azurerm_user_assigned_identity.studio.principal_id
-  scope                = azurerm_key_vault.studio[0].id
+  scope                = azurerm_key_vault.studio.id
 }
 
 resource azurerm_role_assignment key_vault_crypto_service_encryption_user {
-  count                = module.global.keyVault.enable ? 1 : 0
   role_definition_name = "Key Vault Crypto Service Encryption User" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/security#key-vault-crypto-service-encryption-user
   principal_id         = azurerm_user_assigned_identity.studio.principal_id
-  scope                = azurerm_key_vault.studio[0].id
+  scope                = azurerm_key_vault.studio.id
 }
 
 resource azurerm_key_vault studio {
-  count                           = module.global.keyVault.enable ? 1 : 0
   name                            = module.global.keyVault.name
   resource_group_name             = azurerm_resource_group.studio.name
   location                        = azurerm_resource_group.studio.location
@@ -76,30 +73,30 @@ resource azurerm_key_vault studio {
 
 resource azurerm_key_vault_secret studio {
   for_each = {
-    for secret in var.keyVault.secrets : secret.name => secret if module.global.keyVault.enable
+    for secret in var.keyVault.secrets : secret.name => secret
   }
   name         = each.value.name
   value        = each.value.value
-  key_vault_id = azurerm_key_vault.studio[0].id
+  key_vault_id = azurerm_key_vault.studio.id
 }
 
 resource azurerm_key_vault_key studio {
   for_each = {
-    for key in var.keyVault.keys : key.name => key if module.global.keyVault.enable
+    for key in var.keyVault.keys : key.name => key
   }
   name         = each.value.name
   key_type     = each.value.type
   key_size     = each.value.size
   key_opts     = each.value.operations
-  key_vault_id = azurerm_key_vault.studio[0].id
+  key_vault_id = azurerm_key_vault.studio.id
 }
 
 resource azurerm_key_vault_certificate studio {
   for_each = {
-    for certificate in var.keyVault.certificates : certificate.name => certificate if module.global.keyVault.enable
+    for certificate in var.keyVault.certificates : certificate.name => certificate
   }
   name         = each.value.name
-  key_vault_id = azurerm_key_vault.studio[0].id
+  key_vault_id = azurerm_key_vault.studio.id
   certificate_policy {
     x509_certificate_properties {
       subject            = each.value.subject
@@ -119,4 +116,25 @@ resource azurerm_key_vault_certificate studio {
       exportable = each.value.key.exportable
     }
   }
+}
+
+data tls_public_key ssh_key {
+  private_key_pem = tls_private_key.ssh_key.private_key_pem
+}
+
+resource tls_private_key ssh_key {
+  algorithm = var.keyVault.keys[0].type
+  rsa_bits  = var.keyVault.keys[0].size
+}
+
+resource azurerm_key_vault_secret ssh_key_private {
+  name         = module.global.keyVault.secretName.sshKeyPrivate
+  value        = tls_private_key.ssh_key.private_key_pem
+  key_vault_id = azurerm_key_vault.studio.id
+}
+
+resource azurerm_key_vault_secret ssh_key_public {
+  name         = module.global.keyVault.secretName.sshKeyPublic
+  value        = trimspace(data.tls_public_key.ssh_key.public_key_openssh)
+  key_vault_id = azurerm_key_vault.studio.id
 }

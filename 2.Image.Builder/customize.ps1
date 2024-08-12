@@ -28,8 +28,8 @@ $binStorageHost = $buildConfig.binStorage.host
 $binStorageAuth = $buildConfig.binStorage.auth
 # $adminUsername = $buildConfig.dataPlatform.adminLogin.userName
 # $adminPassword = $buildConfig.dataPlatform.adminLogin.userPassword
-# $databaseUsername = $buildConfig.dataPlatform.jobDatabase.serviceLogin.userName
-# $databasePassword = $buildConfig.dataPlatform.jobDatabase.serviceLogin.userPassword
+# $serviceUsername = $buildConfig.dataPlatform.jobDatabase.serviceLogin.userName
+# $servicePassword = $buildConfig.dataPlatform.jobDatabase.serviceLogin.userPassword
 $databaseHost = $buildConfig.dataPlatform.jobDatabase.host
 $databasePort = $buildConfig.dataPlatform.jobDatabase.port
 $renderEngines = $buildConfig.renderEngines
@@ -45,8 +45,8 @@ Write-Host "GPU Provider: $gpuProvider"
 # Write-Host "Admin Username: $adminUsername"
 # Write-Host "Admin Password: $adminPassword"
 # Write-Host "Enable CosmosDB: $enableCosmosDB"
-# Write-Host "Database Username: $databaseUsername"
-# Write-Host "Database Password: $databasePassword"
+# Write-Host "Service Username: $serviceUsername"
+# Write-Host "Service Password: $servicePassword"
 Write-Host "Database Host: $databaseHost"
 Write-Host "Database Port: $databasePort"
 Write-Host "Render Engines: $renderEngines"

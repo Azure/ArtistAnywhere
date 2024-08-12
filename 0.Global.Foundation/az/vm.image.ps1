@@ -4,11 +4,20 @@
 
 $publisher = "RESF"
 $offer     = "RockyLinux-x86_64"
-$plan      = "8-Base"
-
+$plan      = "9-LVM"
 az vm image list --publisher $publisher --offer $offer --sku $plan --all --edge-zone LosAngeles
+[
+  {
+    "architecture": "x64",
+    "offer": "rockylinux-x86_64",
+    "publisher": "resf",
+    "sku": "9-lvm",
+    "urn": "resf:rockylinux-x86_64:9-lvm:9.3.20231113",
+    "version": "9.3.20231113"
+  }
+]
 uname -r
-4.18.0-513.5.1.el8_9.x86_64
+5.14.0-362.8.1.el9_3.x86_64
 
 az vm image terms show --publisher $publisher --offer $offer --plan $plan
 az vm image terms accept --publisher $publisher --offer $offer --plan $plan
@@ -52,8 +61,8 @@ az vm image terms accept --publisher $publisher --offer $offer --plan $planNode
 ###############
 
 $publisher = "Hammerspace"
-$offer     = "Hammerspace-4-6-5-BYOL"
-$plan      = "PlanForMACC-BYOL"
+$offer     = "Hammerspace_BYOL_5_0"
+$plan      = "Hammerspace_5_0"
 
 az vm image list --publisher $publisher --offer $offer --sku $plan --all
 

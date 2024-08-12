@@ -34,7 +34,7 @@ variable virtualMachineScaleSets {
     adminLogin = object({
       userName     = string
       userPassword = string
-      sshPublicKey = string
+      sshKeyPublic = string
       passwordAuth = object({
         disable = bool
       })
@@ -110,12 +110,12 @@ locals {
         subnetId = "${virtualMachineScaleSet.network.locationEdge.enable ? data.azurerm_virtual_network.studio_edge.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
       })
       adminLogin = merge(virtualMachineScaleSet.adminLogin, {
-        userName     = virtualMachineScaleSet.adminLogin.userName != "" || !module.global.keyVault.enable ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
-        userPassword = virtualMachineScaleSet.adminLogin.userPassword != "" || !module.global.keyVault.enable ? virtualMachineScaleSet.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+        userName     = virtualMachineScaleSet.adminLogin.userName != "" ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+        userPassword = virtualMachineScaleSet.adminLogin.userPassword != "" ? virtualMachineScaleSet.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
       })
       activeDirectory = merge(var.activeDirectory, {
-        adminUsername = var.activeDirectory.adminUsername != "" || !module.global.keyVault.enable ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
-        adminPassword = var.activeDirectory.adminPassword != "" || !module.global.keyVault.enable ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
+        adminUsername = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value
+        adminPassword = var.activeDirectory.adminPassword != "" ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password.value
       })
     }) if virtualMachineScaleSet.enable
   ]
@@ -231,10 +231,10 @@ resource azurerm_linux_virtual_machine_scale_set farm {
     }
   }
   dynamic admin_ssh_key {
-    for_each = each.value.adminLogin.sshPublicKey != "" ? [1] : []
+    for_each = each.value.adminLogin.sshKeyPublic != "" ? [1] : []
     content {
       username   = each.value.adminLogin.userName
-      public_key = each.value.adminLogin.sshPublicKey
+      public_key = each.value.adminLogin.sshKeyPublic
     }
   }
   dynamic termination_notification {
@@ -437,10 +437,10 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
         admin_password                  = each.value.adminLogin.userPassword
         disable_password_authentication = each.value.adminLogin.passwordAuth.disable
         dynamic admin_ssh_key {
-          for_each = each.value.adminLogin.sshPublicKey != "" ? [1] : []
+          for_each = each.value.adminLogin.sshKeyPublic != "" ? [1] : []
           content {
             username   = each.value.adminLogin.userName
-            public_key = each.value.adminLogin.sshPublicKey
+            public_key = each.value.adminLogin.sshKeyPublic
           }
         }
       }

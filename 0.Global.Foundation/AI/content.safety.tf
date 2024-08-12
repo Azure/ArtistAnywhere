@@ -24,9 +24,9 @@ resource azurerm_cognitive_account ai_content_safety {
     ]
   }
   dynamic customer_managed_key {
-    for_each = module.global.keyVault.enable && var.ai.encryption.enable ? [1] : []
+    for_each = var.ai.encryption.enable ? [1] : []
     content {
-      key_vault_key_id = data.azurerm_key_vault_key.data_encryption[0].id
+      key_vault_key_id = data.azurerm_key_vault_key.data_encryption.id
     }
   }
 }

@@ -17,8 +17,8 @@ resource azurerm_synapse_workspace studio {
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.studio.id
   compute_subnet_id                    = data.azurerm_subnet.data.id
   purview_id                           = var.data.governance.enable ? azurerm_purview_account.data_governance[0].id : null
-  sql_administrator_login              = var.data.analytics.workspace.adminLogin.userName != "" || !module.global.keyVault.enable ? var.data.analytics.workspace.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
-  sql_administrator_login_password     = var.data.analytics.workspace.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.data.analytics.workspace.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+  sql_administrator_login              = var.data.analytics.workspace.adminLogin.userName != "" ? var.data.analytics.workspace.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+  sql_administrator_login_password     = var.data.analytics.workspace.adminLogin.userPassword != "" ? var.data.analytics.workspace.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
   identity {
     type = "SystemAssigned, UserAssigned"
     identity_ids = [
@@ -32,7 +32,7 @@ resource azurerm_synapse_workspace studio {
     root_folder     = "/1.Virtual.Network/Data/SynapseStudio"
   }
   dynamic customer_managed_key {
-    for_each = var.data.analytics.workspace.encryption.enable && module.global.keyVault.enable ? [1] : []
+    for_each = var.data.analytics.workspace.encryption.enable ? [1] : []
     content {
       key_name                  = module.global.keyVault.keyName.dataEncryption
       key_versionless_id        = data.azurerm_key_vault_key.data_encryption[0].versionless_id

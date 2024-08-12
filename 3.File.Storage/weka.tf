@@ -28,7 +28,7 @@ variable weka {
     adminLogin = object({
       userName     = string
       userPassword = string
-      sshPublicKey = string
+      sshKeyPublic = string
       passwordAuth = object({
         disable = bool
       })
@@ -119,8 +119,8 @@ locals {
       })
     })
     adminLogin = {
-      userName     = var.weka.adminLogin.userName != "" || !module.global.keyVault.enable ? var.weka.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
-      userPassword = var.weka.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.weka.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+      userName     = var.weka.adminLogin.userName != "" ? var.weka.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+      userPassword = var.weka.adminLogin.userPassword != "" ? var.weka.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
     }
     objectTier = merge(var.weka.objectTier, {
       storage = {
@@ -333,10 +333,10 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     }
   }
   dynamic admin_ssh_key {
-    for_each = var.weka.adminLogin.sshPublicKey != "" ? [1] : []
+    for_each = var.weka.adminLogin.sshKeyPublic != "" ? [1] : []
     content {
       username   = local.weka.adminLogin.userName
-      public_key = var.weka.adminLogin.sshPublicKey
+      public_key = var.weka.adminLogin.sshKeyPublic
     }
   }
   depends_on = [

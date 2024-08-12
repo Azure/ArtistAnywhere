@@ -1,25 +1,25 @@
 resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
-#######################################################################################################
-# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace_4_6_5) #
-#######################################################################################################
+######################################################################################################
+# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) #
+######################################################################################################
 
 hammerspace = {
-  enable     = false
+  enable     = true
   namePrefix = "xstudio-cache"
   domainName = ""
   metadata = {
     machine = {
       namePrefix = "-anvil"
       size       = "Standard_E4as_v4"
-      count      = 1 # Set to 2 (or more) to enable high availability
+      count      = 2
     }
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
       passwordAuth = {
-        disable = false
+        disable = true
       }
     }
     network = {
@@ -41,15 +41,15 @@ hammerspace = {
   data = {
     machine = {
       namePrefix = "-dsx"
-      size       = "Standard_F2s_v2"
-      count      = 2
+      size       = "Standard_E32s_v3"
+      count      = 3
     }
     adminLogin = {
-      userName     = "xadmin"
-      userPassword = "P@ssword1234"
-      sshPublicKey = "" # "ssh-rsa ..."
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
       passwordAuth = {
-        disable = false
+        disable = true
       }
     }
     network = {
@@ -108,8 +108,8 @@ mediaflux = {
     size = 1024 # Set to either 1024 GB (1 TB) or 4096 GB (4 TB) nodes
   }
   adminLogin = {
-    userName     = "xadmin"
-    userPassword = "P@ssword1234"
+    userName     = ""
+    userPassword = ""
   }
 }
 
@@ -136,10 +136,6 @@ hpcCache = {
     ]
     searchDomain = ""
   }
-  encryption = {
-    enable    = false
-    rotateKey = false
-  }
 }
 
 #################################################################################
@@ -152,9 +148,9 @@ vfxtCache = {
   cluster = {
     nodeSize      = 1024 # Set to either 1024 GB (1 TB) or 4096 GB (4 TB) nodes
     nodeCount     = 3    # Set to a minimum of 3 nodes up to a maximum of 12 nodes
-    adminUsername = "xadmin"
-    adminPassword = "P@ssword1234"
-    sshPublicKey  = ""
+    adminUsername = ""
+    adminPassword = ""
+    sshKeyPublic  = ""
     localTimezone = "UTC"
     enableDevMode = false
     imageId = {
@@ -196,7 +192,7 @@ storageTargets = [
     name              = "Content"
     clientPath        = "/content"
     usageModel        = "READ_ONLY" # https://learn.microsoft.com/azure/hpc-cache/cache-usage-models
-    hostName          = "xstudio2"
+    hostName          = "xstudio1"
     containerName     = "content"
     resourceGroupName = "ArtistAnywhere.Storage"
     fileIntervals = {

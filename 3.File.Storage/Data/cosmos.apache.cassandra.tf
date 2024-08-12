@@ -184,7 +184,7 @@ resource azurerm_cosmosdb_cassandra_cluster cassandra {
   delegated_management_subnet_id = data.azurerm_subnet.data_cassandra.id
   version                        = var.apacheCassandra.cluster.version
   hours_between_backups          = var.apacheCassandra.backup.intervalHours
-  default_admin_password         = var.apacheCassandra.cluster.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.apacheCassandra.cluster.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+  default_admin_password         = var.apacheCassandra.cluster.adminLogin.userPassword != "" ? var.apacheCassandra.cluster.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
   identity {
     type = "SystemAssigned"
   }

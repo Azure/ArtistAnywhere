@@ -1,13 +1,22 @@
 terraform {
-  required_version = ">= 1.9.2"
+  required_version = ">= 1.9.4"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.112.0"
+      version = "~>3.115.0"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = "~>3.4.4"
+    }
+    azapi = {
+      source = "azure/azapi"
+      version = "~>1.14.0"
     }
   }
   backend azurerm {
-    key = "1.Virtual.Network.API"
+    key              = "1.Virtual.Network.App"
+    use_azuread_auth = true
   }
 }
 
@@ -21,6 +30,7 @@ provider azurerm {
       recover_soft_deleted         = true
     }
   }
+  storage_use_azuread = true
 }
 
 module global {
@@ -31,8 +41,23 @@ variable resourceGroupName {
   type = string
 }
 
+data http client_address {
+  url = "https://api.ipify.org?format=json"
+}
+
 data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name
+  resource_group_name = module.global.resourceGroupName
+}
+
+data azurerm_storage_account studio {
+  name                = module.global.storage.accountName
+  resource_group_name = module.global.resourceGroupName
+}
+
+data azurerm_application_insights studio {
+  count               = module.global.monitor.enable ? 1 : 0
+  name                = module.global.monitor.name
   resource_group_name = module.global.resourceGroupName
 }
 
@@ -43,6 +68,7 @@ data terraform_remote_state network {
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
     key                  = "1.Virtual.Network"
+    use_azuread_auth     = true
   }
 }
 
@@ -51,13 +77,19 @@ data azurerm_virtual_network studio_region {
   resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
+data azurerm_subnet app {
+  name                 = "App"
+  resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio_region.name
+}
+
 data azurerm_subnet farm {
   name                 = "Farm"
   resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }
 
-resource azurerm_resource_group api {
+resource azurerm_resource_group app {
   name     = var.resourceGroupName
   location = module.global.resourceLocation.regionName
 }

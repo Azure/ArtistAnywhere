@@ -7,10 +7,12 @@ variable computeGallery {
     name = string
     platform = object({
       linux = object({
-        enable = bool
+        enable  = bool
+        version = string
       })
       windows = object({
-        enable = bool
+        enable  = bool
+        version = string
       })
     })
     imageDefinitions = list(object({

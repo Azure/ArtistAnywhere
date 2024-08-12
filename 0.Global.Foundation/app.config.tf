@@ -12,7 +12,6 @@ variable appConfig {
 }
 
 resource azurerm_app_configuration studio {
-  count               = module.global.appConfig.enable ? 1 : 0
   name                = module.global.appConfig.name
   resource_group_name = azurerm_resource_group.studio.name
   location            = azurerm_resource_group.studio.location
@@ -24,9 +23,10 @@ resource azurerm_app_configuration studio {
     ]
   }
   dynamic encryption {
-    for_each = module.global.keyVault.enable && var.appConfig.encryption.enable ? [1] : []
+    for_each = var.appConfig.encryption.enable ? [1] : []
     content {
-      key_vault_key_identifier = azurerm_key_vault_key.studio[module.global.keyVault.keyNames.cacheEncryption].id
+      key_vault_key_identifier = azurerm_key_vault_key.studio[module.global.keyVault.keyName.dataEncryption].id
+      identity_client_id       = azurerm_user_assigned_identity.studio.client_id
     }
   }
 }

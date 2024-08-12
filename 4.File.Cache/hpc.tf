@@ -14,10 +14,6 @@ variable hpcCache {
       ipAddresses  = list(string)
       searchDomain = string
     })
-    encryption = object({
-      enable    = bool
-      rotateKey = bool
-    })
   })
 }
 
@@ -52,8 +48,8 @@ resource time_sleep hpc_cache_storage_rbac {
 resource azurerm_hpc_cache studio {
   count               = var.hpcCache.enable ? 1 : 0
   name                = var.hpcCache.name
-  resource_group_name = azurerm_resource_group.cache[0].name
-  location            = azurerm_resource_group.cache[0].location
+  resource_group_name = azurerm_resource_group.cache.name
+  location            = azurerm_resource_group.cache.location
   subnet_id           = data.azurerm_subnet.cache.id
   sku_name            = var.hpcCache.throughput
   cache_size_in_gb    = var.hpcCache.size
@@ -72,8 +68,6 @@ resource azurerm_hpc_cache studio {
       search_domain = var.hpcCache.dns.searchDomain != "" ? var.hpcCache.dns.searchDomain : null
     }
   }
-  key_vault_key_id                           = var.hpcCache.encryption.enable ? data.azurerm_key_vault_key.cache_encryption[0].id : null
-  automatically_rotate_key_to_latest_enabled = var.hpcCache.encryption.enable ? var.hpcCache.encryption.rotateKey : null
 }
 
 resource azurerm_hpc_cache_nfs_target storage {

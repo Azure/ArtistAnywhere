@@ -9,8 +9,7 @@ variable imageBuilder {
       name   = string
       source = object({
         imageDefinition = object({
-          name    = string
-          version = string
+          name = string
         })
         # imageVersion = object({
         #   id = string
@@ -85,15 +84,15 @@ variable binStorage {
 locals {
   dataPlatform = {
     adminLogin = {
-      userName     = var.dataPlatform.adminLogin.userName != "" || !module.global.keyVault.enable ? var.dataPlatform.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
-      userPassword = var.dataPlatform.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.dataPlatform.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+      userName     = var.dataPlatform.adminLogin.userName != "" ? var.dataPlatform.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+      userPassword = var.dataPlatform.adminLogin.userPassword != "" ? var.dataPlatform.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
     }
     jobDatabase = {
       host = var.dataPlatform.jobDatabase.host
       port = var.dataPlatform.jobDatabase.port
       serviceLogin = {
-        userName     = var.dataPlatform.jobDatabase.serviceLogin.userName != "" || !module.global.keyVault.enable ? var.dataPlatform.jobDatabase.serviceLogin.userName : data.azurerm_key_vault_secret.database_username[0].value
-        userPassword = var.dataPlatform.jobDatabase.serviceLogin.userPassword != "" || !module.global.keyVault.enable ? var.dataPlatform.jobDatabase.serviceLogin.userPassword : data.azurerm_key_vault_secret.database_password[0].value
+        userName     = var.dataPlatform.jobDatabase.serviceLogin.userName != "" ? var.dataPlatform.jobDatabase.serviceLogin.userName : data.azurerm_key_vault_secret.service_username.value
+        userPassword = var.dataPlatform.jobDatabase.serviceLogin.userPassword != "" ? var.dataPlatform.jobDatabase.serviceLogin.userPassword : data.azurerm_key_vault_secret.service_password.value
       }
     }
   }
@@ -158,7 +157,7 @@ resource azapi_resource linux {
         publisher = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].publisher
         offer     = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].offer
         sku       = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].sku
-        version   = each.value.source.imageDefinition.version
+        version   = var.computeGallery.platform.linux.version
         planInfo = {
           planPublisher = lower(var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].publisher)
           planProduct   = lower(var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].offer)
@@ -271,7 +270,7 @@ resource azapi_resource windows {
         publisher = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].publisher
         offer     = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].offer
         sku       = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].sku
-        version   = each.value.source.imageDefinition.version
+        version   = var.computeGallery.platform.windows.version
       }
       optimize = {
         vmBoot = {

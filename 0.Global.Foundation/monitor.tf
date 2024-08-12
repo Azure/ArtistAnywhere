@@ -23,7 +23,7 @@ resource azurerm_role_assignment storage_blob_data_contributor {
   count                = module.global.monitor.enable ? 1 : 0
   role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
   principal_id         = data.azuread_service_principal.monitor_diagnostics[0].object_id
-  scope                = azurerm_storage_account.studio[0].id
+  scope                = azurerm_storage_account.studio.id
 }
 
 resource time_sleep monitor_diagnostics_rbac {
@@ -69,7 +69,7 @@ resource azurerm_application_insights studio {
 resource terraform_data monitor_storage {
   count = module.global.monitor.enable ? 1 : 0
   provisioner local-exec {
-    command = "az monitor app-insights component linked-storage link --id ${azurerm_application_insights.studio[0].id} --storage-account ${azurerm_storage_account.studio[0].id}"
+    command = "az monitor app-insights component linked-storage link --id ${azurerm_application_insights.studio[0].id} --storage-account ${azurerm_storage_account.studio.id}"
   }
   depends_on = [
     azurerm_application_insights.studio,

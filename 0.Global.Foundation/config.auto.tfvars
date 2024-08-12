@@ -3,23 +3,38 @@
 #######################################################
 
 storage = {
-  accountType        = "StorageV2" # https://learn.microsoft.com/azure/storage/common/storage-account-overview
-  accountRedundancy  = "LRS"       # https://learn.microsoft.com/azure/storage/common/storage-redundancy
-  accountPerformance = "Standard"  # https://learn.microsoft.com/azure/storage/blobs/storage-blob-performance-tiers
-}
-
-######################################################################
-# Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
-######################################################################
-
-monitor = {
-  logWorkspace = {
-    tier = "PerGB2018"
+  account = {
+    type        = "StorageV2" # https://learn.microsoft.com/azure/storage/common/storage-account-overview
+    redundancy  = "LRS"       # https://learn.microsoft.com/azure/storage/common/storage-redundancy
+    performance = "Standard"  # https://learn.microsoft.com/azure/storage/blobs/storage-blob-performance-tiers
   }
-  appInsight = {
-    type = "web"
+  security = {
+    encryption = {
+      infrastructure = {
+        enable = true
+      }
+      service = {
+        customKey = {
+          enable = false
+        }
+      }
+    }
+    httpsTrafficOnly = {
+      enable = true
+    }
+    sharedAccessKey = {
+      enable = false
+    }
+    defender = {
+      malwareScanning = {
+        enable        = true
+        maxPerMonthGB = 5000
+      }
+      sensitiveDataDiscovery = {
+        enable = true
+      }
+    }
   }
-  retentionDays = 90
 }
 
 ############################################################################
@@ -44,11 +59,11 @@ keyVault = {
       value = "P@ssword1234"
     },
     {
-      name  = "DatabaseUsername"
-      value = "dbuser"
+      name  = "ServiceUsername"
+      value = "xservice"
     },
     {
-      name  = "DatabasePassword"
+      name  = "ServicePassword"
       value = "P@ssword1234"
     },
     {
@@ -60,20 +75,7 @@ keyVault = {
     {
       name = "DataEncryption"
       type = "RSA"
-      size = 3072
-      operations = [
-        "decrypt",
-        "encrypt",
-        "sign",
-        "unwrapKey",
-        "verify",
-        "wrapKey"
-      ]
-    },
-    {
-      name = "CacheEncryption"
-      type = "RSA"
-      size = 3072
+      size = 4096
       operations = [
         "decrypt",
         "encrypt",
@@ -99,42 +101,16 @@ appConfig = {
   }
 }
 
-################################################################################################
-# Traffic Manager (https://learn.microsoft.com/azure/traffic-manager/traffic-manager-overview) #
-################################################################################################
+######################################################################
+# Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
+######################################################################
 
-trafficManager = {
-  routingMethod = "Performance" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/traffic_manager_profile.html#traffic_routing_method
-  dns = {
-    name = "xstudio"
-    ttl  = 300
+monitor = {
+  logWorkspace = {
+    tier = "PerGB2018"
   }
-  monitor = {
-    protocol = "HTTP"
-    port     = 80
-    path     = "/"
+  appInsight = {
+    type = "web"
   }
-  trafficView = {
-    enable = true
-  }
-}
-
-#################################################################
-# Functions - https://learn.microsoft.com/azure/azure-functions #
-#################################################################
-
-functionApp = {
-  name = "xstudio"
-  servicePlan = {
-    osType      = "Linux"
-    computeType = "FC1"
-  }
-  runtime = {
-    name    = "dotnet-isolated"
-    version = "8.0"
-  }
-  instance = {
-    memoryMB = 512
-    maxCount = 40
-  }
+  retentionDays = 90
 }

@@ -24,9 +24,9 @@ resource azurerm_cognitive_account ai_language_conversational {
   #   ]
   # }
   dynamic customer_managed_key {
-    for_each = module.global.keyVault.enable && var.ai.encryption.enable ? [1] : []
+    for_each = var.ai.encryption.enable ? [1] : []
     content {
-      key_vault_key_id = data.azurerm_key_vault_key.data_encryption[0].id
+      key_vault_key_id = data.azurerm_key_vault_key.data_encryption.id
     }
   }
 }
@@ -63,9 +63,9 @@ resource azurerm_cognitive_account ai_language_text_analytics {
     identity_client_id = data.azurerm_user_assigned_identity.studio.client_id
   }
   dynamic customer_managed_key {
-    for_each = module.global.keyVault.enable && var.ai.encryption.enable ? [1] : []
+    for_each = var.ai.encryption.enable ? [1] : []
     content {
-      key_vault_key_id   = data.azurerm_key_vault_key.data_encryption[0].id
+      key_vault_key_id   = data.azurerm_key_vault_key.data_encryption.id
       identity_client_id = data.azurerm_user_assigned_identity.studio.client_id
     }
   }
@@ -97,9 +97,9 @@ resource azurerm_cognitive_account ai_language_text_translation {
     ]
   }
   dynamic customer_managed_key {
-    for_each = module.global.keyVault.enable && var.ai.encryption.enable ? [1] : []
+    for_each = var.ai.encryption.enable ? [1] : []
     content {
-      key_vault_key_id = data.azurerm_key_vault_key.data_encryption[0].id
+      key_vault_key_id = data.azurerm_key_vault_key.data_encryption.id
     }
   }
 }

@@ -66,7 +66,7 @@ resource azurerm_cosmosdb_postgresql_cluster postgre_sql {
   coordinator_storage_quota_in_mb      = var.postgreSQL.coordinator.storageMB
   coordinator_vcore_count              = var.postgreSQL.coordinator.coreCount
   shards_on_coordinator_enabled        = var.postgreSQL.coordinator.shards.enable
-  administrator_login_password         = var.postgreSQL.cluster.adminLogin.userPassword != "" || !module.global.keyVault.enable ? var.postgreSQL.cluster.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+  administrator_login_password         = var.postgreSQL.cluster.adminLogin.userPassword != "" ? var.postgreSQL.cluster.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
   ha_enabled                           = var.postgreSQL.highAvailability.enable
   node_public_ip_access_enabled        = false
   coordinator_public_ip_access_enabled = false

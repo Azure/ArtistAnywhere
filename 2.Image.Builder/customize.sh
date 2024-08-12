@@ -18,8 +18,8 @@ binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
 binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
 adminUsername=$(echo $buildConfig | jq -r .dataPlatform.adminLogin.userName)
 adminPassword=$(echo $buildConfig | jq -r .dataPlatform.adminLogin.userPassword)
-databaseUsername=$(echo $buildConfig | jq -r .dataPlatform.jobDatabase.serviceLogin.userName)
-databasePassword=$(echo $buildConfig | jq -r .dataPlatform.jobDatabase.serviceLogin.userPassword)
+serviceUsername=$(echo $buildConfig | jq -r .dataPlatform.jobDatabase.serviceLogin.userName)
+servicePassword=$(echo $buildConfig | jq -r .dataPlatform.jobDatabase.serviceLogin.userPassword)
 databaseHost=$(echo $buildConfig | jq -r .dataPlatform.jobDatabase.host)
 databasePort=$(echo $buildConfig | jq -r .dataPlatform.jobDatabase.port)
 renderEngines=$(echo $buildConfig | jq -c .renderEngines)
@@ -34,8 +34,8 @@ echo "GPU Provider: $gpuProvider"
 echo "Admin Username: $adminUsername"
 echo "Admin Password: $adminPassword"
 echo "Enable Cosmos DB: $enableCosmosDB"
-echo "Database Username: $databaseUsername"
-echo "Database Password: $databasePassword"
+echo "Service Username: $serviceUsername"
+echo "Service Password: $servicePassword"
 echo "Database Host: $databaseHost"
 echo "Database Port: $databasePort"
 echo "Render Engines: $renderEngines"
@@ -44,8 +44,8 @@ echo "Customize (End): Image Build Parameters"
 echo "Customize (Start): Image Build Platform"
 # systemctl --now disable firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-installFile="kernel-devel-4.18.0-513.5.1.el8_9.x86_64.rpm"
-downloadUrl="https://download.rockylinux.org/vault/rocky/8.9/BaseOS/x86_64/os/Packages/k/$installFile"
+installFile="kernel-devel-5.14.0-362.8.1.el9_3.x86_64.rpm"
+downloadUrl="https://download.rockylinux.org/vault/rocky/9.3/BaseOS/x86_64/os/Packages/k/$installFile"
 curl -o $installFile -L $downloadUrl
 rpm -i $installFile
 dnf -y install gcc gcc-c++ perl cmake git docker python3-devel
@@ -62,7 +62,7 @@ echo "Customize (End): Image Build Platform"
 if [ $machineType == Storage ]; then
   echo "Customize (Start): NVIDIA OFED"
   processType="mellanox-ofed"
-  installFile="MLNX_OFED_LINUX-23.10-1.1.9.0-rhel8.9-x86_64.tgz"
+  installFile="MLNX_OFED_LINUX-24.04-0.7.0.0-rhel9.3-x86_64.tgz"
   downloadUrl="$binStorageHost/NVIDIA/OFED/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xzf $installFile
@@ -83,7 +83,7 @@ if [ "$gpuProvider" == NVIDIA ]; then
   echo "Customize (End): NVIDIA GPU (GRID)"
 
   echo "Customize (Start): NVIDIA GPU (CUDA)"
-  dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
+  dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo
   dnf -y install cuda
   echo "Customize (End): NVIDIA GPU (CUDA)"
 
@@ -270,8 +270,8 @@ if [ $machineType != Storage ]; then
       mongoScript="$processType.js"
       echo "db = db.getSiblingDB(\"$databaseName\");" > $mongoScript
       echo "db.createUser({" >> $mongoScript
-      echo "  user: \"$databaseUsername\"," >> $mongoScript
-      echo "  pwd: \"$databasePassword\"," >> $mongoScript
+      echo "  user: \"$serviceUsername\"," >> $mongoScript
+      echo "  pwd: \"$servicePassword\"," >> $mongoScript
       echo "  roles: [" >> $mongoScript
       echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $mongoScript
       echo "  ]" >> $mongoScript
@@ -284,8 +284,8 @@ if [ $machineType != Storage ]; then
     echo "Customize (Start): Deadline Server"
     processType="deadline-repository"
     installFile="DeadlineRepository-$versionPath-linux-x64-installer.run"
-    export DB_PASSWORD=$databasePassword
-    RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $databaseUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
+    export DB_PASSWORD=$servicePassword
+    RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
     echo "$installRoot *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
     exportfs -r
@@ -305,7 +305,7 @@ if [ $machineType != Storage ]; then
   RunProcess "$installPath/$installFile $installArgs" $binDirectory/$processType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
   [ $machineType == Scheduler ] && repositoryPath=$installRoot || repositoryPath="/mnt/deadline"
-  echo "$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $databaseUsername $databasePassword" >> $aaaProfile
+  echo "$binPathScheduler/deadlinecommand -StoreDatabaseCredentials $serviceUsername $servicePassword" >> $aaaProfile
   echo "$binPathScheduler/deadlinecommand -ChangeRepository Direct $repositoryPath" >> $aaaProfile
   echo "Customize (End): Deadline Client"
 
@@ -316,7 +316,7 @@ if [ $machineType == Workstation ]; then
   echo "Customize (Start): HP Anyware"
   versionPath=$(echo $buildConfig | jq -r .versionPath.pcoipAgent)
   [ "$gpuProvider" == "" ] && processType="pcoip-agent-standard" || processType="pcoip-agent-graphics"
-  installFile="pcoip-agent-offline-rocky8.8_$versionPath-1.el8.x86_64.tar.gz"
+  installFile="pcoip-agent-offline-rocky9.4_$versionPath-1.el9.x86_64.tar
   downloadUrl="$binStorageHost/Teradici/$versionPath/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   mkdir -p $processType

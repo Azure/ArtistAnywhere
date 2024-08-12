@@ -11,7 +11,7 @@ variable vfxtCache {
       nodeCount     = number
       adminUsername = string
       adminPassword = string
-      sshPublicKey  = string
+      sshKeyPublic  = string
       localTimezone = string
       enableDevMode = bool
       imageId = object({
@@ -39,8 +39,8 @@ variable vfxtCache {
 locals {
   vfxtCache = merge(var.vfxtCache, {
     cluster = merge(var.vfxtCache.cluster, {
-      adminUsername = var.vfxtCache.cluster.adminUsername != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
-      adminPassword = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
+      adminUsername = var.vfxtCache.cluster.adminUsername != "" ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username.value
+      adminPassword = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password.value
     })
   })
   reserveDNSAddresses = split("/", data.azurerm_subnet.cache.address_prefixes[0])[1] <= 26
@@ -52,11 +52,11 @@ module vfxt_controller {
   count                          = var.vfxtCache.enable ? 1 : 0
   source                         = "github.com/Azure/Avere/src/terraform/modules/controller3"
   create_resource_group          = false
-  resource_group_name            = azurerm_resource_group.cache[0].name
-  location                       = azurerm_resource_group.cache[0].location
-  admin_username                 = var.vfxtCache.cluster.adminUsername != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username[0].value
-  admin_password                 = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
-  ssh_key_data                   = var.vfxtCache.cluster.sshPublicKey != "" ? var.vfxtCache.cluster.sshPublicKey : null
+  resource_group_name            = azurerm_resource_group.cache.name
+  location                       = azurerm_resource_group.cache.location
+  admin_username                 = var.vfxtCache.cluster.adminUsername != "" ? var.vfxtCache.cluster.adminUsername : data.azurerm_key_vault_secret.admin_username.value
+  admin_password                 = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password.value
+  ssh_key_data                   = var.vfxtCache.cluster.sshKeyPublic != "" ? var.vfxtCache.cluster.sshKeyPublic : null
   virtual_network_name           = data.azurerm_virtual_network.studio_region.name
   virtual_network_resource_group = data.azurerm_virtual_network.studio_region.resource_group_name
   virtual_network_subnet_name    = data.azurerm_subnet.cache.name
@@ -70,8 +70,8 @@ module vfxt_controller {
 resource avere_vfxt cache {
   count                           = var.vfxtCache.enable ? 1 : 0
   vfxt_cluster_name               = lower(var.vfxtCache.name)
-  azure_resource_group            = azurerm_resource_group.cache[0].name
-  location                        = azurerm_resource_group.cache[0].location
+  azure_resource_group            = azurerm_resource_group.cache.name
+  location                        = azurerm_resource_group.cache.location
   node_cache_size                 = var.vfxtCache.cluster.nodeSize
   vfxt_node_count                 = var.vfxtCache.cluster.nodeCount
   image_id                        = var.vfxtCache.cluster.imageId.node
@@ -80,9 +80,9 @@ resource avere_vfxt cache {
   azure_subnet_name               = data.azurerm_subnet.cache.name
   controller_address              = module.vfxt_controller[count.index].controller_address
   controller_admin_username       = module.vfxt_controller[count.index].controller_username
-  controller_admin_password       = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
-  vfxt_admin_password             = var.vfxtCache.cluster.adminPassword != "" || !module.global.keyVault.enable ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password[0].value
-  vfxt_ssh_key_data               = var.vfxtCache.cluster.sshPublicKey != "" ? var.vfxtCache.cluster.sshPublicKey : null
+  controller_admin_password       = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password.value
+  vfxt_admin_password             = var.vfxtCache.cluster.adminPassword != "" ? var.vfxtCache.cluster.adminPassword : data.azurerm_key_vault_secret.admin_password.value
+  vfxt_ssh_key_data               = var.vfxtCache.cluster.sshKeyPublic != "" ? var.vfxtCache.cluster.sshKeyPublic : null
   cifs_ad_domain                  = var.vfxtCache.activeDirectory.enable ? var.vfxtCache.activeDirectory.domainName : null
   cifs_netbios_domain_name        = var.vfxtCache.activeDirectory.enable ? var.vfxtCache.activeDirectory.domainNameNetBIOS : null
   cifs_dc_addreses                = var.vfxtCache.activeDirectory.enable ? var.vfxtCache.activeDirectory.domainControllers : null

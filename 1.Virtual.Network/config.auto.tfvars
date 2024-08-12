@@ -130,13 +130,18 @@ virtualNetworks = [
         serviceDelegation = null
       },
       {
-        name = "API"
+        name = "App"
         addressSpace = [
           "10.0.199.0/24"
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = null
+        serviceDelegation = {
+          service = "Microsoft.App/environments"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
       },
       {
         name = "GatewaySubnet"
@@ -162,7 +167,7 @@ virtualNetworks = [
     enable = false
     name   = "Studio"
     regionNames = [
-      "EastUS"
+      "WestUS"
     ]
     addressSpace = [
       "10.1.0.0/16"
@@ -284,13 +289,18 @@ virtualNetworks = [
         serviceDelegation = null
       },
       {
-        name = "API"
+        name = "App"
         addressSpace = [
-          "10.0.199.0/24"
+          "10.1.199.0/24"
         ]
         serviceEndpoints = [
         ]
-        serviceDelegation = null
+        serviceDelegation = {
+          service = "Microsoft.App/environments"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
       },
       {
         name = "GatewaySubnet"
@@ -337,7 +347,7 @@ bastion = {
   enableCopyPaste     = true
   enableIpConnect     = true
   enableTunneling     = true
-  enablePerRegion     = false
+  enablePerRegion     = true
   enableShareableLink = false
 }
 
