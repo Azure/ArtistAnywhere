@@ -21,7 +21,7 @@ data = {
       schemaType = "FullFidelity" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_account#schema_type
     }
     synapse = {
-      enable = true
+      enable = false
       sqlPools = [
         {
           enable = false
@@ -52,16 +52,12 @@ data = {
       ]
     }
     databricks = {
-      enable = true
+      enable = false
       serverless = {
         enable = true
       }
       workspace = {
         tier = "standard"
-      }
-      storageAccount = {
-        name = "xstudio3"
-        type = "Standard_LRS"
       }
     }
     stream = {
@@ -83,7 +79,7 @@ data = {
     }
   }
   integration = {
-    enable = true
+    enable = false
     name   = "xstudio"
     tier   = "Standard"
     encryption = {
@@ -108,7 +104,7 @@ cosmosDB = {
   geoLocations = [
     {
       enable     = true
-      regionName = "EastUS"
+      regionName = "SouthCentralUS"
       failover = {
         priority = 0
       }
@@ -387,18 +383,23 @@ mongoDBvCore = {
   }
 }
 
-##############################################################################################
-# Cosmos DB PostgreSQL (https://learn.microsoft.com/azure/cosmos-db/postgresql/introduction) #
-##############################################################################################
+######################################################################################################
+# Cosmos DB PostgreSQL       (https://learn.microsoft.com/azure/cosmos-db/postgresql/introduction)   #
+# PostgreSQL Flexible Server (https://learn.microsoft.com/azure/postgresql/flexible-server/overview) #
+######################################################################################################
 
 postgreSQL = {
-  enable = false
+  enable  = false
+  name    = "xstudio"
+  version = "16"
+  server = {
+    enable    = false
+    type      = "GP_Standard_D8s_v3"
+    storageMB = 32768
+  }
   cluster = {
-    name         = "xstudio"
-    version      = "16"
-    versionCitus = "12.1"
-    adminLogin = {
-      userPassword = ""
+    citus = {
+      version = "12.1"
     }
     firewallRules = [
       {
@@ -425,6 +426,10 @@ postgreSQL = {
     shards = {
       enable = true
     }
+  }
+  adminLogin = {
+    userName     = ""
+    userPassword = ""
   }
   roles = [
     {

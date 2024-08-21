@@ -22,7 +22,7 @@ variable imageBuilder {
         imageVersion   = string
         osDiskSizeGB   = number
         timeoutMinutes = number
-        renderEngines  = list(string)
+        jobProcessors  = list(string)
       })
       distribute = object({
         replicaCount       = number
@@ -33,40 +33,6 @@ variable imageBuilder {
         customizationMode = string
       })
     }))
-  })
-}
-
-variable versionPath {
-  type = object({
-    nvidiaCUDA        = string
-    nvidiaCUDAToolkit = string
-    nvidiaOptiX       = string
-    renderPBRT        = string
-    renderBlender     = string
-    renderMaya        = string
-    renderHoudini     = string
-    renderUnrealVS    = string
-    renderUnreal      = string
-    renderUnrealPixel = string
-    jobScheduler      = string
-    pcoipAgent        = string
-  })
-}
-
-variable dataPlatform {
-  type = object({
-    adminLogin = object({
-      userName     = string
-      userPassword = string
-    })
-    jobDatabase = object({
-      host = string
-      port = number
-      serviceLogin = object({
-        userName     = string
-        userPassword = string
-      })
-    })
   })
 }
 
@@ -82,19 +48,13 @@ variable binStorage {
 }
 
 locals {
-  dataPlatform = {
-    adminLogin = {
-      userName     = var.dataPlatform.adminLogin.userName != "" ? var.dataPlatform.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-      userPassword = var.dataPlatform.adminLogin.userPassword != "" ? var.dataPlatform.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
-    }
-    jobDatabase = {
-      host = var.dataPlatform.jobDatabase.host
-      port = var.dataPlatform.jobDatabase.port
-      serviceLogin = {
-        userName     = var.dataPlatform.jobDatabase.serviceLogin.userName != "" ? var.dataPlatform.jobDatabase.serviceLogin.userName : data.azurerm_key_vault_secret.service_username.value
-        userPassword = var.dataPlatform.jobDatabase.serviceLogin.userPassword != "" ? var.dataPlatform.jobDatabase.serviceLogin.userPassword : data.azurerm_key_vault_secret.service_password.value
-      }
-    }
+  versionPath = {
+    nvidiaCUDA          = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.nvidiaCUDAVersion])
+    nvidiaOptiX         = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.nvidiaOptiXVersion])
+    artistAgent         = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.artistAgentVersion])
+    jobManager          = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobManagerVersion])
+    jobProcessorPBRT    = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobProcessorPBRTVersion])
+    jobProcessorBlender = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobProcessorBlenderVersion])
   }
 }
 
@@ -182,12 +142,22 @@ resource azapi_resource linux {
           },
           {
             type        = "File"
-            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/customize.sh"
-            destination = "/tmp/customize.sh"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Linux/customize.core.sh"
+            destination = "/tmp/customize.core.sh"
           },
           {
             type        = "File"
-            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/terminate.sh"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Linux/customize.job.manager.sh"
+            destination = "/tmp/customize.job.manager.sh"
+          },
+          {
+            type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Linux/customize.job.processor.sh"
+            destination = "/tmp/customize.job.processor.sh"
+          },
+          {
+            type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Linux/terminate.sh"
             destination = "/tmp/terminate.sh"
           }
         ],
@@ -201,7 +171,9 @@ resource azapi_resource linux {
           {
             type = "Shell"
             inline = [
-              "cat /tmp/customize.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = var.versionPath}, {dataPlatform = local.dataPlatform}, {binStorage = var.binStorage})))} /bin/bash"
+              "cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))} /bin/bash",
+              "cat /tmp/customize.job.manager.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))} /bin/bash",
+              "cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))} /bin/bash"
             ]
           }
         ]
@@ -290,12 +262,22 @@ resource azapi_resource windows {
           },
           {
             type        = "File"
-            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/customize.ps1"
-            destination = "C:\\AzureData\\customize.ps1"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Windows/customize.core.ps1"
+            destination = "C:\\AzureData\\customize.core.ps1"
           },
           {
             type        = "File"
-            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/terminate.ps1"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Windows/customize.job.manager.ps1"
+            destination = "C:\\AzureData\\customize.job.manager.ps1"
+          },
+          {
+            type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Windows/customize.job.processor.ps1"
+            destination = "C:\\AzureData\\customize.job.processor.ps1"
+          },
+          {
+            type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Windows/terminate.ps1"
             destination = "C:\\AzureData\\terminate.ps1"
           }
         ],
@@ -315,7 +297,9 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "C:\\AzureData\\customize.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = var.versionPath}, {dataPlatform = local.dataPlatform}, {binStorage = var.binStorage})))}"
+              "C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))}",
+              "C:\\AzureData\\customize.job.manager.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))}",
+              "C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))}"
             ]
             runElevated = true
             runAsSystem = true

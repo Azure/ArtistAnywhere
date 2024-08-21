@@ -1,8 +1,5 @@
 #!/bin/bash -x
 
-binDirectory="/usr/local/bin"
-cd $binDirectory
-
 source /tmp/functions.sh
 
 if [ ${terminateNotification.enable} == true ]; then

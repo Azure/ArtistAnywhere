@@ -67,11 +67,3 @@ storageAccounts = [
     ]
   }
 ]
-
-#################################################
-# Non-Default Terraform Workspace Configuration #
-#################################################
-
-subscriptionId = {
-  terraformState = ""
-}

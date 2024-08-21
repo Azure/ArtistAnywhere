@@ -78,6 +78,7 @@ locals {
       adminLogin = merge(computeFleet.adminLogin, {
         userName     = computeFleet.adminLogin.userName != "" ? computeFleet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
         userPassword = computeFleet.adminLogin.userPassword != "" ? computeFleet.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+        sshKeyPublic = computeFleet.adminLogin.sshKeyPublic != "" ? computeFleet.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
       })
       activeDirectory = merge(var.activeDirectory, {
         adminUsername = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value
@@ -107,7 +108,7 @@ resource azapi_resource fleet {
         baseVirtualMachineProfile = {
           storageProfile = {
             imageReference = {
-              id = "/subscriptions/${local.subscriptionId.computeGallery}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+              id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
             }
           }
           osProfile = {

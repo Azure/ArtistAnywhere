@@ -1,3 +1,10 @@
+binPaths=""
+binDirectory="/usr/local/bin"
+cd $binDirectory
+
+aaaProfile="/etc/profile.d/aaa.sh"
+touch $aaaProfile
+
 function RunProcess {
   exitStatus=-1
   retryCount=0

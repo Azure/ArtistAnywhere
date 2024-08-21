@@ -28,56 +28,59 @@ $subscriptionId = ""
 az account set --subscription $subscriptionId
 az account show
 
-az account list-locations --query [?name=='losangeles'] --include-extended-locations
-az account list-locations --query [?name=='westus']
-az account list-locations --query [?name=='eastus']
+az account list-locations --query "[?name=='southcentralus']"
+az account list-locations --query "[?name=='losangeles']" --include-extended-locations
+az account list-locations --query "[?name=='westus']"
+az account list-locations --query "[?name=='westus2']"
+az account list-locations --query "[?name=='eastus']"
+az account list-locations --query "[?name=='eastus2']"
 
-az account list-locations --query [?name=='westus']|[0]
-{
-  "availabilityZoneMappings": [
-    {
-      "logicalZone": "1",
-      "physicalZone": "westus-az1"
-    },
-    {
-      "logicalZone": "2",
-      "physicalZone": "westus-az2"
-    },
-    {
-      "logicalZone": "3",
-      "physicalZone": "westus-az3"
-    }
-  ],
-  "displayName": "West US",
-  "id": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/locations/westus",
-  "metadata": {
-    "geography": "United States",
-    "geographyGroup": "US",
-    "latitude": "37.783",
-    "longitude": "-122.417",
-    "pairedRegion": [
+az account list-locations --query "[?name=='southcentralus']"
+[
+  {
+    "availabilityZoneMappings": [
       {
-        "id": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/locations/eastus",
-        "name": "eastus"
+        "logicalZone": "1",
+        "physicalZone": "southcentralus-az1"
+      },
+      {
+        "logicalZone": "2",
+        "physicalZone": "southcentralus-az2"
+      },
+      {
+        "logicalZone": "3",
+        "physicalZone": "southcentralus-az3"
       }
     ],
-    "physicalLocation": "California",
-    "regionCategory": "Other",
-    "regionType": "Physical"
-  },
-  "name": "westus",
-  "regionalDisplayName": "(US) West US",
-  "type": "Region"
-}
+    "displayName": "South Central US",
+    "id": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/locations/southcentralus",
+    "metadata": {
+      "geography": "United States",
+      "geographyGroup": "US",
+      "latitude": "29.4167",
+      "longitude": "-98.5",
+      "pairedRegion": [
+        {
+          "id": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/locations/northcentralus",
+          "name": "northcentralus"
+        }
+      ],
+      "physicalLocation": "Texas",
+      "regionCategory": "Recommended",
+      "regionType": "Physical"
+    },
+    "name": "southcentralus",
+    "regionalDisplayName": "(US) South Central US",
+    "type": "Region"
+  }
+]
 
-az account list-locations --query [?name=='westus'].availabilityZoneMappings[].logicalZone
+az account list-locations --query "[?name=='southcentralus'].availabilityZoneMappings[].logicalZone"
 [
   "1",
   "2",
   "3"
 ]
 
-az account list-locations --query [?name=='westcentralus'].availabilityZoneMappings[].logicalZone
+az account list-locations --query "[?name=='westus'].availabilityZoneMappings[].logicalZone"
 []
-
-az account list-locations --query [].[metadata.regionType,name,metadata.pairedRegion[0].name] --output table

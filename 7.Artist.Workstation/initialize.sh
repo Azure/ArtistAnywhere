@@ -1,12 +1,9 @@
 #!/bin/bash -x
 
-binDirectory="/usr/local/bin"
-cd $binDirectory
-
 source /tmp/functions.sh
 
-if [ "${pcoipLicenseKey}" != "" ]; then
-  RunProcess "/sbin/pcoip-register-host --registration-code=${pcoipLicenseKey}" $binDirectory/pcoip-agent-license
+if [ "${remoteAgentKey}" != "" ]; then
+  RunProcess "/sbin/pcoip-register-host --registration-code=${remoteAgentKey}" $binDirectory/pcoip-agent-license
 fi
 
 SetFileSystems '${jsonencode(fileSystems)}'

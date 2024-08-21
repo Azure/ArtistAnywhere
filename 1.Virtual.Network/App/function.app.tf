@@ -93,7 +93,7 @@ resource azapi_resource function_app_site {
           },
           {
             name  = "ApplicationInsights_Connection_String"
-            value = data.azurerm_application_insights.studio[0].connection_string
+            value = data.azurerm_application_insights.studio.connection_string
           }
         ]
         ipSecurityRestrictions = [

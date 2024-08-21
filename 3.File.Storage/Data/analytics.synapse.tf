@@ -35,7 +35,7 @@ resource azurerm_synapse_workspace studio {
     for_each = var.data.analytics.workspace.encryption.enable ? [1] : []
     content {
       key_name                  = module.global.keyVault.keyName.dataEncryption
-      key_versionless_id        = data.azurerm_key_vault_key.data_encryption[0].versionless_id
+      key_versionless_id        = data.azurerm_key_vault_key.data_encryption.versionless_id
       user_assigned_identity_id = data.azurerm_user_assigned_identity.studio.id
     }
   }

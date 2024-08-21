@@ -1,6 +1,6 @@
 variable resourceLocation {
   default = {
-    regionName = "EastUS" # Set from "az account list-locations --query [].name"
+    regionName = "SouthCentralUS" # Set from "az account list-locations --query [].name"
     edgeZone = {
       enable     = false
       name       = "LosAngeles"
@@ -78,6 +78,17 @@ variable eventGrid {
 variable appConfig {
   default = {
     name = "xstudio"
+    key = {
+      nvidiaCUDAVersion          = "NVIDIA/CUDA/Version"
+      nvidiaOptiXVersion         = "NVIDIA/OptiX/Version"
+      artistAgentVersion         = "Artist/Agent/Version"
+      jobManagerVersion          = "Job/Manager/Version"
+      jobProcessorPBRTVersion    = "Job/Processor/PBRT/Version"
+      jobProcessorBlenderVersion = "Job/Processor/Blender/Version"
+      monitorAgentLinuxVersion   = "Monitor/Agent/Linux/Version"
+      monitorAgentWindowsVersion = "Monitor/Agent/Windows/Version"
+      aiEnable                   = "AI/Enable"
+    }
   }
 }
 
@@ -89,10 +100,6 @@ variable monitor {
   default = {
     enable = true
     name   = "xstudio"
-    agentVersion = {
-      linux   = "1.32"
-      windows = "1.29"
-    }
   }
 }
 

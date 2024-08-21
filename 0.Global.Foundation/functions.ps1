@@ -1,5 +1,9 @@
-$jobSchedulerTaskName = "AAA Job Scheduler Initialize"
-$fileSystemsMountPath = "C:\Users\Public\Downloads\fileSystems.bat"
+$binPaths = ""
+$binDirectory = "C:\Users\Public\Downloads"
+Set-Location -Path $binDirectory
+
+$jobManagerTaskName = "AAA Job Manager Initialize"
+$fileSystemsMountPath = "$binDirectory\fileSystems.bat"
 
 function RunProcess ($filePath, $argumentList, $logFile) {
   if ($logFile) {

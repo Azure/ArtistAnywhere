@@ -4,7 +4,7 @@
 
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  region   = "EastUS"
+  region   = "SouthCentralUS"
   edgeZone = ""
 }
 $virtualNetwork = @{
@@ -40,15 +40,15 @@ for ($i = 1; $i -le $virtualMachine.dataDisk.count; $i++) {
   az vm disk attach --resource-group $resourceGroupName --name $dataDiskName --sku $virtualMachine.dataDisk.type --size-gb $virtualMachine.dataDisk.sizeGB --caching $virtualMachine.dataDisk.caching --vm-name $virtualMachine.name --new
 }
 
-#################
-# Job Scheduler #
-#################
+###############
+# Job Manager #
+###############
 
 $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  region   = if ($extendedLocation) {"WestUS"} else {"EastUS"}
+  region   = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
   edgeZone = "LosAngeles"
 }
 $virtualNetwork = @{
@@ -58,7 +58,7 @@ $virtualNetwork = @{
   subnetName        = "Farm"
 }
 $virtualMachine = @{
-  name    = if ($osTypeWindows) {"WinScheduler"} else {"LnxScheduler"}
+  name    = if ($osTypeWindows) {"WinJobManager"} else {"LnxJobManager"}
   size    = "Standard_E8s_v4"
   imageId = if ($osTypeWindows) {"MicrosoftWindowsServer:WindowsServer:2022-Datacenter-Azure-Edition:Latest"} else {"RESF:RockyLinux-x86_64:9-LVM:9.3.20231113"}
   adminLogin = @{
@@ -86,7 +86,7 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  region   = if ($extendedLocation) {"WestUS"} else {"EastUS"}
+  region   = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
   edgeZone = "LosAngeles"
 }
 $virtualNetwork = @{
@@ -97,7 +97,7 @@ $virtualNetwork = @{
 }
 $virtualMachine = @{
   name    = if ($osTypeWindows) {"WinFarm"} else {"LnxFarm"}
-  size    = "Standard_HB176rs_v4" # "Standard_NV36ads_A10_v5"
+  size    = "Standard_HB176rs_v4" # "Standard_NV72ads_A10_v5"
   imageId = if ($osTypeWindows) {"MicrosoftWindowsDesktop:Windows-10:Win10-22H2-Ent-G2:Latest"} else {"RESF:RockyLinux-x86_64:9-LVM:9.3.20231113"}
   adminLogin = @{
     userName     = az keyvault secret show --vault-name "xstudio" --name "AdminUsername" --query value --output tsv
@@ -135,7 +135,7 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  region   = if ($extendedLocation) {"WestUS"} else {"EastUS"}
+  region   = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
   edgeZone = "LosAngeles"
 }
 $virtualNetwork = @{
@@ -146,7 +146,7 @@ $virtualNetwork = @{
 }
 $virtualMachine = @{
   name    = if ($osTypeWindows) {"WinArtist"} else {"LnxArtist"}
-  size    = "Standard_NV36ads_A10_v5" # "Standard_NG32ads_V620_v1"
+  size    = "Standard_NV72ads_A10_v5" # "Standard_NG32ads_V620_v1"
   imageId = if ($osTypeWindows) {"MicrosoftWindowsDesktop:Windows-11:Win11-23H2-Ent:Latest"} else {"RESF:RockyLinux-x86_64:9-LVM:9.3.20231113"}
   adminLogin = @{
     userName     = az keyvault secret show --vault-name "xstudio" --name "AdminUsername" --query value --output tsv

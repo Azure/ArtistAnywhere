@@ -39,14 +39,14 @@ variable storage {
   })
 }
 
-resource azurerm_role_assignment studio_storage_blob_data_owner_current_user {
+resource azurerm_role_assignment studio_storage_blob_data_owner {
   role_definition_name = "Storage Blob Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-owner
   principal_id         = data.azurerm_client_config.studio.object_id
   scope                = azurerm_storage_account.studio.id
 }
 
-resource azurerm_role_assignment studio_storage_blob_data_owner_managed_identity {
-  role_definition_name = "Storage Blob Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-owner
+resource azurerm_role_assignment studio_storage_blob_data_contributor {
+  role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
   principal_id         = azurerm_user_assigned_identity.studio.principal_id
   scope                = azurerm_storage_account.studio.id
 }

@@ -44,10 +44,10 @@ vpnGatewayLocal = {
 virtualNetwork = {
   name              = "Studio"
   edgeZoneName      = ""
-  resourceGroupName = "ArtistAnywhere.Network.EastUS"
+  resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
   gateway = {
     ipAddress1 = {
-      name              = "xstudio-east"
+      name              = "xstudio"
       resourceGroupName = "Shared"
     }
     ipAddress2 = {

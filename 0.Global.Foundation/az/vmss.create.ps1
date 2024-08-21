@@ -6,7 +6,7 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  region   = if ($extendedLocation) {"WestUS"} else {"EastUS"}
+  region   = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
   edgeZone = "LosAngeles"
 }
 $virtualNetwork = @{

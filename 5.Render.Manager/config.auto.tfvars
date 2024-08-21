@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Scheduler" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.JobManager" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
 #########################################################################
 # Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
@@ -7,7 +7,7 @@ resourceGroupName = "ArtistAnywhere.Scheduler" # Alphanumeric, underscores, hyph
 virtualMachines = [
   {
     enable = false
-    name   = "LnxScheduler"
+    name   = "LnxJobManager"
     size   = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
@@ -65,7 +65,7 @@ virtualMachines = [
   },
   {
     enable = false
-    name   = "WinScheduler"
+    name   = "WinJobManager"
     size   = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
@@ -128,7 +128,7 @@ virtualMachines = [
 ############################################################################
 
 dnsRecord = {
-  name        = "scheduler"
+  name        = "job"
   ttlSeconds  = 300
 }
 
@@ -138,7 +138,7 @@ dnsRecord = {
 
 activeDirectory = {
   enable     = true
-  domainName = "artist.studio"
+  domainName = "azure.studio"
 }
 
 ##################################################
@@ -154,13 +154,4 @@ existingNetwork = {
     zoneName          = ""
     resourceGroupName = ""
   }
-}
-
-#################################################
-# Non-Default Terraform Workspace Configuration #
-#################################################
-
-subscriptionId = {
-  terraformState = ""
-  computeGallery = ""
 }

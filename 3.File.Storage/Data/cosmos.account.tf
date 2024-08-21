@@ -94,7 +94,7 @@ resource azurerm_cosmosdb_account studio {
   kind                             = each.value.type == "mongo" ? "MongoDB" : "GlobalDocumentDB"
   mongo_server_version             = each.value.type == "mongo" ? var.mongoDB.account.version : null
   offer_type                       = var.cosmosDB.tier
-  key_vault_key_id                 = var.cosmosDB.encryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
+  key_vault_key_id                 = var.cosmosDB.encryption.enable ? data.azurerm_key_vault_key.data_encryption.versionless_id : null
   analytical_storage_enabled       = var.data.analytics.cosmosDB.enable
   partition_merge_enabled          = var.cosmosDB.partitionMerge.enable
   multiple_write_locations_enabled = var.cosmosDB.multiRegionWrite.enable

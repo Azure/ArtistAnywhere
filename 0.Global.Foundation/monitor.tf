@@ -15,19 +15,16 @@ variable monitor {
 }
 
 data azuread_service_principal monitor_diagnostics {
-  count        = module.global.monitor.enable ? 1 : 0
   display_name = "Diagnostic Services Trusted Storage Access"
 }
 
 resource azurerm_role_assignment storage_blob_data_contributor {
-  count                = module.global.monitor.enable ? 1 : 0
   role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
-  principal_id         = data.azuread_service_principal.monitor_diagnostics[0].object_id
+  principal_id         = data.azuread_service_principal.monitor_diagnostics.object_id
   scope                = azurerm_storage_account.studio.id
 }
 
 resource time_sleep monitor_diagnostics_rbac {
-  count           = module.global.monitor.enable ? 1 : 0
   create_duration = "30s"
   depends_on = [
     azurerm_role_assignment.storage_blob_data_contributor
@@ -35,10 +32,9 @@ resource time_sleep monitor_diagnostics_rbac {
 }
 
 resource azurerm_log_analytics_workspace studio {
-  count                      = module.global.monitor.enable ? 1 : 0
   name                       = module.global.monitor.name
-  resource_group_name        = azurerm_resource_group.studio.name
-  location                   = azurerm_resource_group.studio.location
+  resource_group_name        = azurerm_resource_group.studio_monitor.name
+  location                   = azurerm_resource_group.studio_monitor.location
   sku                        = var.monitor.logWorkspace.tier
   retention_in_days          = var.monitor.retentionDays
   internet_ingestion_enabled = false
@@ -52,11 +48,10 @@ resource azurerm_log_analytics_workspace studio {
 }
 
 resource azurerm_application_insights studio {
-  count                      = module.global.monitor.enable ? 1 : 0
   name                       = module.global.monitor.name
-  resource_group_name        = azurerm_resource_group.studio.name
-  location                   = azurerm_resource_group.studio.location
-  workspace_id               = azurerm_log_analytics_workspace.studio[0].id
+  resource_group_name        = azurerm_resource_group.studio_monitor.name
+  location                   = azurerm_resource_group.studio_monitor.location
+  workspace_id               = azurerm_log_analytics_workspace.studio.id
   application_type           = var.monitor.appInsight.type
   retention_in_days          = var.monitor.retentionDays
   internet_ingestion_enabled = false
@@ -67,9 +62,8 @@ resource azurerm_application_insights studio {
 }
 
 resource terraform_data monitor_storage {
-  count = module.global.monitor.enable ? 1 : 0
   provisioner local-exec {
-    command = "az monitor app-insights component linked-storage link --id ${azurerm_application_insights.studio[0].id} --storage-account ${azurerm_storage_account.studio.id}"
+    command = "az monitor app-insights component linked-storage link --id ${azurerm_application_insights.studio.id} --storage-account ${azurerm_storage_account.studio.id}"
   }
   depends_on = [
     azurerm_application_insights.studio,
@@ -78,10 +72,9 @@ resource terraform_data monitor_storage {
 }
 
 resource azurerm_monitor_data_collection_endpoint studio {
-  count                         = module.global.monitor.enable ? 1 : 0
   name                          = module.global.monitor.name
-  resource_group_name           = azurerm_resource_group.studio.name
-  location                      = azurerm_resource_group.studio.location
+  resource_group_name           = azurerm_resource_group.studio_monitor.name
+  location                      = azurerm_resource_group.studio_monitor.location
   public_network_access_enabled = false
   lifecycle {
     create_before_destroy = true
@@ -92,11 +85,10 @@ resource azurerm_monitor_data_collection_endpoint studio {
 }
 
 resource azurerm_monitor_data_collection_rule studio {
-  count                       = module.global.monitor.enable ? 1 : 0
   name                        = module.global.monitor.name
-  resource_group_name         = azurerm_resource_group.studio.name
-  location                    = azurerm_resource_group.studio.location
-  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.studio[0].id
+  resource_group_name         = azurerm_resource_group.studio_monitor.name
+  location                    = azurerm_resource_group.studio_monitor.location
+  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.studio.id
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -114,7 +106,13 @@ resource azurerm_monitor_data_collection_rule studio {
   destinations {
     log_analytics {
       name                  = "LogAnalyticsWorkspace"
-      workspace_resource_id = azurerm_log_analytics_workspace.studio[0].id
+      workspace_resource_id = azurerm_log_analytics_workspace.studio.id
     }
+  }
+}
+
+output monitor {
+  value = {
+    resourceGroupName = azurerm_resource_group.studio_monitor.name
   }
 }

@@ -40,8 +40,8 @@ namespace ArtistAnywhere.Data
       CosmosClientOptions cosmosOptions = new() {
         //ConnectionMode = ConnectionMode.Direct;
         //ConsistencyLevel = ConsistencyLevel.Session;
-        //ApplicationPreferredRegions = ["EastUS","WestUS"];
-        //ApplicationRegion = "WestUS";
+        //ApplicationPreferredRegions = ["SouthCentralUS","WestUS"];
+        //ApplicationRegion = "SouthCentralUS";
         //AllowBulkExecution = false;
         //PriorityLevel = null;
       };

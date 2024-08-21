@@ -16,17 +16,17 @@ fileSystems = {
       mount = {
         type    = "nfs"
         path    = "/mnt/content"
-        source  = "cache-west.artist.studio:/content"
+        source  = "cache.azure.studio:/content"
         options = "hard,proto=tcp,mountproto=tcp,retry=30,nolock"
       }
     },
-    { # Job Scheduler
+    { # Job Manager
       enable   = true
       iaasOnly = true
       mount = {
         type    = "nfs"
         path    = "/mnt/deadline"
-        source  = "scheduler.artist.studio:/deadline"
+        source  = "job.azure.studio:/deadline"
         options = "defaults"
       }
     }
@@ -50,19 +50,19 @@ fileSystems = {
       mount = {
         type    = ""
         path    = "X:"
-        source  = "\\\\cache-west.artist.studio\\content"
+        source  = "\\\\cache.azure.studio\\content"
         options = "-o anon nolock"
         userName = ""
         password = ""
       }
     },
-    { # Job Scheduler
+    { # Job Manager
       enable   = true
       iaasOnly = true
       mount = {
         type     = ""
         path     = "S:"
-        source   = "\\\\scheduler.artist.studio\\deadline"
+        source   = "\\\\job.azure.studio\\deadline"
         options  = "-o anon"
         userName = ""
         password = ""

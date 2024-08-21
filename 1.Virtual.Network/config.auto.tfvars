@@ -96,9 +96,23 @@ virtualNetworks = [
         serviceDelegation = null
       },
       {
-        name = "DataCassandra"
+        name = "DataPostgreSQL"
         addressSpace = [
           "10.0.196.0/24"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = {
+          service = "Microsoft.DBforPostgreSQL/flexibleServers"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
+      },
+      {
+        name = "DataCassandra"
+        addressSpace = [
+          "10.0.197.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -112,7 +126,7 @@ virtualNetworks = [
       {
         name = "Cache"
         addressSpace = [
-          "10.0.197.0/24"
+          "10.0.198.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.Storage.Global"
@@ -122,7 +136,7 @@ virtualNetworks = [
       {
         name = "AI"
         addressSpace = [
-          "10.0.198.0/24"
+          "10.0.199.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.CognitiveServices"
@@ -132,7 +146,7 @@ virtualNetworks = [
       {
         name = "App"
         addressSpace = [
-          "10.0.199.0/24"
+          "10.0.200.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -164,7 +178,7 @@ virtualNetworks = [
     ]
   },
   {
-    enable = false
+    enable = true
     name   = "Studio"
     regionNames = [
       "WestUS"
@@ -255,9 +269,23 @@ virtualNetworks = [
         serviceDelegation = null
       },
       {
-        name = "DataCassandra"
+        name = "DataPostgreSQL"
         addressSpace = [
           "10.1.196.0/24"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = {
+          service = "Microsoft.DBforPostgreSQL/flexibleServers"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
+      },
+      {
+        name = "DataCassandra"
+        addressSpace = [
+          "10.1.197.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -271,7 +299,7 @@ virtualNetworks = [
       {
         name = "Cache"
         addressSpace = [
-          "10.1.197.0/24"
+          "10.1.198.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.Storage.Global"
@@ -281,7 +309,7 @@ virtualNetworks = [
       {
         name = "AI"
         addressSpace = [
-          "10.1.198.0/24"
+          "10.1.199.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.CognitiveServices"
@@ -291,7 +319,7 @@ virtualNetworks = [
       {
         name = "App"
         addressSpace = [
-          "10.1.199.0/24"
+          "10.1.200.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -329,7 +357,7 @@ virtualNetworks = [
 ############################################################################
 
 privateDns = {
-  zoneName = "artist.studio"
+  zoneName = "azure.studio"
   autoRegistration = {
     enable = true
   }
@@ -349,20 +377,4 @@ bastion = {
   enableTunneling     = true
   enablePerRegion     = true
   enableShareableLink = false
-}
-
-######################################################################
-# Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
-######################################################################
-
-monitor = {
-  enable = true
-}
-
-#################################################
-# Non-Default Terraform Workspace Configuration #
-#################################################
-
-subscriptionId = {
-  terraformState = ""
 }

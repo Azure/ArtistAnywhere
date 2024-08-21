@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.115.0"
+      version = "~>3.116.0"
     }
   }
   backend azurerm {
@@ -27,12 +27,6 @@ module global {
 
 variable resourceGroupName {
   type = string
-}
-
-variable subscriptionId {
-  type = object({
-    terraformState = string
-  })
 }
 
 data azurerm_client_config studio {}
@@ -62,21 +56,10 @@ data azurerm_app_configuration studio {
   resource_group_name = module.global.resourceGroupName
 }
 
-data terraform_remote_state ai {
-  backend = "azurerm"
+data terraform_remote_state global {
+  backend = "local"
   config = {
-    subscription_id      = local.subscriptionId.terraformState
-    resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.storage.accountName
-    container_name       = module.global.storage.containerName.terraformState
-    key                  = "0.Global.Foundation.AI"
-    use_azuread_auth     = true
-  }
-}
-
-locals {
-  subscriptionId = {
-    terraformState = var.subscriptionId.terraformState != "" ? var.subscriptionId.terraformState : data.azurerm_client_config.studio.subscription_id
+    path = "../0.Global.Foundation/terraform.tfstate"
   }
 }
 

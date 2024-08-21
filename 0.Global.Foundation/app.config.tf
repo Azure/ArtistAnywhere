@@ -5,17 +5,38 @@
 variable appConfig {
   type = object({
     tier = string
+    localAuth = object({
+      enable = bool
+    })
     encryption = object({
       enable = bool
     })
   })
 }
 
+locals {
+  appConfigStoreId = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${lower(azurerm_resource_group.studio.name)}/providers/Microsoft.AppConfiguration/configurationStores/${module.global.appConfig.name}"
+}
+
+resource azurerm_role_assignment studio_app_config_data_owner {
+  role_definition_name = "App Configuration Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/integration#app-configuration-data-owner
+  principal_id         = data.azurerm_client_config.studio.object_id
+  scope                = azurerm_app_configuration.studio.id
+}
+
+resource azurerm_role_assignment studio_app_config_data_reader {
+  role_definition_name = "App Configuration Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/integration#app-configuration-data-owner
+  principal_id         = azurerm_user_assigned_identity.studio.principal_id
+  scope                = azurerm_app_configuration.studio.id
+}
+
 resource azurerm_app_configuration studio {
-  name                = module.global.appConfig.name
-  resource_group_name = azurerm_resource_group.studio.name
-  location            = azurerm_resource_group.studio.location
-  sku                 = var.appConfig.tier
+  name                  = module.global.appConfig.name
+  resource_group_name   = azurerm_resource_group.studio.name
+  location              = azurerm_resource_group.studio.location
+  sku                   = var.appConfig.tier
+  local_auth_enabled    = var.appConfig.localAuth.enable
+  public_network_access = "Enabled"
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -29,4 +50,85 @@ resource azurerm_app_configuration studio {
       identity_client_id       = azurerm_user_assigned_identity.studio.client_id
     }
   }
+}
+
+resource azurerm_app_configuration_key nvidia_cuda_version {
+  configuration_store_id = local.appConfigStoreId
+  key                    = module.global.appConfig.key.nvidiaCUDAVersion
+  value                  = "12.6.0"
+  depends_on = [
+    azurerm_app_configuration.studio
+  ]
+}
+
+resource azurerm_app_configuration_key nvidia_optix_version {
+  configuration_store_id = local.appConfigStoreId
+  key                    = module.global.appConfig.key.nvidiaOptiXVersion
+  value                  = "8.0.0"
+  depends_on = [
+    azurerm_app_configuration.studio
+  ]
+}
+
+resource azurerm_app_configuration_key artist_agent_version {
+  configuration_store_id = local.appConfigStoreId
+  key                    = module.global.appConfig.key.artistAgentVersion
+  value                  = "24.07.3"
+  depends_on = [
+    azurerm_app_configuration.studio
+  ]
+}
+
+resource azurerm_app_configuration_key job_manager_version {
+  configuration_store_id = local.appConfigStoreId
+  key                    = module.global.appConfig.key.jobManagerVersion
+  value                  = "10.3.2.1"
+  depends_on = [
+    azurerm_app_configuration.studio
+  ]
+}
+
+resource azurerm_app_configuration_key job_processor_pbrt_version {
+  configuration_store_id = local.appConfigStoreId
+  key                    = module.global.appConfig.key.jobProcessorPBRTVersion
+  value                  = "v4"
+  depends_on = [
+    azurerm_app_configuration.studio
+  ]
+}
+
+resource azurerm_app_configuration_key job_processor_blender_version {
+  configuration_store_id = local.appConfigStoreId
+  key                    = module.global.appConfig.key.jobProcessorBlenderVersion
+  value                  = "4.2.0"
+  depends_on = [
+    azurerm_app_configuration.studio
+  ]
+}
+
+resource azurerm_app_configuration_key monitor_agent_linux_version {
+  configuration_store_id = local.appConfigStoreId
+  key                    = module.global.appConfig.key.monitorAgentLinuxVersion
+  value                  = "1.32"
+  depends_on = [
+    azurerm_app_configuration.studio
+  ]
+}
+
+resource azurerm_app_configuration_key monitor_agent_windows_version {
+  configuration_store_id = local.appConfigStoreId
+  key                    = module.global.appConfig.key.monitorAgentWindowsVersion
+  value                  = "1.29"
+  depends_on = [
+    azurerm_app_configuration.studio
+  ]
+}
+
+resource azurerm_app_configuration_feature ai {
+  configuration_store_id = local.appConfigStoreId
+  name                   = module.global.appConfig.key.aiEnable
+  enabled                = false
+  depends_on = [
+    azurerm_app_configuration.studio
+  ]
 }

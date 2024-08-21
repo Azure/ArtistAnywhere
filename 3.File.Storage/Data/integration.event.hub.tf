@@ -3,12 +3,11 @@
 #############################################################################
 
 resource azurerm_eventhub_namespace data {
-  count                         = var.data.integration.enable ? 1 : 0
-  name                          = var.data.integration.name
-  resource_group_name           = azurerm_resource_group.data_integration[0].name
-  location                      = azurerm_resource_group.data_integration[0].location
-  sku                           = var.data.integration.tier
-  public_network_access_enabled = true
+  count               = var.data.integration.enable ? 1 : 0
+  name                = var.data.integration.name
+  resource_group_name = azurerm_resource_group.data_integration[0].name
+  location            = azurerm_resource_group.data_integration[0].location
+  sku                 = var.data.integration.tier
   identity {
     type = "UserAssigned"
     identity_ids = [

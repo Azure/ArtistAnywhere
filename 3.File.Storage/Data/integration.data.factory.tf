@@ -7,7 +7,7 @@ resource azurerm_data_factory studio {
   name                             = var.data.integration.name
   resource_group_name              = azurerm_resource_group.data_integration[0].name
   location                         = azurerm_resource_group.data_integration[0].location
-  customer_managed_key_id          = var.data.integration.encryption.enable ? data.azurerm_key_vault_key.data_encryption[0].versionless_id : null
+  customer_managed_key_id          = var.data.integration.encryption.enable ? data.azurerm_key_vault_key.data_encryption.versionless_id : null
   customer_managed_key_identity_id = var.data.integration.encryption.enable ? data.azurerm_user_assigned_identity.studio.id : null
   identity {
     type = "UserAssigned"

@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.115.0"
+      version = "~>3.116.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -19,7 +19,7 @@ terraform {
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>1.14.0"
+      version = "~>1.15.0"
     }
   }
   backend azurerm {
@@ -32,6 +32,9 @@ provider azurerm {
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
+    }
+    postgresql_flexible_server {
+      restart_server_on_configuration_value_change = true
     }
   }
   storage_use_azuread = true
@@ -98,10 +101,6 @@ variable data {
         })
         workspace = object({
           tier = string
-        })
-        storageAccount = object({
-          name = string
-          type = string
         })
       })
       stream = object({
@@ -179,19 +178,14 @@ data azurerm_key_vault_key data_encryption {
 }
 
 data azurerm_application_insights studio {
-  count               = module.global.monitor.enable ? 1 : 0
   name                = module.global.monitor.name
-  resource_group_name = module.global.resourceGroupName
+  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
 }
 
-data terraform_remote_state ai {
-  backend = "azurerm"
+data terraform_remote_state global {
+  backend = "local"
   config = {
-    resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.storage.accountName
-    container_name       = module.global.storage.containerName.terraformState
-    key                  = "0.Global.Foundation.AI"
-    use_azuread_auth     = true
+    path = "../../0.Global.Foundation/terraform.tfstate"
   }
 }
 
@@ -213,6 +207,12 @@ data azurerm_virtual_network studio_region {
 
 data azurerm_subnet data {
   name                 = "Data"
+  resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio_region.name
+}
+
+data azurerm_subnet data_postgre_sql {
+  name                 = "DataPostgreSQL"
   resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }

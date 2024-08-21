@@ -8,7 +8,7 @@ virtualMachines = [
   {
     enable = false
     name   = "LnxArtistN"
-    size   = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_NV72ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
@@ -52,7 +52,7 @@ virtualMachines = [
         name     = "Initialize"
         fileName = "initialize.sh"
         parameters = {
-          pcoipLicenseKey = ""
+          remoteAgentKey = ""
         }
       }
       monitor = {
@@ -108,7 +108,7 @@ virtualMachines = [
         name     = "Initialize"
         fileName = "initialize.sh"
         parameters = {
-          pcoipLicenseKey = ""
+          remoteAgentKey = ""
         }
       }
       monitor = {
@@ -120,7 +120,7 @@ virtualMachines = [
   {
     enable = false
     name   = "WinArtistN"
-    size   = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_NV72ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
@@ -164,7 +164,7 @@ virtualMachines = [
         name     = "Initialize"
         fileName = "initialize.ps1"
         parameters = {
-          pcoipLicenseKey = ""
+          remoteAgentKey = ""
         }
       }
       monitor = {
@@ -220,7 +220,7 @@ virtualMachines = [
         name     = "Initialize"
         fileName = "initialize.ps1"
         parameters = {
-          pcoipLicenseKey = ""
+          remoteAgentKey = ""
         }
       }
       monitor = {
@@ -237,8 +237,8 @@ virtualMachines = [
 
 activeDirectory = {
   enable           = false
-  domainName       = "artist.studio"
-  domainServerName = "WinScheduler"
+  domainName       = "azure.studio"
+  domainServerName = "WinJobManager"
   orgUnitPath      = ""
   adminUsername    = ""
   adminPassword    = ""
@@ -249,13 +249,4 @@ existingNetwork = {
   name              = ""
   subnetName        = ""
   resourceGroupName = ""
-}
-
-#################################################
-# Non-Default Terraform Workspace Configuration #
-#################################################
-
-subscriptionId = {
-  terraformState = ""
-  computeGallery = ""
 }

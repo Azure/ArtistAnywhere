@@ -112,6 +112,7 @@ locals {
       adminLogin = merge(virtualMachineScaleSet.adminLogin, {
         userName     = virtualMachineScaleSet.adminLogin.userName != "" ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
         userPassword = virtualMachineScaleSet.adminLogin.userPassword != "" ? virtualMachineScaleSet.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+        sshKeyPublic = virtualMachineScaleSet.adminLogin.sshKeyPublic != "" ? virtualMachineScaleSet.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
       })
       activeDirectory = merge(var.activeDirectory, {
         adminUsername = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value
@@ -132,7 +133,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   edge_zone                       = each.value.resourceLocation.edgeZone
   sku                             = each.value.machine.size
   instances                       = each.value.machine.count
-  source_image_id                 = "/subscriptions/${local.subscriptionId.computeGallery}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
@@ -212,12 +213,12 @@ resource azurerm_linux_virtual_machine_scale_set farm {
     }
   }
   dynamic extension {
-    for_each = module.global.monitor.enable && each.value.extension.monitor.enable ? [1] : []
+    for_each = each.value.extension.monitor.enable ? [1] : []
     content {
       name                       = each.value.extension.monitor.name
       type                       = "AzureMonitorLinuxAgent"
       publisher                  = "Microsoft.Azure.Monitor"
-      type_handler_version       = module.global.monitor.agentVersion.linux
+      type_handler_version       = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionLinux])
       automatic_upgrade_enabled  = true
       auto_upgrade_minor_version = true
       settings = jsonencode({
@@ -255,7 +256,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm_linux {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexMode.enable && module.global.monitor.enable && virtualMachineScaleSet.extension.monitor.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_linux_virtual_machine_scale_set.farm[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
@@ -272,7 +273,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   edge_zone                   = each.value.resourceLocation.edgeZone
   sku                         = each.value.machine.size
   instances                   = each.value.machine.count
-  source_image_id             = "/subscriptions/${local.subscriptionId.computeGallery}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+  source_image_id             = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   admin_username              = each.value.adminLogin.userName
   admin_password              = each.value.adminLogin.userPassword
   priority                    = each.value.spot.enable ? "Spot" : "Regular"
@@ -344,12 +345,12 @@ resource azurerm_windows_virtual_machine_scale_set farm {
     }
   }
   dynamic extension {
-    for_each = module.global.monitor.enable && each.value.extension.monitor.enable ? [1] : []
+    for_each = each.value.extension.monitor.enable ? [1] : []
     content {
       name                       = each.value.extension.monitor.name
       type                       = "AzureMonitorWindowsAgent"
       publisher                  = "Microsoft.Azure.Monitor"
-      type_handler_version       = module.global.monitor.agentVersion.windows
+      type_handler_version       = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionWindows])
       automatic_upgrade_enabled  = true
       auto_upgrade_minor_version = true
       settings = jsonencode({
@@ -380,7 +381,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm_windows {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexMode.enable && module.global.monitor.enable && virtualMachineScaleSet.extension.monitor.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_windows_virtual_machine_scale_set.farm[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
@@ -396,7 +397,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
   # edge_zone                   = each.value.resourceLocation.edgeZone
   sku_name                    = each.value.machine.size
   instances                   = each.value.machine.count
-  source_image_id             = "/subscriptions/${local.subscriptionId.computeGallery}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+  source_image_id             = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   priority                    = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy             = each.value.spot.enable ? each.value.spot.evictionPolicy : null
   platform_fault_domain_count = each.value.faultDomainCount
@@ -501,12 +502,12 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
     }
   }
   dynamic extension {
-    for_each = module.global.monitor.enable && each.value.extension.monitor.enable ? [1] : []
+    for_each = each.value.extension.monitor.enable ? [1] : []
     content {
       name                               = each.value.extension.monitor.name
       type                               = lower(each.value.operatingSystem.type) == "windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
       publisher                          = "Microsoft.Azure.Monitor"
-      type_handler_version               = lower(each.value.operatingSystem.type) == "windows" ? module.global.monitor.agentVersion.windows : module.global.monitor.agentVersion.linux
+      type_handler_version               = lower(each.value.operatingSystem.type) == "windows" ? one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionWindows]) : one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionLinux])
       auto_upgrade_minor_version_enabled = true
       settings = jsonencode({
         authentication = {
@@ -529,7 +530,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable && module.global.monitor.enable && virtualMachineScaleSet.extension.monitor.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.farm[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id

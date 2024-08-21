@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.115.0"
+      version = "~>3.116.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -19,7 +19,7 @@ terraform {
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>1.14.0"
+      version = "~>1.15.0"
     }
   }
   backend azurerm {
@@ -37,15 +37,16 @@ provider azurerm {
       expand_without_downtime = true
     }
     virtual_machine {
-      delete_os_disk_on_deletion     = true
-      skip_shutdown_and_force_delete = false
-      graceful_shutdown              = false
+      delete_os_disk_on_deletion            = true
+      detach_implicit_data_disk_on_deletion = false
+      skip_shutdown_and_force_delete        = false
+      graceful_shutdown                     = false
     }
     virtual_machine_scale_set {
-      force_delete                  = false
       reimage_on_manual_upgrade     = true
       roll_instances_when_required  = true
       scale_to_zero_before_deletion = true
+      force_delete                  = false
     }
   }
   storage_use_azuread = true
@@ -66,12 +67,6 @@ variable fileLoadSource {
     accountKey    = string
     containerName = string
     blobName      = string
-  })
-}
-
-variable subscriptionId {
-  type = object({
-    terraformState = string
   })
 }
 
@@ -101,15 +96,40 @@ data azurerm_key_vault_secret admin_password {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
+data azurerm_key_vault_secret ssh_key_public {
+  name         = module.global.keyVault.secretName.sshKeyPublic
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
 data azurerm_key_vault_key data_encryption {
   name         = module.global.keyVault.keyName.dataEncryption
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
+data azurerm_log_analytics_workspace studio {
+  name                = module.global.monitor.name
+  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
+}
+
+data azurerm_app_configuration studio {
+  name                = module.global.appConfig.name
+  resource_group_name = module.global.resourceGroupName
+}
+
+data azurerm_app_configuration_keys studio {
+  configuration_store_id = data.azurerm_app_configuration.studio.id
+}
+
+data terraform_remote_state global {
+  backend = "local"
+  config = {
+    path = "../0.Global.Foundation/terraform.tfstate"
+  }
+}
+
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
-    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
@@ -121,7 +141,6 @@ data terraform_remote_state network {
 data terraform_remote_state image {
   backend = "azurerm"
   config = {
-    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
@@ -159,12 +178,6 @@ data azurerm_subnet storage_region {
 data azurerm_private_dns_zone studio {
   name                = data.terraform_remote_state.network.outputs.privateDns.zoneName
   resource_group_name = data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
-}
-
-locals {
-  subscriptionId = {
-    terraformState = var.subscriptionId.terraformState != "" ? var.subscriptionId.terraformState : data.azurerm_client_config.studio.subscription_id
-  }
 }
 
 resource azurerm_resource_group storage {

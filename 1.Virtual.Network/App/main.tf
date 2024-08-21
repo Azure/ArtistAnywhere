@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.115.0"
+      version = "~>3.116.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -11,7 +11,7 @@ terraform {
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>1.14.0"
+      version = "~>1.15.0"
     }
   }
   backend azurerm {
@@ -56,9 +56,24 @@ data azurerm_storage_account studio {
 }
 
 data azurerm_application_insights studio {
-  count               = module.global.monitor.enable ? 1 : 0
   name                = module.global.monitor.name
+  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
+}
+
+data azurerm_app_configuration studio {
+  name                = module.global.appConfig.name
   resource_group_name = module.global.resourceGroupName
+}
+
+data azurerm_app_configuration_keys studio {
+  configuration_store_id = data.azurerm_app_configuration.studio.id
+}
+
+data terraform_remote_state global {
+  backend = "local"
+  config = {
+    path = "../0.Global.Foundation/terraform.tfstate"
+  }
 }
 
 data terraform_remote_state network {

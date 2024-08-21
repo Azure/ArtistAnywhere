@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.115.0"
+      version = "~>3.116.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -11,7 +11,7 @@ terraform {
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>1.14.0"
+      version = "~>1.15.0"
     }
   }
   backend azurerm {
@@ -35,12 +35,6 @@ module global {
 
 variable resourceGroupName {
   type = string
-}
-
-variable subscriptionId {
-  type = object({
-    terraformState = string
-  })
 }
 
 data http client_address {
@@ -79,10 +73,23 @@ data azurerm_key_vault_secret service_password {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
+data azurerm_key_vault_secret ssh_key_public {
+  name         = module.global.keyVault.secretName.sshKeyPublic
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_app_configuration studio {
+  name                = module.global.appConfig.name
+  resource_group_name = module.global.resourceGroupName
+}
+
+data azurerm_app_configuration_keys studio {
+  configuration_store_id = data.azurerm_app_configuration.studio.id
+}
+
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
-    subscription_id      = local.subscriptionId.terraformState
     resource_group_name  = module.global.resourceGroupName
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
@@ -107,9 +114,6 @@ data azurerm_resource_group network {
 }
 
 locals {
-  subscriptionId = {
-    terraformState = var.subscriptionId.terraformState != "" ? var.subscriptionId.terraformState : data.azurerm_client_config.studio.subscription_id
-  }
   regionNames = distinct([
     for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
   ])
@@ -117,11 +121,5 @@ locals {
 
 resource azurerm_resource_group image {
   name     = var.resourceGroupName
-  location = module.global.resourceLocation.regionName
-}
-
-resource azurerm_resource_group image_registry {
-  count    = var.containerRegistry.enable ? 1 : 0
-  name     = "${var.resourceGroupName}.Registry"
   location = module.global.resourceLocation.regionName
 }

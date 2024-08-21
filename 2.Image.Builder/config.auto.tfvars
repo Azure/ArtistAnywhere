@@ -98,7 +98,7 @@ imageBuilder = {
         imageVersion   = "0.0.0"
         osDiskSizeGB   = 0
         timeoutMinutes = 120
-        renderEngines = [
+        jobProcessors = [
         ]
       }
       distribute = {
@@ -112,7 +112,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "LnxScheduler"
+      name   = "LnxJobManager"
       source = {
         imageDefinition = {
           name = "Linux"
@@ -122,13 +122,13 @@ imageBuilder = {
         # }
       }
       build = {
-        machineType    = "Scheduler"
+        machineType    = "JobManager"
         machineSize    = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
         osDiskSizeGB   = 30
         timeoutMinutes = 120
-        renderEngines = [
+        jobProcessors = [
         ]
       }
       distribute = {
@@ -158,7 +158,7 @@ imageBuilder = {
         imageVersion   = "2.0.0"
         osDiskSizeGB   = 480
         timeoutMinutes = 240
-        renderEngines = [
+        jobProcessors = [
           "PBRT"
         ]
       }
@@ -184,12 +184,12 @@ imageBuilder = {
       }
       build = {
         machineType    = "Farm"
-        machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        machineSize    = "Standard_NV72ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
         imageVersion   = "2.1.0"
         osDiskSizeGB   = 512
         timeoutMinutes = 240
-        renderEngines = [
+        jobProcessors = [
           "PBRT",
           "Blender"
         ]
@@ -216,12 +216,12 @@ imageBuilder = {
       }
       build = {
         machineType    = "Workstation"
-        machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        machineSize    = "Standard_NV72ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
         imageVersion   = "3.0.0"
         osDiskSizeGB   = 512
         timeoutMinutes = 240
-        renderEngines = [
+        jobProcessors = [
           "PBRT",
           "Blender"
         ]
@@ -253,7 +253,7 @@ imageBuilder = {
         imageVersion   = "3.1.0"
         osDiskSizeGB   = 512
         timeoutMinutes = 240
-        renderEngines = [
+        jobProcessors = [
           "PBRT",
           "Blender"
         ]
@@ -269,7 +269,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinScheduler"
+      name   = "WinJobManager"
       source = {
         imageDefinition = {
           name = "WinServer"
@@ -279,13 +279,13 @@ imageBuilder = {
         # }
       }
       build = {
-        machineType    = "Scheduler"
+        machineType    = "JobManager"
         machineSize    = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
         osDiskSizeGB   = 0
         timeoutMinutes = 240
-        renderEngines = [
+        jobProcessors = [
         ]
       }
       distribute = {
@@ -315,7 +315,7 @@ imageBuilder = {
         imageVersion   = "2.0.0"
         osDiskSizeGB   = 480
         timeoutMinutes = 360
-        renderEngines = [
+        jobProcessors = [
           "PBRT"
         ]
       }
@@ -341,15 +341,14 @@ imageBuilder = {
       }
       build = {
         machineType    = "Farm"
-        machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        machineSize    = "Standard_NV72ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                        # NVIDIA or AMD
         imageVersion   = "2.1.0"
         osDiskSizeGB   = 512
         timeoutMinutes = 480
-        renderEngines = [
+        jobProcessors = [
           "PBRT",
-          "Blender",
-          # "Unreal"
+          "Blender"
         ]
       }
       distribute = {
@@ -374,15 +373,14 @@ imageBuilder = {
       }
       build = {
         machineType    = "Workstation"
-        machineSize    = "Standard_NV36ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        machineSize    = "Standard_NV72ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
         imageVersion   = "3.0.0"
         osDiskSizeGB   = 512
         timeoutMinutes = 480
-        renderEngines = [
+        jobProcessors = [
           "PBRT",
-          "Blender",
-          # "Unreal+PixelStream"
+          "Blender"
         ]
       }
       distribute = {
@@ -412,10 +410,9 @@ imageBuilder = {
         imageVersion   = "3.1.0"
         osDiskSizeGB   = 512
         timeoutMinutes = 480
-        renderEngines = [
+        jobProcessors = [
           "PBRT",
-          "Blender",
-          # "Unreal+PixelStream"
+          "Blender"
         ]
       }
       distribute = {
@@ -430,63 +427,7 @@ imageBuilder = {
   ]
 }
 
-versionPath = {
-  nvidiaCUDA        = "12.3.2"
-  nvidiaCUDAToolkit = "v12.3"
-  nvidiaOptiX       = "8.0.0"
-  renderPBRT        = "v4"
-  renderBlender     = "4.2.0"
-  renderMaya        = "2024_0_1"
-  renderHoudini     = "20.0.506"
-  renderUnrealVS    = "2022"
-  renderUnreal      = "5.3.2"
-  renderUnrealPixel = "5.3-1.0.1"
-  jobScheduler      = "10.3.2.1"
-  pcoipAgent        = "24.07.3"
-}
-
-dataPlatform = {
-  adminLogin = {
-    userName     = ""
-    userPassword = ""
-  }
-  jobDatabase = {
-    host = ""
-    port = 27017 # 10255
-    serviceLogin = {
-      userName     = ""
-      userPassword = ""
-    }
-  }
-}
-
 binStorage = { # Required for image build customization
   host = ""
   auth = ""
-}
-
-######################################################################################################
-# Container Registry (https://learn.microsoft.com/azure/container-registry/container-registry-intro) #
-######################################################################################################
-
-containerRegistry = {
-  enable = false
-  name = "xstudio"
-  type = "Premium"
-  adminUser = {
-    enable = true
-  }
-  agentPool = {
-    enable        = false
-    tier          = "S1"
-    instanceCount = 1
-  }
-}
-
-#################################################
-# Non-Default Terraform Workspace Configuration #
-#################################################
-
-subscriptionId = {
-  terraformState = ""
 }

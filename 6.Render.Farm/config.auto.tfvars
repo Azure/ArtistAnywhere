@@ -95,7 +95,7 @@ virtualMachineScaleSets = [
     name   = "LnxFarmG"
     machine = {
       namePrefix = ""
-      size       = "Standard_NV36ads_A10_v5"
+      size       = "Standard_NV72ads_A10_v5"
       count      = 2
       image = {
         resourceGroupName = "ArtistAnywhere.Image"
@@ -265,7 +265,7 @@ virtualMachineScaleSets = [
     name   = "WinFarmG"
     machine = {
       namePrefix = ""
-      size       = "Standard_NV36ads_A10_v5"
+      size       = "Standard_NV72ads_A10_v5"
       count      = 2
       image = {
         resourceGroupName = "ArtistAnywhere.Image"
@@ -493,8 +493,8 @@ containerApp = {
 
 activeDirectory = {
   enable           = false
-  domainName       = "artist.studio"
-  domainServerName = "WinScheduler"
+  domainName       = "azure.studio"
+  domainServerName = "WinJobManager"
   orgUnitPath      = ""
   adminUsername    = ""
   adminPassword    = ""
@@ -505,13 +505,4 @@ existingNetwork = {
   name              = ""
   subnetName        = ""
   resourceGroupName = ""
-}
-
-#################################################
-# Non-Default Terraform Workspace Configuration #
-#################################################
-
-subscriptionId = {
-  terraformState = ""
-  computeGallery = ""
 }

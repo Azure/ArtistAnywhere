@@ -14,12 +14,6 @@ resource azapi_resource stream_analytics_cluster {
   type      = "Microsoft.StreamAnalytics/clusters@2020-03-01"
   parent_id = azurerm_resource_group.data_analytics_stream[0].id
   location  = azurerm_resource_group.data_analytics_stream[0].location
-  identity {
-    type = "UserAssigned"
-    identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
-    ]
-  }
   body = jsonencode({
     sku = {
       name     = "DefaultV2"

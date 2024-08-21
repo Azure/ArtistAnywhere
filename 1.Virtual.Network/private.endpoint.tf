@@ -101,3 +101,72 @@ resource azurerm_private_endpoint app_config {
     azurerm_private_endpoint.key_vault
  ]
 }
+
+resource azurerm_private_endpoint container_registry {
+  count               = data.terraform_remote_state.global.outputs.containerRegistry.enable ? 1 : 0
+  name                = "${lower(data.terraform_remote_state.global.outputs.containerRegistry.name)}-${azurerm_private_dns_zone_virtual_network_link.container_registry[0].name}"
+  resource_group_name = data.terraform_remote_state.global.outputs.containerRegistry.resourceGroupName
+  location            = data.terraform_remote_state.global.outputs.containerRegistry.regionName
+  subnet_id           = "${local.virtualNetwork.id}/subnets/Farm"
+  private_service_connection {
+    name                           = data.terraform_remote_state.global.outputs.containerRegistry.name
+    private_connection_resource_id = data.terraform_remote_state.global.outputs.containerRegistry.id
+    is_manual_connection           = false
+    subresource_names = [
+      "registry"
+    ]
+  }
+  private_dns_zone_group {
+    name = azurerm_private_dns_zone_virtual_network_link.container_registry[0].name
+    private_dns_zone_ids = [
+      azurerm_private_dns_zone.container_registry[0].id
+    ]
+  }
+}
+
+resource azurerm_private_endpoint ai_services_open {
+  count               = data.terraform_remote_state.global.outputs.ai.services.enable ? 1 : 0
+  name                = "${lower(data.terraform_remote_state.global.outputs.ai.services.name)}-${azurerm_private_dns_zone_virtual_network_link.ai_services_open[0].name}"
+  resource_group_name = data.terraform_remote_state.global.outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.global.outputs.ai.regionName
+  subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
+  private_service_connection {
+    name                           = data.terraform_remote_state.global.outputs.ai.services.name
+    private_connection_resource_id = data.terraform_remote_state.global.outputs.ai.services.id
+    is_manual_connection           = false
+    subresource_names = [
+      "account"
+    ]
+  }
+  private_dns_zone_group {
+    name = azurerm_private_dns_zone_virtual_network_link.ai_services_open[0].name
+    private_dns_zone_ids = [
+      azurerm_private_dns_zone.ai_services_open[0].id
+    ]
+  }
+}
+
+resource azurerm_private_endpoint ai_services_cognitive {
+  count               = data.terraform_remote_state.global.outputs.ai.services.enable ? 1 : 0
+  name                = "${lower(data.terraform_remote_state.global.outputs.ai.services.name)}-${azurerm_private_dns_zone_virtual_network_link.ai_services_cognitive[0].name}"
+  resource_group_name = data.terraform_remote_state.global.outputs.ai.resourceGroupName
+  location            = data.terraform_remote_state.global.outputs.ai.regionName
+  subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
+  private_service_connection {
+    name                           = data.terraform_remote_state.global.outputs.ai.services.name
+    private_connection_resource_id = data.terraform_remote_state.global.outputs.ai.services.id
+    is_manual_connection           = false
+    subresource_names = [
+      "account"
+    ]
+  }
+  private_dns_zone_group {
+    name = azurerm_private_dns_zone_virtual_network_link.ai_services_cognitive[0].name
+    private_dns_zone_ids = [
+      azurerm_private_dns_zone.ai_services_cognitive[0].id
+    ]
+  }
+  depends_on = [
+    azurerm_private_endpoint.ai_services_open
+  ]
+}
