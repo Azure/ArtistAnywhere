@@ -103,6 +103,24 @@ variable monitor {
   }
 }
 
+###################################################################################################
+# Defender (https://learn.microsoft.com/azure/defender-for-cloud/defender-for-cloud-introduction) #
+###################################################################################################
+
+variable defender {
+  default = {
+    storage = {
+      malwareScanning = {
+        enable        = true
+        maxPerMonthGB = 5000
+      }
+      sensitiveDataDiscovery = {
+        enable = true
+      }
+    }
+  }
+}
+
 output resourceLocation {
   value = var.resourceLocation
 }
@@ -133,4 +151,8 @@ output appConfig {
 
 output monitor {
   value = var.monitor
+}
+
+output defender {
+  value = var.defender
 }

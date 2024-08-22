@@ -67,7 +67,7 @@ provider azurerm {
 }
 
 module global {
-  source = "./config"
+  source = "./cfg"
 }
 
 data http client_address {

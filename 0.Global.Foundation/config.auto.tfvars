@@ -25,15 +25,6 @@ storage = {
     sharedAccessKey = {
       enable = false
     }
-    defender = {
-      malwareScanning = {
-        enable        = true
-        maxPerMonthGB = 5000
-      }
-      sensitiveDataDiscovery = {
-        enable = true
-      }
-    }
   }
 }
 

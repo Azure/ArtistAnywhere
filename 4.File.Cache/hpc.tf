@@ -26,14 +26,14 @@ resource azurerm_role_assignment storage_account_contributor {
   count                = var.hpcCache.enable ? 1 : 0
   role_definition_name = "Storage Account Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-account-contributor
   principal_id         = data.azuread_service_principal.hpc_cache[0].object_id
-  scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.blobStorageAccountNfs.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.blobStorageAccountNfs.name}"
+  scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.nfsStorageAccount.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.nfsStorageAccount.name}"
 }
 
 resource azurerm_role_assignment storage_blob_data_contributor {
   count                = var.hpcCache.enable ? 1 : 0
   role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
   principal_id         = data.azuread_service_principal.hpc_cache[0].object_id
-  scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.blobStorageAccountNfs.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.blobStorageAccountNfs.name}"
+  scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.nfsStorageAccount.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.nfsStorageAccount.name}"
 }
 
 resource time_sleep hpc_cache_storage_rbac {

@@ -29,7 +29,7 @@ resource azurerm_synapse_workspace studio {
     account_name    = "Azure"
     repository_name = "ArtistAnywhere"
     branch_name     = "main"
-    root_folder     = "/1.Virtual.Network/Data/SynapseStudio"
+    root_folder     = "/3.File.Storage/Data/SynapseStudio"
   }
   dynamic customer_managed_key {
     for_each = var.data.analytics.workspace.encryption.enable ? [1] : []

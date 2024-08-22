@@ -43,7 +43,7 @@ provider azurerm {
 }
 
 module global {
-  source = "../0.Global.Foundation/config"
+  source = "../0.Global.Foundation/cfg"
 }
 
 variable resourceGroupName {
@@ -189,7 +189,7 @@ data azurerm_private_dns_zone studio {
 }
 
 locals {
-  blobStorageAccountNfs = try(data.terraform_remote_state.storage.outputs.blobStorageAccountNfs, {})
+  nfsStorageAccount = try(data.terraform_remote_state.storage.outputs.nfsStorageAccount, {})
 }
 
 resource azurerm_resource_group cache {

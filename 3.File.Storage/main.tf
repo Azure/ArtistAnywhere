@@ -53,7 +53,7 @@ provider azurerm {
 }
 
 module global {
-  source = "../0.Global.Foundation/config"
+  source = "../0.Global.Foundation/cfg"
 }
 
 variable resourceGroupName {
@@ -163,6 +163,11 @@ data azurerm_virtual_network studio_edge {
   resource_group_name = reverse(data.terraform_remote_state.network.outputs.virtualNetworks)[0].resourceGroupName
 }
 
+data azurerm_private_dns_zone studio {
+  name                = data.terraform_remote_state.network.outputs.privateDns.zoneName
+  resource_group_name = data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
+}
+
 data azurerm_subnet storage_region {
   name                 = "Storage"
   resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
@@ -175,12 +180,22 @@ data azurerm_subnet storage_region {
 #   virtual_network_name = data.azurerm_virtual_network.studio_edge.name
 # }
 
-data azurerm_private_dns_zone studio {
-  name                = data.terraform_remote_state.network.outputs.privateDns.zoneName
-  resource_group_name = data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
+locals {
+  nfsStorageAccounts = [
+    for storageAccount in local.storageAccounts : storageAccount if storageAccount.enableBlobNfsV3 == true || storageAccount.type == "FileStorage"
+  ]
 }
 
 resource azurerm_resource_group storage {
+  count    = length(local.storageAccounts) > 0 ? 1 : 0
   name     = var.resourceGroupName
   location = module.global.resourceLocation.regionName
+}
+
+output nfsStorageAccount {
+  value = length(local.nfsStorageAccounts) > 0 ? {
+    name              = local.nfsStorageAccounts[0].name
+    resourceGroupName = local.nfsStorageAccounts[0].resourceGroupName
+  } : null
+  sensitive = true
 }

@@ -26,15 +26,6 @@ variable storage {
       sharedAccessKey = object({
         enable = bool
       })
-      defender = object({
-        malwareScanning = object({
-          enable        = bool
-          maxPerMonthGB = number
-        })
-        sensitiveDataDiscovery = object({
-          enable = bool
-        })
-      })
     })
   })
 }
@@ -77,16 +68,16 @@ resource azurerm_storage_account studio {
   }
   network_rules {
     default_action = "Deny"
+    ip_rules = [
+      jsondecode(data.http.client_address.response_body).ip
+    ]
     dynamic private_link_access {
-      for_each = var.storage.security.defender.malwareScanning.enable ? [1] : []
+      for_each = module.global.defender.storage.malwareScanning.enable ? [1] : []
       content {
         endpoint_tenant_id   = data.azurerm_client_config.studio.tenant_id
         endpoint_resource_id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/providers/Microsoft.Security/datascanners/storageDataScanner"
       }
     }
-    ip_rules = [
-      jsondecode(data.http.client_address.response_body).ip
-    ]
   }
 }
 
@@ -100,7 +91,7 @@ resource azurerm_storage_container studio {
 
 resource azurerm_security_center_storage_defender studio {
   storage_account_id                          = azurerm_storage_account.studio.id
-  malware_scanning_on_upload_enabled          = var.storage.security.defender.malwareScanning.enable
-  malware_scanning_on_upload_cap_gb_per_month = var.storage.security.defender.malwareScanning.maxPerMonthGB
-  sensitive_data_discovery_enabled            = var.storage.security.defender.sensitiveDataDiscovery.enable
+  malware_scanning_on_upload_enabled          = module.global.defender.storage.malwareScanning.enable
+  malware_scanning_on_upload_cap_gb_per_month = module.global.defender.storage.malwareScanning.maxPerMonthGB
+  sensitive_data_discovery_enabled            = module.global.defender.storage.sensitiveDataDiscovery.enable
 }

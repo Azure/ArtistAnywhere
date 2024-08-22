@@ -170,3 +170,7 @@ resource azurerm_private_endpoint ai_services_cognitive {
     azurerm_private_endpoint.ai_services_open
   ]
 }
+
+output keyVaultPrivateEndpointId {
+  value = azurerm_private_endpoint.key_vault.id
+}

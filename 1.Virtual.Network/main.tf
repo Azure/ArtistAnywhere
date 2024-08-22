@@ -22,7 +22,7 @@ provider azurerm {
 }
 
 module global {
-  source = "../0.Global.Foundation/config"
+  source = "../0.Global.Foundation/cfg"
 }
 
 variable resourceGroupName {

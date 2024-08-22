@@ -2,37 +2,43 @@
 # NetApp Files (https://learn.microsoft.com/azure/azure-netapp-files/azure-netapp-files-introduction) #
 #######################################################################################################
 
-variable netApp {
+variable netAppFiles {
   type = object({
-    enable      = bool
-    accountName = string
+    enable = bool
+    name   = string
     capacityPools = list(object({
-      enable       = bool
-      name         = string
-      sizeTiB      = number
-      serviceLevel = string
+      enable  = bool
+      name    = string
+      tier    = string
+      sizeTiB = number
       volumes = list(object({
-        enable       = bool
-        name         = string
-        sizeGB       = number
-        serviceLevel = string
-        mountPath    = string
-        protocols    = list(string)
+        enable    = bool
+        name      = string
+        tier      = string
+        sizeGiB   = number
+        mountPath = string
+        network = object({
+          features  = string
+          protocols = list(string)
+        })
         exportPolicies = list(object({
-          ruleIndex      = number
-          readOnly       = bool
-          readWrite      = bool
-          rootAccess     = bool
-          protocols      = list(string)
-          allowedClients = list(string)
+          ruleIndex        = number
+          readOnly         = bool
+          readWrite        = bool
+          rootAccess       = bool
+          networkProtocols = list(string)
+          allowedClients   = list(string)
         }))
       }))
     }))
+    encryption = object({
+      enable = bool
+    })
   })
 }
 
 data azurerm_subnet storage_netapp {
-  count                = var.netApp.enable ? 1 : 0
+  count                = var.netAppFiles.enable ? 1 : 0
   name                 = "StorageNetApp"
   resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio_region.name
@@ -40,37 +46,50 @@ data azurerm_subnet storage_netapp {
 
 locals {
   netAppVolumes = flatten([
-    for capacityPool in var.netApp.capacityPools : [
+    for capacityPool in var.netAppFiles.capacityPools : [
       for volume in capacityPool.volumes : merge(volume, {
         capacityPoolName = capacityPool.name
       }) if volume.enable
-    ] if var.netApp.enable && capacityPool.enable
+    ] if var.netAppFiles.enable && capacityPool.enable
   ])
 }
 
 resource azurerm_resource_group netapp {
-  count    = var.netApp.enable ? 1 : 0
+  count    = var.netAppFiles.enable ? 1 : 0
   name     = "${var.resourceGroupName}.NetApp"
   location = module.global.resourceLocation.regionName
 }
 
 resource azurerm_netapp_account storage {
-  count               = var.netApp.enable ? 1 : 0
-  name                = var.netApp.accountName
+  count               = var.netAppFiles.enable ? 1 : 0
+  name                = var.netAppFiles.name
   resource_group_name = azurerm_resource_group.netapp[0].name
   location            = azurerm_resource_group.netapp[0].location
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
+  }
+}
+
+resource azurerm_netapp_account_encryption storage {
+  count                     = var.netAppFiles.enable && var.netAppFiles.encryption.enable ? 1 : 0
+  netapp_account_id         = azurerm_netapp_account.storage[0].id
+  user_assigned_identity_id = data.azurerm_user_assigned_identity.studio.id
+  encryption_key            = data.azurerm_key_vault_key.data_encryption.versionless_id
 }
 
 resource azurerm_netapp_pool storage {
   for_each = {
-    for capacityPool in var.netApp.capacityPools : capacityPool.name => capacityPool if var.netApp.enable && capacityPool.enable
+    for capacityPool in var.netAppFiles.capacityPools : capacityPool.name => capacityPool if var.netAppFiles.enable && capacityPool.enable
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.netapp[0].name
   location            = azurerm_resource_group.netapp[0].location
+  service_level       = each.value.tier
   size_in_tb          = each.value.sizeTiB
-  service_level       = each.value.serviceLevel
-  account_name        = var.netApp.accountName
+  account_name        = var.netAppFiles.name
   depends_on = [
     azurerm_netapp_account.storage
   ]
@@ -80,16 +99,19 @@ resource azurerm_netapp_volume storage {
   for_each = {
     for volume in local.netAppVolumes : "${volume.capacityPoolName}-${volume.name}" => volume
   }
-  name                = each.value.name
-  resource_group_name = azurerm_resource_group.netapp[0].name
-  location            = azurerm_resource_group.netapp[0].location
-  storage_quota_in_gb = each.value.sizeGB
-  service_level       = each.value.serviceLevel
-  volume_path         = each.value.mountPath
-  protocols           = each.value.protocols
-  pool_name           = each.value.capacityPoolName
-  account_name        = var.netApp.accountName
-  subnet_id           = data.azurerm_subnet.storage_netapp[0].id
+  name                          = each.value.name
+  resource_group_name           = azurerm_resource_group.netapp[0].name
+  location                      = azurerm_resource_group.netapp[0].location
+  service_level                 = each.value.tier
+  storage_quota_in_gb           = each.value.sizeGiB
+  volume_path                   = each.value.mountPath
+  pool_name                     = each.value.capacityPoolName
+  network_features              = each.value.network.features
+  protocols                     = each.value.network.protocols
+  subnet_id                     = data.azurerm_subnet.storage_netapp[0].id
+  encryption_key_source         = var.netAppFiles.encryption.enable ? "Microsoft.KeyVault" : null
+  key_vault_private_endpoint_id = var.netAppFiles.encryption.enable ? data.terraform_remote_state.network.outputs.keyVaultPrivateEndpointId : null
+  account_name                  = var.netAppFiles.name
   dynamic export_policy_rule {
     for_each = each.value.exportPolicies
     content {
@@ -97,7 +119,7 @@ resource azurerm_netapp_volume storage {
       unix_read_only      = export_policy_rule.value["readOnly"]
       unix_read_write     = export_policy_rule.value["readWrite"]
       root_access_enabled = export_policy_rule.value["rootAccess"]
-      protocols_enabled   = export_policy_rule.value["protocols"]
+      protocols_enabled   = export_policy_rule.value["networkProtocols"]
       allowed_clients     = export_policy_rule.value["allowedClients"]
     }
   }

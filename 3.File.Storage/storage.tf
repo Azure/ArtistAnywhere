@@ -37,12 +37,12 @@ variable storageAccounts {
 locals {
   storageAccounts = [
     for storageAccount in var.storageAccounts : merge(storageAccount, {
-      resourceGroupName     = azurerm_resource_group.storage.name
-      resourceGroupLocation = storageAccount.enableEdgeZoneDeploy && module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : azurerm_resource_group.storage.location
+      resourceGroupName     = var.resourceGroupName
+      resourceGroupLocation = storageAccount.enableEdgeZoneDeploy && module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : module.global.resourceLocation.regionName
       edgeZoneName          = storageAccount.enableEdgeZoneDeploy && module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
-      storageAccountId      = "${azurerm_resource_group.storage.id}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
+      storageAccountId      = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
       storageAccountName    = storageAccount.name
-    })
+    }) if storageAccount.enable
   ]
   serviceEndpointSubnets = try(data.terraform_remote_state.network.outputs.virtualNetworksSubnetStorage, [])
   privateEndpoints = flatten([
@@ -52,33 +52,27 @@ locals {
         type      = privateEndpointType
         dnsZoneId = "${data.azurerm_resource_group.dns.id}/providers/Microsoft.Network/privateDnsZones/privatelink.${privateEndpointType}.core.windows.net"
       })
-    ] if storageAccount.enable
+    ]
   ])
-  blobStorageAccount = [
-    for storageAccount in azurerm_storage_account.studio : storageAccount if storageAccount.nfsv3_enabled == false
-  ][0]
-  blobStorageAccountNfs = [
-    for storageAccount in azurerm_storage_account.studio : storageAccount if storageAccount.nfsv3_enabled == true
-  ][0]
   blobContainers = flatten([
     for storageAccount in local.storageAccounts : [
       for blobContainer in storageAccount.blobContainers : merge(storageAccount, blobContainer, {
         key = "${storageAccount.name}-${blobContainer.name}"
       }) if blobContainer.enable
-    ] if storageAccount.enable
+    ]
   ])
   fileShares = flatten([
     for storageAccount in local.storageAccounts : [
       for fileShare in storageAccount.fileShares : merge(storageAccount, fileShare, {
         key = "${storageAccount.name}-${fileShare.name}"
       }) if fileShare.enable
-    ] if storageAccount.enable
+    ]
   ])
 }
 
 resource azurerm_role_assignment storage_blob_data_owner {
   for_each = {
-    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
+    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount
   }
   role_definition_name = "Storage Blob Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-owner
   principal_id         = data.azurerm_client_config.studio.object_id
@@ -90,7 +84,7 @@ resource azurerm_role_assignment storage_blob_data_owner {
 
 resource azurerm_role_assignment storage_blob_data_contributor {
   for_each = {
-    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
+    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount
   }
   role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
@@ -101,6 +95,9 @@ resource azurerm_role_assignment storage_blob_data_contributor {
 }
 
 resource time_sleep storage_rbac {
+  for_each = {
+    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount
+  }
   create_duration = "30s"
   depends_on = [
     azurerm_role_assignment.storage_blob_data_owner,
@@ -110,7 +107,7 @@ resource time_sleep storage_rbac {
 
 resource azurerm_storage_account studio {
   for_each = {
-    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount if storageAccount.enable
+    for storageAccount in local.storageAccounts : storageAccount.name => storageAccount
   }
   name                            = each.value.name
   resource_group_name             = each.value.resourceGroupName
@@ -126,13 +123,20 @@ resource azurerm_storage_account studio {
   allow_nested_items_to_be_public = false
   network_rules {
     default_action = "Deny"
+    ip_rules = [
+      jsondecode(data.http.client_address.response_body).ip
+    ]
     virtual_network_subnet_ids = [
       for serviceEndpointSubnet in local.serviceEndpointSubnets :
         "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${serviceEndpointSubnet.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${serviceEndpointSubnet.virtualNetworkName}/subnets/${serviceEndpointSubnet.name}"
     ]
-    ip_rules = [
-      jsondecode(data.http.client_address.response_body).ip
-    ]
+    dynamic private_link_access {
+      for_each = module.global.defender.storage.malwareScanning.enable ? [1] : []
+      content {
+        endpoint_tenant_id   = data.azurerm_client_config.studio.tenant_id
+        endpoint_resource_id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/providers/Microsoft.Security/datascanners/storageDataScanner"
+      }
+    }
   }
 }
 
@@ -287,20 +291,4 @@ resource azurerm_private_endpoint storage {
   depends_on = [
     azurerm_storage_account.studio
   ]
-}
-
-output blobStorageAccount {
-  value = {
-    name              = local.blobStorageAccount.name
-    resourceGroupName = local.blobStorageAccount.resource_group_name
-  }
-  sensitive = true
-}
-
-output blobStorageAccountNfs {
-  value = {
-    name              = local.blobStorageAccountNfs.name
-    resourceGroupName = local.blobStorageAccountNfs.resource_group_name
-  }
-  sensitive = true
 }
