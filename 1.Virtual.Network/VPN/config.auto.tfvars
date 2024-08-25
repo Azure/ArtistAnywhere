@@ -1,3 +1,5 @@
+subscriptionId = "" # Set to your Azure subscription id
+
 ###############################################################################################################
 # Virtual Network Gateway (VPN) (https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-about-vpngateways) #
 ###############################################################################################################
@@ -44,7 +46,7 @@ vpnGatewayLocal = {
 virtualNetwork = {
   name              = "Studio"
   edgeZoneName      = ""
-  resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
+  resourceGroupName = "ArtistAnywhere.Network.WestUS"
   gateway = {
     ipAddress1 = {
       name              = "xstudio"

@@ -35,46 +35,6 @@ az account list-locations --query "[?name=='westus2']"
 az account list-locations --query "[?name=='eastus']"
 az account list-locations --query "[?name=='eastus2']"
 
-az account list-locations --query "[?name=='southcentralus']"
-[
-  {
-    "availabilityZoneMappings": [
-      {
-        "logicalZone": "1",
-        "physicalZone": "southcentralus-az1"
-      },
-      {
-        "logicalZone": "2",
-        "physicalZone": "southcentralus-az2"
-      },
-      {
-        "logicalZone": "3",
-        "physicalZone": "southcentralus-az3"
-      }
-    ],
-    "displayName": "South Central US",
-    "id": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/locations/southcentralus",
-    "metadata": {
-      "geography": "United States",
-      "geographyGroup": "US",
-      "latitude": "29.4167",
-      "longitude": "-98.5",
-      "pairedRegion": [
-        {
-          "id": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/locations/northcentralus",
-          "name": "northcentralus"
-        }
-      ],
-      "physicalLocation": "Texas",
-      "regionCategory": "Recommended",
-      "regionType": "Physical"
-    },
-    "name": "southcentralus",
-    "regionalDisplayName": "(US) South Central US",
-    "type": "Region"
-  }
-]
-
 az account list-locations --query "[?name=='southcentralus'].availabilityZoneMappings[].logicalZone"
 [
   "1",

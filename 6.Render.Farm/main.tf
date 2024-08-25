@@ -1,25 +1,25 @@
 terraform {
-  required_version = ">= 1.9.4"
+  required_version = ">=1.9.5"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.116.0"
+      version = "~>4.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.53.1"
+      version = "~>2.53"
     }
     local = {
       source  = "hashicorp/local"
-      version = "~>2.5.1"
+      version = "~>2.5"
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.4"
+      version = "~>3.4"
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>1.15.0"
+      version = "~>1.15"
     }
   }
   backend azurerm {
@@ -40,6 +40,7 @@ provider azurerm {
       force_delete                  = false
     }
   }
+  subscription_id     = module.global.subscriptionId
   storage_use_azuread = true
 }
 
@@ -105,7 +106,7 @@ data azurerm_user_assigned_identity studio {
 
 data azurerm_monitor_data_collection_endpoint studio {
   name                = module.global.monitor.name
-  resource_group_name = module.global.resourceGroupName
+  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
 }
 
 data azurerm_key_vault studio {

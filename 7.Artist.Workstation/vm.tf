@@ -209,7 +209,7 @@ resource azurerm_monitor_data_collection_rule_association workstation_linux {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && virtualMachine.extension.monitor.enable
   }
   target_resource_id          = azurerm_linux_virtual_machine.workstation[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }
 
 resource azurerm_windows_virtual_machine workstation {
@@ -296,5 +296,5 @@ resource azurerm_monitor_data_collection_rule_association workstation_windows {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && virtualMachine.extension.monitor.enable
   }
   target_resource_id          = azurerm_windows_virtual_machine.workstation[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }

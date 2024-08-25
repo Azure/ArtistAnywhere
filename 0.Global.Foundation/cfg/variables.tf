@@ -1,3 +1,7 @@
+variable subscriptionId {
+  default = "" # Set to your Azure subscription id
+}
+
 variable resourceLocation {
   default = {
     regionName = "SouthCentralUS" # Set from "az account list-locations --query [].name"
@@ -119,6 +123,10 @@ variable defender {
       }
     }
   }
+}
+
+output subscriptionId {
+  value = var.subscriptionId
 }
 
 output resourceLocation {

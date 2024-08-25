@@ -1,29 +1,29 @@
 terraform {
-  required_version = ">= 1.9.4"
+  required_version = ">=1.9.5"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.116.0"
+      version = "~>4.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.53.1"
+      version = "~>2.53"
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.4"
+      version = "~>3.4"
     }
     time = {
       source  = "hashicorp/time"
-      version = "~>0.12.0"
+      version = "~>0.12"
     }
     tls = {
       source  = "hashicorp/tls"
-      version = "~>4.0.5"
+      version = "~>4.0"
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>1.15.0"
+      version = "~>1.15"
     }
   }
 }
@@ -63,6 +63,7 @@ provider azurerm {
       purge_soft_deleted_workspace_on_destroy = true
     }
   }
+  subscription_id     = module.global.subscriptionId
   storage_use_azuread = true
 }
 

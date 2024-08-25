@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.9.4"
+  required_version = ">=1.9.5"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.116.0"
+      version = "~>4.0"
     }
   }
   backend azurerm {
@@ -27,6 +27,7 @@ provider azurerm {
       graceful_shutdown                     = false
     }
   }
+  subscription_id     = module.global.subscriptionId
   storage_use_azuread = true
 }
 
@@ -92,7 +93,7 @@ data azurerm_user_assigned_identity studio {
 
 data azurerm_monitor_data_collection_endpoint studio {
   name                = module.global.monitor.name
-  resource_group_name = module.global.resourceGroupName
+  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
 }
 
 data azurerm_key_vault studio {

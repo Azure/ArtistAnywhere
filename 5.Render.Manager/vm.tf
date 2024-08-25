@@ -85,10 +85,6 @@ locals {
         userPassword = virtualMachine.adminLogin.userPassword != "" ? virtualMachine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
         sshKeyPublic = virtualMachine.adminLogin.sshKeyPublic != "" ? virtualMachine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
       })
-      activeDirectory = merge(var.activeDirectory, {
-        adminUsername = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value
-        adminPassword = var.activeDirectory.adminPassword != "" ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password.value
-      })
     })
   ]
 }
@@ -207,7 +203,7 @@ resource azurerm_monitor_data_collection_rule_association job_manager_linux {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && virtualMachine.extension.monitor.enable
   }
   target_resource_id          = azurerm_linux_virtual_machine.job_manager[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }
 
 resource azurerm_windows_virtual_machine job_manager {
@@ -294,5 +290,5 @@ resource azurerm_monitor_data_collection_rule_association job_manager_windows {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && virtualMachine.extension.monitor.enable
   }
   target_resource_id          = azurerm_windows_virtual_machine.job_manager[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }

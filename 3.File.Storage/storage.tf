@@ -44,7 +44,6 @@ locals {
       storageAccountName    = storageAccount.name
     }) if storageAccount.enable
   ]
-  serviceEndpointSubnets = try(data.terraform_remote_state.network.outputs.virtualNetworksSubnetStorage, [])
   privateEndpoints = flatten([
     for storageAccount in local.storageAccounts : [
       for privateEndpointType in storageAccount.privateEndpointTypes : merge(storageAccount, {
@@ -125,10 +124,6 @@ resource azurerm_storage_account studio {
     default_action = "Deny"
     ip_rules = [
       jsondecode(data.http.client_address.response_body).ip
-    ]
-    virtual_network_subnet_ids = [
-      for serviceEndpointSubnet in local.serviceEndpointSubnets :
-        "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${serviceEndpointSubnet.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${serviceEndpointSubnet.virtualNetworkName}/subnets/${serviceEndpointSubnet.name}"
     ]
     dynamic private_link_access {
       for_each = module.global.defender.storage.malwareScanning.enable ? [1] : []

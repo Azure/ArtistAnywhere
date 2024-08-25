@@ -1,75 +1,96 @@
 resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
-######################################################################################################
-# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) #
-######################################################################################################
+#######################################################################################################
+# Weka (https://azuremarketplace.microsoft.com/marketplace/apps/weka1652213882079.weka_data_platform) #
+#######################################################################################################
 
-hammerspace = {
-  enable     = true
-  namePrefix = "xstudio-cache"
-  domainName = ""
-  metadata = {
-    machine = {
-      namePrefix = "-anvil"
-      size       = "Standard_E4as_v4"
-      count      = 2
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = true
+weka = {
+  enable   = false
+  version  = "4.3.4"
+  apiToken = ""
+  name = {
+    resource = "xstudio"
+    display  = "Azure Artist Anywhere"
+  }
+  machine = {
+    size  = "Standard_L8s_v3"
+    count = 6
+    image = {
+      resourceGroupName = "ArtistAnywhere.Image"
+      galleryName       = "xstudio"
+      definitionName    = "Linux"
+      versionId         = "0.0.0"
+      plan = {
+        publisher = ""
+        product   = ""
+        name      = ""
       }
-    }
-    network = {
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-    }
-    osDisk = {
-      storageType = "Standard_LRS"
-      cachingType = "ReadOnly"
-      sizeGB      = 128
-    }
-    dataDisk = {
-      storageType = "Standard_LRS"
-      cachingType = "None"
-      sizeGB      = 256
     }
   }
-  data = {
-    machine = {
-      namePrefix = "-dsx"
-      size       = "Standard_E32s_v3"
-      count      = 3
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = true
-      }
-    }
-    network = {
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-    }
-    osDisk = {
-      storageType = "Standard_LRS"
-      cachingType = "ReadOnly"
-      sizeGB      = 128
-    }
-    dataDisk = {
-      storageType = "Standard_LRS"
-      cachingType = "None"
-      enableRaid0 = false
-      sizeGB      = 256
-      count       = 2
+  adminLogin = {
+    userName     = ""
+    userPassword = ""
+    sshKeyPublic = ""
+    passwordAuth = {
+      disable = true
     }
   }
+  network = {
+    acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+      enable = true
+    }
+    dnsRecord = {
+      name    = "content"
+      ttlSeconds = 300
+    }
+  }
+  terminateNotification = {
+    enable       = true
+    delayTimeout = "PT15M"
+  }
+  objectTier = {
+    percent = 80
+    storage = {
+      accountName   = ""
+      accountKey    = ""
+      containerName = "weka"
+    }
+  }
+  fileSystem = {
+    name         = "default"
+    groupName    = "default"
+    autoScale    = false
+    authRequired = false
+    loadFiles    = false
+  }
+  osDisk = {
+    storageType = "Standard_LRS"
+    cachingType = "ReadOnly"
+    sizeGB      = 0
+  }
+  dataDisk = {
+    storageType = "Standard_LRS"
+    cachingType = "None"
+    sizeGB      = 256
+  }
+  dataProtection = {
+    stripeWidth = 3
+    parityLevel = 2
+    hotSpare    = 1
+  }
+  healthExtension = {
+    protocol    = "http"
+    port        = 14000
+    requestPath = "/ui"
+  }
+  license = {
+    key = ""
+    payGo = {
+      planId    = ""
+      secretKey = ""
+    }
+  }
+  supportUrl = ""
 }
 
 ##############################################################################
@@ -85,7 +106,7 @@ hammerspace = {
 #      Standard_8G - 12288, 24576, 49152  Read Write
 hpcCache = {
   enable     = false
-  name       = "xstudio-cache"
+  name       = "xstudio"
   throughput = "Standard_L4_5G"
   size       = 21623
   mtuSize    = 1500
@@ -103,7 +124,7 @@ hpcCache = {
 
 vfxtCache = {
   enable = false
-  name   = "xstudio-cache"
+  name   = "xstudio"
   cluster = {
     nodeSize      = 1024 # Set to either 1024 GB (1 TB) or 4096 GB (4 TB) nodes
     nodeCount     = 3    # Set to a minimum of 3 nodes up to a maximum of 12 nodes

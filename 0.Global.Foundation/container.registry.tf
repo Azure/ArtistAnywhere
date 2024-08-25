@@ -26,8 +26,7 @@ variable containerRegistry {
       enable = bool
     })
     retentionPolicy = object({
-      enable = bool
-      days  = number
+      days = number
     })
     agentPool = object({
       enable        = bool
@@ -56,6 +55,8 @@ resource azurerm_container_registry studio {
   data_endpoint_enabled     = var.containerRegistry.dataEndpoint.enable
   zone_redundancy_enabled   = var.containerRegistry.zoneRedundancy.enable
   quarantine_policy_enabled = var.containerRegistry.quarantinePolicy.enable
+  retention_policy_in_days  = var.containerRegistry.retentionPolicy.days
+  trust_policy_enabled      = var.containerRegistry.trustPolicy.enable
   anonymous_pull_enabled    = false
   identity {
     type = "UserAssigned"
@@ -69,13 +70,6 @@ resource azurerm_container_registry studio {
       action   = "Allow"
       ip_range = "${jsondecode(data.http.client_address.response_body).ip}/32"
     }
-  }
-  trust_policy {
-    enabled = var.containerRegistry.trustPolicy.enable
-  }
-  retention_policy {
-    enabled = var.containerRegistry.retentionPolicy.enable
-    days    = var.containerRegistry.retentionPolicy.days
   }
   dynamic encryption {
     for_each = var.containerRegistry.encryption.enable ? [1] : []

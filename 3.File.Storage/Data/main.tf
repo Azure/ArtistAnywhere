@@ -1,25 +1,25 @@
 terraform {
-  required_version = ">= 1.9.4"
+  required_version = ">=1.9.5"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.116.0"
+      version = "~>4.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.53.1"
+      version = "~>2.53"
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.4"
+      version = "~>3.4"
     }
     time = {
       source  = "hashicorp/time"
-      version = "~>0.12.0"
+      version = "~>0.12"
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>1.15.0"
+      version = "~>1.15"
     }
   }
   backend azurerm {
@@ -37,6 +37,7 @@ provider azurerm {
       restart_server_on_configuration_value_change = true
     }
   }
+  subscription_id     = module.global.subscriptionId
   storage_use_azuread = true
 }
 
@@ -201,8 +202,8 @@ data terraform_remote_state network {
 }
 
 data azurerm_virtual_network studio_region {
-  name                = data.terraform_remote_state.network.outputs.virtualNetworks[0].name
-  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
+  name                = data.terraform_remote_state.network.outputs.virtualNetworks[local.cosmosDBNetworkIndex].name
+  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[local.cosmosDBNetworkIndex].resourceGroupName
 }
 
 data azurerm_subnet data {
@@ -221,6 +222,12 @@ data azurerm_subnet data_cassandra {
   name                 = "DataCassandra"
   resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio_region.name
+}
+
+locals {
+  cosmosDBNetworkIndex = [
+    for i in range(length(data.terraform_remote_state.network.outputs.virtualNetworks)) : i if data.terraform_remote_state.network.outputs.virtualNetworks[i].regionName == var.cosmosDB.geoLocations[0].regionName
+  ][0]
 }
 
 resource azurerm_resource_group data {

@@ -259,7 +259,7 @@ resource azurerm_monitor_data_collection_rule_association farm_linux {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_linux_virtual_machine_scale_set.farm[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }
 
 resource azurerm_windows_virtual_machine_scale_set farm {
@@ -384,7 +384,7 @@ resource azurerm_monitor_data_collection_rule_association farm_windows {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_windows_virtual_machine_scale_set.farm[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }
 
 resource azurerm_orchestrated_virtual_machine_scale_set farm {
@@ -533,5 +533,5 @@ resource azurerm_monitor_data_collection_rule_association farm {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.farm[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio[0].id
+  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }

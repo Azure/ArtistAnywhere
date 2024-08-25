@@ -86,6 +86,7 @@ resource azurerm_synapse_sql_pool studio {
   name                 = each.value.name
   synapse_workspace_id = azurerm_synapse_workspace.studio[0].id
   sku_name             = each.value.size
+  storage_account_type = "LRS"
 }
 
 resource azurerm_synapse_spark_pool studio {

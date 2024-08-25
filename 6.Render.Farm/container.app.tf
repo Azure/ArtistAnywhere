@@ -20,7 +20,7 @@ resource azurerm_container_app_environment studio {
   name                           = var.containerApp.environment.name
   resource_group_name            = azurerm_resource_group.farm.name
   location                       = azurerm_resource_group.farm.location
-  log_analytics_workspace_id     = data.azurerm_log_analytics_workspace.studio[0].id
+  log_analytics_workspace_id     = data.azurerm_log_analytics_workspace.studio.id
   infrastructure_subnet_id       = "${data.azurerm_virtual_network.studio_region.id}/subnets/Farm"
   internal_load_balancer_enabled = false
   zone_redundancy_enabled        = false

@@ -104,19 +104,9 @@ cosmosDB = {
   geoLocations = [
     {
       enable     = true
-      regionName = "SouthCentralUS"
-      failover = {
-        priority = 0
-      }
-      zoneRedundant = {
-        enable = false
-      }
-    },
-    {
-      enable     = false
       regionName = "WestUS"
       failover = {
-        priority = 1
+        priority = 0
       }
       zoneRedundant = {
         enable = false

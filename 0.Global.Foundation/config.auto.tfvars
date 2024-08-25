@@ -136,8 +136,7 @@ containerRegistry = {
     enable = false
   }
   retentionPolicy = {
-    enable = false
-    days   = 7
+    days = 7
   }
   agentPool = {
     enable        = false

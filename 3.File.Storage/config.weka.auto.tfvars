@@ -4,6 +4,7 @@
 
 weka = {
   enable   = false
+  version  = "4.3.4"
   apiToken = ""
   name = {
     resource = "xstudio"

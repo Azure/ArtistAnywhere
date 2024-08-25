@@ -10,7 +10,7 @@ netAppFiles = {
       enable  = false
       name    = "CapacityPool"
       tier    = "Standard"
-      sizeTiB = 2
+      sizeTiB = 1
       volumes = [
         {
           enable    = false
@@ -43,7 +43,7 @@ netAppFiles = {
           enable    = false
           name      = "Volume2"
           tier      = "Standard"
-          sizeGiB   = 1948
+          sizeGiB   = 924
           mountPath = "volume2"
           network = {
             features = "Standard"

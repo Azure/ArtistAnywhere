@@ -1,21 +1,21 @@
 terraform {
-  required_version = ">= 1.9.4"
+  required_version = ">=1.9.5"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.116.0"
+      version = "~>4.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.53.1"
+      version = "~>2.53"
     }
     avere = {
       source  = "hashicorp/avere"
-      version = "~>1.3.3"
+      version = "~>1.3"
     }
     time = {
       source  = "hashicorp/time"
-      version = "~>0.12.0"
+      version = "~>0.12"
     }
   }
   backend azurerm {
@@ -39,6 +39,7 @@ provider azurerm {
       graceful_shutdown                     = false
     }
   }
+  subscription_id     = module.global.subscriptionId
   storage_use_azuread = true
 }
 
@@ -115,6 +116,11 @@ data azurerm_key_vault_secret admin_password {
 
 data azurerm_key_vault_secret ssh_key_public {
   name         = module.global.keyVault.secretName.sshKeyPublic
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_key data_encryption {
+  name         = module.global.keyVault.keyName.dataEncryption
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
