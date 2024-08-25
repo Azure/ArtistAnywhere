@@ -70,9 +70,18 @@ resource azurerm_app_configuration_key nvidia_optix_version {
   ]
 }
 
-resource azurerm_app_configuration_key artist_agent_version {
+resource azurerm_app_configuration_key az_blob_nfs_mount_version {
   configuration_store_id = local.appConfigStoreId
-  key                    = module.global.appConfig.key.artistAgentVersion
+  key                    = module.global.appConfig.key.azBlobNFSMountVersion
+  value                  = "2.0.9"
+  depends_on = [
+    azurerm_app_configuration.studio
+  ]
+}
+
+resource azurerm_app_configuration_key hp_anyware_agent_version {
+  configuration_store_id = local.appConfigStoreId
+  key                    = module.global.appConfig.key.hpAnywareAgentVersion
   value                  = "24.07.3"
   depends_on = [
     azurerm_app_configuration.studio
@@ -100,7 +109,7 @@ resource azurerm_app_configuration_key job_processor_pbrt_version {
 resource azurerm_app_configuration_key job_processor_blender_version {
   configuration_store_id = local.appConfigStoreId
   key                    = module.global.appConfig.key.jobProcessorBlenderVersion
-  value                  = "4.2.0"
+  value                  = "4.2.1"
   depends_on = [
     azurerm_app_configuration.studio
   ]

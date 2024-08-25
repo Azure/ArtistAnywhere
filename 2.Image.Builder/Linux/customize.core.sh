@@ -4,19 +4,6 @@ echo "Customize (Start): Core"
 
 source /tmp/functions.sh
 
-echo "Customize (Start): Image Build Parameters"
-dnf -y install jq
-buildConfig=$(echo $buildConfigEncoded | base64 -d)
-machineType=$(echo $buildConfig | jq -r .machineType)
-gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
-binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
-binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
-jobProcessors=$(echo $buildConfig | jq -c .jobProcessors)
-echo "Machine Type: $machineType"
-echo "GPU Provider: $gpuProvider"
-echo "Job Processors: $jobProcessors"
-echo "Customize (End): Image Build Parameters"
-
 echo "Customize (Start): Image Build Platform"
 # systemctl --now disable firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
@@ -26,7 +13,8 @@ curl -o $installFile -L $downloadUrl
 rpm -i $installFile
 dnf -y install gcc gcc-c++ perl cmake git docker python3-devel
 export AZNFS_NONINTERACTIVE_INSTALL=1
-curl -L https://github.com/Azure/AZNFS-mount/releases/download/2.0.4/aznfs_install.sh | bash
+versionPath=$(echo $buildConfig | jq -r .versionPath.azBlobNFSMount)
+curl -L https://github.com/Azure/AZNFS-mount/releases/download/$versionPath/aznfs_install.sh | bash
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): Image Build Platform (Workstation)"
   dnf -y group install workstation
@@ -96,7 +84,7 @@ fi
 
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): HP Anyware"
-  versionPath=$(echo $buildConfig | jq -r .versionPath.artistAgent)
+  versionPath=$(echo $buildConfig | jq -r .versionPath.hpAnywareAgent)
   [ "$gpuProvider" == "" ] && processType="pcoip-agent-standard" || processType="pcoip-agent-graphics"
   installFile="pcoip-agent-offline-rocky9.4_$versionPath-1.el9.x86_64.tar"
   downloadUrl="$binStorageHost/Teradici/$versionPath/$installFile$binStorageAuth"

@@ -85,7 +85,8 @@ variable appConfig {
     key = {
       nvidiaCUDAVersion          = "NVIDIA/CUDA/Version"
       nvidiaOptiXVersion         = "NVIDIA/OptiX/Version"
-      artistAgentVersion         = "Artist/Agent/Version"
+      azBlobNFSMountVersion      = "Azure/Blob/NFSMount/Version"
+      hpAnywareAgentVersion      = "HP/Anyware/Agent/Version"
       jobManagerVersion          = "Job/Manager/Version"
       jobProcessorPBRTVersion    = "Job/Processor/PBRT/Version"
       jobProcessorBlenderVersion = "Job/Processor/Blender/Version"

@@ -5,6 +5,19 @@ cd $binDirectory
 aaaProfile="/etc/profile.d/aaa.sh"
 touch $aaaProfile
 
+echo "Customize (Start): Image Build Parameters"
+dnf -y install jq
+buildConfig=$(echo $buildConfigEncoded | base64 -d)
+machineType=$(echo $buildConfig | jq -r .machineType)
+gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
+binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
+binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
+jobProcessors=$(echo $buildConfig | jq -c .jobProcessors)
+echo "Machine Type: $machineType"
+echo "GPU Provider: $gpuProvider"
+echo "Job Processors: $jobProcessors"
+echo "Customize (End): Image Build Parameters"
+
 function RunProcess {
   exitStatus=-1
   retryCount=0

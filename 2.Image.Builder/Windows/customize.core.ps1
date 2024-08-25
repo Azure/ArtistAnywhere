@@ -17,19 +17,6 @@ if ($partitionSizeActive + 1000000 -lt $partitionSizeRange.SizeMax) {
 }
 Write-Host "Customize (End): Resize OS Disk"
 
-Write-Host "Customize (Start): Image Build Parameters"
-$buildConfigBytes = [System.Convert]::FromBase64String($buildConfigEncoded)
-$buildConfig = [System.Text.Encoding]::UTF8.GetString($buildConfigBytes) | ConvertFrom-Json
-$machineType = $buildConfig.machineType
-$gpuProvider = $buildConfig.gpuProvider
-$binStorageHost = $buildConfig.binStorage.host
-$binStorageAuth = $buildConfig.binStorage.auth
-$jobProcessors = $buildConfig.jobProcessors
-Write-Host "Machine Type: $machineType"
-Write-Host "GPU Provider: $gpuProvider"
-Write-Host "Job Processors: $jobProcessors"
-Write-Host "Customize (End): Image Build Parameters"
-
 Write-Host "Customize (Start): Image Build Platform"
 netsh advfirewall set allprofiles state off
 
@@ -154,7 +141,7 @@ if ($machineType -eq "Farm") {
 
 if ($machineType -eq "Workstation") {
   Write-Host "Customize (Start): HP Anyware"
-  $versionPath = $buildConfig.versionPath.artistAgent
+  $versionPath = $buildConfig.versionPath.hpAnywareAgent
   $processType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
   $installFile = "${processType}_$versionPath.exe"
   $downloadUrl = "$binStorageHost/Teradici/$versionPath/$installFile$binStorageAuth"
