@@ -7,7 +7,7 @@ source /tmp/functions.sh
 echo "Customize (Start): Image Build Platform"
 # systemctl --now disable firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-dnf -y install gcc gcc-c++ perl cmake git docker bison flex python3-devel openssl-devel elfutils-libelf-devel
+dnf -y install epel-release gcc gcc-c++ perl cmake git docker bison flex python3-devel openssl-devel elfutils-libelf-devel
 installFile="kernel-devel-5.14.0-362.8.1.el9_3.x86_64.rpm"
 downloadUrl="https://download.rockylinux.org/vault/rocky/9.3/devel/x86_64/os/Packages/k/$installFile"
 curl -o $installFile -L $downloadUrl
@@ -17,8 +17,9 @@ versionPath=$(echo $buildConfig | jq -r .versionPath.azBlobNFSMount)
 curl -L https://github.com/Azure/AZNFS-mount/releases/download/$versionPath/aznfs_install.sh | bash
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): Image Build Platform (Workstation)"
-  dnf -y module install nodejs
   dnf -y group install workstation
+  dnf -y module enable nodejs:20
+  dnf -y module install nodejs
   echo "Customize (End): Image Build Platform (Workstation)"
 fi
 echo "Customize (End): Image Build Platform"
@@ -26,7 +27,7 @@ echo "Customize (End): Image Build Platform"
 if [ $machineType == Storage ]; then
   echo "Customize (Start): NVIDIA OFED"
   processType="mellanox-ofed"
-  installFile="MLNX_OFED_LINUX-24.04-0.7.0.0-rhel9.3-x86_64.tgz"
+  installFile="MLNX_OFED_LINUX-24.07-0.6.1.0-rhel9.3-x86_64.tgz"
   downloadUrl="$binStorageHost/NVIDIA/OFED/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xzf $installFile
@@ -86,7 +87,7 @@ if [ $machineType == Workstation ]; then
   echo "Customize (Start): HP Anyware"
   versionPath=$(echo $buildConfig | jq -r .versionPath.hpAnywareAgent)
   [ "$gpuProvider" == "" ] && processType="pcoip-agent-standard" || processType="pcoip-agent-graphics"
-  installFile="pcoip-agent-offline-rocky9.4_$versionPath-1.el9.x86_64.tar"
+  installFile="pcoip-agent-offline-rocky9.4_$versionPath-1.el9.x86_64.tar.gz"
   downloadUrl="$binStorageHost/Teradici/$versionPath/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   mkdir -p $processType

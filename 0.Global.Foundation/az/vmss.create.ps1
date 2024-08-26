@@ -17,7 +17,7 @@ $virtualNetwork = @{
 }
 $virtualMachine = @{
   name    = if ($osTypeWindows) {"WinFarmC"} else {"LnxFarmC"}
-  size    = "Standard_D64s_v4" # "Standard_HB176rs_v4"
+  size    = "Standard_HB176rs_v4"
   count   = 2
   imageId = if ($osTypeWindows) {"MicrosoftWindowsDesktop:Windows-10:Win10-22H2-Ent-G2:Latest"} else {"RESF:RockyLinux-x86_64:9-LVM:9.3.20231113"}
   adminLogin = @{
@@ -26,7 +26,7 @@ $virtualMachine = @{
     sshKeyPublic = az keyvault secret show --vault-name "xstudio" --name "SSHKeyPublic" --query value
   }
   osDisk = @{
-    sizeGB  = 480
+    sizeGB  = 1024
     caching = "ReadOnly"
     ephemeral = @{
       enable    = $false

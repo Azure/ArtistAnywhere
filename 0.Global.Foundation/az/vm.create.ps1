@@ -27,7 +27,7 @@ $virtualMachine = @{
   }
   dataDisk = @{
     count   = 1
-    sizeGB  = 512
+    sizeGB  = 1024
     caching = "None"
     type    = "Standard_LRS"
   }
@@ -105,7 +105,7 @@ $virtualMachine = @{
     sshKeyPublic = az keyvault secret show --vault-name "xstudio" --name "SSHKeyPublic" --query value
   }
   osDisk = @{
-    sizeGB  = 480
+    sizeGB  = 1024
     caching = "ReadOnly"
     ephemeral = @{
       enable    = $true
@@ -154,7 +154,7 @@ $virtualMachine = @{
     sshKeyPublic = az keyvault secret show --vault-name "xstudio" --name "SSHKeyPublic" --query value
   }
   osDisk = @{
-    sizeGB  = 512
+    sizeGB  = 1024
     caching = "ReadOnly"
   }
   hibernation = @{
