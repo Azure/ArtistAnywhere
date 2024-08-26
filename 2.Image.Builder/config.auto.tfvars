@@ -427,7 +427,13 @@ imageBuilder = {
   ]
 }
 
-binStorage = { # Required for image build customization
+imageCustomize = { # Enables or disables image build customization scripts
+  core         = true
+  jobManager   = true
+  jobProcessor = true
+}
+
+binStorage = { # Required for image build customization script access
   host = ""
   auth = ""
 }

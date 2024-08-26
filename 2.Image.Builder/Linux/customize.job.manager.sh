@@ -26,58 +26,56 @@ if [ $machineType != Storage ]; then
   echo "Customize (End): Deadline Download"
 
   if [ $machineType == JobManager ]; then
-    if [ $enableCosmosDB != true ]; then
-      echo "Customize (Start): Mongo DB Service"
-      if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
-        echo never > /sys/kernel/mm/transparent_hugepage/enabled
-      fi
-      repoPath="/etc/yum.repos.d/mongodb.repo"
-      echo "[mongodb-org-5.0]" > $repoPath
-      echo "name=MongoDB" >> $repoPath
-      echo "baseurl=https://repo.mongodb.org/yum/redhat/8/mongodb-org/5.0/x86_64/" >> $repoPath
-      echo "gpgcheck=1" >> $repoPath
-      echo "enabled=1" >> $repoPath
-      echo "gpgkey=https://www.mongodb.org/static/pgp/server-5.0.asc" >> $repoPath
-      dnf -y install mongodb-org
-      configFile="/etc/mongod.conf"
-      sed -i "s/bindIp: 127.0.0.1/bindIp: 0.0.0.0/" $configFile
-      sed -i "/bindIp: 0.0.0.0/a\  tls:" $configFile
-      sed -i "/tls:/a\    mode: disabled" $configFile
-      systemctl --now enable mongod
-      echo "Customize (End): Mongo DB Service"
-
-      echo "Customize (Start): Mongo DB Users"
-      processType="mongo-create-admin-user"
-      mongoScript="$processType.js"
-      echo "use admin" > $mongoScript
-      echo "db.createUser({" >> $mongoScript
-      echo "  user: \"$adminUsername\"," >> $mongoScript
-      echo "  pwd: \"$adminPassword\"," >> $mongoScript
-      echo "  roles: [" >> $mongoScript
-      echo "    { role: \"userAdminAnyDatabase\", db: \"admin\" }," >> $mongoScript
-      echo "    { role: \"readWriteAnyDatabase\", db: \"admin\" }" >> $mongoScript
-      echo "  ]" >> $mongoScript
-      echo "})" >> $mongoScript
-      RunProcess "mongosh $mongoScript" $binDirectory/$processType
-
-      # sed -i "s/#security:/security:/" $configFile
-      # sed -i "/security:/a\  authorization: enabled" $configFile
-      # systemctl restart mongod
-
-      processType="mongo-create-database-user"
-      mongoScript="$processType.js"
-      echo "db = db.getSiblingDB(\"$databaseName\");" > $mongoScript
-      echo "db.createUser({" >> $mongoScript
-      echo "  user: \"$serviceUsername\"," >> $mongoScript
-      echo "  pwd: \"$servicePassword\"," >> $mongoScript
-      echo "  roles: [" >> $mongoScript
-      echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $mongoScript
-      echo "  ]" >> $mongoScript
-      echo "})" >> $mongoScript
-      # RunProcess "mongosh --authenticationDatabase admin -u $adminUsername -p $adminPassword $mongoScript" $binDirectory/$processType
-      RunProcess "mongosh $mongoScript" $binDirectory/$processType
-      echo "Customize (End): Mongo DB Users"
+    echo "Customize (Start): Mongo DB Service"
+    if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+      echo never > /sys/kernel/mm/transparent_hugepage/enabled
     fi
+    repoPath="/etc/yum.repos.d/mongodb.repo"
+    echo "[mongodb-org-5.0]" > $repoPath
+    echo "name=MongoDB" >> $repoPath
+    echo "baseurl=https://repo.mongodb.org/yum/redhat/8/mongodb-org/5.0/x86_64/" >> $repoPath
+    echo "gpgcheck=1" >> $repoPath
+    echo "enabled=1" >> $repoPath
+    echo "gpgkey=https://www.mongodb.org/static/pgp/server-5.0.asc" >> $repoPath
+    dnf -y install mongodb-org
+    configFile="/etc/mongod.conf"
+    sed -i "s/bindIp: 127.0.0.1/bindIp: 0.0.0.0/" $configFile
+    sed -i "/bindIp: 0.0.0.0/a\  tls:" $configFile
+    sed -i "/tls:/a\    mode: disabled" $configFile
+    systemctl --now enable mongod
+    echo "Customize (End): Mongo DB Service"
+
+    echo "Customize (Start): Mongo DB Users"
+    processType="mongo-create-admin-user"
+    mongoScript="$processType.js"
+    echo "use admin" > $mongoScript
+    echo "db.createUser({" >> $mongoScript
+    echo "  user: \"$adminUsername\"," >> $mongoScript
+    echo "  pwd: \"$adminPassword\"," >> $mongoScript
+    echo "  roles: [" >> $mongoScript
+    echo "    { role: \"userAdminAnyDatabase\", db: \"admin\" }," >> $mongoScript
+    echo "    { role: \"readWriteAnyDatabase\", db: \"admin\" }" >> $mongoScript
+    echo "  ]" >> $mongoScript
+    echo "})" >> $mongoScript
+    RunProcess "mongosh $mongoScript" $binDirectory/$processType
+
+    # sed -i "s/#security:/security:/" $configFile
+    # sed -i "/security:/a\  authorization: enabled" $configFile
+    # systemctl restart mongod
+
+    processType="mongo-create-database-user"
+    mongoScript="$processType.js"
+    echo "db = db.getSiblingDB(\"$databaseName\");" > $mongoScript
+    echo "db.createUser({" >> $mongoScript
+    echo "  user: \"$serviceUsername\"," >> $mongoScript
+    echo "  pwd: \"$servicePassword\"," >> $mongoScript
+    echo "  roles: [" >> $mongoScript
+    echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $mongoScript
+    echo "  ]" >> $mongoScript
+    echo "})" >> $mongoScript
+    # RunProcess "mongosh --authenticationDatabase admin -u $adminUsername -p $adminPassword $mongoScript" $binDirectory/$processType
+    RunProcess "mongosh $mongoScript" $binDirectory/$processType
+    echo "Customize (End): Mongo DB Users"
 
     echo "Customize (Start): Deadline Server"
     processType="deadline-repository"

@@ -36,6 +36,14 @@ variable imageBuilder {
   })
 }
 
+variable imageCustomize {
+  type = object({
+    core         = bool
+    jobManager   = bool
+    jobProcessor = bool
+  })
+}
+
 variable binStorage {
   type = object({
     host = string
@@ -172,9 +180,15 @@ resource azapi_resource linux {
           {
             type = "Shell"
             inline = [
-              "cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))} /bin/bash",
-              "cat /tmp/customize.job.manager.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))} /bin/bash",
-              "cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))} /bin/bash"
+              "if [ ${var.imageCustomize.core} == true ]; then",
+              "  cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))} /bin/bash",
+              "fi",
+              "if [ ${var.imageCustomize.jobManager} == true ]; then",
+              "  cat /tmp/customize.job.manager.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))} /bin/bash",
+              "fi",
+              "if [ ${var.imageCustomize.jobProcessor} == true ]; then",
+              "  cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))} /bin/bash",
+              "fi"
             ]
           }
         ]
@@ -286,10 +300,7 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "Rename-Computer -NewName ${each.value.name}",
-              "dism /Online /NoRestart /Enable-Feature /FeatureName:VirtualMachinePlatform /All",
-              "dism /Online /NoRestart /Enable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /All",
-              "exit 0"
+              "Rename-Computer -NewName ${each.value.name}"
             ]
           },
           {
@@ -298,9 +309,15 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))}",
-              "C:\\AzureData\\customize.job.manager.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))}",
-              "C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))}"
+              "if ('${var.imageCustomize.core}' -eq $true) {",
+              "  C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))}",
+              "}",
+              "if ('${var.imageCustomize.jobManager}' -eq $true) {",
+              "  C:\\AzureData\\customize.job.manager.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))}",
+              "}",
+              "if ('${var.imageCustomize.jobProcessor}' -eq $true) {",
+              "  C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))}",
+              "}"
             ]
             runElevated = true
             runAsSystem = true
