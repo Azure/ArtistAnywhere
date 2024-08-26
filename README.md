@@ -36,8 +36,8 @@ For each module, here is the recommended configuration and deployment process.
    * In module `0 Global Foundation`, review and edit the following required config files.<br/>For example, your Azure subscription id must be set in /cfg/variables.tf
       * `/cfg/variables.tf`
       * `/cfg/backend.config`
-   * In modules `2 Image Builder`, `5 Render Manager` and `7 Artist Workstation`, make sure you have sufficient **Standard** compute cores quota available on your Azure subscription for each configured virtual machine type / size.
-   * In module `6 Render Farm`, make sure you have sufficient [Spot](https://learn.microsoft.com/azure/virtual-machines/spot-vms) compute cores quota available on your Azure subscription for each configured virtual machine type / size.
+   * In modules `2 Image Builder`, `5 Render Manager` and `7 Artist Workstation`, make sure you have sufficient **Standard** compute cores quota available on your Azure subscription for each configured virtual machine type / size in your target region.
+   * In module `6 Render Farm`, make sure you have sufficient [Spot](https://learn.microsoft.com/azure/virtual-machines/spot-vms) compute cores quota available on your Azure subscription for each configured virtual machine type / size in your target region.
    * In modules `5 Render Manager`, `6 Render Farm` and `7 Artist Workstation`, make sure each **image** config references the correct [Compute Gallery](https://learn.microsoft.com/azure/virtual-machines/shared-image-galleries) custom image in your Azure subscription.
 1. In module `0 Global Foundation`, run `terraform init` to initialize the module local directory (append `-upgrade` if older providers are detected).
 1. In all modules except `0 Global Foundation`, run `terraform init -backend-config ../0.Global.Foundation/cfg/backend.config` to initialize the module local directory (append `-upgrade` if older providers are detected).
