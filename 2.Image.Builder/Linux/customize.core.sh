@@ -8,7 +8,7 @@ echo "Customize (Start): Image Build Platform"
 # systemctl --now disable firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
 installFile="kernel-devel-5.14.0-362.8.1.el9_3.x86_64.rpm"
-downloadUrl="https://download.rockylinux.org/vault/rocky/9.3/BaseOS/x86_64/os/Packages/k/$installFile"
+downloadUrl="https://download.rockylinux.org/vault/rocky/9.3/devel/x86_64/os/Packages/k/$installFile"
 curl -o $installFile -L $downloadUrl
 rpm -i $installFile
 dnf -y install gcc gcc-c++ perl cmake git docker python3-devel
