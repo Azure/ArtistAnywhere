@@ -103,8 +103,7 @@ variable appConfig {
 
 variable monitor {
   default = {
-    enable = true
-    name   = "xstudio"
+    name = "xstudio"
   }
 }
 
