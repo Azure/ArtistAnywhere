@@ -13,6 +13,10 @@ $gpuProvider = $buildConfig.gpuProvider
 $binStorageHost = $buildConfig.binStorage.host
 $binStorageAuth = $buildConfig.binStorage.auth
 $jobProcessors = $buildConfig.jobProcessors
+$adminUsername = $buildConfig.authCredential.adminUsername
+$adminPassword = $buildConfig.authCredential.adminPassword
+$serviceUsername = $buildConfig.authCredential.serviceUsername
+$servicePassword = $buildConfig.authCredential.servicePassword
 Write-Host "Machine Type: $machineType"
 Write-Host "GPU Provider: $gpuProvider"
 Write-Host "Job Processors: $jobProcessors"

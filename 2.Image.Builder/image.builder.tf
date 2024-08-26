@@ -65,6 +65,12 @@ locals {
     jobProcessorPBRT    = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobProcessorPBRTVersion])
     jobProcessorBlender = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobProcessorBlenderVersion])
   }
+  authCredential = {
+    adminUsername   = data.azurerm_key_vault_secret.admin_username.value
+    adminPassword   = data.azurerm_key_vault_secret.admin_password.value
+    serviceUsername = data.azurerm_key_vault_secret.service_username.value
+    servicePassword = data.azurerm_key_vault_secret.service_password.value
+  }
 }
 
 resource azurerm_role_assignment managed_identity_operator {
@@ -181,13 +187,13 @@ resource azapi_resource linux {
             type = "Shell"
             inline = [
               "if [ ${var.imageCustomize.core} == true ]; then",
-              "  cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))} /bin/bash",
+              "  cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))} /bin/bash",
               "fi",
               "if [ ${var.imageCustomize.jobManager} == true ]; then",
-              "  cat /tmp/customize.job.manager.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))} /bin/bash",
+              "  cat /tmp/customize.job.manager.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))} /bin/bash",
               "fi",
               "if [ ${var.imageCustomize.jobProcessor} == true ]; then",
-              "  cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))} /bin/bash",
+              "  cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))} /bin/bash",
               "fi"
             ]
           }
@@ -310,13 +316,13 @@ resource azapi_resource windows {
             type = "PowerShell"
             inline = [
               "if ('${var.imageCustomize.core}' -eq $true) {",
-              "  C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))}",
+              "  C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))}",
               "}",
               "if ('${var.imageCustomize.jobManager}' -eq $true) {",
-              "  C:\\AzureData\\customize.job.manager.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))}",
+              "  C:\\AzureData\\customize.job.manager.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))}",
               "}",
               "if ('${var.imageCustomize.jobProcessor}' -eq $true) {",
-              "  C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {binStorage = var.binStorage})))}",
+              "  C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))}",
               "}"
             ]
             runElevated = true

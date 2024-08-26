@@ -50,28 +50,6 @@ computeGallery = {
       sku        = "Win11-23H2-Ent"
     }
   ]
-  appDefinitions = [
-    {
-      name = "LnxPBRT"
-      type = "Linux"
-    },
-    {
-      name = "LnxBlender"
-      type = "Linux"
-    },
-    {
-      name = "WinPBRT"
-      type = "Windows"
-    },
-    {
-      name = "WinBlender"
-      type = "Windows"
-    },
-    {
-      name = "WinUnreal"
-      type = "Windows"
-    }
-  ]
 }
 
 #############################################################################################

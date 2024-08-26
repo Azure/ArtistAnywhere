@@ -23,10 +23,6 @@ variable computeGallery {
       offer      = string
       sku        = string
     }))
-    appDefinitions = list(object({
-      name = string
-      type = string
-    }))
   })
 }
 
@@ -57,16 +53,6 @@ resource azurerm_shared_image studio {
     offer     = each.value.offer
     sku       = each.value.sku
   }
-}
-
-resource azurerm_gallery_application studio {
-  for_each = {
-    for appDefinition in var.computeGallery.appDefinitions : appDefinition.name => appDefinition if (var.computeGallery.platform.linux.enable && lower(appDefinition.type) == "linux") || (var.computeGallery.platform.windows.enable && lower(appDefinition.type) == "windows")
-  }
-  name              = each.value.name
-  location          = azurerm_resource_group.image.location
-  gallery_id        = azurerm_shared_image_gallery.studio.id
-  supported_os_type = each.value.type
 }
 
 output linuxPlan {
