@@ -13,10 +13,10 @@ gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
 binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
 binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
 jobProcessors=$(echo $buildConfig | jq -c .jobProcessors)
-adminUsername=$(echo $buildConfig | jq -c .authCredential.adminUsername)
-adminPassword=$(echo $buildConfig | jq -c .authCredential.adminPassword)
-serviceUsername=$(echo $buildConfig | jq -c .authCredential.serviceUsername)
-servicePassword=$(echo $buildConfig | jq -c .authCredential.servicePassword)
+adminUsername=$(echo $buildConfig | jq -r .authCredential.adminUsername)
+adminPassword=$(echo $buildConfig | jq -r .authCredential.adminPassword)
+serviceUsername=$(echo $buildConfig | jq -r .authCredential.serviceUsername)
+servicePassword=$(echo $buildConfig | jq -r .authCredential.servicePassword)
 echo "Machine Type: $machineType"
 echo "GPU Provider: $gpuProvider"
 echo "Job Processors: $jobProcessors"
