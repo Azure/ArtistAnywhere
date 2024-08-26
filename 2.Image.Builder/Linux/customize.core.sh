@@ -7,18 +7,18 @@ source /tmp/functions.sh
 echo "Customize (Start): Image Build Platform"
 # systemctl --now disable firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+dnf -y install gcc gcc-c++ perl cmake git docker bison flex python3-devel openssl-devel elfutils-libelf-devel
 installFile="kernel-devel-5.14.0-362.8.1.el9_3.x86_64.rpm"
 downloadUrl="https://download.rockylinux.org/vault/rocky/9.3/devel/x86_64/os/Packages/k/$installFile"
 curl -o $installFile -L $downloadUrl
 rpm -i $installFile
-dnf -y install gcc gcc-c++ perl cmake git docker python3-devel
 export AZNFS_NONINTERACTIVE_INSTALL=1
 versionPath=$(echo $buildConfig | jq -r .versionPath.azBlobNFSMount)
 curl -L https://github.com/Azure/AZNFS-mount/releases/download/$versionPath/aznfs_install.sh | bash
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): Image Build Platform (Workstation)"
-  dnf -y group install workstation
   dnf -y module install nodejs
+  dnf -y group install workstation
   echo "Customize (End): Image Build Platform (Workstation)"
 fi
 echo "Customize (End): Image Build Platform"
