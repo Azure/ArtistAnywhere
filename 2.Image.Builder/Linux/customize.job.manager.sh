@@ -32,7 +32,7 @@ if [ $machineType != Storage ]; then
     if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
       echo never > /sys/kernel/mm/transparent_hugepage/enabled
     fi
-    repoPath="/etc/yum.repos.d/mongodb.repo"
+    repoPath="/etc/yum.repos.d/mongodb-org-5.0.repo"
     echo "[mongodb-org-5.0]" > $repoPath
     echo "name=MongoDB" >> $repoPath
     echo "baseurl=https://repo.mongodb.org/yum/redhat/9/mongodb-org/5.0/x86_64/" >> $repoPath
