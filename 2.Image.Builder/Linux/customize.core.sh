@@ -7,11 +7,7 @@ source /tmp/functions.sh
 echo "Customize (Start): Image Build Platform"
 # systemctl --now disable firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-dnf -y install epel-release gcc gcc-c++ perl cmake git docker bison flex python3-devel openssl-devel elfutils-libelf-devel
-installFile="kernel-devel-5.14.0-362.8.1.el9_3.x86_64.rpm"
-downloadUrl="https://download.rockylinux.org/vault/rocky/9.3/devel/x86_64/os/Packages/k/$installFile"
-curl -o $installFile -L $downloadUrl
-rpm -i $installFile
+dnf -y install epel-release python3-devel gcc gcc-c++ perl cmake git docker
 export AZNFS_NONINTERACTIVE_INSTALL=1
 versionPath=$(echo $buildConfig | jq -r .versionPath.azBlobNFSMount)
 curl -L https://github.com/Azure/AZNFS-mount/releases/download/$versionPath/aznfs_install.sh | bash
@@ -36,6 +32,16 @@ if [ $machineType == Storage ]; then
   echo "Customize (End): NVIDIA OFED"
 fi
 
+if [ "$gpuProvider" != "" ]; then
+  echo "Customize (Start): Linux Kernel Dev"
+  dnf -y install elfutils-libelf-devel openssl-devel bison flex
+  installFile="kernel-devel-5.14.0-362.8.1.el9_3.x86_64.rpm"
+  downloadUrl="https://download.rockylinux.org/vault/rocky/9.3/devel/x86_64/os/Packages/k/$installFile"
+  curl -o $installFile -L $downloadUrl
+  rpm -i $installFile
+  echo "Customize (End): Linux Kernel Dev"
+fi
+
 if [ "$gpuProvider" == NVIDIA ]; then
   echo "Customize (Start): NVIDIA GPU (GRID)"
   processType="nvidia-gpu-grid"
@@ -43,7 +49,7 @@ if [ "$gpuProvider" == NVIDIA ]; then
   downloadUrl="https://go.microsoft.com/fwlink/?linkid=874272"
   curl -o $installFile -L $downloadUrl
   chmod +x $installFile
-  dnf -y install mesa-vulkan-drivers libglvnd-devel
+  dnf -y install libglvnd-devel mesa-vulkan-drivers
   RunProcess "./$installFile --silent" $binDirectory/$processType
   echo "Customize (End): NVIDIA GPU (GRID)"
 
@@ -64,11 +70,11 @@ if [ "$gpuProvider" == NVIDIA ]; then
   RunProcess "./$installFile --skip-license --prefix=$installPath" $binDirectory/$processType-1
   buildDirectory="$installPath/build"
   mkdir -p $buildDirectory
-  dnf -y install mesa-libGL
-  dnf -y install mesa-libGL-devel
   dnf -y install libXrandr-devel
-  dnf -y install libXinerama-devel
   dnf -y install libXcursor-devel
+  dnf -y install libXinerama-devel
+  dnf -y install mesa-libGL-devel
+  dnf -y install mesa-libGL
   RunProcess "cmake -B $buildDirectory -S $installPath/SDK" $binDirectory/$processType-2
   RunProcess "make -C $buildDirectory" $binDirectory/$processType-3
   binPaths="$binPaths:$buildDirectory/bin"
