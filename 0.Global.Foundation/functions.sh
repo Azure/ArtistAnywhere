@@ -27,15 +27,19 @@ function RunProcess {
   retryCount=0
   command="$1"
   logFile=$2
+  sleep=$3
   while [[ $exitStatus && $retryCount -lt 3 ]]; do
     $command 1> $logFile.out 2> $logFile.err
     exitStatus=$?
     ((retryCount++))
     if [ $exitStatus ]; then
       cat $logFile.err
-      sleep 3s
+      sleep 5s
     fi
   done
+  if [ -n "$sleep" ]; then
+    sleep $sleep
+  fi
 }
 
 function GetEncodedValue {

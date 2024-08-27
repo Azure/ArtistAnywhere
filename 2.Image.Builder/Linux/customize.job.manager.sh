@@ -54,11 +54,7 @@ if [ $machineType != Storage ]; then
     echo "    { role: \"readWriteAnyDatabase\", db: \"admin\" }" >> $mongoScript
     echo "  ]" >> $mongoScript
     echo "})" >> $mongoScript
-    RunProcess "mongosh $mongoScript" $binDirectory/$processType
-
-    # sed -i "s/#security:/security:/" $configFile
-    # sed -i "/security:/a\  authorization: enabled" $configFile
-    # systemctl restart mongod
+    RunProcess "mongosh $mongoScript" $binDirectory/$processType 5s
 
     processType="mongo-create-database-user"
     mongoScript="$processType.js"
@@ -70,8 +66,7 @@ if [ $machineType != Storage ]; then
     echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $mongoScript
     echo "  ]" >> $mongoScript
     echo "})" >> $mongoScript
-    # RunProcess "mongosh --authenticationDatabase admin -u $adminUsername -p $adminPassword $mongoScript" $binDirectory/$processType
-    RunProcess "mongosh $mongoScript" $binDirectory/$processType
+    RunProcess "mongosh $mongoScript" $binDirectory/$processType 5s
     echo "Customize (End): Mongo DB Users"
 
     echo "Customize (Start): Deadline Server"
