@@ -209,3 +209,13 @@ aiMachineLearning = {
     tier = "Basic"
   }
 }
+
+#########################################################################
+# Policy (https://learn.microsoft.com/azure/governance/policy/overview) #
+#########################################################################
+
+policy = {
+  disablePasswordAuthLinux = {
+    enable = false
+  }
+}
