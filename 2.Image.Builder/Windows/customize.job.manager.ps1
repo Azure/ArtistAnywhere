@@ -40,6 +40,7 @@ if ($machineType -eq "JobManager") {
 if ($machineType -ne "Storage") {
   $versionPath = $buildConfig.versionPath.jobManager
   $installRoot = "C:\Deadline"
+  $databaseHost = $(hostname)
   $databasePath = "C:\DeadlineData"
   $certificateFile = "Deadline10Client.pfx"
   $binPathJobManager = "$installRoot\bin"
