@@ -4,12 +4,6 @@ echo "Customize (Start): Job Manager"
 
 source /tmp/functions.sh
 
-if [ $machineType == JobManager ]; then
-  echo "Customize (Start): NFS Server"
-  systemctl --now enable nfs-server
-  echo "Customize (End): NFS Server"
-fi
-
 if [ $machineType != Storage ]; then
   versionPath=$(echo $buildConfig | jq -r .versionPath.jobManager)
   installRoot="/deadline"

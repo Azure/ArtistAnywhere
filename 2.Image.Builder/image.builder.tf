@@ -180,7 +180,12 @@ resource azapi_resource linux {
           {
             type = "Shell"
             inline = [
-              "hostname ${each.value.name}"
+              "hostname ${each.value.name}",
+              "if [ $machineType == JobManager ]; then",
+              "  echo 'Customize (Start): NFS Server'",
+              "  systemctl --now enable nfs-server",
+              "  echo 'Customize (End): NFS Server'",
+              "fi"
             ]
           },
           {
@@ -306,7 +311,15 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "Rename-Computer -NewName ${each.value.name}"
+              "Rename-Computer -NewName ${each.value.name}",
+              "if ($machineType -eq 'JobManager') {",
+                "Write-Host 'Customize (Start): NFS Server'",
+                "Install-WindowsFeature -Name 'FS-NFS-Service'",
+                "Write-Host 'Customize (End): NFS Server'",
+                "Write-Host 'Customize (Start): AD Domain Services'",
+                "Install-WindowsFeature -Name 'AD-Domain-Services' -IncludeManagementTools",
+                "Write-Host 'Customize (End): AD Domain Services'",
+              "}",
             ]
           },
           {

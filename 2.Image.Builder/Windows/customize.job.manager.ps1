@@ -8,24 +8,7 @@ Write-Host "Customize (Start): Job Manager"
 
 . C:\AzureData\functions.ps1
 
-if ($machineType -eq "JobManager") {
-  Write-Host "Customize (Start): NFS Server"
-  Install-WindowsFeature -Name "FS-NFS-Service"
-  Write-Host "Customize (End): NFS Server"
-
-  Write-Host "Customize (Start): AD Domain Services"
-  Install-WindowsFeature -Name "AD-Domain-Services" -IncludeManagementTools
-  Write-Host "Customize (End): AD Domain Services"
-
-  Write-Host "Customize (Start): AD Users & Computers"
-  $shortcutPath = "$env:AllUsersProfile\Desktop\AD Users & Computers.lnk"
-  $scriptShell = New-Object -ComObject WScript.Shell
-  $shortcut = $scriptShell.CreateShortcut($shortcutPath)
-  $shortcut.WorkingDirectory = "%HOMEDRIVE%%HOMEPATH%"
-  $shortcut.TargetPath = "%SystemRoot%\system32\dsa.msc"
-  $shortcut.Save()
-  Write-Host "Customize (End): AD Users & Computers"
-} else {
+if ($machineType -ne "JobManager") {
   Write-Host "Customize (Start): NFS Client"
   $processType = "nfs-client"
   dism /Online /NoRestart /LogPath:"$binDirectory\$processType" /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All
