@@ -32,6 +32,7 @@ function RunProcess {
     exitStatus=$?
     ((retryCount++))
     if [ $exitStatus ]; then
+      cat $logFile.out
       cat $logFile.err
       sleep 5s
     fi

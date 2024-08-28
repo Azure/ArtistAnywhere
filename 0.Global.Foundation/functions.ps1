@@ -83,6 +83,7 @@ function Retry ($delaySeconds, $maxCount, $scriptBlock) {
       $exOriginal = $null
       exit
     } catch {
+      Write-Host $_.Exception.Message
       if ($exOriginal -eq $null) {
         $exOriginal = $_.Exception.MembershipwiseClone
       }
