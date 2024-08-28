@@ -104,7 +104,7 @@ imageBuilder = {
         machineSize    = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
-        osDiskSizeGB   = 30
+        osDiskSizeGB   = 256
         timeoutMinutes = 120
         jobProcessors = [
         ]
@@ -134,7 +134,7 @@ imageBuilder = {
         machineSize    = "Standard_HB176rs_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                    # NVIDIA or AMD
         imageVersion   = "2.0.0"
-        osDiskSizeGB   = 1024
+        osDiskSizeGB   = 480
         timeoutMinutes = 240
         jobProcessors = [
           "PBRT"
@@ -261,7 +261,7 @@ imageBuilder = {
         machineSize    = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
-        osDiskSizeGB   = 0
+        osDiskSizeGB   = 256
         timeoutMinutes = 240
         jobProcessors = [
         ]
@@ -291,7 +291,7 @@ imageBuilder = {
         machineSize    = "Standard_HB176rs_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                    # NVIDIA or AMD
         imageVersion   = "2.0.0"
-        osDiskSizeGB   = 1024
+        osDiskSizeGB   = 480
         timeoutMinutes = 360
         jobProcessors = [
           "PBRT"

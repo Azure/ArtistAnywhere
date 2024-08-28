@@ -129,7 +129,7 @@ resource azurerm_private_endpoint ai_services_open {
   name                = "${lower(data.terraform_remote_state.global.outputs.ai.services.name)}-${azurerm_private_dns_zone_virtual_network_link.ai_services_open[0].name}"
   resource_group_name = data.terraform_remote_state.global.outputs.ai.resourceGroupName
   location            = data.terraform_remote_state.global.outputs.ai.regionName
-  subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
+  subnet_id           = "${local.virtualNetwork.id}/subnets/Farm"
   private_service_connection {
     name                           = data.terraform_remote_state.global.outputs.ai.services.name
     private_connection_resource_id = data.terraform_remote_state.global.outputs.ai.services.id
@@ -151,7 +151,7 @@ resource azurerm_private_endpoint ai_services_cognitive {
   name                = "${lower(data.terraform_remote_state.global.outputs.ai.services.name)}-${azurerm_private_dns_zone_virtual_network_link.ai_services_cognitive[0].name}"
   resource_group_name = data.terraform_remote_state.global.outputs.ai.resourceGroupName
   location            = data.terraform_remote_state.global.outputs.ai.regionName
-  subnet_id           = "${local.virtualNetwork.id}/subnets/AI"
+  subnet_id           = "${local.virtualNetwork.id}/subnets/Farm"
   private_service_connection {
     name                           = data.terraform_remote_state.global.outputs.ai.services.name
     private_connection_resource_id = data.terraform_remote_state.global.outputs.ai.services.id

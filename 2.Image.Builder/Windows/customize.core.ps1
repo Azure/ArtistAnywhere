@@ -160,7 +160,9 @@ if ($machineType -ne "JobManager") {
   Write-Host "Customize (End): Cinebench"
 }
 
-Write-Host "Customize (PATH): $($binPaths.substring(1))"
-setx PATH "$env:PATH$binPaths" /m
+if ($binPaths -ne "") {
+  Write-Host "Customize (PATH): $($binPaths.substring(1))"
+  setx PATH "$env:PATH$binPaths" /m
+}
 
 Write-Host "Customize (End): Core"

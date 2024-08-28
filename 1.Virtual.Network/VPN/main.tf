@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.9.4"
+  required_version = ">=1.9.5"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.116.0"
+      version = "~>4.0"
     }
   }
 }
@@ -14,7 +14,11 @@ provider azurerm {
       prevent_deletion_if_contains_resources = false
     }
   }
-  storage_use_azuread = true
+  subscription_id = var.subscriptionId
+}
+
+variable subscriptionId {
+  type = string
 }
 
 variable virtualNetwork {
@@ -35,8 +39,24 @@ variable virtualNetwork {
   })
 }
 
-data azurerm_client_config studio {}
+data azurerm_virtual_network studio {
+  name                = var.virtualNetwork.name
+  resource_group_name = var.virtualNetwork.resourceGroupName
+}
 
-data azurerm_resource_group network {
-  name = var.virtualNetwork.resourceGroupName
+data azurerm_subnet gateway {
+  name                 = "GatewaySubnet"
+  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio.name
+}
+
+data azurerm_public_ip gateway1 {
+  name                = var.virtualNetwork.gateway.ipAddress1.name
+  resource_group_name = var.virtualNetwork.gateway.ipAddress1.resourceGroupName
+}
+
+data azurerm_public_ip gateway2 {
+  count               = var.virtualNetwork.gateway.ipAddress2.name != "" ? 1 : 0
+  name                = var.virtualNetwork.gateway.ipAddress2.name
+  resource_group_name = var.virtualNetwork.gateway.ipAddress2.resourceGroupName
 }

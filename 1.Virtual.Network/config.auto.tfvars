@@ -21,10 +21,6 @@ virtualNetworks = [
         addressSpace = [
           "10.0.0.0/17"
         ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global",
-          "Microsoft.ContainerRegistry"
-        ]
         serviceDelegation = null
       },
       {
@@ -32,28 +28,12 @@ virtualNetworks = [
         addressSpace = [
           "10.0.128.0/18"
         ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global"
-        ]
         serviceDelegation = null
       },
       {
         name = "Storage"
         addressSpace = [
-          "10.0.192.0/25"
-        ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global"
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "Storage2"
-        addressSpace = [
-          "10.0.192.128/25"
-        ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global"
+          "10.0.192.0/24"
         ]
         serviceDelegation = null
       },
@@ -61,8 +41,6 @@ virtualNetworks = [
         name = "StorageNetApp"
         addressSpace = [
           "10.0.193.0/24"
-        ]
-        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Microsoft.Netapp/volumes"
@@ -77,8 +55,6 @@ virtualNetworks = [
         addressSpace = [
           "10.0.194.0/24"
         ]
-        serviceEndpoints = [
-        ]
         serviceDelegation = {
           service = "Qumulo.Storage/fileSystems"
           actions = [
@@ -91,16 +67,12 @@ virtualNetworks = [
         addressSpace = [
           "10.0.195.0/24"
         ]
-        serviceEndpoints = [
-        ]
         serviceDelegation = null
       },
       {
         name = "DataPostgreSQL"
         addressSpace = [
           "10.0.196.0/24"
-        ]
-        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Microsoft.DBforPostgreSQL/flexibleServers"
@@ -114,8 +86,6 @@ virtualNetworks = [
         addressSpace = [
           "10.0.197.0/24"
         ]
-        serviceEndpoints = [
-        ]
         serviceDelegation = {
           service = "Microsoft.DocumentDB/cassandraClusters"
           actions = [
@@ -128,27 +98,12 @@ virtualNetworks = [
         addressSpace = [
           "10.0.198.0/24"
         ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global"
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "AI"
-        addressSpace = [
-          "10.0.199.0/24"
-        ]
-        serviceEndpoints = [
-          "Microsoft.CognitiveServices"
-        ]
         serviceDelegation = null
       },
       {
         name = "App"
         addressSpace = [
-          "10.0.200.0/24"
-        ]
-        serviceEndpoints = [
+          "10.0.199.0/24"
         ]
         serviceDelegation = {
           service = "Microsoft.App/environments"
@@ -158,11 +113,21 @@ virtualNetworks = [
         }
       },
       {
+        name = "Web"
+        addressSpace = [
+          "10.0.200.0/24"
+        ]
+        serviceDelegation = {
+          service = "Microsoft.Web/serverFarms"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/action"
+          ]
+        }
+      },
+      {
         name = "GatewaySubnet"
         addressSpace = [
           "10.0.255.0/26"
-        ]
-        serviceEndpoints = [
         ]
         serviceDelegation = null
       },
@@ -171,14 +136,12 @@ virtualNetworks = [
         addressSpace = [
           "10.0.255.64/26"
         ]
-        serviceEndpoints = [
-        ]
         serviceDelegation = null
       }
     ]
   },
   {
-    enable = true
+    enable = false
     name   = "Studio"
     regionNames = [
       "WestUS"
@@ -194,10 +157,6 @@ virtualNetworks = [
         addressSpace = [
           "10.1.0.0/17"
         ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global",
-          "Microsoft.ContainerRegistry"
-        ]
         serviceDelegation = null
       },
       {
@@ -205,28 +164,12 @@ virtualNetworks = [
         addressSpace = [
           "10.1.128.0/18"
         ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global"
-        ]
         serviceDelegation = null
       },
       {
         name = "Storage"
         addressSpace = [
-          "10.1.192.0/25"
-        ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global"
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "Storage2"
-        addressSpace = [
-          "10.1.192.128/25"
-        ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global"
+          "10.1.192.0/24"
         ]
         serviceDelegation = null
       },
@@ -234,8 +177,6 @@ virtualNetworks = [
         name = "StorageNetApp"
         addressSpace = [
           "10.1.193.0/24"
-        ]
-        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Microsoft.Netapp/volumes"
@@ -250,8 +191,6 @@ virtualNetworks = [
         addressSpace = [
           "10.1.194.0/24"
         ]
-        serviceEndpoints = [
-        ]
         serviceDelegation = {
           service = "Qumulo.Storage/fileSystems"
           actions = [
@@ -264,16 +203,12 @@ virtualNetworks = [
         addressSpace = [
           "10.1.195.0/24"
         ]
-        serviceEndpoints = [
-        ]
         serviceDelegation = null
       },
       {
         name = "DataPostgreSQL"
         addressSpace = [
           "10.1.196.0/24"
-        ]
-        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Microsoft.DBforPostgreSQL/flexibleServers"
@@ -287,8 +222,6 @@ virtualNetworks = [
         addressSpace = [
           "10.1.197.0/24"
         ]
-        serviceEndpoints = [
-        ]
         serviceDelegation = {
           service = "Microsoft.DocumentDB/cassandraClusters"
           actions = [
@@ -301,27 +234,12 @@ virtualNetworks = [
         addressSpace = [
           "10.1.198.0/24"
         ]
-        serviceEndpoints = [
-          "Microsoft.Storage.Global"
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "AI"
-        addressSpace = [
-          "10.1.199.0/24"
-        ]
-        serviceEndpoints = [
-          "Microsoft.CognitiveServices"
-        ]
         serviceDelegation = null
       },
       {
         name = "App"
         addressSpace = [
-          "10.1.200.0/24"
-        ]
-        serviceEndpoints = [
+          "10.1.199.0/24"
         ]
         serviceDelegation = {
           service = "Microsoft.App/environments"
@@ -331,11 +249,21 @@ virtualNetworks = [
         }
       },
       {
+        name = "Web"
+        addressSpace = [
+          "10.1.200.0/24"
+        ]
+        serviceDelegation = {
+          service = "Microsoft.Web/serverFarms"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/action"
+          ]
+        }
+      },
+      {
         name = "GatewaySubnet"
         addressSpace = [
           "10.1.255.0/26"
-        ]
-        serviceEndpoints = [
         ]
         serviceDelegation = null
       },
@@ -343,8 +271,6 @@ virtualNetworks = [
         name = "AzureBastionSubnet"
         addressSpace = [
           "10.1.255.64/26"
-        ]
-        serviceEndpoints = [
         ]
         serviceDelegation = null
       }
@@ -377,4 +303,16 @@ bastion = {
   enableTunneling     = true
   enablePerRegion     = true
   enableShareableLink = false
+}
+
+################################################################################################################
+# Virtual Network Peering (https://learn.microsoft.com/azure/virtual-network/virtual-network-peering-overview) #
+################################################################################################################
+
+networkPeering = {
+  enable                      = false
+  allowRemoteNetworkAccess    = true
+  allowRemoteForwardedTraffic = true
+  allowGatewayTransit         = false
+  useRemoteGateways           = false
 }

@@ -24,8 +24,8 @@ variable vpnGatewayLocal {
 resource azurerm_local_network_gateway vpn {
   count               = var.vpnGatewayLocal.enable ? 1 : 0
   name                = azurerm_virtual_network_gateway.vpn.name
-  resource_group_name = data.azurerm_resource_group.network.name
-  location            = data.azurerm_resource_group.network.location
+  resource_group_name = data.azurerm_virtual_network.studio.resource_group_name
+  location            = data.azurerm_virtual_network.studio.location
   gateway_fqdn        = var.vpnGatewayLocal.address == "" ? var.vpnGatewayLocal.fqdn : null
   gateway_address     = var.vpnGatewayLocal.fqdn == "" ? var.vpnGatewayLocal.address : null
   address_space       = var.vpnGatewayLocal.addressSpace
@@ -42,8 +42,8 @@ resource azurerm_local_network_gateway vpn {
 resource azurerm_virtual_network_gateway_connection site_to_site {
   count                      = var.vpnGatewayLocal.enable ? 1 : 0
   name                       = azurerm_virtual_network_gateway.vpn.name
-  resource_group_name        = data.azurerm_resource_group.network.name
-  location                   = data.azurerm_resource_group.network.location
+  resource_group_name        = data.azurerm_virtual_network.studio.resource_group_name
+  location                   = data.azurerm_virtual_network.studio.location
   type                       = "IPsec"
   virtual_network_gateway_id = azurerm_virtual_network_gateway.vpn.id
   local_network_gateway_id   = azurerm_local_network_gateway.vpn[0].id

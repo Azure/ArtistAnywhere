@@ -54,7 +54,7 @@ if [ $machineType != Storage ]; then
     echo "    { role: \"readWriteAnyDatabase\", db: \"admin\" }" >> $mongoScript
     echo "  ]" >> $mongoScript
     echo "})" >> $mongoScript
-    RunProcess "mongosh $mongoScript" $binDirectory/$processType 5s
+    RunProcess "mongosh $mongoScript" $binDirectory/$processType
 
     processType="mongo-create-database-user"
     mongoScript="$processType.js"
@@ -66,7 +66,7 @@ if [ $machineType != Storage ]; then
     echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $mongoScript
     echo "  ]" >> $mongoScript
     echo "})" >> $mongoScript
-    RunProcess "mongosh $mongoScript" $binDirectory/$processType 5s
+    RunProcess "mongosh $mongoScript" $binDirectory/$processType
     echo "Customize (End): Mongo DB Users"
 
     echo "Customize (Start): Deadline Server"
@@ -100,7 +100,9 @@ if [ $machineType != Storage ]; then
   binPaths="$binPaths:$binPathJobManager"
 fi
 
-echo "Customize (PATH): ${binPaths:1}"
-echo 'PATH=$PATH'$binPaths >> $aaaProfile
+if [ "$binPaths" != "" ]; then
+  echo "Customize (PATH): ${binPaths:1}"
+  echo 'PATH=$PATH'$binPaths >> $aaaProfile
+fi
 
 echo "Customize (End): Job Manager"

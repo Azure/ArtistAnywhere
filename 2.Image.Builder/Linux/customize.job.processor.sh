@@ -43,7 +43,9 @@ if [[ $jobProcessors == *Blender* ]]; then
   echo "Customize (End): Blender"
 fi
 
-echo "Customize (PATH): ${binPaths:1}"
-echo 'PATH=$PATH'$binPaths >> $aaaProfile
+if [ "$binPaths" != "" ]; then
+  echo "Customize (PATH): ${binPaths:1}"
+  echo 'PATH=$PATH'$binPaths >> $aaaProfile
+fi
 
 echo "Customize (End): Job Processor"

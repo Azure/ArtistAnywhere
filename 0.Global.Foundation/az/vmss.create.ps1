@@ -26,7 +26,7 @@ $virtualMachine = @{
     sshKeyPublic = az keyvault secret show --vault-name "xstudio" --name "SSHKeyPublic" --query value
   }
   osDisk = @{
-    sizeGB  = 1024
+    sizeGB  = 480
     caching = "ReadOnly"
     ephemeral = @{
       enable    = $false

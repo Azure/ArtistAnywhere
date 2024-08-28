@@ -10,9 +10,8 @@ variable virtualNetworks {
     addressSpace = list(string)
     dnsAddresses = list(string)
     subnets = list(object({
-      name             = string
-      addressSpace     = list(string)
-      serviceEndpoints = list(string)
+      name         = string
+      addressSpace = list(string)
       serviceDelegation = object({
         service = string
         actions = list(string)
@@ -106,7 +105,6 @@ resource azurerm_subnet studio {
   resource_group_name                           = each.value.resourceGroupName
   virtual_network_name                          = each.value.virtualNetworkName
   address_prefixes                              = each.value.addressSpace
-  service_endpoints                             = each.value.serviceEndpoints
   private_endpoint_network_policies             = each.value.name == "GatewaySubnet" ? "Enabled" : "Disabled"
   private_link_service_network_policies_enabled = each.value.name == "GatewaySubnet"
   dynamic delegation {
@@ -135,16 +133,4 @@ output virtualNetworks {
       edgeZone          = virtualNetwork.edgeZone
     }
   ]
-}
-
-output virtualNetworksSubnetStorage {
-  value = flatten([
-    for virtualNetwork in local.virtualNetworks : [
-      for subnet in virtualNetwork.subnets : {
-        name               = subnet.name
-        resourceGroupName  = virtualNetwork.resourceGroupName
-        virtualNetworkName = virtualNetwork.name
-      } if contains(subnet.serviceEndpoints, "Microsoft.Storage.Global")
-    ]
-  ])
 }

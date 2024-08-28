@@ -33,7 +33,9 @@ if ($jobProcessors -contains "Blender") {
   Write-Host "Customize (End): Blender"
 }
 
-Write-Host "Customize (PATH): $($binPaths.substring(1))"
-setx PATH "$env:PATH$binPaths" /m
+if ($binPaths -ne "") {
+  Write-Host "Customize (PATH): $($binPaths.substring(1))"
+  setx PATH "$env:PATH$binPaths" /m
+}
 
 Write-Host "Customize (End): Job Processor"

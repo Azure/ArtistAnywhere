@@ -22,8 +22,8 @@ variable vpnGateway {
 
 resource azurerm_virtual_network_gateway vpn {
   name                = var.vpnGateway.name
-  resource_group_name = data.azurerm_resource_group.network.name
-  location            = data.azurerm_resource_group.network.location
+  resource_group_name = data.azurerm_virtual_network.studio.resource_group_name
+  location            = data.azurerm_virtual_network.studio.location
   edge_zone           = var.virtualNetwork.edgeZoneName != "" ? var.virtualNetwork.edgeZoneName : null
   type                = "Vpn"
   sku                 = var.vpnGateway.tier
@@ -33,15 +33,15 @@ resource azurerm_virtual_network_gateway vpn {
   active_active       = var.virtualNetwork.gateway.ipAddress2.name != ""
   ip_configuration {
     name                 = "ipConfig1"
-    subnet_id            = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.virtualNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${var.virtualNetwork.name}/subnets/GatewaySubnet"
-    public_ip_address_id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.virtualNetwork.gateway.ipAddress1.resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/${var.virtualNetwork.gateway.ipAddress1.name}"
+    subnet_id            = data.azurerm_subnet.gateway.id
+    public_ip_address_id = data.azurerm_public_ip.gateway1.id
   }
   dynamic ip_configuration {
     for_each = var.virtualNetwork.gateway.ipAddress2.name != "" ? [1] : []
     content {
       name                 = "ipConfig2"
-      subnet_id            = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.virtualNetwork.resourceGroupName}/providers/Microsoft.Network/virtualNetworks/${var.virtualNetwork.name}/subnets/GatewaySubnet"
-      public_ip_address_id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.virtualNetwork.gateway.ipAddress2.resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/${var.virtualNetwork.gateway.ipAddress2.name}"
+      subnet_id            = data.azurerm_subnet.gateway.id
+      public_ip_address_id = data.azurerm_public_ip.gateway2[0].id
     }
   }
   dynamic vpn_client_configuration {
