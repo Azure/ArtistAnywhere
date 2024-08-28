@@ -43,7 +43,9 @@ For each module, here is the recommended configuration and deployment process.
 1. In all modules except `0 Global Foundation`, run `terraform init -backend-config ../0.Global.Foundation/cfg/backend.config` to initialize the module local directory (append `-upgrade` if older providers are detected).
 1. Run `terraform apply` to generate the Terraform deployment [Plan](https://www.terraform.io/docs/cli/run/index.html#planning) (append `-destroy` to delete Azure resources).
 1. Review the Terraform deployment Plan *before* confirming to add, change and/or destroy Azure resources.
-   * For module `2 Image Builder` to build virtual machine images, use the Azure portal or [Image Builder CLI](https://learn.microsoft.com/cli/azure/image/builder#az-image-builder-run) to start image build runs as needed.
+   * In module `2 Image Builder`,
+      * The following Azure Marketplace Rocky Linux image terms must be accepted on your Azure subscription.<br/>`az vm image terms accept --publisher RESF --offer RockyLinux-x86_64 --plan 9-Base`
+      * Use the Azure management portal or [Image Builder CLI](https://learn.microsoft.com/cli/azure/image/builder#az-image-builder-run) to start image build runs as needed.
 
 ## Render Job Samples
 
@@ -57,7 +59,7 @@ The following Disney Moana Island scene was rendered on Azure via the [Physicall
 
 To render the Disney Moana Island scene on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** and/or **Windows** artist workstation.
 
-```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt -arguments "--outfile /mnt/content/pbrt/moana/island-v4.png /mnt/content/pbrt/moana/island/pbrt-v4/island.pbrt"```
+```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt -arguments "--outfile /mnt/storage/pbrt/moana/island-v4.png /mnt/storage/pbrt/moana/island/pbrt-v4/island.pbrt"```
 
 To render the Disney Moana Island scene on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** and/or **Windows** artist workstation.
 
@@ -71,7 +73,7 @@ The following Blender 3.4 Splash screen was rendered on Azure via the [Blender](
 
 To render the Blender Splash screen on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** and/or **Windows** artist workstation.
 
-```deadlinecommand -SubmitCommandLineJob -name blender-splash -executable blender -arguments "--background /mnt/content/blender/3.4/splash.blend --render-output /mnt/content/blender/3.4/splash --enable-autoexec --render-frame 1"```
+```deadlinecommand -SubmitCommandLineJob -name blender-splash -executable blender -arguments "--background /mnt/storage/blender/3.4/splash.blend --render-output /mnt/storage/blender/3.4/splash --enable-autoexec --render-frame 1"```
 
 To render the Blender Splash screen on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** and/or **Windows** artist workstation.
 
