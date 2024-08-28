@@ -19,7 +19,7 @@ storageAccounts = [
     blobContainers = [ # https://learn.microsoft.com/azure/storage/blobs/storage-blobs-introduction
       {
         enable    = true
-        name      = "content"
+        name      = "storage"
         fileSystem = {
           enable  = true
           rootAcl = "user::rwx,group::rwx,other::rwx"
@@ -48,7 +48,7 @@ storageAccounts = [
     fileShares = [ # https://learn.microsoft.com/azure/storage/files/storage-files-introduction
       {
         enable         = true
-        name           = "content"
+        name           = "storage"
         sizeGB         = 5120
         accessTier     = "Premium"
         accessProtocol = "NFS"

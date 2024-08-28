@@ -23,7 +23,7 @@ computeGallery = {
       generation = "V2"
       publisher  = "RESF"
       offer      = "RockyLinux-x86_64"
-      sku        = "9-LVM"
+      sku        = "9-Base"
     },
     {
       name       = "WinServer"
@@ -104,7 +104,7 @@ imageBuilder = {
         machineSize    = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
-        osDiskSizeGB   = 256
+        osDiskSizeGB   = 512
         timeoutMinutes = 120
         jobProcessors = [
         ]
@@ -151,7 +151,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "LnxFarmG"
+      name   = "LnxFarmGN"
       source = {
         imageDefinition = {
           name = "Linux"
@@ -182,8 +182,40 @@ imageBuilder = {
       }
     },
     {
+      enable = false
+      name   = "LnxFarmGA"
+      source = {
+        imageDefinition = {
+          name = "Linux"
+        }
+        # imageVersion = {
+        #   id = ""
+        # }
+      }
+      build = {
+        machineType    = "Farm"
+        machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
+        imageVersion   = "2.2.0"
+        osDiskSizeGB   = 1024
+        timeoutMinutes = 240
+        jobProcessors = [
+          "PBRT",
+          "Blender"
+        ]
+      }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Standard_LRS"
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
+      }
+    },
+    {
       enable = true
-      name   = "LnxArtistN"
+      name   = "LnxArtistGN"
       source = {
         imageDefinition = {
           name = "Linux"
@@ -215,7 +247,7 @@ imageBuilder = {
     },
     {
       enable = false
-      name   = "LnxArtistA"
+      name   = "LnxArtistGA"
       source = {
         imageDefinition = {
           name = "Linux"
@@ -261,7 +293,7 @@ imageBuilder = {
         machineSize    = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
-        osDiskSizeGB   = 256
+        osDiskSizeGB   = 512
         timeoutMinutes = 240
         jobProcessors = [
         ]
@@ -308,7 +340,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinFarmG"
+      name   = "WinFarmGN"
       source = {
         imageDefinition = {
           name = "WinFarm"
@@ -339,8 +371,40 @@ imageBuilder = {
       }
     },
     {
+      enable = false
+      name   = "WinFarmGA"
+      source = {
+        imageDefinition = {
+          name = "WinFarm"
+        }
+        # imageVersion = {
+        #   id = ""
+        # }
+      }
+      build = {
+        machineType    = "Farm"
+        machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                        # NVIDIA or AMD
+        imageVersion   = "2.2.0"
+        osDiskSizeGB   = 1024
+        timeoutMinutes = 480
+        jobProcessors = [
+          "PBRT",
+          "Blender"
+        ]
+      }
+      distribute = {
+        replicaCount       = 3
+        storageAccountType = "Standard_LRS"
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
+      }
+    },
+    {
       enable = true
-      name   = "WinArtistN"
+      name   = "WinArtistGN"
       source = {
         imageDefinition = {
           name = "WinArtist"
@@ -372,7 +436,7 @@ imageBuilder = {
     },
     {
       enable = false
-      name   = "WinArtistA"
+      name   = "WinArtistGA"
       source = {
         imageDefinition = {
           name = "WinArtist"

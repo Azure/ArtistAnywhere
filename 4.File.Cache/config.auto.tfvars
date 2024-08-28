@@ -40,7 +40,7 @@ weka = {
       enable = true
     }
     dnsRecord = {
-      name    = "content"
+      name    = "storage"
       ttlSeconds = 300
     }
   }
@@ -71,7 +71,7 @@ weka = {
   dataDisk = {
     storageType = "Standard_LRS"
     cachingType = "None"
-    sizeGB      = 256
+    sizeGB      = 512
   }
   dataProtection = {
     stripeWidth = 3
@@ -169,11 +169,11 @@ dnsRecord = {
 storageTargets = [
   {
     enable            = false
-    name              = "Content"
-    clientPath        = "/content"
+    name              = "Storage"
+    clientPath        = "/storage"
     usageModel        = "READ_ONLY" # https://learn.microsoft.com/azure/hpc-cache/cache-usage-models
     hostName          = "xstudio1"
-    containerName     = "content"
+    containerName     = "storage"
     resourceGroupName = "ArtistAnywhere.Storage"
     fileIntervals = {
       verificationSeconds = 30

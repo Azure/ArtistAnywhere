@@ -92,7 +92,7 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "LnxFarmG"
+    name   = "LnxFarmGN"
     machine = {
       namePrefix = ""
       size       = "Standard_NV72ads_A10_v5"
@@ -102,6 +102,91 @@ virtualMachineScaleSets = [
         galleryName       = "xstudio"
         definitionName    = "Linux"
         versionId         = "2.1.0"
+        plan = {
+          publisher = ""
+          product   = ""
+          name      = ""
+        }
+      }
+    }
+    network = {
+      subnetName = "Farm"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationEdge = {
+        enable = false
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = true
+      }
+    }
+    operatingSystem = {
+      type = "Linux"
+      disk = {
+        storageType = "Standard_LRS"
+        cachingType = "ReadOnly"
+        sizeGB      = 0
+        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+          enable    = true
+          placement = "ResourceDisk"
+        }
+      }
+    }
+    spot = {
+      enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
+      evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
+      tryRestore = {
+        enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        timeout = "PT1H"
+      }
+    }
+    extension = {
+      custom = {
+        enable   = true
+        name     = "Initialize"
+        fileName = "initialize.sh"
+        parameters = {
+          terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
+            enable       = false
+            delayTimeout = "PT5M"
+          }
+        }
+      }
+      health = {
+        enable      = true
+        name        = "Health"
+        protocol    = "tcp"
+        port        = 111
+        requestPath = ""
+      }
+      monitor = {
+        enable = false
+        name   = "Monitor"
+      }
+    }
+    flexMode = {
+      enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+    }
+    faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
+  },
+  {
+    enable = false
+    name   = "LnxFarmGA"
+    machine = {
+      namePrefix = ""
+      size       = "Standard_NG32ads_V620_v1"
+      count      = 2
+      image = {
+        resourceGroupName = "ArtistAnywhere.Image"
+        galleryName       = "xstudio"
+        definitionName    = "Linux"
+        versionId         = "2.2.0"
         plan = {
           publisher = ""
           product   = ""
@@ -262,7 +347,7 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "WinFarmG"
+    name   = "WinFarmGN"
     machine = {
       namePrefix = ""
       size       = "Standard_NV72ads_A10_v5"
@@ -344,110 +429,19 @@ virtualMachineScaleSets = [
       enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
     }
     faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
-  }
-]
-
-##################################################################################
-# Compute Fleet (https://learn.microsoft.com/azure/azure-compute-fleet/overview) #
-##################################################################################
-
-computeFleets = [
-  {
-    enable = false
-    name   = "LnxFarmC"
-    machine = {
-      namePrefix = ""
-      sizes = [
-        {
-          name = "Standard_HB176rs_v4"
-        },
-        {
-          name = "Standard_HB176-144rs_v4"
-        },
-        {
-          name = "Standard_HB176-96rs_v4"
-        }
-      ]
-      priority = {
-        standard = {
-          allocationStrategy = "LowestPrice"
-          capacityTarget     = 0
-          capacityMinimum    = 0
-        }
-        spot = {
-          allocationStrategy = "PriceCapacityOptimized"
-          evictionPolicy     = "Delete"
-          capacityTarget     = 2
-          capacityMinimum    = 2
-          capacityMaintain = {
-            enable = true
-          }
-        }
-      }
-      image = {
-        resourceGroupName = "ArtistAnywhere.Image"
-        galleryName       = "xstudio"
-        definitionName    = "Linux"
-        versionId         = "2.0.0"
-        plan = {
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
-      }
-    }
-    network = {
-      subnetName = "Farm"
-      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-        enable = true
-      }
-      locationEdge = {
-        enable = false
-      }
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-    }
   },
   {
     enable = false
-    name   = "WinFarmC"
+    name   = "WinFarmGA"
     machine = {
       namePrefix = ""
-      sizes = [
-        {
-          name = "Standard_HB176rs_v4"
-        },
-        {
-          name = "Standard_HB176-144rs_v4"
-        },
-        {
-          name = "Standard_HB176-96rs_v4"
-        }
-      ]
-      priority = {
-        standard = {
-          allocationStrategy = "LowestPrice"
-          capacityTarget     = 0
-          capacityMinimum    = 0
-        }
-        spot = {
-          allocationStrategy = "PriceCapacityOptimized"
-          evictionPolicy     = "Delete"
-          capacityTarget     = 2
-          capacityMinimum    = 2
-          capacityMaintain = {
-            enable = true
-          }
-        }
-      }
+      size       = "Standard_NG32ads_V620_v1"
+      count      = 2
       image = {
         resourceGroupName = "ArtistAnywhere.Image"
         galleryName       = "xstudio"
         definitionName    = "WinFarm"
-        versionId         = "2.0.0"
+        versionId         = "2.1.0"
         plan = {
           publisher = ""
           product   = ""
@@ -468,7 +462,58 @@ computeFleets = [
       userName     = ""
       userPassword = ""
       sshKeyPublic = ""
+      passwordAuth = {
+        disable = false
+      }
     }
+    operatingSystem = {
+      type = "Windows"
+      disk = {
+        storageType = "Standard_LRS"
+        cachingType = "ReadOnly"
+        sizeGB      = 0
+        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+          enable    = true
+          placement = "ResourceDisk"
+        }
+      }
+    }
+    spot = {
+      enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
+      evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
+      tryRestore = {
+        enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        timeout = "PT1H"
+      }
+    }
+    extension = {
+      custom = {
+        enable   = true
+        name     = "Initialize"
+        fileName = "initialize.ps1"
+        parameters = {
+          terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
+            enable       = false
+            delayTimeout = "PT5M"
+          }
+        }
+      }
+      health = {
+        enable      = true
+        name        = "Health"
+        protocol    = "tcp"
+        port        = 445
+        requestPath = ""
+      }
+      monitor = {
+        enable = false
+        name   = "Monitor"
+      }
+    }
+    flexMode = {
+      enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+    }
+    faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
   }
 ]
 

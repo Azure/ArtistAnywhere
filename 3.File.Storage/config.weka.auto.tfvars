@@ -38,7 +38,7 @@ weka = {
       enable = true
     }
     dnsRecord = {
-      name    = "content"
+      name    = "storage"
       ttlSeconds = 300
     }
   }
@@ -69,7 +69,7 @@ weka = {
   dataDisk = {
     storageType = "Standard_LRS"
     cachingType = "None"
-    sizeGB      = 256
+    sizeGB      = 512
   }
   dataProtection = {
     stripeWidth = 3

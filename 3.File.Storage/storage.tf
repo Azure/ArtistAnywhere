@@ -133,6 +133,9 @@ resource azurerm_storage_account studio {
       }
     }
   }
+  depends_on = [
+    azurerm_resource_group.storage
+  ]
 }
 
 resource azurerm_storage_container core {

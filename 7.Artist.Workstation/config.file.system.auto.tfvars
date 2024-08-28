@@ -5,8 +5,8 @@ fileSystems = {
       iaasOnly = false
       mount = {
         type    = "aznfs"
-        path    = "/mnt/content"
-        source  = "xstudio1.blob.core.windows.net:/xstudio1/content"
+        path    = "/mnt/storage"
+        source  = "xstudio1.blob.core.windows.net:/xstudio1/storage"
         options = "sec=sys,proto=tcp,vers=3,nolock"
       }
     },
@@ -15,8 +15,8 @@ fileSystems = {
       iaasOnly = false
       mount = {
         type    = "nfs"
-        path    = "/mnt/content"
-        source  = "cache.azure.studio:/content"
+        path    = "/mnt/storage"
+        source  = "cache.azure.studio:/storage"
         options = "hard,proto=tcp,mountproto=tcp,retry=30,nolock"
       }
     },
@@ -38,7 +38,7 @@ fileSystems = {
       mount = {
         type    = ""
         path    = "X:"
-        source  = "\\\\xstudio1.blob.core.windows.net\\xstudio1\\content"
+        source  = "\\\\xstudio1.blob.core.windows.net\\xstudio1\\storage"
         options = "-o anon nolock"
         userName = ""
         password = ""
@@ -50,7 +50,7 @@ fileSystems = {
       mount = {
         type    = ""
         path    = "X:"
-        source  = "\\\\cache.azure.studio\\content"
+        source  = "\\\\cache.azure.studio\\storage"
         options = "-o anon nolock"
         userName = ""
         password = ""

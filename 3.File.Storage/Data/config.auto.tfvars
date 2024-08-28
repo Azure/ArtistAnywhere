@@ -174,7 +174,7 @@ noSQL = {
       containers = [
         {
           enable = true
-          name   = "Content"
+          name   = "Asset"
           throughput = {
             requestUnits = null
             autoScale = {
