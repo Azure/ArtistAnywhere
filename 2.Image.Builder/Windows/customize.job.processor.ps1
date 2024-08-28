@@ -14,9 +14,9 @@ if ($jobProcessors -contains "PBRT") {
   $processType = "pbrt"
   $installPath = "C:\Program Files\PBRT"
   New-Item -ItemType Directory -Path "$installPath" -Force
-  RunProcess "$binPathGit\git.exe" "clone --recursive https://github.com/mmp/$processType-$versionPath.git" "$binDirectory\$processType-1"
-  RunProcess "$binPathCMake\cmake.exe" "-B ""$installPath"" -S $binDirectory\$processType-$versionPath" "$binDirectory\$processType-2"
-  RunProcess "$binPathMSBuild\MSBuild.exe" """$installPath\PBRT-$versionPath.sln"" -p:Configuration=Release" "$binDirectory\$processType-3"
+  RunProcess "$env:GIT_BIN_PATH\git.exe" "clone --recursive https://github.com/mmp/$processType-$versionPath.git" "$binDirectory\$processType-1"
+  RunProcess "$env:CMAKE_BIN_PATH\cmake.exe" "-B ""$installPath"" -S $binDirectory\$processType-$versionPath" "$binDirectory\$processType-2"
+  RunProcess "$env:MSBUILD_BIN_PATH\MSBuild.exe" """$installPath\PBRT-$versionPath.sln"" -p:Configuration=Release" "$binDirectory\$processType-3"
   $binPaths += ";$installPath\Release"
   Write-Host "Customize (End): PBRT"
 }

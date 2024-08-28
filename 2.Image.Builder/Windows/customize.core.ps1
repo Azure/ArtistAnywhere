@@ -47,6 +47,7 @@ $processType = "git"
 RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
 $binPathGit = "C:\Program Files\Git\bin"
 $binPaths += ";$binPathGit"
+$env:GIT_BIN_PATH = $binPathGit
 Write-Host "Customize (End): Git"
 
 Write-Host "Customize (Start): 7-Zip"
@@ -65,6 +66,8 @@ RunProcess "$binPathChoco\choco.exe" "install visualstudio2022buildtools --packa
 $binPathCMake = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
 $binPathMSBuild = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64"
 $binPaths += ";$binPathCMake;$binPathMSBuild"
+$env:CMAKE_BIN_PATH = $binPathCMake
+$env:MSBUILD_BIN_PATH = $binPathMSBuild
 Write-Host "Customize (End): Visual Studio Build Tools"
 
 Write-Host "Customize (End): Image Build Platform"
