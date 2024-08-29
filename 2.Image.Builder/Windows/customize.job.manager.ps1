@@ -68,11 +68,14 @@ if ($machineType -ne "Storage") {
 
   Write-Host "Customize (Start): Deadline Scheduled Task"
   $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
-  $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct S:\ S:\Deadline10Client.pfx"
   if ($machineType -eq "JobManager") {
-    $taskAction = New-ScheduledTaskAction -Execute "deadlinecommand" -Argument "-ChangeRepository Direct $installRoot $installRoot\$certificateFile"
+    $taskAction = New-ScheduledTaskAction -Execute "$binPathJobManager\deadlinecommand" -Argument "-ChangeRepository Direct $installRoot $installRoot\$certificateFile"
+    Register-ScheduledTask -TaskName $jobManagerInitTaskName -Trigger $taskTrigger -Action $taskAction -User System -Force
+  } else {
+    $taskAction1 = New-ScheduledTaskAction -Execute "$binPathJobManager\deadlinecommand" -Argument "-StoreDatabaseCredentials $serviceUsername $servicePassword"
+    $taskAction2 = New-ScheduledTaskAction -Execute "$binPathJobManager\deadlinecommand" -Argument "-ChangeRepository Direct S:\"
+    Register-ScheduledTask -TaskName $jobManagerInitTaskName -Trigger $taskTrigger -Action $taskAction1,$taskAction2 -User System -Force
   }
-  Register-ScheduledTask -TaskName $jobManagerTaskName -Trigger $taskTrigger -Action $taskAction -User System -Force
   Write-Host "Customize (End): Deadline Scheduled Task"
 
   Write-Host "Customize (Start): Deadline Monitor"

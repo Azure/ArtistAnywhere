@@ -2,8 +2,8 @@ $binPaths = ""
 $binDirectory = "C:\Users\Public\Downloads"
 Set-Location -Path $binDirectory
 
-$jobManagerTaskName = "AAA Job Manager Initialize"
 $fileSystemsMountPath = "$binDirectory\fileSystems.bat"
+$jobManagerInitTaskName = "AAA Job Manager Initialize"
 
 Write-Host "Customize (Start): Image Build Parameters"
 $buildConfigBytes = [System.Convert]::FromBase64String($buildConfigEncoded)
