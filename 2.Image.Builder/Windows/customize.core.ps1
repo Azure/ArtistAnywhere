@@ -55,10 +55,10 @@ $processType = "7zip"
 RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
 Write-Host "Customize (End): 7-Zip"
 
-Write-Host "Customize (Start): Docker Desktop"
-$processType = "docker-desktop"
+Write-Host "Customize (Start): cwRsync"
+$processType = "rsync"
 RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
-Write-Host "Customize (End): Docker Desktop"
+Write-Host "Customize (End): cwRsync"
 
 Write-Host "Customize (Start): Visual Studio Build Tools"
 $processType = "vsBuildTools"
