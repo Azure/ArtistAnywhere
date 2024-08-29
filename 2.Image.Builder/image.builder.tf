@@ -180,12 +180,13 @@ resource azapi_resource linux {
           {
             type = "Shell"
             inline = [
-              "hostname ${each.value.name}",
+              "dnf -y install nfs-utils",
               "if [ ${each.value.build.machineType} == JobManager ]; then",
               "  echo 'Customize (Start): NFS Server'",
               "  systemctl --now enable nfs-server",
               "  echo 'Customize (End): NFS Server'",
-              "fi"
+              "fi",
+              "hostname ${each.value.name}"
             ]
           },
           {
@@ -311,7 +312,6 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "Rename-Computer -NewName ${each.value.name}",
               "if ('${each.value.build.machineType}' -eq 'JobManager') {",
                 "Write-Host 'Customize (Start): NFS Server'",
                 "Install-WindowsFeature -Name 'FS-NFS-Service'",
@@ -320,6 +320,7 @@ resource azapi_resource windows {
                 "Install-WindowsFeature -Name 'AD-Domain-Services' -IncludeManagementTools",
                 "Write-Host 'Customize (End): AD Domain Services'",
               "}",
+              "Rename-Computer -NewName ${each.value.name}"
             ]
           },
           {
