@@ -43,9 +43,9 @@ function GetEncodedValue {
   echo $1 | base64 -d | jq -r $2
 }
 
-function SetFileSystems {
-  fileSystems="$1"
-  for fileSystem in $(echo $fileSystems | jq -r '.[] | @base64'); do
+function SetFileSystem {
+  fileSystemConfig="$1"
+  for fileSystem in $(echo $fileSystemConfig | jq -r '.[] | @base64'); do
     if [ $(GetEncodedValue $fileSystem .enable) == true ]; then
       SetFileSystemMount "$(GetEncodedValue $fileSystem .mount)"
     fi

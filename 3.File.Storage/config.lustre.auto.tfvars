@@ -3,10 +3,10 @@
 ##########################################################################################
 
 lustre = {
-  enable     = false
-  name       = "xlab"
-  tier       = "AMLFS-Durable-Premium-40" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/managed_lustre_file_system#sku_name
-  capacityTB = 48                         # https://learn.microsoft.com/azure/azure-managed-lustre/create-file-system-resource-manager#file-system-type-and-size-options
+  enable  = false
+  name    = "xlab"
+  tier    = "AMLFS-Durable-Premium-40" # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/managed_lustre_file_system#sku_name
+  sizeTiB = 48                         # https://learn.microsoft.com/azure/azure-managed-lustre/create-file-system-resource-manager#file-system-type-and-size-options
   maintenanceWindow = {
     dayOfWeek    = "Saturday"
     utcStartTime = "00:00"

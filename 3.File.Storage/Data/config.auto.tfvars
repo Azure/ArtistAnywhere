@@ -27,6 +27,14 @@ data = {
           enable = false
           name   = "xstudio"
           size   = "DW100c"
+          backup = {
+            storageAccount = {
+              type = "LRS"
+            }
+            geoPolicy = {
+              enable = false
+            }
+          }
         }
       ]
       sparkPools = [

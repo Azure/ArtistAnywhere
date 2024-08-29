@@ -4,10 +4,10 @@
 
 variable lustre {
   type = object({
-    enable     = bool
-    name       = string
-    tier       = string
-    capacityTB = number
+    enable  = bool
+    name    = string
+    tier    = string
+    sizeTiB = number
     maintenanceWindow = object({
       dayOfWeek    = string
       utcStartTime = string
@@ -74,7 +74,7 @@ resource azurerm_managed_lustre_file_system lab {
   resource_group_name    = azurerm_resource_group.lustre[0].name
   location               = azurerm_resource_group.lustre[0].location
   sku_name               = var.lustre.tier
-  storage_capacity_in_tb = var.lustre.capacityTB
+  storage_capacity_in_tb = var.lustre.sizeTiB
   subnet_id              = data.azurerm_subnet.storage_region.id
   zones                  = ["1"]
   identity {

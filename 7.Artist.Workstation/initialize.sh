@@ -6,6 +6,6 @@ if [ "${remoteAgentKey}" != "" ]; then
   RunProcess "/sbin/pcoip-register-host --registration-code=${remoteAgentKey}" $binDirectory/pcoip-agent-license
 fi
 
-SetFileSystems '${jsonencode(fileSystems)}'
+SetFileSystem '${jsonencode(fileSystem)}'
 
 source /etc/profile.d/aaa.sh

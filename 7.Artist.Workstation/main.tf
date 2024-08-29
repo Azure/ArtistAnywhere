@@ -39,31 +39,6 @@ variable resourceGroupName {
   type = string
 }
 
-variable fileSystems {
-  type = object({
-    linux = list(object({
-      enable   = bool
-      iaasOnly = bool
-      mount = object({
-        type    = string
-        path    = string
-        source  = string
-        options = string
-      })
-    }))
-    windows = list(object({
-      enable   = bool
-      iaasOnly = bool
-      mount = object({
-        type    = string
-        path    = string
-        source  = string
-        options = string
-      })
-    }))
-  })
-}
-
 variable activeDirectory {
   type = object({
     enable           = bool
@@ -170,11 +145,11 @@ data azurerm_virtual_network studio_edge {
 }
 
 locals {
-  fileSystemsLinux = [
-    for fileSystem in var.fileSystems.linux : fileSystem if fileSystem.enable
+  fileSystemLinux = [
+    for fileSystem in module.global.fileSystem.linux : fileSystem if fileSystem.enable
   ]
-  fileSystemsWindows = [
-    for fileSystem in var.fileSystems.windows : fileSystem if fileSystem.enable
+  fileSystemWindows = [
+    for fileSystem in module.global.fileSystem.windows : fileSystem if fileSystem.enable
   ]
 }
 

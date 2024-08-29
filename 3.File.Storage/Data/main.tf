@@ -74,6 +74,14 @@ variable data {
           enable = bool
           name   = string
           size   = string
+          backup = object({
+            storageAccount = object({
+              type = string
+            })
+            geoPolicy = object({
+              enable = bool
+            })
+          })
         }))
         sparkPools = list(object({
           enable  = bool

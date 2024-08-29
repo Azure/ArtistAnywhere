@@ -8,7 +8,7 @@ if ("${terminateNotification.enable}" -eq $true) {
   Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -User System -Force
 }
 
-SetFileSystems (ConvertFrom-Json -InputObject '${jsonencode(fileSystems)}')
+SetFileSystem (ConvertFrom-Json -InputObject '${jsonencode(fileSystem)}')
 
 Start-ScheduledTask -TaskName $jobManagerTaskName
 

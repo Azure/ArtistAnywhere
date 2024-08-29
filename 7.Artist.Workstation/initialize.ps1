@@ -5,7 +5,7 @@ if ("${remoteAgentKey}" -ne "") {
   RunProcess PowerShell.exe "-ExecutionPolicy Unrestricted -File ""$installFile"" -RegistrationCode ${remoteAgentKey}" $binDirectory/pcoip-agent-license
 }
 
-SetFileSystems (ConvertFrom-Json -InputObject '${jsonencode(fileSystems)}')
+SetFileSystem (ConvertFrom-Json -InputObject '${jsonencode(fileSystem)}')
 
 Start-ScheduledTask -TaskName $jobManagerTaskName
 

@@ -43,8 +43,8 @@ function FileExists ($filePath) {
   return Test-Path -PathType Leaf -Path $filePath
 }
 
-function SetFileSystems ($fileSystems) {
-  foreach ($fileSystem in $fileSystems) {
+function SetFileSystem ($fileSystemConfig) {
+  foreach ($fileSystem in $fileSystemConfig) {
     if ($fileSystem.enable) {
       SetFileSystemMount $fileSystem.mount
     }

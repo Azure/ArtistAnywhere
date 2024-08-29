@@ -83,10 +83,11 @@ resource azurerm_synapse_sql_pool studio {
   for_each = {
     for sqlPool in var.data.analytics.synapse.sqlPools : sqlPool.name => sqlPool if var.data.analytics.synapse.enable && sqlPool.enable
   }
-  name                 = each.value.name
-  synapse_workspace_id = azurerm_synapse_workspace.studio[0].id
-  sku_name             = each.value.size
-  storage_account_type = "LRS"
+  name                      = each.value.name
+  synapse_workspace_id      = azurerm_synapse_workspace.studio[0].id
+  sku_name                  = each.value.size
+  storage_account_type      = each.value.backup.storageAccount.type
+  geo_backup_policy_enabled = each.value.backup.geoPolicy.enable
 }
 
 resource azurerm_synapse_spark_pool studio {
