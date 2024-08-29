@@ -33,8 +33,9 @@ The following installation process is required for local deployment orchestratio
 For each module, here is the recommended configuration and deployment process.
 
 1. Review and edit the config values in each `config.auto.tfvars` file for your target deployment.
-   * In module `0 Global Foundation`, review and edit the following required config files.<br/>For example, your Azure subscription id must be set in /cfg/variables.tf
-      * `/cfg/variables.tf`
+   * In module `0 Global Foundation`, review and edit the following required config files.<br/>For example, your Azure subscription id must be set in /cfg/global.tf
+      * `/cfg/global.tf`
+      * `/cfg/file.system.tf`
       * `/cfg/backend.config`
    * In modules `2 Image Builder`, `5 Render Manager` and `7 Artist Workstation`, make sure you have sufficient **Standard** compute cores quota available on your Azure subscription for each configured virtual machine type / size in your target region.
    * In module `6 Render Farm`, make sure you have sufficient [Spot](https://learn.microsoft.com/azure/virtual-machines/spot-vms) compute cores quota available on your Azure subscription for each configured virtual machine type / size in your target region.
