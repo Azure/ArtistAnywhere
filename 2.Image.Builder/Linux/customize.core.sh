@@ -7,7 +7,7 @@ source /tmp/functions.sh
 echo "Customize (Start): Image Build Platform"
 # systemctl --now disable firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-dnf -y install epel-release python3-devel gcc gcc-c++ perl cmake git docker
+dnf -y install epel-release python3-devel nfs-utils gcc gcc-c++ perl cmake git docker
 export AZNFS_NONINTERACTIVE_INSTALL=1
 versionPath=$(echo $buildConfig | jq -r .versionPath.azBlobNFSMount)
 curl -L https://github.com/Azure/AZNFS-mount/releases/download/$versionPath/aznfs_install.sh | bash
