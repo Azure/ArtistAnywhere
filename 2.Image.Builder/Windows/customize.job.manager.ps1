@@ -68,7 +68,7 @@ if ($machineType -ne "Storage") {
 
   Write-Host "Customize (Start): Deadline Client Auth"
   $registryKeyName = "Run"
-  $registryKeyRoot = "HKCU:\Software\Microsoft\Windows\CurrentVersion"
+  $registryKeyRoot = "HKLM:\Software\Microsoft\Windows\CurrentVersion"
   $registryKeyPath = "$registryKeyRoot\$registryKeyName"
   if (-not (Test-Path -Path $registryKeyPath)) {
     New-Item -Path $registryKeyRoot -Name $registryKeyName
