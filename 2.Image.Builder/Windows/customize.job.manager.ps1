@@ -67,14 +67,18 @@ if ($machineType -ne "Storage") {
   Write-Host "Customize (End): Deadline Client"
 
   Write-Host "Customize (Start): Deadline Client Auth"
-  $registryKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-  $registryKeyName = "Deadline Database"
-  Set-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Value "$binPathJobManager\deadlinecommand.exe -StoreDatabaseCredentials $serviceUsername $servicePassword"
-  $registryKeyName = "Deadline Repository"
+  $registryKeyName = "Run"
+  $registryKeyRoot = "HKCU:\Software\Microsoft\Windows\CurrentVersion"
+  $registryKeyPath = "$registryKeyRoot\$registryKeyName"
+  if (-not (Test-Path -Path $registryKeyPath)) {
+    New-Item -Path $registryKeyRoot -Name $registryKeyName
+  }
+  Set-ItemProperty -Path $registryKeyPath -Name "Deadline Database" -Value "$binPathJobManager\deadlinecommand.exe -StoreDatabaseCredentials $serviceUsername $servicePassword"
+  $keyValueName = "Deadline Repository"
   if ($machineType -eq "JobManager") {
-    Set-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct $installRoot $installRoot\$certificateFile"
+    Set-ItemProperty -Path $registryKeyPath -Name $keyValueName -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct $installRoot $installRoot\$certificateFile"
   } else {
-    Set-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\"
+    Set-ItemProperty -Path $registryKeyPath -Name $keyValueName -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\"
   }
   Write-Host "Customize (End): Deadline Client Auth"
 
