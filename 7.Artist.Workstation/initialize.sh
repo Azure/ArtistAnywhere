@@ -7,5 +7,3 @@ if [ "${remoteAgentKey}" != "" ]; then
 fi
 
 SetFileSystem '${jsonencode(fileSystem)}'
-
-source /etc/profile.d/aaa.sh

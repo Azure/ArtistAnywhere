@@ -64,6 +64,11 @@ data azurerm_key_vault_secret admin_password {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
+data azurerm_key_vault_secret ssh_key_public {
+  name         = module.global.keyVault.secretName.sshKeyPublic
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
 data azurerm_key_vault_secret service_username {
   name         = module.global.keyVault.secretName.serviceUsername
   key_vault_id = data.azurerm_key_vault.studio.id
@@ -71,11 +76,6 @@ data azurerm_key_vault_secret service_username {
 
 data azurerm_key_vault_secret service_password {
   name         = module.global.keyVault.secretName.servicePassword
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
-data azurerm_key_vault_secret ssh_key_public {
-  name         = module.global.keyVault.secretName.sshKeyPublic
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 

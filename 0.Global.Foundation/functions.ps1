@@ -67,9 +67,9 @@ function RegisterFileSystemMounts {
   if (FileExists $fileSystemsMountPath) {
     RunProcess $fileSystemsMountPath $null file-system-mount
     $taskName = "AAA File System Mount"
-    $taskAction = New-ScheduledTaskAction -Execute $fileSystemsMountPath
     $taskTrigger = New-ScheduledTaskTrigger -AtStartup
-    Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -User System -Force
+    $taskAction = New-ScheduledTaskAction -Execute $fileSystemsMountPath
+    Register-ScheduledTask -TaskName $taskName -Trigger $taskTrigger -Action $taskAction -User System -Force
   }
 }
 

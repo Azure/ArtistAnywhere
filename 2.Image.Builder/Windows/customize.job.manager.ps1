@@ -66,17 +66,17 @@ if ($machineType -ne "Storage") {
   Set-Location -Path $binDirectory
   Write-Host "Customize (End): Deadline Client"
 
-  Write-Host "Customize (Start): Deadline Scheduled Task"
-  $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
+  Write-Host "Customize (Start): Deadline Client Auth"
+  $registryKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+  $registryKeyName = "Deadline Database"
+  Set-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Value "$binPathJobManager\deadlinecommand.exe -StoreDatabaseCredentials $serviceUsername $servicePassword"
+  $registryKeyName = "Deadline Repository"
   if ($machineType -eq "JobManager") {
-    $taskAction = New-ScheduledTaskAction -Execute "$binPathJobManager\deadlinecommand" -Argument "-ChangeRepository Direct $installRoot $installRoot\$certificateFile"
-    Register-ScheduledTask -TaskName $jobManagerInitTaskName -Trigger $taskTrigger -Action $taskAction -User System -Force
+    Set-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct $installRoot $installRoot\$certificateFile"
   } else {
-    $taskAction1 = New-ScheduledTaskAction -Execute "$binPathJobManager\deadlinecommand" -Argument "-StoreDatabaseCredentials $serviceUsername $servicePassword"
-    $taskAction2 = New-ScheduledTaskAction -Execute "$binPathJobManager\deadlinecommand" -Argument "-ChangeRepository Direct S:\"
-    Register-ScheduledTask -TaskName $jobManagerInitTaskName -Trigger $taskTrigger -Action $taskAction1,$taskAction2 -User System -Force
+    Set-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\"
   }
-  Write-Host "Customize (End): Deadline Scheduled Task"
+  Write-Host "Customize (End): Deadline Client Auth"
 
   Write-Host "Customize (Start): Deadline Monitor"
   $shortcutPath = "$env:AllUsersProfile\Desktop\Deadline Monitor.lnk"

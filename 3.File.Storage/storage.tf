@@ -265,7 +265,7 @@ resource terraform_data file_share_load_blob {
 
 resource azurerm_private_endpoint storage {
   for_each = {
-    for privateEndpoint in local.privateEndpoints : privateEndpoint.key => privateEndpoint if privateEndpoint.edgeZoneName == ""
+    for privateEndpoint in local.privateEndpoints : privateEndpoint.key => privateEndpoint if privateEndpoint.edgeZoneName == null
   }
   name                = each.value.key
   resource_group_name = each.value.resourceGroupName

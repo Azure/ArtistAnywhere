@@ -7,6 +7,4 @@ if ("${remoteAgentKey}" -ne "") {
 
 SetFileSystem (ConvertFrom-Json -InputObject '${jsonencode(fileSystem)}')
 
-Start-ScheduledTask -TaskName $jobManagerTaskName
-
 SetActiveDirectory (ConvertFrom-Json -InputObject '${jsonencode(activeDirectory)}')
