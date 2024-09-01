@@ -5,7 +5,7 @@ Azure Artist Anywhere (AAA) is a *modular & configurable* [Infrastructure as Cod
 The following design principles are implemented throughout each AAA solution deployment framework module.
 * Defense-in-depth layered security with integration of core services including [Managed Identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview), [Key Vault](https://learn.microsoft.com/azure/key-vault/general/overview),</br>[Private Link](https://learn.microsoft.com/azure/private-link/private-link-overview) / [ Endpoints](https://learn.microsoft.com/azure/private-link/private-endpoint-overview), [Network Security Groups](https://learn.microsoft.com/azure/virtual-network/network-security-groups-overview), [NAT Gateway](https://learn.microsoft.com/azure/nat-gateway/nat-overview), [Bastion](https://learn.microsoft.com/azure/bastion/bastion-overview), [Defender for Cloud](https://learn.microsoft.com/azure/defender-for-cloud/defender-for-cloud-introduction), [Policy](https://learn.microsoft.com/azure/governance/policy/overview), etc
 * Any custom software or 3rd-party software is supported in a [Compute Gallery](https://learn.microsoft.com/azure/virtual-machines/shared-image-galleries) custom image repository
-* Both Multi-Region and Edge Zone deployments are supported via a [Virtual Network](https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview) per region / zone
+* Multi-Region and [Extended Zone](https://learn.microsoft.com/azure/extended-zones/overview) deployments are supported via a [Virtual Network](https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview) per region / zone
 * Clean separation of [Terraform](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs) configuration files (**config.auto.tfvars**) and implementation files (**\*.tf**)
 
 | **Module Name** | **Module Description** | **Required for<br/>Burst Render?<br/>(*Compute Only*)** | **Required for<br/>Full Solution?<br/>(*Compute & Storage*)** |
@@ -54,7 +54,7 @@ The following sample images were rendered on Azure via multiple render farm, eng
 
 ### [Disney Moana Island](https://www.disneyanimation.com/resources/moana-island-scene)
 
-The following Disney Moana Island scene was rendered on Azure via the [Physically-Based Ray Tracer (PBRT) v4](https://github.com/mmp/pbrt-v4) render engine.
+The following Disney Moana Island scene was rendered on Azure via the [Physically-Based Ray Tracer (PBRT) v4](https://github.com/mmp/pbrt-v4) renderer.
 
 ![moana-island](https://github.com/Azure/ArtistAnywhere/assets/22285652/7320acaf-061d-40a5-95e8-3a157a0a513c)
 
@@ -68,7 +68,7 @@ To render the Disney Moana Island scene on an Azure **Windows** render farm, the
 
 ### [Blender Splash Screen](https://www.blender.org/download/demo-files/#splash)
 
-The following Blender 3.4 Splash screen was rendered on Azure via the [Blender](https://www.blender.org) render engine.
+The following Blender 3.4 Splash screen was rendered on Azure via the [Blender](https://www.blender.org) renderer.
 
 ![blender-splash-3 4](https://github.com/Azure/ArtistAnywhere/assets/22285652/07576415-ba75-454f-90b6-04f20cfecbe2)
 
