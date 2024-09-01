@@ -5,7 +5,6 @@ echo "Customize (Start): Core"
 source /tmp/functions.sh
 
 echo "Customize (Start): Image Build Platform"
-# systemctl --now disable firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
 dnf -y install epel-release python3-devel gcc gcc-c++ perl cmake git rsync
 export AZNFS_NONINTERACTIVE_INSTALL=1
@@ -49,7 +48,7 @@ if [ "$gpuProvider" == NVIDIA ]; then
   downloadUrl="https://go.microsoft.com/fwlink/?linkid=874272"
   curl -o $installFile -L $downloadUrl
   chmod +x $installFile
-  dnf -y install libglvnd-devel mesa-vulkan-drivers
+  dnf -y install libglvnd-devel mesa-vulkan-drivers xorg-x11-drivers pkg-config
   RunProcess "./$installFile --silent" $binDirectory/$processType
   echo "Customize (End): NVIDIA GPU (GRID)"
 

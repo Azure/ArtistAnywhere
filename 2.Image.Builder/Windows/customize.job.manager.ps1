@@ -73,12 +73,12 @@ if ($machineType -ne "Storage") {
   if (-not (Test-Path -Path $registryKeyPath)) {
     New-Item -Path $registryKeyRoot -Name $registryKeyName
   }
-  Set-ItemProperty -Path $registryKeyPath -Name "Deadline Database" -Value "$binPathJobManager\deadlinecommand.exe -StoreDatabaseCredentials $serviceUsername $servicePassword"
-  $keyValueName = "Deadline Repository"
+  Set-ItemProperty -Path $registryKeyPath -Name "DeadlineDatabase" -Value "$binPathJobManager\deadlinecommand.exe -StoreDatabaseCredentials $serviceUsername $servicePassword"
+  $keyValueName = "DeadlineRepository"
   if ($machineType -eq "JobManager") {
     Set-ItemProperty -Path $registryKeyPath -Name $keyValueName -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct $installRoot $installRoot\$certificateFile"
   } else {
-    Set-ItemProperty -Path $registryKeyPath -Name $keyValueName -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\"
+    Set-ItemProperty -Path $registryKeyPath -Name $keyValueName -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$certificateFile"
   }
   Write-Host "Customize (End): Deadline Client Auth"
 

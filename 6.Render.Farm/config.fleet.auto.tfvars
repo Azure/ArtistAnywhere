@@ -52,7 +52,7 @@ computeFleets = [
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
-      locationEdge = {
+      locationExtended = {
         enable = false
       }
     }
@@ -111,7 +111,7 @@ computeFleets = [
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
-      locationEdge = {
+      locationExtended = {
         enable = false
       }
     }

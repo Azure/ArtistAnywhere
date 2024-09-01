@@ -39,43 +39,43 @@ locals {
         key               = "${virtualNetwork.name}-${regionName}"
         resourceGroupName = "${var.resourceGroupName}.${regionName}"
         regionName        = regionName
-        edgeZone          = ""
+        extendedZone      = ""
       }) if virtualNetwork.enable
     ]
   ])
-  virtualNetworksExtended = distinct(concat(local.virtualNetworks, !module.global.resourceLocation.edgeZone.enable ? concat([local.virtualNetwork], [local.virtualNetwork]) : [
+  virtualNetworksExtended = distinct(concat(local.virtualNetworks, !module.global.resourceLocation.extendedZone.enable ? concat([local.virtualNetwork], [local.virtualNetwork]) : [
     merge(local.virtualNetwork, {
-      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetwork.name}"
-      key               = "${local.virtualNetwork.name}-${module.global.resourceLocation.edgeZone.regionName}"
-      resourceGroupId   = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}"
-      resourceGroupName = "${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}"
-      regionName        = module.global.resourceLocation.edgeZone.regionName
+      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetwork.name}"
+      key               = "${local.virtualNetwork.name}-${module.global.resourceLocation.extendedZone.regionName}"
+      resourceGroupId   = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}"
+      resourceGroupName = "${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}"
+      regionName        = module.global.resourceLocation.extendedZone.regionName
     }),
     merge(local.virtualNetwork, {
-      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}.${module.global.resourceLocation.edgeZone.name}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetwork.name}"
-      key               = "${local.virtualNetwork.name}-${module.global.resourceLocation.edgeZone.regionName}-${module.global.resourceLocation.edgeZone.name}"
-      resourceGroupId   = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}.${module.global.resourceLocation.edgeZone.name}"
-      resourceGroupName = "${var.resourceGroupName}.${module.global.resourceLocation.edgeZone.regionName}.${module.global.resourceLocation.edgeZone.name}"
-      regionName        = module.global.resourceLocation.edgeZone.regionName
-      edgeZone          = module.global.resourceLocation.edgeZone.name
+      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}.${module.global.resourceLocation.extendedZone.name}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetwork.name}"
+      key               = "${local.virtualNetwork.name}-${module.global.resourceLocation.extendedZone.regionName}-${module.global.resourceLocation.extendedZone.name}"
+      resourceGroupId   = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}.${module.global.resourceLocation.extendedZone.name}"
+      resourceGroupName = "${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}.${module.global.resourceLocation.extendedZone.name}"
+      regionName        = module.global.resourceLocation.extendedZone.regionName
+      extendedZone      = module.global.resourceLocation.extendedZone.name
     })
   ]))
   virtualNetworksSubnets = flatten([
     for virtualNetwork in local.virtualNetworksExtended : [
       for subnet in virtualNetwork.subnets : merge(subnet, {
-        key                    = "${virtualNetwork.key}-${subnet.name}"
-        regionName             = virtualNetwork.regionName
-        resourceGroupId        = virtualNetwork.resourceGroupId
-        resourceGroupName      = virtualNetwork.resourceGroupName
-        virtualNetworkKey      = virtualNetwork.key
-        virtualNetworkId       = virtualNetwork.id
-        virtualNetworkName     = virtualNetwork.name
-        virtualNetworkEdgeZone = virtualNetwork.edgeZone
-      }) if virtualNetwork.edgeZone == "" || (virtualNetwork.edgeZone != "" && subnet.serviceDelegation == null)
+        key                        = "${virtualNetwork.key}-${subnet.name}"
+        regionName                 = virtualNetwork.regionName
+        resourceGroupId            = virtualNetwork.resourceGroupId
+        resourceGroupName          = virtualNetwork.resourceGroupName
+        virtualNetworkKey          = virtualNetwork.key
+        virtualNetworkId           = virtualNetwork.id
+        virtualNetworkName         = virtualNetwork.name
+        virtualNetworkExtendedZone = virtualNetwork.extendedZone
+      }) if virtualNetwork.extendedZone == "" || (virtualNetwork.extendedZone != "" && subnet.serviceDelegation == null)
     ]
   ])
   virtualNetworksSubnetStorage = [
-    for subnet in local.virtualNetworksSubnets : subnet if subnet.name == "Storage" && subnet.virtualNetworkEdgeZone == ""
+    for subnet in local.virtualNetworksSubnets : subnet if subnet.name == "Storage" && subnet.virtualNetworkExtendedZone == ""
   ]
   virtualNetworksSubnetsSecurity = [
     for subnet in local.virtualNetworksSubnets : subnet if subnet.name != "GatewaySubnet"
@@ -89,7 +89,7 @@ resource azurerm_virtual_network studio {
   name                = each.value.name
   resource_group_name = each.value.resourceGroupName
   location            = each.value.regionName
-  edge_zone           = each.value.edgeZone != "" ? each.value.edgeZone : null
+  edge_zone           = each.value.extendedZone != "" ? each.value.extendedZone : null
   address_space       = each.value.addressSpace
   dns_servers         = each.value.dnsAddresses
   depends_on = [
@@ -130,7 +130,7 @@ output virtualNetworks {
       name              = virtualNetwork.name
       resourceGroupName = virtualNetwork.resourceGroupName
       regionName        = virtualNetwork.regionName
-      edgeZone          = virtualNetwork.edgeZone
+      extendedZone      = virtualNetwork.extendedZone
     }
   ]
 }

@@ -25,7 +25,7 @@ virtualMachines = [
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
-      locationEdge = {
+      locationExtended = {
         enable = false
       }
       staticIpAddress = ""
@@ -83,7 +83,7 @@ virtualMachines = [
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
-      locationEdge = {
+      locationExtended = {
         enable = false
       }
       staticIpAddress = "10.0.127.0"

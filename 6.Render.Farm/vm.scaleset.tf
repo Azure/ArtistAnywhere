@@ -27,7 +27,7 @@ variable virtualMachineScaleSets {
       acceleration = object({
         enable = bool
       })
-      locationEdge = object({
+      locationExtended = object({
         enable = bool
       })
     })
@@ -94,8 +94,8 @@ locals {
   virtualMachineScaleSets = [
     for virtualMachineScaleSet in var.virtualMachineScaleSets : merge(virtualMachineScaleSet, {
       resourceLocation = {
-        regionName = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : module.global.resourceLocation.regionName
-        edgeZone   = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+        regionName   = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
+        extendedZone = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
       }
       machine = merge(virtualMachineScaleSet.machine, {
         image = merge(virtualMachineScaleSet.machine.image, {
@@ -107,7 +107,7 @@ locals {
         })
       })
       network = merge(virtualMachineScaleSet.network, {
-        subnetId = "${virtualMachineScaleSet.network.locationEdge.enable ? data.azurerm_virtual_network.studio_edge.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
+        subnetId = "${virtualMachineScaleSet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
       })
       adminLogin = merge(virtualMachineScaleSet.adminLogin, {
         userName     = virtualMachineScaleSet.adminLogin.userName != "" ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -130,7 +130,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
   resource_group_name             = azurerm_resource_group.farm.name
   location                        = each.value.resourceLocation.regionName
-  edge_zone                       = each.value.resourceLocation.edgeZone
+  edge_zone                       = each.value.resourceLocation.extendedZone
   sku                             = each.value.machine.size
   instances                       = each.value.machine.count
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
@@ -270,7 +270,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   computer_name_prefix        = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
   resource_group_name         = azurerm_resource_group.farm.name
   location                    = each.value.resourceLocation.regionName
-  edge_zone                   = each.value.resourceLocation.edgeZone
+  edge_zone                   = each.value.resourceLocation.extendedZone
   sku                         = each.value.machine.size
   instances                   = each.value.machine.count
   source_image_id             = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
@@ -394,7 +394,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
   name                        = each.value.name
   resource_group_name         = azurerm_resource_group.farm.name
   location                    = each.value.resourceLocation.regionName
-  # edge_zone                   = each.value.resourceLocation.edgeZone
+  # edge_zone                   = each.value.resourceLocation.extendedZone
   sku_name                    = each.value.machine.size
   instances                   = each.value.machine.count
   source_image_id             = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"

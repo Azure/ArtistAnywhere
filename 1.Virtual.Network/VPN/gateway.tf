@@ -24,7 +24,7 @@ resource azurerm_virtual_network_gateway vpn {
   name                = var.vpnGateway.name
   resource_group_name = data.azurerm_virtual_network.studio.resource_group_name
   location            = data.azurerm_virtual_network.studio.location
-  edge_zone           = var.virtualNetwork.edgeZoneName != "" ? var.virtualNetwork.edgeZoneName : null
+  edge_zone           = var.virtualNetwork.extendedZoneName != "" ? var.virtualNetwork.extendedZoneName : null
   type                = "Vpn"
   sku                 = var.vpnGateway.tier
   vpn_type            = var.vpnGateway.type

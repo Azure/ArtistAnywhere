@@ -159,7 +159,7 @@ data azurerm_virtual_network studio_region {
   resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
-data azurerm_virtual_network studio_edge {
+data azurerm_virtual_network studio_extended {
   name                = reverse(data.terraform_remote_state.network.outputs.virtualNetworks)[0].name
   resource_group_name = reverse(data.terraform_remote_state.network.outputs.virtualNetworks)[0].resourceGroupName
 }
@@ -175,10 +175,10 @@ data azurerm_subnet storage_region {
   virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }
 
-# data azurerm_subnet storage_edge {
+# data azurerm_subnet storage_extended {
 #   name                 = "Storage"
-#   resource_group_name  = data.azurerm_virtual_network.studio_edge.resource_group_name
-#   virtual_network_name = data.azurerm_virtual_network.studio_edge.name
+#   resource_group_name  = data.azurerm_virtual_network.studio_extended.resource_group_name
+#   virtual_network_name = data.azurerm_virtual_network.studio_extended.name
 # }
 
 locals {

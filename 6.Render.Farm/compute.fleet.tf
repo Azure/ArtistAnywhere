@@ -44,7 +44,7 @@ variable computeFleets {
       acceleration = object({
         enable = bool
       })
-      locationEdge = object({
+      locationExtended = object({
         enable = bool
       })
     })
@@ -60,8 +60,8 @@ locals {
   computeFleets = [
     for computeFleet in var.computeFleets : merge(computeFleet, {
       resourceLocation = {
-        regionName = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : module.global.resourceLocation.regionName
-        edgeZone   = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+        regionName   = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
+        extendedZone = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
       }
       machine = merge(computeFleet.machine, {
         image = merge(computeFleet.machine.image, {
@@ -73,7 +73,7 @@ locals {
         })
       })
       network = merge(computeFleet.network, {
-        subnetId = "${computeFleet.network.locationEdge.enable ? data.azurerm_virtual_network.studio_edge.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : computeFleet.network.subnetName}"
+        subnetId = "${computeFleet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : computeFleet.network.subnetName}"
       })
       adminLogin = merge(computeFleet.adminLogin, {
         userName     = computeFleet.adminLogin.userName != "" ? computeFleet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value

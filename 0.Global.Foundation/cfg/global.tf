@@ -1,11 +1,11 @@
 variable subscriptionId {
-  default = "5cc0d8f1-3643-410c-8646-1a2961134bd3" # Set to your Azure subscription id
+  default = "" # Set to your Azure subscription id
 }
 
 variable resourceLocation {
   default = {
     regionName = "SouthCentralUS" # Set from "az account list-locations --query [].name"
-    edgeZone = {
+    extendedZone = {
       enable     = false
       name       = "LosAngeles"
       regionName = "WestUS"

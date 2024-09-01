@@ -4,7 +4,7 @@
 
 locals {
   natGatewayNetworks = [
-    for virtualNetwork in local.virtualNetworks : virtualNetwork if virtualNetwork.edgeZone == ""
+    for virtualNetwork in local.virtualNetworks : virtualNetwork if virtualNetwork.extendedZone == ""
   ]
   natGatewayNetworksSubnets = flatten([
     for virtualNetwork in local.natGatewayNetworks : [
@@ -12,7 +12,7 @@ locals {
         key               = "${virtualNetwork.key}-${subnet.name}"
         virtualNetworkKey = virtualNetwork.key
         virtualNetworkId  = virtualNetwork.id
-      }) if virtualNetwork.edgeZone == "" && subnet.name != "GatewaySubnet"
+      }) if virtualNetwork.extendedZone == "" && subnet.name != "GatewaySubnet"
     ]
   ])
 }

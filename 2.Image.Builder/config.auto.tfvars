@@ -104,7 +104,7 @@ imageBuilder = {
         machineSize    = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
-        osDiskSizeGB   = 512
+        osDiskSizeGB   = 256
         timeoutMinutes = 120
         jobProcessors = [
         ]
@@ -293,7 +293,7 @@ imageBuilder = {
         machineSize    = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
-        osDiskSizeGB   = 512
+        osDiskSizeGB   = 256
         timeoutMinutes = 240
         jobProcessors = [
         ]

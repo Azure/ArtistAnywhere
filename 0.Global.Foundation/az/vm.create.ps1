@@ -4,8 +4,8 @@
 
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  region   = "SouthCentralUS"
-  edgeZone = ""
+  region       = "SouthCentralUS"
+  extendedZone = ""
 }
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
@@ -22,7 +22,7 @@ $virtualMachine = @{
     sshKeyPublic = az keyvault secret show --vault-name "xstudio" --name "SSHKeyPublic" --query value
   }
   osDisk = @{
-    sizeGB  = 512
+    sizeGB  = 256
     caching = "None"
   }
   dataDisk = @{
@@ -48,12 +48,12 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  region   = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
-  edgeZone = "LosAngeles"
+  region       = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
+  extendedZone = "LosAngeles"
 }
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.edgeZone)"})"
+  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.extendedZone)"})"
   name              = "Studio"
   subnetName        = "Farm"
 }
@@ -67,14 +67,14 @@ $virtualMachine = @{
     sshKeyPublic = az keyvault secret show --vault-name "xstudio" --name "SSHKeyPublic" --query value
   }
   osDisk = @{
-    sizeGB  = 512
+    sizeGB  = 256
     caching = "ReadOnly"
   }
 }
 az group create --name $resourceGroupName --location $resourceLocation.region
-$edgeZone = if ($extendedLocation) {" --edge-zone $($resourceLocation.edgeZone)"} else {""}
+$extendedZone = if ($extendedLocation) {" --edge-zone $($resourceLocation.extendedZone)"} else {""}
 $subnetId = "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)"
-$vmCreate = "az vm create --resource-group $resourceGroupName$edgeZone --name $($virtualMachine.name) --size $($virtualMachine.size) --os-disk-size-gb $($virtualMachine.osDisk.sizeGB) --os-disk-caching $($virtualMachine.osDisk.caching) --image $($virtualMachine.imageId) --admin-username $($virtualMachine.adminLogin.userName) --subnet $subnetId --public-ip-address '""""' --nsg '""""'"
+$vmCreate = "az vm create --resource-group $resourceGroupName$extendedZone --name $($virtualMachine.name) --size $($virtualMachine.size) --os-disk-size-gb $($virtualMachine.osDisk.sizeGB) --os-disk-caching $($virtualMachine.osDisk.caching) --image $($virtualMachine.imageId) --admin-username $($virtualMachine.adminLogin.userName) --subnet $subnetId --public-ip-address '""""' --nsg '""""'"
 $vmCreate = if ($osTypeWindows) {"$vmCreate --admin-password $($virtualMachine.adminLogin.userPassword)"} else {"$vmCreate --ssh-key-values $($virtualMachine.adminLogin.sshKeyPublic)"}
 Invoke-Expression -Command $vmCreate
 
@@ -86,12 +86,12 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  region   = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
-  edgeZone = "LosAngeles"
+  region       = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
+  extendedZone = "LosAngeles"
 }
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.edgeZone)"})"
+  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.extendedZone)"})"
   name              = "Studio"
   subnetName        = "Farm"
 }
@@ -118,10 +118,10 @@ $virtualMachine = @{
   }
 }
 az group create --name $resourceGroupName --location $resourceLocation.region
-$edgeZone = if ($extendedLocation) {" --edge-zone $($resourceLocation.edgeZone)"} else {""}
+$extendedZone = if ($extendedLocation) {" --edge-zone $($resourceLocation.extendedZone)"} else {""}
 $priority = if ($virtualMachine.spot.enable) {"Spot"} else {"Regular"}
 $subnetId = "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)"
-$vmCreate = "az vm create --resource-group $resourceGroupName$edgeZone --name $($virtualMachine.name) --size $($virtualMachine.size) --os-disk-size-gb $($virtualMachine.osDisk.sizeGB) --os-disk-caching $($virtualMachine.osDisk.caching) --image $($virtualMachine.imageId) --admin-username $($virtualMachine.adminLogin.userName) --subnet $subnetId --public-ip-address '""""' --nsg '""""' --priority $priority"
+$vmCreate = "az vm create --resource-group $resourceGroupName$extendedZone --name $($virtualMachine.name) --size $($virtualMachine.size) --os-disk-size-gb $($virtualMachine.osDisk.sizeGB) --os-disk-caching $($virtualMachine.osDisk.caching) --image $($virtualMachine.imageId) --admin-username $($virtualMachine.adminLogin.userName) --subnet $subnetId --public-ip-address '""""' --nsg '""""' --priority $priority"
 $vmCreate = if ($osTypeWindows) {"$vmCreate --admin-password $($virtualMachine.adminLogin.userPassword)"} else {"$vmCreate --ssh-key-values $($virtualMachine.adminLogin.sshKeyPublic)"}
 $vmCreate = if ($virtualMachine.osDisk.ephemeral.enable) {"$vmCreate --ephemeral-os-disk $($virtualMachine.osDisk.ephemeral.enable) --ephemeral-os-disk-placement $($virtualMachine.osDisk.ephemeral.placement)"} else {$vmCreate}
 $vmCreate = if ($virtualMachine.spot.enable) {"$vmCreate --eviction-policy $($virtualMachine.spot.evictionPolicy)"} else {$vmCreate}
@@ -135,12 +135,12 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  region   = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
-  edgeZone = "LosAngeles"
+  region       = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
+  extendedZone = "LosAngeles"
 }
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.edgeZone)"})"
+  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.extendedZone)"})"
   name              = "Studio"
   subnetName        = "Workstation"
 }
@@ -162,8 +162,8 @@ $virtualMachine = @{
   }
 }
 az group create --name $resourceGroupName --location $resourceLocation.region
-$edgeZone = if ($extendedLocation) {" --edge-zone $($resourceLocation.edgeZone)"} else {""}
+$extendedZone = if ($extendedLocation) {" --edge-zone $($resourceLocation.extendedZone)"} else {""}
 $subnetId = "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)"
-$vmCreate = "az vm create --resource-group $resourceGroupName$edgeZone --name $($virtualMachine.name) --size $($virtualMachine.size) --os-disk-size-gb $($virtualMachine.osDisk.sizeGB) --os-disk-caching $($virtualMachine.osDisk.caching) --image $($virtualMachine.imageId) --admin-username $($virtualMachine.adminLogin.userName) --subnet $subnetId --public-ip-address '""""' --nsg '""""'"
+$vmCreate = "az vm create --resource-group $resourceGroupName$extendedZone --name $($virtualMachine.name) --size $($virtualMachine.size) --os-disk-size-gb $($virtualMachine.osDisk.sizeGB) --os-disk-caching $($virtualMachine.osDisk.caching) --image $($virtualMachine.imageId) --admin-username $($virtualMachine.adminLogin.userName) --subnet $subnetId --public-ip-address '""""' --nsg '""""'"
 $vmCreate = if ($osTypeWindows) {"$vmCreate --admin-password $($virtualMachine.adminLogin.userPassword)"} else {"$vmCreate --ssh-key-values $($virtualMachine.adminLogin.sshKeyPublic)"}
 Invoke-Expression -Command $vmCreate

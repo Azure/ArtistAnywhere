@@ -12,7 +12,6 @@ variable storageAccounts {
     enableHttpsOnly      = bool
     enableBlobNfsV3      = bool
     enableLargeFileShare = bool
-    enableEdgeZoneDeploy = bool
     privateEndpointTypes = list(string)
     blobContainers = list(object({
       enable = bool
@@ -31,6 +30,9 @@ variable storageAccounts {
       accessProtocol = string
       loadFiles      = bool
     }))
+    extendedZone = object({
+      enable = bool
+    })
   }))
 }
 
@@ -38,8 +40,8 @@ locals {
   storageAccounts = [
     for storageAccount in var.storageAccounts : merge(storageAccount, {
       resourceGroupName     = var.resourceGroupName
-      resourceGroupLocation = storageAccount.enableEdgeZoneDeploy && module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : module.global.resourceLocation.regionName
-      edgeZoneName          = storageAccount.enableEdgeZoneDeploy && module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+      resourceGroupLocation = storageAccount.extendedZone.enable && module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
+      extendedZoneName      = storageAccount.extendedZone.enable && module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
       storageAccountId      = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
       storageAccountName    = storageAccount.name
     }) if storageAccount.enable
@@ -111,7 +113,7 @@ resource azurerm_storage_account studio {
   name                            = each.value.name
   resource_group_name             = each.value.resourceGroupName
   location                        = each.value.resourceGroupLocation
-  edge_zone                       = each.value.edgeZoneName
+  edge_zone                       = each.value.extendedZoneName
   account_kind                    = each.value.type
   account_tier                    = each.value.tier
   account_replication_type        = each.value.redundancy
@@ -265,12 +267,12 @@ resource terraform_data file_share_load_blob {
 
 resource azurerm_private_endpoint storage {
   for_each = {
-    for privateEndpoint in local.privateEndpoints : privateEndpoint.key => privateEndpoint if privateEndpoint.edgeZoneName == null
+    for privateEndpoint in local.privateEndpoints : privateEndpoint.key => privateEndpoint if privateEndpoint.extendedZoneName == null
   }
   name                = each.value.key
   resource_group_name = each.value.resourceGroupName
   location            = each.value.resourceGroupLocation
-  # edge_zone           = each.value.edgeZoneName != "" ? each.value.edgeZoneName : null
+  # edge_zone           = each.value.extendedZoneName != "" ? each.value.extendedZoneName : null
   subnet_id           = data.azurerm_subnet.storage_region.id
   private_service_connection {
     name                           = each.value.storageAccountName

@@ -23,7 +23,7 @@ variable virtualMachines {
       acceleration = object({
         enable = bool
       })
-      locationEdge = object({
+      locationExtended = object({
         enable = bool
       })
       staticIpAddress = string
@@ -67,8 +67,8 @@ locals {
   virtualMachines = [
     for virtualMachine in var.virtualMachines : merge(virtualMachine, {
       resourceLocation = {
-        regionName = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : module.global.resourceLocation.regionName
-        edgeZone   = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+        regionName   = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
+        extendedZone = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
       }
       image = merge(virtualMachine.image, {
         plan = {
@@ -78,7 +78,7 @@ locals {
         }
       })
       network = merge(virtualMachine.network, {
-        subnetId = "${virtualMachine.network.locationEdge.enable ? data.azurerm_virtual_network.studio_edge.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
+        subnetId = "${virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
       })
       adminLogin = merge(virtualMachine.adminLogin, {
         userName     = virtualMachine.adminLogin.userName != "" ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -96,7 +96,7 @@ resource azurerm_network_interface job_manager {
   name                = each.value.name
   resource_group_name = azurerm_resource_group.job_manager.name
   location            = each.value.resourceLocation.regionName
-  edge_zone           = each.value.resourceLocation.edgeZone
+  edge_zone           = each.value.resourceLocation.extendedZone
   ip_configuration {
     name                          = "ipConfig"
     subnet_id                     = each.value.network.subnetId
@@ -113,7 +113,7 @@ resource azurerm_linux_virtual_machine job_manager {
   name                            = each.value.name
   resource_group_name             = azurerm_resource_group.job_manager.name
   location                        = each.value.resourceLocation.regionName
-  edge_zone                       = each.value.resourceLocation.edgeZone
+  edge_zone                       = each.value.resourceLocation.extendedZone
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                            = each.value.size
   admin_username                  = each.value.adminLogin.userName
@@ -213,7 +213,7 @@ resource azurerm_windows_virtual_machine job_manager {
   name                = each.value.name
   resource_group_name = azurerm_resource_group.job_manager.name
   location            = each.value.resourceLocation.regionName
-  edge_zone           = each.value.resourceLocation.edgeZone
+  edge_zone           = each.value.resourceLocation.extendedZone
   source_image_id     = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                = each.value.size
   admin_username      = each.value.adminLogin.userName
@@ -252,7 +252,7 @@ resource azurerm_virtual_machine_extension initialize_windows {
     commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
       templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
         adminPassword   = each.value.adminLogin.userPassword
-        activeDirectory = each.value.activeDirectory
+        activeDirectory = var.activeDirectory
       })), "UTF-16LE"
     )}"
   })

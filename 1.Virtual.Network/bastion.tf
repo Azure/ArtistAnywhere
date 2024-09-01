@@ -131,7 +131,7 @@ resource azurerm_network_security_group bastion {
 
 resource azurerm_subnet_network_security_group_association bastion {
   for_each = {
-    for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet if subnet.name == "AzureBastionSubnet" && subnet.virtualNetworkEdgeZone == ""
+    for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet if subnet.name == "AzureBastionSubnet" && subnet.virtualNetworkExtendedZone == ""
   }
   subnet_id                 = "${each.value.virtualNetworkId}/subnets/AzureBastionSubnet"
   network_security_group_id = azurerm_network_security_group.bastion[each.value.key].id

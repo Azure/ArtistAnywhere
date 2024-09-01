@@ -19,7 +19,7 @@ data azurerm_monitor_data_collection_endpoint studio {
 
 locals {
   monitorNetworks = [
-    for virtualNetwork in local.virtualNetworks: virtualNetwork if virtualNetwork.edgeZone == ""
+    for virtualNetwork in local.virtualNetworks: virtualNetwork if virtualNetwork.extendedZone == ""
   ]
 }
 

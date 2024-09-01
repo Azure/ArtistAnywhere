@@ -24,7 +24,7 @@ variable virtualMachines {
       acceleration = object({
         enable = bool
       })
-      locationEdge = object({
+      locationExtended = object({
         enable = bool
       })
     })
@@ -66,8 +66,8 @@ locals {
     for virtualMachine in var.virtualMachines : [
       for i in range(virtualMachine.count) : merge(virtualMachine, {
         resourceLocation = {
-          regionName = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.regionName : module.global.resourceLocation.regionName
-          edgeZone   = module.global.resourceLocation.edgeZone.enable ? module.global.resourceLocation.edgeZone.name : null
+          regionName   = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
+          extendedZone = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
         }
         name = "${virtualMachine.name}${i}"
         image = merge(virtualMachine.image, {
@@ -78,7 +78,7 @@ locals {
           }
         })
         network = merge(virtualMachine.network, {
-          subnetId = "${virtualMachine.network.locationEdge.enable ? data.azurerm_virtual_network.studio_edge.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
+          subnetId = "${virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
         })
         adminLogin = merge(virtualMachine.adminLogin, {
           userName     = virtualMachine.adminLogin.userName != "" ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -101,7 +101,7 @@ resource azurerm_network_interface workstation {
   name                = each.value.name
   resource_group_name = azurerm_resource_group.workstation.name
   location            = each.value.resourceLocation.regionName
-  edge_zone           = each.value.resourceLocation.edgeZone
+  edge_zone           = each.value.resourceLocation.extendedZone
   ip_configuration {
     name                          = "ipConfig"
     subnet_id                     = each.value.network.subnetId
@@ -117,7 +117,7 @@ resource azurerm_linux_virtual_machine workstation {
   name                            = each.value.name
   resource_group_name             = azurerm_resource_group.workstation.name
   location                        = each.value.resourceLocation.regionName
-  edge_zone                       = each.value.resourceLocation.edgeZone
+  edge_zone                       = each.value.resourceLocation.extendedZone
   size                            = each.value.size
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username                  = each.value.adminLogin.userName
@@ -219,7 +219,7 @@ resource azurerm_windows_virtual_machine workstation {
   name                = each.value.name
   resource_group_name = azurerm_resource_group.workstation.name
   location            = each.value.resourceLocation.regionName
-  edge_zone           = each.value.resourceLocation.edgeZone
+  edge_zone           = each.value.resourceLocation.extendedZone
   size                = each.value.size
   source_image_id     = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username      = each.value.adminLogin.userName

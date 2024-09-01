@@ -24,7 +24,7 @@ variable subscriptionId {
 variable virtualNetwork {
   type = object({
     name              = string
-    edgeZoneName      = string
+    extendedZoneName  = string
     resourceGroupName = string
     gateway = object({
       ipAddress1 = object({

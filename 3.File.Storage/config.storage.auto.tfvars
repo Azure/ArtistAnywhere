@@ -12,7 +12,6 @@ storageAccounts = [
     enableHttpsOnly      = true               # https://learn.microsoft.com/azure/storage/common/storage-require-secure-transfer
     enableBlobNfsV3      = true               # https://learn.microsoft.com/azure/storage/blobs/network-file-system-protocol-support
     enableLargeFileShare = false              # https://learn.microsoft.com/azure/storage/files/storage-how-to-create-file-share#advanced
-    enableEdgeZoneDeploy = false
     privateEndpointTypes = [ # https://learn.microsoft.com/azure/storage/common/storage-private-endpoints
       "blob"
     ]
@@ -29,6 +28,9 @@ storageAccounts = [
     ]
     fileShares = [ # https://learn.microsoft.com/azure/storage/files/storage-files-introduction
     ]
+    extendedZone = {
+      enable = false
+    }
   },
   {
     enable               = false
@@ -39,7 +41,6 @@ storageAccounts = [
     enableHttpsOnly      = false         # https://learn.microsoft.com/azure/storage/common/storage-require-secure-transfer
     enableBlobNfsV3      = false         # https://learn.microsoft.com/azure/storage/blobs/network-file-system-protocol-support
     enableLargeFileShare = true          # https://learn.microsoft.com/azure/storage/files/storage-how-to-create-file-share#advanced
-    enableEdgeZoneDeploy = false
     privateEndpointTypes = [ # https://learn.microsoft.com/azure/storage/common/storage-private-endpoints
       "file"
     ]
@@ -55,5 +56,8 @@ storageAccounts = [
         loadFiles      = false
       }
     ]
+    extendedZone = {
+      enable = false
+    }
   }
 ]

@@ -26,7 +26,7 @@ virtualMachines = [
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
-      locationEdge = {
+      locationExtended = {
         enable = false
       }
     }
@@ -82,7 +82,7 @@ virtualMachines = [
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
-      locationEdge = {
+      locationExtended = {
         enable = false
       }
     }
@@ -138,7 +138,7 @@ virtualMachines = [
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
-      locationEdge = {
+      locationExtended = {
         enable = false
       }
     }
@@ -194,7 +194,7 @@ virtualMachines = [
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
-      locationEdge = {
+      locationExtended = {
         enable = false
       }
     }
