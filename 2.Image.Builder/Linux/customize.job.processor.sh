@@ -32,6 +32,7 @@ if [[ $jobProcessors == *Blender* ]]; then
   downloadUrl="$binStorageHost/Blender/$versionPath/$installFile$binStorageAuth"
   curl -o $installFile -L $downloadUrl
   tar -xJf $installFile
+  dnf -y install mesa-dri-drivers
   dnf -y install mesa-libGL
   dnf -y install libXxf86vm
   dnf -y install libXfixes
