@@ -78,7 +78,8 @@ if ($machineType -ne "Storage") {
   if ($machineType -eq "JobManager") {
     Set-ItemProperty -Path $registryKeyPath -Name $keyValueName -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct $installRoot $installRoot\$certificateFile"
   } else {
-    Set-ItemProperty -Path $registryKeyPath -Name $keyValueName -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$certificateFile"
+    Set-ItemProperty -Path $registryKeyPath -Name "$($keyValueName)Linux" -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\"
+    Set-ItemProperty -Path $registryKeyPath -Name "$($keyValueName)Windows" -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$certificateFile"
   }
   Write-Host "Customize (End): Deadline Client Auth"
 
