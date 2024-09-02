@@ -67,20 +67,22 @@ if ($machineType -ne "Storage") {
   Write-Host "Customize (End): Deadline Client"
 
   Write-Host "Customize (Start): Deadline Client Auth"
+  $filePath = "$binDirectory\deadline-client-auth.bat"
+  New-Item -Path $filePath -ItemType File
+  Add-Content -Path $filePath -Value "$binPathJobManager\deadlinecommand.exe -StoreDatabaseCredentials $serviceUsername $servicePassword"
+  if ($machineType -eq "JobManager") {
+    Add-Content -Path $filePath -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct $installRoot $installRoot\$certificateFile"
+  } else {
+    Add-Content -Path $filePath -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\"
+    Add-Content -Path $filePath -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$certificateFile"
+  }
   $registryKeyName = "Run"
   $registryKeyRoot = "HKLM:\Software\Microsoft\Windows\CurrentVersion"
   $registryKeyPath = "$registryKeyRoot\$registryKeyName"
   if (-not (Test-Path -Path $registryKeyPath)) {
     New-Item -Path $registryKeyRoot -Name $registryKeyName
   }
-  Set-ItemProperty -Path $registryKeyPath -Name "DeadlineDatabase" -Value "$binPathJobManager\deadlinecommand.exe -StoreDatabaseCredentials $serviceUsername $servicePassword"
-  $keyValueName = "DeadlineRepository"
-  if ($machineType -eq "JobManager") {
-    Set-ItemProperty -Path $registryKeyPath -Name $keyValueName -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct $installRoot $installRoot\$certificateFile"
-  } else {
-    Set-ItemProperty -Path $registryKeyPath -Name "$($keyValueName)Linux" -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\"
-    Set-ItemProperty -Path $registryKeyPath -Name "$($keyValueName)Windows" -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$certificateFile"
-  }
+  Set-ItemProperty -Path $registryKeyPath -Name "DeadlineClientAuth" -Value $filePath
   Write-Host "Customize (End): Deadline Client Auth"
 
   Write-Host "Customize (Start): Deadline Monitor"
