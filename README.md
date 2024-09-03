@@ -54,15 +54,15 @@ The following sample images were rendered on Azure via multiple render farm, eng
 
 ### [Disney Moana Island](https://www.disneyanimation.com/resources/moana-island-scene)
 
-The following Disney Moana Island scene was rendered on Azure via the [Physically-Based Ray Tracer (PBRT) v4](https://github.com/mmp/pbrt-v4) renderer.
+The following Disney Moana Island scene was rendered on Azure via the [Physically-Based Ray Tracer (PBRT)](https://github.com/mmp/pbrt-v4) renderer.
 
 ![moana-island](https://github.com/Azure/ArtistAnywhere/assets/22285652/7320acaf-061d-40a5-95e8-3a157a0a513c)
 
-To render the Disney Moana Island scene on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** and/or **Windows** artist workstation.
+To render the Disney Moana Island scene on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** or **Windows** artist workstation.
 
 ```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt -arguments "--outfile /mnt/storage/pbrt/moana/island-v4.png /mnt/storage/pbrt/moana/island/pbrt-v4/island.pbrt"```
 
-To render the Disney Moana Island scene on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** and/or **Windows** artist workstation.
+To render the Disney Moana Island scene on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** or **Windows** artist workstation.
 
 ```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt.exe -arguments "--outfile X:\pbrt\moana\island-v4.png X:\pbrt\moana\island\pbrt-v4\island.pbrt"```
 
@@ -70,13 +70,13 @@ To render the Disney Moana Island scene on an Azure **Windows** render farm, the
 
 The following Blender 3.4 Splash screen was rendered on Azure via the [Blender](https://www.blender.org) renderer.
 
-![blender-splash-3 4](https://github.com/Azure/ArtistAnywhere/assets/22285652/07576415-ba75-454f-90b6-04f20cfecbe2)
+![blender-splash](https://github.com/Azure/ArtistAnywhere/assets/22285652/07576415-ba75-454f-90b6-04f20cfecbe2)
 
-To render the Blender Splash screen on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** and/or **Windows** artist workstation.
+To render the Blender Splash screen on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** or **Windows** artist workstation.
 
 ```deadlinecommand -SubmitCommandLineJob -name blender-splash -executable blender -arguments "--background /mnt/storage/blender/3.4/splash.blend --render-output /mnt/storage/blender/3.4/splash --enable-autoexec --render-frame 1"```
 
-To render the Blender Splash screen on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** and/or **Windows** artist workstation.
+To render the Blender Splash screen on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** or **Windows** artist workstation.
 
 ```deadlinecommand -SubmitCommandLineJob -name blender-splash -executable blender.exe -arguments "--background X:\blender\3.4\splash.blend --render-output X:\blender\3.4\splash --enable-autoexec --render-frame 1"```
 
