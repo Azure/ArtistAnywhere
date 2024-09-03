@@ -29,7 +29,7 @@ if ($jobProcessors -contains "Blender") {
   $downloadUrl = "$binStorageHost/Blender/$versionPath/$installFile$binStorageAuth"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   RunProcess $installFile "/quiet /norestart /log $processType.log" $null
-  $binPaths += ";C:\Program Files\Blender Foundation\Blender 4.0"
+  $binPaths += ";C:\Program Files\Blender Foundation\Blender $($versionPath.substring(0, 3))"
   Write-Host "Customize (End): Blender"
 }
 

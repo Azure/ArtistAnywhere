@@ -19,6 +19,16 @@ if [ $machineType == Workstation ]; then
 fi
 echo "Customize (End): Image Build Platform"
 
+if [[ $machineType == Storage || "$gpuProvider" != "" ]]; then
+  echo "Customize (Start): Linux Kernel Dev"
+  dnf -y install elfutils-libelf-devel openssl-devel bison flex
+  installFile="kernel-devel-5.14.0-362.8.1.el9_3.x86_64.rpm"
+  downloadUrl="https://download.rockylinux.org/vault/rocky/9.3/devel/x86_64/os/Packages/k/$installFile"
+  curl -o $installFile -L $downloadUrl
+  rpm -i $installFile
+  echo "Customize (End): Linux Kernel Dev"
+fi
+
 if [ $machineType == Storage ]; then
   echo "Customize (Start): NVIDIA OFED"
   processType="mellanox-ofed"
@@ -29,16 +39,6 @@ if [ $machineType == Storage ]; then
   dnf -y install kernel-modules-extra kernel-rpm-macros rpm-build libtool gcc-gfortran pciutils tcl tk
   RunProcess "./MLNX_OFED*/mlnxofedinstall --without-fw-update --add-kernel-support --skip-repo --force" $binDirectory/$processType
   echo "Customize (End): NVIDIA OFED"
-fi
-
-if [ "$gpuProvider" != "" ]; then
-  echo "Customize (Start): Linux Kernel Dev"
-  dnf -y install elfutils-libelf-devel openssl-devel bison flex
-  installFile="kernel-devel-5.14.0-362.8.1.el9_3.x86_64.rpm"
-  downloadUrl="https://download.rockylinux.org/vault/rocky/9.3/devel/x86_64/os/Packages/k/$installFile"
-  curl -o $installFile -L $downloadUrl
-  rpm -i $installFile
-  echo "Customize (End): Linux Kernel Dev"
 fi
 
 if [ "$gpuProvider" == NVIDIA ]; then
