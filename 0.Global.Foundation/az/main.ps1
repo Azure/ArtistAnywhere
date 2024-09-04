@@ -9,7 +9,7 @@ az provider show --namespace Microsoft.Network --query "resourceTypes[?resourceT
 # 2024-06-01-preview
 az provider show --namespace Microsoft.VideoIndexer --query "resourceTypes[?resourceType=='accounts'].apiVersions[]"
 
-# 2024-06-01-preview
+# 2024-07-01
 az provider show --namespace Microsoft.DocumentDB --query "resourceTypes[?resourceType=='mongoClusters'].apiVersions[]"
 
 # 2020-03-01

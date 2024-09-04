@@ -6,7 +6,7 @@ source /tmp/functions.sh
 
 echo "Customize (Start): Image Build Platform"
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-dnf -y install epel-release python3-devel gcc gcc-c++ perl lsof cmake git rsync
+dnf -y install epel-release python3-devel gcc gcc-c++ perl lsof cmake git
 export AZNFS_NONINTERACTIVE_INSTALL=1
 versionPath=$(echo $buildConfig | jq -r .versionPath.azBlobNFSMount)
 curl -L https://github.com/Azure/AZNFS-mount/releases/download/$versionPath/aznfs_install.sh | bash
@@ -37,7 +37,7 @@ if [ $machineType == Storage ]; then
   curl -o $installFile -L $downloadUrl
   tar -xzf $installFile
   dnf -y install kernel-modules-extra kernel-rpm-macros rpm-build libtool gcc-gfortran pciutils tcl tk
-  RunProcess "./MLNX_OFED*/mlnxofedinstall --without-fw-update --add-kernel-support --skip-repo --force" $binDirectory/$processType
+  RunProcess "./MLNX_OFED*/mlnxofedinstall --without-fw-update --add-kernel-support --skip-repo" $binDirectory/$processType
   echo "Customize (End): NVIDIA OFED"
 fi
 

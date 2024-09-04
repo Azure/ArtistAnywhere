@@ -208,7 +208,7 @@ resource azurerm_private_endpoint mongo_db {
 resource azapi_resource mongo_cluster {
   count     = var.mongoDBvCore.enable ? 1 : 0
   name      = var.mongoDBvCore.cluster.name
-  type      = "Microsoft.DocumentDB/mongoClusters@2024-06-01-preview"
+  type      = "Microsoft.DocumentDB/mongoClusters@2024-07-01"
   parent_id = azurerm_resource_group.data.id
   location  = azurerm_resource_group.data.location
   body = jsonencode({
@@ -233,7 +233,7 @@ resource azapi_resource mongo_cluster {
 resource azapi_resource mongo_cluster_firewall_rule_allow_azure {
   count     = var.mongoDBvCore.enable ? 1 : 0
   name      = "AllowAllAzureServicesAndResourcesWithinAzureIps"
-  type      = "Microsoft.DocumentDB/mongoClusters/firewallRules@2024-06-01-preview"
+  type      = "Microsoft.DocumentDB/mongoClusters/firewallRules@2024-07-01"
   parent_id = azapi_resource.mongo_cluster[0].id
   body = jsonencode({
     properties = {
@@ -247,7 +247,7 @@ resource azapi_resource mongo_cluster_firewall_rule_allow_azure {
 resource azapi_resource mongo_cluster_firewall_rule_allow_client {
   count     = var.mongoDBvCore.enable ? 1 : 0
   name      = "AllowClient"
-  type      = "Microsoft.DocumentDB/mongoClusters/firewallRules@2024-06-01-preview"
+  type      = "Microsoft.DocumentDB/mongoClusters/firewallRules@2024-07-01"
   parent_id = azapi_resource.mongo_cluster[0].id
   body = jsonencode({
     properties = {
