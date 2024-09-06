@@ -65,16 +65,6 @@ variable keyVault {
   }
 }
 
-######################################################################
-# Event Grid (https://learn.microsoft.com/azure/event-grid/overview) #
-######################################################################
-
-variable eventGrid {
-  default = {
-    name = "xstudio"
-  }
-}
-
 ##########################################################################################
 # App Configuration (https://learn.microsoft.com/azure/azure-app-configuration/overview) #
 ##########################################################################################
@@ -92,7 +82,6 @@ variable appConfig {
       jobProcessorBlenderVersion = "Job/Processor/Blender/Version"
       monitorAgentLinuxVersion   = "Monitor/Agent/Linux/Version"
       monitorAgentWindowsVersion = "Monitor/Agent/Windows/Version"
-      aiEnable                   = "AI/Enable"
     }
   }
 }
@@ -147,10 +136,6 @@ output storage {
 
 output keyVault {
   value = var.keyVault
-}
-
-output eventGrid {
-  value = var.eventGrid
 }
 
 output appConfig {

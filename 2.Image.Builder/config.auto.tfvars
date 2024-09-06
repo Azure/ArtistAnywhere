@@ -101,7 +101,7 @@ imageBuilder = {
       }
       build = {
         machineType    = "JobManager"
-        machineSize    = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        machineSize    = "Standard_E8s_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
         osDiskSizeGB   = 256
@@ -290,7 +290,7 @@ imageBuilder = {
       }
       build = {
         machineType    = "JobManager"
-        machineSize    = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        machineSize    = "Standard_E8s_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
         osDiskSizeGB   = 256

@@ -6,12 +6,12 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  region       = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
-  extendedZone = "LosAngeles"
+  regionName       = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
+  extendedZoneName = "LosAngeles"
 }
 $virtualNetwork = @{
   subscriptionId    = az account show --query id --output tsv
-  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.region)$(if ($extendedLocation) {".$($resourceLocation.extendedZone)"})"
+  resourceGroupName = "ArtistAnywhere.Network.$($resourceLocation.regionName)$(if ($extendedLocation) {".$($resourceLocation.extendedZoneName)"})"
   name              = "Studio"
   subnetName        = "Farm"
 }
@@ -43,8 +43,8 @@ $virtualMachine = @{
   singlePlacementGroup = $false
   faultDomainCount     = 1
 }
-az group create --name $resourceGroupName --location $resourceLocation.region
-$extendedZone = if ($extendedLocation) {" --edge-zone $($resourceLocation.extendedZone)"} else {""}
+az group create --name $resourceGroupName --location $resourceLocation.regionName
+$extendedZone = if ($extendedLocation) {" --edge-zone $($resourceLocation.extendedZoneName)"} else {""}
 $priority = if ($virtualMachine.spot.enable) {"Spot"} else {"Regular"}
 $subnetId = "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)"
 $vmCreate = "az vmss create --resource-group $resourceGroupName$extendedZone --name $($virtualMachine.name) --vm-sku $($virtualMachine.size) --instance-count $($virtualMachine.count) --os-disk-size-gb $($virtualMachine.osDisk.sizeGB) --os-disk-caching $($virtualMachine.osDisk.caching) --image $($virtualMachine.imageId.ToLower()) --admin-username $($virtualMachine.adminLogin.userName) --subnet $subnetId --public-ip-address '""""' --nsg '""""' --lb '""""' --priority $priority"

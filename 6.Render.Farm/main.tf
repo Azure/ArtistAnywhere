@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.0"
+      version = "~>4.1"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -158,12 +158,12 @@ data azurerm_virtual_network studio_extended {
 }
 
 locals {
-  fileSystemLinux = [
-    for fileSystem in module.global.fileSystem.linux : fileSystem if fileSystem.enable
-  ]
-  fileSystemWindows = [
-    for fileSystem in module.global.fileSystem.windows : fileSystem if fileSystem.enable
-  ]
+  fileSystemLinux = one([
+    for fileSystem in module.global.fileSystems : fileSystem.linux if fileSystem.enable
+  ])
+  fileSystemWindows = one([
+    for fileSystem in module.global.fileSystems : fileSystem.windows if fileSystem.enable
+  ])
 }
 
 resource azurerm_resource_group farm {

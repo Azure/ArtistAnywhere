@@ -60,8 +60,8 @@ locals {
   computeFleets = [
     for computeFleet in var.computeFleets : merge(computeFleet, {
       resourceLocation = {
-        regionName   = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
-        extendedZone = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
+        regionName       = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
+        extendedZoneName = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
       }
       machine = merge(computeFleet.machine, {
         image = merge(computeFleet.machine.image, {

@@ -67,8 +67,8 @@ locals {
   virtualMachines = [
     for virtualMachine in var.virtualMachines : merge(virtualMachine, {
       resourceLocation = {
-        regionName   = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
-        extendedZone = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
+        regionName       = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
+        extendedZoneName = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
       }
       image = merge(virtualMachine.image, {
         plan = {
@@ -96,7 +96,7 @@ resource azurerm_network_interface job_manager {
   name                = each.value.name
   resource_group_name = azurerm_resource_group.job_manager.name
   location            = each.value.resourceLocation.regionName
-  edge_zone           = each.value.resourceLocation.extendedZone
+  edge_zone           = each.value.resourceLocation.extendedZoneName
   ip_configuration {
     name                          = "ipConfig"
     subnet_id                     = each.value.network.subnetId
@@ -113,7 +113,7 @@ resource azurerm_linux_virtual_machine job_manager {
   name                            = each.value.name
   resource_group_name             = azurerm_resource_group.job_manager.name
   location                        = each.value.resourceLocation.regionName
-  edge_zone                       = each.value.resourceLocation.extendedZone
+  edge_zone                       = each.value.resourceLocation.extendedZoneName
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                            = each.value.size
   admin_username                  = each.value.adminLogin.userName
@@ -213,7 +213,7 @@ resource azurerm_windows_virtual_machine job_manager {
   name                = each.value.name
   resource_group_name = azurerm_resource_group.job_manager.name
   location            = each.value.resourceLocation.regionName
-  edge_zone           = each.value.resourceLocation.extendedZone
+  edge_zone           = each.value.resourceLocation.extendedZoneName
   source_image_id     = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                = each.value.size
   admin_username      = each.value.adminLogin.userName

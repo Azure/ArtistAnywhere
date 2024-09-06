@@ -7,16 +7,16 @@ netAppFiles = {
   name   = "xstudio"
   capacityPools = [
     {
-      enable  = false
+      enable  = true
       name    = "CapacityPool"
       tier    = "Standard"
-      sizeTiB = 1
+      sizeTiB = 2
       volumes = [
         {
-          enable    = false
+          enable    = true
           name      = "Volume1"
           tier      = "Standard"
-          sizeGiB   = 100
+          sizeGiB   = 500
           mountPath = "volume1"
           network = {
             features = "Standard"
@@ -40,10 +40,10 @@ netAppFiles = {
           ]
         },
         {
-          enable    = false
+          enable    = true
           name      = "Volume2"
           tier      = "Standard"
-          sizeGiB   = 924
+          sizeGiB   = 1548
           mountPath = "volume2"
           network = {
             features = "Standard"

@@ -8,7 +8,7 @@ virtualMachines = [
   {
     enable = false
     name   = "LnxJobManager"
-    size   = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_E8s_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
       galleryName       = "xstudio"
@@ -66,7 +66,7 @@ virtualMachines = [
   {
     enable = false
     name   = "WinJobManager"
-    size   = "Standard_E8s_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_E8s_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
       galleryName       = "xstudio"

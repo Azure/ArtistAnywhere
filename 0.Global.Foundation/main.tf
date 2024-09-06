@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.0"
+      version = "~>4.1"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -21,10 +21,6 @@ terraform {
       source  = "hashicorp/tls"
       version = "~>4.0"
     }
-    azapi = {
-      source = "azure/azapi"
-      version = "~>1.15"
-    }
   }
 }
 
@@ -39,9 +35,6 @@ provider azurerm {
     app_configuration {
       purge_soft_delete_on_destroy = true
       recover_soft_deleted         = true
-    }
-    cognitive_account {
-      purge_soft_delete_on_destroy = true
     }
     key_vault {
       purge_soft_delete_on_destroy                                = true
@@ -59,9 +52,6 @@ provider azurerm {
     log_analytics_workspace {
       permanently_delete_on_destroy = false
     }
-    machine_learning {
-      purge_soft_deleted_workspace_on_destroy = true
-    }
   }
   subscription_id     = module.global.subscriptionId
   storage_use_azuread = true
@@ -77,10 +67,6 @@ data http client_address {
 
 data azurerm_client_config studio {}
 
-locals {
-  aiEnable = var.aiServices.enable || var.aiSearch.enable || var.aiMachineLearning.enable
-}
-
 resource azurerm_resource_group studio {
   name     = module.global.resourceGroupName
   location = module.global.resourceLocation.regionName
@@ -88,17 +74,5 @@ resource azurerm_resource_group studio {
 
 resource azurerm_resource_group studio_monitor {
   name     = "${module.global.resourceGroupName}.Monitor"
-  location = module.global.resourceLocation.regionName
-}
-
-resource azurerm_resource_group studio_registry {
-  count    = var.containerRegistry.enable ? 1 : 0
-  name     = "${module.global.resourceGroupName}.Registry"
-  location = module.global.resourceLocation.regionName
-}
-
-resource azurerm_resource_group studio_ai {
-  count    = local.aiEnable ? 1 : 0
-  name     = "${module.global.resourceGroupName}.AI"
   location = module.global.resourceLocation.regionName
 }

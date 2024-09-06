@@ -132,12 +132,3 @@ resource azurerm_app_configuration_key monitor_agent_windows_version {
     azurerm_app_configuration.studio
   ]
 }
-
-resource azurerm_app_configuration_feature ai {
-  configuration_store_id = local.appConfigStoreId
-  name                   = module.global.appConfig.key.aiEnable
-  enabled                = false
-  depends_on = [
-    azurerm_app_configuration.studio
-  ]
-}

@@ -517,21 +517,6 @@ virtualMachineScaleSets = [
   }
 ]
 
-##############################################################################
-# Container Apps (https://learn.microsoft.com/azure/container-apps/overview) #
-##############################################################################
-
-containerApp = {
-  enable = false
-  environment = {
-    name = "xstudio"
-    workloadProfile = {
-      name = "Consumption"
-      type = "Consumption"
-    }
-  }
-}
-
 ##################################################
 # Pre-Existing Resource Dependency Configuration #
 ##################################################
