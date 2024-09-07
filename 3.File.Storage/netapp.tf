@@ -124,6 +124,12 @@ resource azurerm_resource_group netapp {
   location = module.global.resourceLocation.regionName
 }
 
+resource azurerm_resource_group netapp_data {
+  count    = var.netAppFiles.enable && var.netAppFiles.loadFiles.enable ? 1 : 0
+  name     = "${azurerm_resource_group.netapp[0].name}.Data"
+  location = module.global.resourceLocation.regionName
+}
+
 resource azurerm_netapp_account storage {
   count               = var.netAppFiles.enable ? 1 : 0
   name                = var.netAppFiles.name
@@ -196,24 +202,27 @@ resource azurerm_netapp_volume storage {
 # Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
 #########################################################################
 
-resource azurerm_network_interface netapp {
+resource azurerm_network_interface netapp_data {
   count               = var.netAppFiles.enable && var.netAppFiles.loadFiles.enable ? 1 : 0
   name                = var.netAppFiles.name
-  resource_group_name = azurerm_resource_group.netapp[0].name
-  location            = azurerm_resource_group.netapp[0].location
+  resource_group_name = azurerm_resource_group.netapp_data[0].name
+  location            = azurerm_resource_group.netapp_data[0].location
   ip_configuration {
     name                          = "ipConfig"
     subnet_id                     = data.azurerm_subnet.storage_region.id
     private_ip_address_allocation = "Dynamic"
   }
   accelerated_networking_enabled = local.virtualMachine.network.acceleration.enable
+  depends_on = [
+    azurerm_netapp_volume.storage
+  ]
 }
 
- resource azurerm_linux_virtual_machine netapp {
+ resource azurerm_linux_virtual_machine netapp_data {
   count                           = var.netAppFiles.enable && var.netAppFiles.loadFiles.enable ? 1 : 0
   name                            = var.netAppFiles.name
-  resource_group_name             = azurerm_resource_group.netapp[0].name
-  location                        = azurerm_resource_group.netapp[0].location
+  resource_group_name             = azurerm_resource_group.netapp_data[0].name
+  location                        = azurerm_resource_group.netapp_data[0].location
   size                            = local.virtualMachine.size
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.virtualMachine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${local.virtualMachine.image.galleryName}/images/${local.virtualMachine.image.definitionName}/versions/${local.virtualMachine.image.versionId}"
   admin_username                  = local.virtualMachine.adminLogin.userName
@@ -226,7 +235,7 @@ resource azurerm_network_interface netapp {
     ]
   }
   network_interface_ids = [
-    azurerm_network_interface.netapp[0].id
+    azurerm_network_interface.netapp_data[0].id
   ]
   os_disk {
     storage_account_type = local.virtualMachine.operatingSystem.disk.storageType
@@ -250,7 +259,7 @@ resource azurerm_network_interface netapp {
   }
  }
 
-resource azurerm_virtual_machine_extension netapp {
+resource azurerm_virtual_machine_extension netapp_data {
   count                      = var.netAppFiles.enable && var.netAppFiles.loadFiles.enable ? 1 : 0
   name                       = local.virtualMachine.extension.custom.name
   type                       = "CustomScript"
@@ -258,12 +267,11 @@ resource azurerm_virtual_machine_extension netapp {
   type_handler_version       = "2.1"
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
-  virtual_machine_id         = azurerm_linux_virtual_machine.netapp[0].id
+  virtual_machine_id         = azurerm_linux_virtual_machine.netapp_data[0].id
   protected_settings = jsonencode({
     script = base64encode(
       templatefile(local.virtualMachine.extension.custom.fileName, merge(local.virtualMachine.extension.custom.parameters, {
         fileSystem = local.fileSystemLinux
-        fileLoadSource = var.fileLoadSource
       }))
     )
   })

@@ -69,7 +69,7 @@ weka = {
   dataDisk = {
     storageType = "Standard_LRS"
     cachingType = "None"
-    sizeGB      = 256
+    sizeGB      = 512
   }
   dataProtection = {
     stripeWidth = 3
