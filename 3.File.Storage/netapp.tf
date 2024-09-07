@@ -14,9 +14,8 @@ variable netAppFiles {
       volumes = list(object({
         enable    = bool
         name      = string
-        tier      = string
-        sizeGiB   = number
         mountPath = string
+        sizeGiB   = number
         network = object({
           features  = string
           protocols = list(string)
@@ -34,6 +33,53 @@ variable netAppFiles {
     encryption = object({
       enable = bool
     })
+    loadFiles = object({
+      enable = bool
+      virtualMachine = object({
+        size = string
+        image = object({
+          resourceGroupName = string
+          galleryName       = string
+          definitionName    = string
+          versionId         = string
+          plan = object({
+            publisher = string
+            product   = string
+            name      = string
+          })
+        })
+        network = object({
+          acceleration = object({
+            enable = bool
+          })
+        })
+        adminLogin = object({
+          userName     = string
+          userPassword = string
+          sshKeyPublic = string
+          passwordAuth = object({
+            disable = bool
+          })
+        })
+        operatingSystem = object({
+          type = string
+          disk = object({
+            storageType = string
+            cachingType = string
+            sizeGB      = number
+          })
+        })
+        extension = object({
+          custom = object({
+            enable   = bool
+            name     = string
+            fileName = string
+            parameters = object({
+            })
+          })
+        })
+      })
+    })
   })
 }
 
@@ -49,8 +95,26 @@ locals {
     for capacityPool in var.netAppFiles.capacityPools : [
       for volume in capacityPool.volumes : merge(volume, {
         capacityPoolName = capacityPool.name
+        capacityPoolTier = capacityPool.tier
       }) if volume.enable
     ] if var.netAppFiles.enable && capacityPool.enable
+  ])
+  virtualMachine = merge(var.netAppFiles.loadFiles.virtualMachine, {
+    image = merge(var.netAppFiles.loadFiles.virtualMachine.image, {
+      plan = {
+        publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher, var.netAppFiles.loadFiles.virtualMachine.image.plan.publisher)
+        product   = try(data.terraform_remote_state.image.outputs.linuxPlan.offer, var.netAppFiles.loadFiles.virtualMachine.image.plan.product)
+        name      = try(data.terraform_remote_state.image.outputs.linuxPlan.sku, var.netAppFiles.loadFiles.virtualMachine.image.plan.name)
+      }
+    })
+    adminLogin = merge(var.netAppFiles.loadFiles.virtualMachine.adminLogin, {
+      userName     = var.netAppFiles.loadFiles.virtualMachine.adminLogin.userName != "" ? var.netAppFiles.loadFiles.virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+      userPassword = var.netAppFiles.loadFiles.virtualMachine.adminLogin.userPassword != "" ? var.netAppFiles.loadFiles.virtualMachine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+      sshKeyPublic = var.netAppFiles.loadFiles.virtualMachine.adminLogin.sshKeyPublic != "" ? var.netAppFiles.loadFiles.virtualMachine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
+    })
+  })
+  fileSystemLinux = one([
+    for fileSystem in module.global.fileSystems : fileSystem.linux if fileSystem.enable
   ])
 }
 
@@ -102,10 +166,10 @@ resource azurerm_netapp_volume storage {
   name                          = each.value.name
   resource_group_name           = azurerm_resource_group.netapp[0].name
   location                      = azurerm_resource_group.netapp[0].location
-  service_level                 = each.value.tier
+  pool_name                     = each.value.capacityPoolName
+  service_level                 = each.value.capacityPoolTier
   storage_quota_in_gb           = each.value.sizeGiB
   volume_path                   = each.value.mountPath
-  pool_name                     = each.value.capacityPoolName
   network_features              = each.value.network.features
   protocols                     = each.value.network.protocols
   subnet_id                     = data.azurerm_subnet.storage_netapp[0].id
@@ -126,4 +190,81 @@ resource azurerm_netapp_volume storage {
   depends_on = [
     azurerm_netapp_pool.storage
   ]
+}
+
+#########################################################################
+# Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
+#########################################################################
+
+resource azurerm_network_interface netapp {
+  count               = var.netAppFiles.enable && var.netAppFiles.loadFiles.enable ? 1 : 0
+  name                = var.netAppFiles.name
+  resource_group_name = azurerm_resource_group.netapp[0].name
+  location            = azurerm_resource_group.netapp[0].location
+  ip_configuration {
+    name                          = "ipConfig"
+    subnet_id                     = data.azurerm_subnet.storage_region.id
+    private_ip_address_allocation = "Dynamic"
+  }
+  accelerated_networking_enabled = local.virtualMachine.network.acceleration.enable
+}
+
+ resource azurerm_linux_virtual_machine netapp {
+  count                           = var.netAppFiles.enable && var.netAppFiles.loadFiles.enable ? 1 : 0
+  name                            = var.netAppFiles.name
+  resource_group_name             = azurerm_resource_group.netapp[0].name
+  location                        = azurerm_resource_group.netapp[0].location
+  size                            = local.virtualMachine.size
+  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.virtualMachine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${local.virtualMachine.image.galleryName}/images/${local.virtualMachine.image.definitionName}/versions/${local.virtualMachine.image.versionId}"
+  admin_username                  = local.virtualMachine.adminLogin.userName
+  admin_password                  = local.virtualMachine.adminLogin.userPassword
+  disable_password_authentication = local.virtualMachine.adminLogin.passwordAuth.disable
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
+  }
+  network_interface_ids = [
+    azurerm_network_interface.netapp[0].id
+  ]
+  os_disk {
+    storage_account_type = local.virtualMachine.operatingSystem.disk.storageType
+    caching              = local.virtualMachine.operatingSystem.disk.cachingType
+    disk_size_gb         = local.virtualMachine.operatingSystem.disk.sizeGB > 0 ? local.virtualMachine.operatingSystem.disk.sizeGB : null
+  }
+  dynamic plan {
+    for_each = local.virtualMachine.image.plan.publisher != "" ? [1] : []
+    content {
+      publisher = local.virtualMachine.image.plan.publisher
+      product   = local.virtualMachine.image.plan.product
+      name      = local.virtualMachine.image.plan.name
+    }
+  }
+  dynamic admin_ssh_key {
+    for_each = local.virtualMachine.adminLogin.sshKeyPublic != "" ? [1] : []
+    content {
+      username   = local.virtualMachine.adminLogin.userName
+      public_key = local.virtualMachine.adminLogin.sshKeyPublic
+    }
+  }
+ }
+
+resource azurerm_virtual_machine_extension netapp {
+  count                      = var.netAppFiles.enable && var.netAppFiles.loadFiles.enable ? 1 : 0
+  name                       = local.virtualMachine.extension.custom.name
+  type                       = "CustomScript"
+  publisher                  = "Microsoft.Azure.Extensions"
+  type_handler_version       = "2.1"
+  automatic_upgrade_enabled  = false
+  auto_upgrade_minor_version = true
+  virtual_machine_id         = azurerm_linux_virtual_machine.netapp[0].id
+  protected_settings = jsonencode({
+    script = base64encode(
+      templatefile(local.virtualMachine.extension.custom.fileName, merge(local.virtualMachine.extension.custom.parameters, {
+        fileSystem = local.fileSystemLinux
+        fileLoadSource = var.fileLoadSource
+      }))
+    )
+  })
 }

@@ -246,6 +246,12 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     dnsRecordName        = var.weka.network.dnsRecord.name
     binDirectory         = local.binDirectory
   }))
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
+  }
   network_interface {
     name    = "nic1"
     primary = true
@@ -267,12 +273,6 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     disk_size_gb         = var.weka.dataDisk.sizeGB
     create_option        = "Empty"
     lun                  = 0
-  }
-  identity {
-    type = "UserAssigned"
-    identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
-    ]
   }
   termination_notification {
     enabled = var.weka.terminateNotification.enable
@@ -300,7 +300,7 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     auto_upgrade_minor_version = true
     protected_settings = jsonencode({
       script = base64encode(
-        templatefile("initialize.sh", {
+        templatefile("weka.sh", {
           wekaVersion               = var.weka.version
           wekaApiToken              = var.weka.apiToken
           wekaClusterName           = var.weka.name.resource

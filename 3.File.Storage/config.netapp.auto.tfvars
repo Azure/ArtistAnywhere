@@ -8,16 +8,15 @@ netAppFiles = {
   capacityPools = [
     {
       enable  = true
-      name    = "CapacityPool"
-      tier    = "Standard"
+      name    = "Pool1"
+      tier    = "Premium"
       sizeTiB = 2
       volumes = [
         {
           enable    = true
           name      = "Volume1"
-          tier      = "Standard"
-          sizeGiB   = 500
           mountPath = "volume1"
+          sizeGiB   = 512
           network = {
             features = "Standard"
             protocols = [
@@ -42,9 +41,8 @@ netAppFiles = {
         {
           enable    = true
           name      = "Volume2"
-          tier      = "Standard"
-          sizeGiB   = 1548
           mountPath = "volume2"
+          sizeGiB   = 1536
           network = {
             features = "Standard"
             protocols = [
@@ -71,5 +69,52 @@ netAppFiles = {
   ]
   encryption = {
     enable = false
+  }
+  loadFiles = {
+    enable = false
+    virtualMachine ={
+      size = "Standard_E8s_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+      image = {
+        resourceGroupName = "ArtistAnywhere.Image"
+        galleryName       = "xstudio"
+        definitionName    = "Linux"
+        versionId         = "0.0.0"
+        plan = {
+          publisher = ""
+          product   = ""
+          name      = ""
+        }
+      }
+      network = {
+        acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+          enable = true
+        }
+      }
+      adminLogin = {
+        userName     = ""
+        userPassword = ""
+        sshKeyPublic = ""
+        passwordAuth = {
+          disable = true
+        }
+      }
+      operatingSystem = {
+        type = "Linux"
+        disk = {
+          storageType = "Standard_LRS"
+          cachingType = "ReadOnly"
+          sizeGB      = 0
+        }
+      }
+      extension = {
+        custom = {
+          enable   = true
+          name     = "Initialize"
+          fileName = "netapp.sh"
+          parameters = {
+          }
+        }
+      }
+    }
   }
 }

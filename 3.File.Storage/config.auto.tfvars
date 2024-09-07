@@ -1,6 +1,6 @@
 resourceGroupName = "ArtistAnywhere.Storage" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
-fileLoadSource = { # Applies to Storage and Weka only
+fileLoadSource = { # For Blob & File Storage, NetApp Files and Weka
   enable        = false
   accountName   = ""
   accountKey    = ""

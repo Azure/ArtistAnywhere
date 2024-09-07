@@ -119,6 +119,12 @@ resource azurerm_linux_virtual_machine job_manager {
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
+  }
   network_interface_ids = [
     "${azurerm_resource_group.job_manager.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
   ]
@@ -126,12 +132,6 @@ resource azurerm_linux_virtual_machine job_manager {
     storage_account_type = each.value.operatingSystem.disk.storageType
     caching              = each.value.operatingSystem.disk.cachingType
     disk_size_gb         = each.value.operatingSystem.disk.sizeGB > 0 ? each.value.operatingSystem.disk.sizeGB : null
-  }
-  identity {
-    type = "UserAssigned"
-    identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
-    ]
   }
   dynamic plan {
     for_each = each.value.image.plan.publisher != "" ? [1] : []
@@ -153,7 +153,7 @@ resource azurerm_linux_virtual_machine job_manager {
   ]
 }
 
-resource azurerm_virtual_machine_extension initialize_linux {
+resource azurerm_virtual_machine_extension job_manager_initialize_linux {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.operatingSystem.type) == "linux"
   }
@@ -174,7 +174,7 @@ resource azurerm_virtual_machine_extension initialize_linux {
   ]
 }
 
-resource azurerm_virtual_machine_extension monitor_linux {
+resource azurerm_virtual_machine_extension job_manager_monitor_linux {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && virtualMachine.extension.monitor.enable
   }
@@ -194,7 +194,7 @@ resource azurerm_virtual_machine_extension monitor_linux {
     }
   })
   depends_on = [
-    azurerm_virtual_machine_extension.initialize_linux
+    azurerm_virtual_machine_extension.job_manager_initialize_linux
   ]
 }
 
@@ -218,6 +218,12 @@ resource azurerm_windows_virtual_machine job_manager {
   size                = each.value.size
   admin_username      = each.value.adminLogin.userName
   admin_password      = each.value.adminLogin.userPassword
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      data.azurerm_user_assigned_identity.studio.id
+    ]
+  }
   network_interface_ids = [
     "${azurerm_resource_group.job_manager.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
   ]
@@ -226,18 +232,12 @@ resource azurerm_windows_virtual_machine job_manager {
     caching              = each.value.operatingSystem.disk.cachingType
     disk_size_gb         = each.value.operatingSystem.disk.sizeGB > 0 ? each.value.operatingSystem.disk.sizeGB : null
   }
-  identity {
-    type = "UserAssigned"
-    identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
-    ]
-  }
   depends_on = [
     azurerm_network_interface.job_manager
   ]
 }
 
-resource azurerm_virtual_machine_extension initialize_windows {
+resource azurerm_virtual_machine_extension job_manager_initialize_windows {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.operatingSystem.type) == "windows"
   }
@@ -261,7 +261,7 @@ resource azurerm_virtual_machine_extension initialize_windows {
   ]
 }
 
-resource azurerm_virtual_machine_extension monitor_windows {
+resource azurerm_virtual_machine_extension job_manager_monitor_windows {
   for_each = {
     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && virtualMachine.extension.monitor.enable
   }
@@ -281,7 +281,7 @@ resource azurerm_virtual_machine_extension monitor_windows {
     }
   })
   depends_on = [
-    azurerm_virtual_machine_extension.initialize_windows
+    azurerm_virtual_machine_extension.job_manager_initialize_windows
   ]
 }
 
