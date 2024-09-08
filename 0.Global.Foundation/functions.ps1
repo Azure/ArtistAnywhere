@@ -1,3 +1,9 @@
+param (
+  [string] $buildConfigEncoded
+)
+
+$ErrorActionPreference = "Stop"
+
 $binPaths = ""
 $binDirectory = "C:\Users\Public\Downloads"
 Set-Location -Path $binDirectory

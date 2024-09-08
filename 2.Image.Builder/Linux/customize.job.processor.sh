@@ -1,8 +1,6 @@
-#!/bin/bash -x
+source /tmp/functions.sh
 
 echo "Customize (Start): Job Processor"
-
-source /tmp/functions.sh
 
 if [[ $jobProcessors == *PBRT* ]]; then
   echo "Customize (Start): PBRT"

@@ -1,12 +1,6 @@
-param (
-  [string] $buildConfigEncoded
-)
-
-$ErrorActionPreference = "Stop"
+. C:\AzureData\functions.ps1
 
 Write-Host "Customize (Start): Job Processor"
-
-. C:\AzureData\functions.ps1
 
 if ($jobProcessors -contains "PBRT") {
   Write-Host "Customize (Start): PBRT"

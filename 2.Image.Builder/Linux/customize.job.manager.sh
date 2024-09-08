@@ -1,8 +1,6 @@
-#!/bin/bash -x
+source /tmp/functions.sh
 
 echo "Customize (Start): Job Manager"
-
-source /tmp/functions.sh
 
 if [ $machineType != Storage ]; then
   versionPath=$(echo $buildConfig | jq -r .versionPath.jobManager)

@@ -23,7 +23,7 @@ computeGallery = {
       generation = "V2"
       publisher  = "RESF"
       offer      = "RockyLinux-x86_64"
-      sku        = "9-Base"
+      sku        = "9-LVM"
     },
     {
       name       = "WinServer"
@@ -74,8 +74,8 @@ imageBuilder = {
         machineSize    = "Standard_L8s_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "0.0.0"
-        osDiskSizeGB   = 0
-        timeoutMinutes = 120
+        osDiskSizeGB   = 1024
+        timeoutMinutes = 240
         jobProcessors = [
         ]
       }
@@ -104,8 +104,8 @@ imageBuilder = {
         machineSize    = "Standard_E8s_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
-        osDiskSizeGB   = 512
-        timeoutMinutes = 120
+        osDiskSizeGB   = 1024
+        timeoutMinutes = 180
         jobProcessors = [
         ]
       }
@@ -135,7 +135,7 @@ imageBuilder = {
         gpuProvider    = ""                    # NVIDIA or AMD
         imageVersion   = "2.0.0"
         osDiskSizeGB   = 480
-        timeoutMinutes = 240
+        timeoutMinutes = 180
         jobProcessors = [
           "PBRT"
         ]
@@ -166,7 +166,7 @@ imageBuilder = {
         gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
         imageVersion   = "2.1.0"
         osDiskSizeGB   = 1024
-        timeoutMinutes = 240
+        timeoutMinutes = 180
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -198,7 +198,7 @@ imageBuilder = {
         gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
         imageVersion   = "2.2.0"
         osDiskSizeGB   = 1024
-        timeoutMinutes = 240
+        timeoutMinutes = 180
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -230,7 +230,7 @@ imageBuilder = {
         gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
         imageVersion   = "3.0.0"
         osDiskSizeGB   = 1024
-        timeoutMinutes = 240
+        timeoutMinutes = 180
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -262,7 +262,7 @@ imageBuilder = {
         gpuProvider    = "AMD"                      # NVIDIA or AMD
         imageVersion   = "3.1.0"
         osDiskSizeGB   = 1024
-        timeoutMinutes = 240
+        timeoutMinutes = 180
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -293,8 +293,8 @@ imageBuilder = {
         machineSize    = "Standard_E8s_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                # NVIDIA or AMD
         imageVersion   = "1.0.0"
-        osDiskSizeGB   = 512
-        timeoutMinutes = 240
+        osDiskSizeGB   = 1024
+        timeoutMinutes = 360
         jobProcessors = [
         ]
       }
@@ -355,7 +355,7 @@ imageBuilder = {
         gpuProvider    = ""                        # NVIDIA or AMD
         imageVersion   = "2.1.0"
         osDiskSizeGB   = 1024
-        timeoutMinutes = 480
+        timeoutMinutes = 360
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -387,7 +387,7 @@ imageBuilder = {
         gpuProvider    = ""                        # NVIDIA or AMD
         imageVersion   = "2.2.0"
         osDiskSizeGB   = 1024
-        timeoutMinutes = 480
+        timeoutMinutes = 360
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -419,7 +419,7 @@ imageBuilder = {
         gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
         imageVersion   = "3.0.0"
         osDiskSizeGB   = 1024
-        timeoutMinutes = 480
+        timeoutMinutes = 360
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -451,7 +451,7 @@ imageBuilder = {
         gpuProvider    = "AMD"                      # NVIDIA or AMD
         imageVersion   = "3.1.0"
         osDiskSizeGB   = 1024
-        timeoutMinutes = 480
+        timeoutMinutes = 360
         jobProcessors = [
           "PBRT",
           "Blender"

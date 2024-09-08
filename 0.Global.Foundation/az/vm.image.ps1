@@ -4,15 +4,15 @@
 
 $publisher = "RESF"
 $offer     = "RockyLinux-x86_64"
-$plan      = "9-Base"
+$plan      = "9-LVM"
 az vm image list --publisher $publisher --offer $offer --sku $plan --all --edge-zone LosAngeles
 [
   {
     "architecture": "x64",
     "offer": "rockylinux-x86_64",
     "publisher": "resf",
-    "sku": "9-base",
-    "urn": "resf:rockylinux-x86_64:9-base:9.3.20231113",
+    "sku": "9-lvm",
+    "urn": "resf:rockylinux-x86_64:9-lvm:9.3.20231113",
     "version": "9.3.20231113"
   }
 ]

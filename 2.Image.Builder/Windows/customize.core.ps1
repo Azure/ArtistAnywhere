@@ -1,21 +1,15 @@
-param (
-  [string] $buildConfigEncoded
-)
-
-$ErrorActionPreference = "Stop"
+. C:\AzureData\functions.ps1
 
 Write-Host "Customize (Start): Core"
 
-. C:\AzureData\functions.ps1
-
-Write-Host "Customize (Start): Resize OS Disk"
+Write-Host "Customize (Start): Resize Root Partition"
 $osDriveLetter = "C"
 $partitionSizeActive = (Get-Partition -DriveLetter $osDriveLetter).Size
 $partitionSizeRange = Get-PartitionSupportedSize -DriveLetter $osDriveLetter
 if ($partitionSizeActive -lt $partitionSizeRange.SizeMax) {
   Resize-Partition -DriveLetter $osDriveLetter -Size $partitionSizeRange.SizeMax
 }
-Write-Host "Customize (End): Resize OS Disk"
+Write-Host "Customize (End): Resize Root Partition"
 
 Write-Host "Customize (Start): Image Build Platform"
 netsh advfirewall set allprofiles state off
@@ -55,10 +49,10 @@ $processType = "7zip"
 RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
 Write-Host "Customize (End): 7-Zip"
 
-Write-Host "Customize (Start): Syncthing"
-$processType = "syncthing"
+Write-Host "Customize (Start): cwRsync"
+$processType = "rsync"
 RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
-Write-Host "Customize (End): Syncthing"
+Write-Host "Customize (End): cwRsync"
 
 Write-Host "Customize (Start): Visual Studio Build Tools"
 $processType = "vsBuildTools"

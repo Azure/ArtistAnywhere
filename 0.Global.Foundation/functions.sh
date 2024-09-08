@@ -1,3 +1,5 @@
+#!/bin/bash -x
+
 binPaths=""
 binDirectory="/usr/local/bin"
 cd $binDirectory

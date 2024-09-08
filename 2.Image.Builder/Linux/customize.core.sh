@@ -1,8 +1,15 @@
-#!/bin/bash -x
+source /tmp/functions.sh
 
 echo "Customize (Start): Core"
 
-source /tmp/functions.sh
+echo "Customize (Start): Resize Root Partition"
+partitionDevice=$(lsblk -J | jq '.blockdevices[] | select(.type == "disk")' | jq -r .name)
+partitionNumber=$(lsblk -J | jq '.blockdevices[] | select(.type == "disk")' | jq -r '.children | length')
+rootFileSystem=$(df | grep /dev/mapper | cut -d' ' -f1)
+growpart /dev/$partitionDevice $partitionNumber
+lvextend -l +100%Free $rootFileSystem
+xfs_growfs /
+echo "Customize (End): Resize Root Partition"
 
 echo "Customize (Start): Image Build Platform"
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config

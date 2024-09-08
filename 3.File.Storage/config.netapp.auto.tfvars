@@ -16,33 +16,7 @@ netAppFiles = {
           enable    = true
           name      = "Volume1"
           mountPath = "volume1"
-          sizeGiB   = 512
-          network = {
-            features = "Standard"
-            protocols = [
-              "NFSv3"
-            ]
-          }
-          exportPolicies = [
-            {
-              ruleIndex  = 1
-              readOnly   = false
-              readWrite  = true
-              rootAccess = true
-              networkProtocols = [
-                "NFSv3"
-              ]
-              allowedClients = [
-                "0.0.0.0/0"
-              ]
-            }
-          ]
-        },
-        {
-          enable    = true
-          name      = "Volume2"
-          mountPath = "volume2"
-          sizeGiB   = 1536
+          sizeGiB   = 2048
           network = {
             features = "Standard"
             protocols = [
@@ -103,7 +77,7 @@ netAppFiles = {
         disk = {
           storageType = "Standard_LRS"
           cachingType = "ReadOnly"
-          sizeGB      = 0
+          sizeGB      = 128
         }
       }
       extension = {

@@ -64,12 +64,12 @@ weka = {
   osDisk = {
     storageType = "Standard_LRS"
     cachingType = "ReadOnly"
-    sizeGB      = 0
+    sizeGB      = 128
   }
   dataDisk = {
     storageType = "Standard_LRS"
     cachingType = "None"
-    sizeGB      = 512
+    sizeGB      = 1024
   }
   dataProtection = {
     stripeWidth = 3
