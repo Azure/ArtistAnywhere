@@ -1,7 +1,3 @@
-param (
-  [string] $buildConfigEncoded
-)
-
 $ErrorActionPreference = "Stop"
 
 $binPaths = ""

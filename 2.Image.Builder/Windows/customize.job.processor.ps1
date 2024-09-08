@@ -1,3 +1,7 @@
+param (
+  [string] $buildConfigEncoded
+)
+
 . C:\AzureData\functions.ps1
 
 Write-Host "Customize (Start): Job Processor"

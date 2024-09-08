@@ -1,3 +1,5 @@
+#!/bin/bash -x
+
 source /tmp/functions.sh
 
 echo "Customize (Start): Job Manager"
