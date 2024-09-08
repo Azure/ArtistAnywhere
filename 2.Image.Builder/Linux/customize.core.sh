@@ -5,8 +5,9 @@ source /tmp/functions.sh
 echo "Customize (Start): Core"
 
 echo "Customize (Start): Resize Root Partition"
-partitionDevice=$(lsblk -J | jq '.blockdevices[] | select(.type == "disk")' | jq -r .name)
-partitionNumber=$(lsblk -J | jq '.blockdevices[] | select(.type == "disk")' | jq -r '.children | length')
+rootBlockDevice=$(lsblk -J | jq '.blockdevices[] | .["maj:min"] as $version | select($version == "8:0")')
+partitionDevice=$(echo $rootBlockDevice | jq -r .name)
+partitionNumber=$(echo $rootBlockDevice | jq -r '.children | length')
 rootFileSystem=$(df | grep /dev/mapper | cut -d' ' -f1)
 growpart /dev/$partitionDevice $partitionNumber
 lvextend -l +100%Free $rootFileSystem
