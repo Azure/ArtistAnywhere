@@ -45,7 +45,7 @@ For each module, here is the recommended configuration and deployment process.
 1. Run `terraform apply` to generate the Terraform deployment [Plan](https://www.terraform.io/docs/cli/run/index.html#planning) (append `-destroy` to delete Azure resources).
 1. Review the Terraform deployment Plan *before* confirming to add, change and/or destroy Azure resources.
    * In module `2 Image Builder`,
-      * The following Azure Marketplace Rocky Linux image terms must be accepted on your Azure subscription.<br/>`az vm image terms accept --publisher RESF --offer RockyLinux-x86_64 --plan 9-Base`
+      * The following Azure Marketplace Rocky Linux image terms must be accepted on your Azure subscription.<br/>`az vm image terms accept --publisher RESF --offer RockyLinux-x86_64 --plan 9-LVM`
       * Use the Azure management portal or [Image Builder CLI](https://learn.microsoft.com/cli/azure/image/builder#az-image-builder-run) to start image build runs as needed.
 
 ## Render Job Samples
