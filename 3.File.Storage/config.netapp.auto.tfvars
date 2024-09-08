@@ -5,6 +5,10 @@
 netAppFiles = {
   enable = false
   name   = "xstudio"
+  dnsRecord = {
+    namePrefix = "netapp"
+    ttlSeconds = 300
+  }
   capacityPools = [
     {
       enable  = true
@@ -77,7 +81,7 @@ netAppFiles = {
         disk = {
           storageType = "Standard_LRS"
           cachingType = "ReadOnly"
-          sizeGB      = 128
+          sizeGB      = 0
         }
       }
       extension = {

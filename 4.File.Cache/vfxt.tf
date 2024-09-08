@@ -128,7 +128,7 @@ resource avere_vfxt cache {
 
 resource azurerm_private_dns_a_record cache_vfxt {
   count               = var.vfxtCache.enable ? 1 : 0
-  name                = "cache"
+  name                = var.dnsRecord.name
   resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = data.azurerm_private_dns_zone.studio.name
   records             = avere_vfxt.cache[0].vserver_ip_addresses

@@ -73,10 +73,10 @@ variable fileSystems {
         { # File Storage
           enable = false
           mount = {
-            type    = "aznfs"
+            type    = "nfs"
             path    = "/mnt/storage"
-            source  = "xstudio1.blob.core.windows.net:/xstudio1/storage"
-            options = "sec=sys,proto=tcp,vers=3,nolock"
+            source  = "netapp-volume1.azure.studio:/volume1"
+            options = "hard,tcp,vers=3"
           }
         },
         { # File Cache
@@ -104,7 +104,7 @@ variable fileSystems {
           mount = {
             type    = ""
             path    = "X:"
-            source  = "\\\\xstudio1.blob.core.windows.net\\xstudio1\\storage"
+            source  = "\\\\netapp-volume1.azure.studio\\volume1"
             options = "-o anon nolock"
             userName = ""
             password = ""

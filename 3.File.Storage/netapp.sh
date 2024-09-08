@@ -2,6 +2,6 @@
 
 source /tmp/functions.sh
 
-SetFileSystem '${jsonencode(fileSystem)}'
+SetFileSystem '${jsonencode(fileSystem)}' true
 
 # rsync $binDirectory/island /mnt/storage/

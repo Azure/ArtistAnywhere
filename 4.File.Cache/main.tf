@@ -74,6 +74,7 @@ variable storageTargets {
 
 variable dnsRecord {
   type = object({
+    name       = string
     ttlSeconds = number
   })
 }

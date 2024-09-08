@@ -43,7 +43,7 @@ virtualMachines = [
       disk = {
         storageType = "Standard_LRS"
         cachingType = "ReadOnly"
-        sizeGB      = 128
+        sizeGB      = 0
       }
     }
     extension = {
@@ -101,7 +101,7 @@ virtualMachines = [
       disk = {
         storageType = "Standard_LRS"
         cachingType = "ReadOnly"
-        sizeGB      = 128
+        sizeGB      = 0
       }
     }
     extension = {

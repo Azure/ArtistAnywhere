@@ -64,7 +64,7 @@ weka = {
   osDisk = {
     storageType = "Standard_LRS"
     cachingType = "ReadOnly"
-    sizeGB      = 128
+    sizeGB      = 0
   }
   dataDisk = {
     storageType = "Standard_LRS"

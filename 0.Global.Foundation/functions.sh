@@ -45,9 +45,15 @@ function GetEncodedValue {
 
 function SetFileSystem {
   fileSystemConfig="$1"
+  firstMountOnly=$2
+  continueMounts=true
   for fileSystem in $(echo $fileSystemConfig | jq -r '.[] | @base64'); do
-    if [ $(GetEncodedValue $fileSystem .enable) == true ]; then
+    if [[ $(GetEncodedValue $fileSystem .enable) == true && $continueMounts == true ]]; then
       SetFileSystemMount "$(GetEncodedValue $fileSystem .mount)"
+      if [ $firstMountOnly == true ]; then
+        continueMounts=false
+        break
+      fi
     fi
   done
   systemctl daemon-reload

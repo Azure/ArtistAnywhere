@@ -6,6 +6,10 @@ variable netAppFiles {
   type = object({
     enable = bool
     name   = string
+    dnsRecord = object({
+      namePrefix = string
+      ttlSeconds = number
+    })
     capacityPools = list(object({
       enable  = bool
       name    = string
@@ -195,6 +199,24 @@ resource azurerm_netapp_volume storage {
   }
   depends_on = [
     azurerm_netapp_pool.storage
+  ]
+}
+
+############################################################################
+# Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
+############################################################################
+
+resource azurerm_private_dns_a_record netapp {
+  for_each = {
+    for volume in local.netAppVolumes : "${volume.capacityPoolName}-${volume.name}" => volume
+  }
+  name                = "${var.netAppFiles.dnsRecord.namePrefix}-${lower(each.value.name)}"
+  resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
+  zone_name           = data.azurerm_private_dns_zone.studio.name
+  records             = azurerm_netapp_volume.storage[each.key].mount_ip_addresses
+  ttl                 = var.netAppFiles.dnsRecord.ttlSeconds
+  depends_on = [
+    azurerm_netapp_volume.storage
   ]
 }
 
