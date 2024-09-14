@@ -101,8 +101,8 @@ imageBuilder = {
       }
       build = {
         machineType    = "JobManager"
-        machineSize    = "Standard_E8s_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                # NVIDIA or AMD
+        machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "1.0.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
@@ -131,7 +131,7 @@ imageBuilder = {
       }
       build = {
         machineType    = "Farm"
-        machineSize    = "Standard_HB176rs_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        machineSize    = "Standard_HB120rs_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                    # NVIDIA or AMD
         imageVersion   = "2.0.0"
         osDiskSizeGB   = 480
@@ -290,8 +290,8 @@ imageBuilder = {
       }
       build = {
         machineType    = "JobManager"
-        machineSize    = "Standard_E8s_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                # NVIDIA or AMD
+        machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "1.0.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 360
@@ -320,7 +320,7 @@ imageBuilder = {
       }
       build = {
         machineType    = "Farm"
-        machineSize    = "Standard_HB176rs_v4" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        machineSize    = "Standard_HB120rs_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                    # NVIDIA or AMD
         imageVersion   = "2.0.0"
         osDiskSizeGB   = 480

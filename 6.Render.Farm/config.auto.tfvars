@@ -10,7 +10,7 @@ virtualMachineScaleSets = [
     name   = "LnxFarmC"
     machine = {
       namePrefix = ""
-      size       = "Standard_HB176rs_v4"
+      size       = "Standard_HB120rs_v3"
       count      = 2
       image = {
         resourceGroupName = "ArtistAnywhere.Image"
@@ -33,24 +33,14 @@ virtualMachineScaleSets = [
         enable = false
       }
     }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = true
-      }
-    }
-    operatingSystem = {
-      type = "Linux"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
-          placement = "ResourceDisk"
-        }
+    osDisk = {
+      type        = "Linux"
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+      ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+        enable    = true
+        placement = "ResourceDisk"
       }
     }
     spot = {
@@ -83,6 +73,14 @@ virtualMachineScaleSets = [
       monitor = {
         enable = false
         name   = "Monitor"
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = true
       }
     }
     flexMode = {
@@ -118,24 +116,14 @@ virtualMachineScaleSets = [
         enable = false
       }
     }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = true
-      }
-    }
-    operatingSystem = {
-      type = "Linux"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
-          placement = "ResourceDisk"
-        }
+    osDisk = {
+      type        = "Linux"
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+      ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+        enable    = true
+        placement = "ResourceDisk"
       }
     }
     spot = {
@@ -168,6 +156,14 @@ virtualMachineScaleSets = [
       monitor = {
         enable = false
         name   = "Monitor"
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = true
       }
     }
     flexMode = {
@@ -203,24 +199,14 @@ virtualMachineScaleSets = [
         enable = false
       }
     }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = true
-      }
-    }
-    operatingSystem = {
-      type = "Linux"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
-          placement = "ResourceDisk"
-        }
+    osDisk = {
+      type        = "Linux"
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+      ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+        enable    = true
+        placement = "ResourceDisk"
       }
     }
     spot = {
@@ -255,6 +241,14 @@ virtualMachineScaleSets = [
         name   = "Monitor"
       }
     }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = true
+      }
+    }
     flexMode = {
       enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
     }
@@ -265,7 +259,7 @@ virtualMachineScaleSets = [
     name   = "WinFarmC"
     machine = {
       namePrefix = ""
-      size       = "Standard_HB176rs_v4"
+      size       = "Standard_HB120rs_v3"
       count      = 2
       image = {
         resourceGroupName = "ArtistAnywhere.Image"
@@ -288,24 +282,14 @@ virtualMachineScaleSets = [
         enable = false
       }
     }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = false
-      }
-    }
-    operatingSystem = {
-      type = "Windows"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
-          placement = "ResourceDisk"
-        }
+    osDisk = {
+      type        = "Windows"
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+      ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+        enable    = true
+        placement = "ResourceDisk"
       }
     }
     spot = {
@@ -338,6 +322,14 @@ virtualMachineScaleSets = [
       monitor = {
         enable = false
         name   = "Monitor"
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = false
       }
     }
     flexMode = {
@@ -373,24 +365,14 @@ virtualMachineScaleSets = [
         enable = false
       }
     }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = false
-      }
-    }
-    operatingSystem = {
-      type = "Windows"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
-          placement = "ResourceDisk"
-        }
+    osDisk = {
+      type        = "Windows"
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+      ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+        enable    = true
+        placement = "ResourceDisk"
       }
     }
     spot = {
@@ -423,6 +405,14 @@ virtualMachineScaleSets = [
       monitor = {
         enable = false
         name   = "Monitor"
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = false
       }
     }
     flexMode = {
@@ -458,24 +448,14 @@ virtualMachineScaleSets = [
         enable = false
       }
     }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = false
-      }
-    }
-    operatingSystem = {
-      type = "Windows"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
-          placement = "ResourceDisk"
-        }
+    osDisk = {
+      type        = "Windows"
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+      ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+        enable    = true
+        placement = "ResourceDisk"
       }
     }
     spot = {
@@ -508,6 +488,14 @@ virtualMachineScaleSets = [
       monitor = {
         enable = false
         name   = "Monitor"
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = false
       }
     }
     flexMode = {

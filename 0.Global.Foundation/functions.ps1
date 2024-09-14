@@ -6,22 +6,24 @@ Set-Location -Path $binDirectory
 
 $fileSystemsMountPath = "$binDirectory\fileSystems.bat"
 
-Write-Host "Customize (Start): Image Build Parameters"
-$buildConfigBytes = [System.Convert]::FromBase64String($buildConfigEncoded)
-$buildConfig = [System.Text.Encoding]::UTF8.GetString($buildConfigBytes) | ConvertFrom-Json
-$machineType = $buildConfig.machineType
-$gpuProvider = $buildConfig.gpuProvider
-$binStorageHost = $buildConfig.binStorage.host
-$binStorageAuth = $buildConfig.binStorage.auth
-$jobProcessors = $buildConfig.jobProcessors
-$adminUsername = $buildConfig.authCredential.adminUsername
-$adminPassword = $buildConfig.authCredential.adminPassword
-$serviceUsername = $buildConfig.authCredential.serviceUsername
-$servicePassword = $buildConfig.authCredential.servicePassword
-Write-Host "Machine Type: $machineType"
-Write-Host "GPU Provider: $gpuProvider"
-Write-Host "Job Processors: $jobProcessors"
-Write-Host "Customize (End): Image Build Parameters"
+if ($buildConfigEncoded -ne "") {
+  Write-Host "Customize (Start): Image Build Parameters"
+  $buildConfigBytes = [System.Convert]::FromBase64String($buildConfigEncoded)
+  $buildConfig = [System.Text.Encoding]::UTF8.GetString($buildConfigBytes) | ConvertFrom-Json
+  $machineType = $buildConfig.machineType
+  $gpuProvider = $buildConfig.gpuProvider
+  $binStorageHost = $buildConfig.binStorage.host
+  $binStorageAuth = $buildConfig.binStorage.auth
+  $jobProcessors = $buildConfig.jobProcessors
+  $adminUsername = $buildConfig.authCredential.adminUsername
+  $adminPassword = $buildConfig.authCredential.adminPassword
+  $serviceUsername = $buildConfig.authCredential.serviceUsername
+  $servicePassword = $buildConfig.authCredential.servicePassword
+  Write-Host "Machine Type: $machineType"
+  Write-Host "GPU Provider: $gpuProvider"
+  Write-Host "Job Processors: $jobProcessors"
+  Write-Host "Customize (End): Image Build Parameters"
+}
 
 function RunProcess ($filePath, $argumentList, $logFile) {
   if ($logFile) {

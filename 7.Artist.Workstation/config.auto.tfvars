@@ -21,6 +21,12 @@ virtualMachines = [
         name      = ""
       }
     }
+    osDisk = {
+      type        = "Linux"
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+    }
     network = {
       subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -28,22 +34,6 @@ virtualMachines = [
       }
       locationExtended = {
         enable = false
-      }
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = true
-      }
-    }
-    operatingSystem = {
-      type = "Linux"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
       }
     }
     extension = {
@@ -58,6 +48,14 @@ virtualMachines = [
       monitor = {
         enable = false
         name   = "Monitor"
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = true
       }
     }
   },
@@ -77,6 +75,12 @@ virtualMachines = [
         name      = ""
       }
     }
+    osDisk = {
+      type        = "Linux"
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+    }
     network = {
       subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -84,22 +88,6 @@ virtualMachines = [
       }
       locationExtended = {
         enable = false
-      }
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = true
-      }
-    }
-    operatingSystem = {
-      type = "Linux"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
       }
     }
     extension = {
@@ -114,6 +102,14 @@ virtualMachines = [
       monitor = {
         enable = false
         name   = "Monitor"
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = true
       }
     }
   },
@@ -133,6 +129,12 @@ virtualMachines = [
         name      = ""
       }
     }
+    osDisk = {
+      type        = "Windows"
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+    }
     network = {
       subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -140,22 +142,6 @@ virtualMachines = [
       }
       locationExtended = {
         enable = false
-      }
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = false
-      }
-    }
-    operatingSystem = {
-      type = "Windows"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
       }
     }
     extension = {
@@ -170,6 +156,14 @@ virtualMachines = [
       monitor = {
         enable = false
         name   = "Monitor"
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = false
       }
     }
   },
@@ -189,6 +183,12 @@ virtualMachines = [
         name      = ""
       }
     }
+    osDisk = {
+      type        = "Windows"
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+    }
     network = {
       subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -196,22 +196,6 @@ virtualMachines = [
       }
       locationExtended = {
         enable = false
-      }
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = false
-      }
-    }
-    operatingSystem = {
-      type = "Windows"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
       }
     }
     extension = {
@@ -226,6 +210,14 @@ virtualMachines = [
       monitor = {
         enable = false
         name   = "Monitor"
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = false
       }
     }
   }

@@ -53,11 +53,6 @@ $processType = "7zip"
 RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
 Write-Host "Customize (End): 7-Zip"
 
-Write-Host "Customize (Start): cwRsync"
-$processType = "rsync"
-RunProcess "$binPathChoco\choco.exe" "install $processType --confirm --no-progress" "$binDirectory\$processType"
-Write-Host "Customize (End): cwRsync"
-
 Write-Host "Customize (Start): Visual Studio Build Tools"
 $processType = "vsBuildTools"
 RunProcess "$binPathChoco\choco.exe" "install visualstudio2022buildtools --package-parameters ""--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.Component.MSBuild"" --confirm --no-progress" "$binDirectory\$processType"

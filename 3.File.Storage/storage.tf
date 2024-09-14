@@ -151,76 +151,6 @@ resource azurerm_storage_container core {
   ]
 }
 
-resource terraform_data blob_container_file_system_access_default {
-  for_each = {
-    for blobContainer in local.blobContainers : blobContainer.key => blobContainer if blobContainer.fileSystem.enable
-  }
-  provisioner local-exec {
-    command = "az storage fs access update-recursive --auth-mode login --account-name ${each.value.storageAccountName} --file-system ${each.value.name} --path / --acl default:${each.value.fileSystem.rootAcl}"
-  }
-  depends_on = [
-    azurerm_storage_container.core
-  ]
-}
-
-resource terraform_data blob_container_file_system_access_pre_load {
-  for_each = {
-    for blobContainer in local.blobContainers : blobContainer.key => blobContainer if blobContainer.fileSystem.enable
-  }
-  provisioner local-exec {
-    command = "az storage fs access update-recursive --auth-mode login --account-name ${each.value.storageAccountName} --file-system ${each.value.name} --path / --acl ${each.value.fileSystem.rootAcl}"
-  }
-  depends_on = [
-    azurerm_storage_container.core
-  ]
-}
-
-resource terraform_data blob_container_load_root {
-  for_each = {
-    for blobContainer in local.blobContainers : blobContainer.key => blobContainer if blobContainer.loadFiles && var.fileLoadSource.enable && var.fileLoadSource.blobName == ""
-  }
-  provisioner local-exec {
-    environment = {
-      AZURE_STORAGE_AUTH_MODE = "login"
-    }
-    command = "az storage copy --source-account-name ${var.fileLoadSource.accountName} --source-account-key ${var.fileLoadSource.accountKey} --source-container ${var.fileLoadSource.containerName} --recursive --account-name ${each.value.storageAccountName} --destination-container ${each.value.name}"
-  }
-  depends_on = [
-    terraform_data.blob_container_file_system_access_default,
-    terraform_data.blob_container_file_system_access_pre_load
-  ]
-}
-
-resource terraform_data blob_container_load_blob {
-  for_each = {
-    for blobContainer in local.blobContainers : blobContainer.key => blobContainer if blobContainer.loadFiles && var.fileLoadSource.enable && var.fileLoadSource.blobName != ""
-  }
-  provisioner local-exec {
-    environment = {
-      AZURE_STORAGE_AUTH_MODE = "login"
-    }
-    command = "az storage copy --source-account-name ${var.fileLoadSource.accountName} --source-account-key ${var.fileLoadSource.accountKey} --source-container ${var.fileLoadSource.containerName} --source-blob ${var.fileLoadSource.blobName} --recursive --account-name ${each.value.storageAccountName} --destination-container ${each.value.name} --destination-blob ${var.fileLoadSource.blobName}"
-  }
-  depends_on = [
-    terraform_data.blob_container_file_system_access_default,
-    terraform_data.blob_container_file_system_access_pre_load
-  ]
-}
-
-resource terraform_data blob_container_file_system_access_post_load {
-  for_each = {
-    for blobContainer in local.blobContainers : blobContainer.key => blobContainer if blobContainer.fileSystem.enable && blobContainer.loadFiles
-  }
-  provisioner local-exec {
-    command = "az storage fs access update-recursive --auth-mode login --account-name ${each.value.storageAccountName} --file-system ${each.value.name} --path / --acl ${each.value.fileSystem.rootAcl}"
-  }
-  depends_on = [
-    azurerm_storage_container.core,
-    terraform_data.blob_container_load_root,
-    terraform_data.blob_container_load_blob
-  ]
-}
-
 resource azurerm_storage_share core {
   for_each = {
     for fileShare in local.fileShares : fileShare.key => fileShare
@@ -232,36 +162,6 @@ resource azurerm_storage_share core {
   quota                = each.value.sizeGB
   depends_on = [
     azurerm_private_endpoint.storage
-  ]
-}
-
-resource terraform_data file_share_load_root {
-  for_each = {
-    for fileShare in local.fileShares : fileShare.key => fileShare if fileShare.loadFiles && var.fileLoadSource.enable && var.fileLoadSource.blobName == ""
-  }
-  provisioner local-exec {
-    environment = {
-      AZURE_STORAGE_AUTH_MODE = "login"
-    }
-    command = "az storage copy --source-account-name ${var.fileLoadSource.accountName} --source-account-key ${var.fileLoadSource.accountKey} --source-container ${var.fileLoadSource.containerName} --recursive --account-name ${each.value.storageAccountName} --destination-share ${each.value.name}"
-  }
-  depends_on = [
-    azurerm_storage_share.core
-  ]
-}
-
-resource terraform_data file_share_load_blob {
-  for_each = {
-    for fileShare in local.fileShares : fileShare.key => fileShare if fileShare.loadFiles && var.fileLoadSource.enable && var.fileLoadSource.blobName != ""
-  }
-  provisioner local-exec {
-    environment = {
-      AZURE_STORAGE_AUTH_MODE = "login"
-    }
-    command = "az storage copy --source-account-name ${var.fileLoadSource.accountName} --source-account-key ${var.fileLoadSource.accountKey} --source-container ${var.fileLoadSource.containerName} --source-blob ${var.fileLoadSource.blobName} --recursive --account-name ${each.value.storageAccountName} --destination-share ${each.value.name} --destination-file-path ${var.fileLoadSource.blobName}"
-  }
-  depends_on = [
-    azurerm_storage_share.core
   ]
 }
 

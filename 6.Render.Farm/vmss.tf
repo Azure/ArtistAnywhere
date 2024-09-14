@@ -31,24 +31,14 @@ variable virtualMachineScaleSets {
         enable = bool
       })
     })
-    adminLogin = object({
-      userName     = string
-      userPassword = string
-      sshKeyPublic = string
-      passwordAuth = object({
-        disable = bool
-      })
-    })
-    operatingSystem = object({
-      type = string
-      disk = object({
-        storageType = string
-        cachingType = string
-        sizeGB      = number
-        ephemeral = object({
-          enable    = bool
-          placement = string
-        })
+    osDisk = object({
+      type        = string
+      storageType = string
+      cachingType = string
+      sizeGB      = number
+      ephemeral = object({
+        enable    = bool
+        placement = string
       })
     })
     spot = object({
@@ -81,6 +71,14 @@ variable virtualMachineScaleSets {
       monitor = object({
         enable = bool
         name   = string
+      })
+    })
+    adminLogin = object({
+      userName     = string
+      userPassword = string
+      sshKeyPublic = string
+      passwordAuth = object({
+        disable = bool
       })
     })
     flexMode = object({
@@ -124,7 +122,7 @@ locals {
 
 resource azurerm_linux_virtual_machine_scale_set farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexMode.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "linux" && !virtualMachineScaleSet.flexMode.enable
   }
   name                            = each.value.name
   computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
@@ -159,14 +157,14 @@ resource azurerm_linux_virtual_machine_scale_set farm {
     enable_accelerated_networking = each.value.network.acceleration.enable
   }
   os_disk {
-    storage_account_type = each.value.operatingSystem.disk.storageType
-    caching              = each.value.operatingSystem.disk.cachingType
-    disk_size_gb         = each.value.operatingSystem.disk.sizeGB > 0 ? each.value.operatingSystem.disk.sizeGB : null
+    storage_account_type = each.value.osDisk.storageType
+    caching              = each.value.osDisk.cachingType
+    disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
     dynamic diff_disk_settings {
-      for_each = each.value.operatingSystem.disk.ephemeral.enable ? [1] : []
+      for_each = each.value.osDisk.ephemeral.enable ? [1] : []
       content {
         option    = "Local"
-        placement = each.value.operatingSystem.disk.ephemeral.placement
+        placement = each.value.osDisk.ephemeral.placement
       }
     }
   }
@@ -256,7 +254,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm_linux {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "linux" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "linux" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_linux_virtual_machine_scale_set.farm[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
@@ -264,7 +262,7 @@ resource azurerm_monitor_data_collection_rule_association farm_linux {
 
 resource azurerm_windows_virtual_machine_scale_set farm {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexMode.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "windows" && !virtualMachineScaleSet.flexMode.enable
   }
   name                        = each.value.name
   computer_name_prefix        = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
@@ -298,14 +296,14 @@ resource azurerm_windows_virtual_machine_scale_set farm {
     enable_accelerated_networking = each.value.network.acceleration.enable
   }
   os_disk {
-    storage_account_type = each.value.operatingSystem.disk.storageType
-    caching              = each.value.operatingSystem.disk.cachingType
-    disk_size_gb         = each.value.operatingSystem.disk.sizeGB > 0 ? each.value.operatingSystem.disk.sizeGB : null
+    storage_account_type = each.value.osDisk.storageType
+    caching              = each.value.osDisk.cachingType
+    disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
     dynamic diff_disk_settings {
-      for_each = each.value.operatingSystem.disk.ephemeral.enable ? [1] : []
+      for_each = each.value.osDisk.ephemeral.enable ? [1] : []
       content {
         option    = "Local"
-        placement = each.value.operatingSystem.disk.ephemeral.placement
+        placement = each.value.osDisk.ephemeral.placement
       }
     }
   }
@@ -381,7 +379,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
 
 resource azurerm_monitor_data_collection_rule_association farm_windows {
   for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.operatingSystem.type) == "windows" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "windows" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
   }
   target_resource_id          = azurerm_windows_virtual_machine_scale_set.farm[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
@@ -418,20 +416,20 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
     enable_accelerated_networking = each.value.network.acceleration.enable
   }
   os_disk {
-    storage_account_type = each.value.operatingSystem.disk.storageType
-    caching              = each.value.operatingSystem.disk.cachingType
-    disk_size_gb         = each.value.operatingSystem.disk.sizeGB > 0 ? each.value.operatingSystem.disk.sizeGB : null
+    storage_account_type = each.value.osDisk.storageType
+    caching              = each.value.osDisk.cachingType
+    disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
     dynamic diff_disk_settings {
-      for_each = each.value.operatingSystem.disk.ephemeral.enable ? [1] : []
+      for_each = each.value.osDisk.ephemeral.enable ? [1] : []
       content {
         option    = "Local"
-        placement = each.value.operatingSystem.disk.ephemeral.placement
+        placement = each.value.osDisk.ephemeral.placement
       }
     }
   }
   os_profile {
     dynamic linux_configuration {
-      for_each = lower(each.value.operatingSystem.type) == "linux" ? [1] : []
+      for_each = lower(each.value.osDisk.type) == "linux" ? [1] : []
       content {
         computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
         admin_username                  = each.value.adminLogin.userName
@@ -447,7 +445,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
       }
     }
     dynamic windows_configuration {
-      for_each = lower(each.value.operatingSystem.type) == "windows" ? [1] : []
+      for_each = lower(each.value.osDisk.type) == "windows" ? [1] : []
       content {
         computer_name_prefix = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
         admin_username       = each.value.adminLogin.userName
@@ -456,7 +454,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
     }
   }
   dynamic plan {
-    for_each = lower(each.value.operatingSystem.type) == "linux" && each.value.machine.image.plan.publisher != "" ? [1] : []
+    for_each = lower(each.value.osDisk.type) == "linux" && each.value.machine.image.plan.publisher != "" ? [1] : []
     content {
       publisher = each.value.machine.image.plan.publisher
       product   = each.value.machine.image.plan.product
@@ -467,17 +465,17 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
     for_each = each.value.extension.custom.enable ? [1] : []
     content {
       name                               = each.value.extension.custom.name
-      type                               = lower(each.value.operatingSystem.type) == "windows" ? "CustomScriptExtension" :"CustomScript"
-      publisher                          = lower(each.value.operatingSystem.type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
-      type_handler_version               = lower(each.value.operatingSystem.type) == "windows" ? "1.10" : "2.1"
+      type                               = lower(each.value.osDisk.type) == "windows" ? "CustomScriptExtension" :"CustomScript"
+      publisher                          = lower(each.value.osDisk.type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
+      type_handler_version               = lower(each.value.osDisk.type) == "windows" ? "1.10" : "2.1"
       auto_upgrade_minor_version_enabled = true
       protected_settings = jsonencode({
-        script = lower(each.value.operatingSystem.type) == "windows" ? null : base64encode(
+        script = lower(each.value.osDisk.type) == "windows" ? null : base64encode(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
             fileSystem = local.fileSystemLinux
           }))
         )
-        commandToExecute = lower(each.value.operatingSystem.type) == "windows" ? "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
+        commandToExecute = lower(each.value.osDisk.type) == "windows" ? "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
             fileSystem      = local.fileSystemWindows
             activeDirectory = each.value.activeDirectory
@@ -490,7 +488,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
     for_each = each.value.extension.health.enable ? [1] : []
     content {
       name                               = each.value.extension.health.name
-      type                               = lower(each.value.operatingSystem.type) == "windows" ? "ApplicationHealthWindows" : "ApplicationHealthLinux"
+      type                               = lower(each.value.osDisk.type) == "windows" ? "ApplicationHealthWindows" : "ApplicationHealthLinux"
       publisher                          = "Microsoft.ManagedServices"
       type_handler_version               = "1.0"
       auto_upgrade_minor_version_enabled = true
@@ -505,9 +503,9 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
     for_each = each.value.extension.monitor.enable ? [1] : []
     content {
       name                               = each.value.extension.monitor.name
-      type                               = lower(each.value.operatingSystem.type) == "windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
+      type                               = lower(each.value.osDisk.type) == "windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
       publisher                          = "Microsoft.Azure.Monitor"
-      type_handler_version               = lower(each.value.operatingSystem.type) == "windows" ? one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionWindows]) : one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionLinux])
+      type_handler_version               = lower(each.value.osDisk.type) == "windows" ? one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionWindows]) : one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionLinux])
       auto_upgrade_minor_version_enabled = true
       settings = jsonencode({
         authentication = {

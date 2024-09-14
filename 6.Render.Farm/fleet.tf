@@ -38,6 +38,11 @@ variable computeFleets {
           name      = string
         })
       })
+      adminLogin = object({
+        userName     = string
+        userPassword = string
+        sshKeyPublic = string
+      })
     })
     network = object({
       subnetName = string
@@ -47,11 +52,6 @@ variable computeFleets {
       locationExtended = object({
         enable = bool
       })
-    })
-    adminLogin = object({
-      userName     = string
-      userPassword = string
-      sshKeyPublic = string
     })
   }))
 }
@@ -71,14 +71,14 @@ locals {
             name      = try(data.terraform_remote_state.image.outputs.linuxPlan.sku, computeFleet.machine.image.plan.name)
           }
         })
+        adminLogin = merge(computeFleet.machine.adminLogin, {
+          userName     = computeFleet.machine.adminLogin.userName != "" ? computeFleet.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+          userPassword = computeFleet.machine.adminLogin.userPassword != "" ? computeFleet.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+          sshKeyPublic = computeFleet.machine.adminLogin.sshKeyPublic != "" ? computeFleet.machine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
+        })
       })
       network = merge(computeFleet.network, {
         subnetId = "${computeFleet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : computeFleet.network.subnetName}"
-      })
-      adminLogin = merge(computeFleet.adminLogin, {
-        userName     = computeFleet.adminLogin.userName != "" ? computeFleet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-        userPassword = computeFleet.adminLogin.userPassword != "" ? computeFleet.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
-        sshKeyPublic = computeFleet.adminLogin.sshKeyPublic != "" ? computeFleet.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
       })
       activeDirectory = merge(var.activeDirectory, {
         adminUsername = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value
@@ -113,8 +113,8 @@ resource azapi_resource fleet {
           }
           osProfile = {
             computerNamePrefix = each.value.machine.namePrefix != "" ? each.value.machine.namePrefix : each.value.name
-            adminUsername      = each.value.adminLogin.userName
-            adminPassword      = each.value.adminLogin.userPassword
+            adminUsername      = each.value.machine.adminLogin.userName
+            adminPassword      = each.value.machine.adminLogin.userPassword
           }
           networkProfile = {
             #networkApiVersion = "2024-03-01"

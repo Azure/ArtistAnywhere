@@ -1,5 +1,98 @@
 resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
+######################################################################################################
+# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) #
+######################################################################################################
+
+hsCache = {
+  enable     = false
+  version    = "latest"
+  namePrefix = "xstudio"
+  domainName = "azure.studio"
+  metadata = { # Anvil
+    machine = {
+      namePrefix  = "-anvil"
+      size        = "Standard_E4as_v5"
+      count       = 2
+      adminLogin = {
+        userName     = ""
+        userPassword = ""
+        sshKeyPublic = ""
+        passwordAuth = {
+          disable = true
+        }
+      }
+      osDisk = {
+        storageType = "Premium_LRS"
+        cachingType = "ReadWrite"
+        sizeGB      = 128
+      }
+      dataDisk = {
+        storageType = "Premium_LRS"
+        cachingType = "None"
+        sizeGB      = 256
+      }
+      ultraSSD = {
+        enable = false
+      }
+    }
+    network = {
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+    }
+  }
+  data = { # DSX
+    machine = {
+      namePrefix = "-dsx"
+      size       = "Standard_E32as_v5"
+      count      = 3
+      adminLogin = {
+        userName     = ""
+        userPassword = ""
+        sshKeyPublic = ""
+        passwordAuth = {
+          disable = true
+        }
+      }
+      osDisk = {
+        storageType = "Premium_LRS"
+        cachingType = "ReadWrite"
+        sizeGB      = 128
+      }
+      dataDisk = {
+        storageType = "Premium_LRS"
+        cachingType = "None"
+        sizeGB      = 256
+        count       = 2
+        raid0 = {
+          enable = false
+        }
+      }
+      ultraSSD = {
+        enable = false
+      }
+    }
+    network = {
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+    }
+  }
+  proximityPlacementGroup = { # https://learn.microsoft.com/azure/virtual-machines/co-location
+    enable = false
+  }
+  storageTargets = [
+    {
+      enable  = false
+      type    = ""
+      name    = ""
+      address = ""
+      options = ""
+    }
+  ]
+}
+
 ##############################################################################
 # HPC Cache (https://learn.microsoft.com/azure/hpc-cache/hpc-cache-overview) #
 ##############################################################################
@@ -105,6 +198,7 @@ existingNetwork = {
   enable            = false
   name              = ""
   subnetName        = ""
+  subnetNameHA      = ""
   regionName        = ""
   resourceGroupName = ""
   privateDns = {

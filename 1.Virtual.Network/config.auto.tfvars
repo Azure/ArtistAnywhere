@@ -37,6 +37,13 @@ virtualNetworks = [
         serviceDelegation = null
       },
       {
+        name = "StorageHA"
+        addressSpace = [
+          "10.0.201.0/28"
+        ]
+        serviceDelegation = null
+      },
+      {
         name = "StorageNetApp"
         addressSpace = [
           "10.0.193.0/24"
@@ -96,6 +103,13 @@ virtualNetworks = [
         name = "Cache"
         addressSpace = [
           "10.0.198.0/24"
+        ]
+        serviceDelegation = null
+      },
+      {
+        name = "CacheHA"
+        addressSpace = [
+          "10.0.202.0/28"
         ]
         serviceDelegation = null
       },
@@ -171,6 +185,13 @@ virtualNetworks = [
         serviceDelegation = null
       },
       {
+        name = "StorageHA"
+        addressSpace = [
+          "10.1.201.0/28"
+        ]
+        serviceDelegation = null
+      },
+      {
         name = "StorageNetApp"
         addressSpace = [
           "10.1.193.0/24"
@@ -230,6 +251,13 @@ virtualNetworks = [
         name = "Cache"
         addressSpace = [
           "10.1.198.0/24"
+        ]
+        serviceDelegation = null
+      },
+      {
+        name = "CacheHA"
+        addressSpace = [
+          "10.1.202.0/28"
         ]
         serviceDelegation = null
       },

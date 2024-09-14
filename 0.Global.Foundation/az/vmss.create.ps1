@@ -6,7 +6,7 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  regionName       = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
+  regionName       = if ($extendedLocation) {"WestUS"} else {"WestUS3"}
   extendedZoneName = "LosAngeles"
 }
 $virtualNetwork = @{
@@ -17,7 +17,7 @@ $virtualNetwork = @{
 }
 $virtualMachine = @{
   name    = if ($osTypeWindows) {"WinFarmC"} else {"LnxFarmC"}
-  size    = "Standard_HB176rs_v4"
+  size    = "Standard_HB120rs_v3"
   count   = 2
   imageId = if ($osTypeWindows) {"MicrosoftWindowsDesktop:Windows-10:Win10-22H2-Ent-G2:Latest"} else {"RESF:RockyLinux-x86_64:9-LVM:9.3.20231113"}
   adminLogin = @{

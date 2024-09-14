@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.1"
+      version = "~>4.2"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -61,16 +61,6 @@ variable resourceGroupName {
   type = string
 }
 
-variable fileLoadSource {
-  type = object({
-    enable        = bool
-    accountName   = string
-    accountKey    = string
-    containerName = string
-    blobName      = string
-  })
-}
-
 data http client_address {
   url = "https://api.ipify.org?format=json"
 }
@@ -99,6 +89,11 @@ data azurerm_key_vault_secret admin_password {
 
 data azurerm_key_vault_secret ssh_key_public {
   name         = module.global.keyVault.secretName.sshKeyPublic
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret ssh_key_private {
+  name         = module.global.keyVault.secretName.sshKeyPrivate
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 

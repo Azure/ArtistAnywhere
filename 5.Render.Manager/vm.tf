@@ -18,6 +18,12 @@ variable virtualMachines {
         name      = string
       })
     })
+    osDisk = object({
+      type        = string
+      storageType = string
+      cachingType = string
+      sizeGB      = number
+    })
     network = object({
       subnetName = string
       acceleration = object({
@@ -27,22 +33,6 @@ variable virtualMachines {
         enable = bool
       })
       staticIpAddress = string
-    })
-    operatingSystem = object({
-      type = string
-      disk = object({
-        storageType = string
-        cachingType = string
-        sizeGB      = number
-      })
-    })
-    adminLogin = object({
-      userName     = string
-      userPassword = string
-      sshKeyPublic = string
-      passwordAuth = object({
-        disable = bool
-      })
     })
     extension = object({
       custom = object({
@@ -58,6 +48,14 @@ variable virtualMachines {
       monitor = object({
         enable = bool
         name   = string
+      })
+    })
+    adminLogin = object({
+      userName     = string
+      userPassword = string
+      sshKeyPublic = string
+      passwordAuth = object({
+        disable = bool
       })
     })
   }))
@@ -108,7 +106,7 @@ resource azurerm_network_interface job_manager {
 
 resource azurerm_linux_virtual_machine job_manager {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "linux"
   }
   name                            = each.value.name
   resource_group_name             = azurerm_resource_group.job_manager.name
@@ -129,9 +127,9 @@ resource azurerm_linux_virtual_machine job_manager {
     "${azurerm_resource_group.job_manager.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
   ]
   os_disk {
-    storage_account_type = each.value.operatingSystem.disk.storageType
-    caching              = each.value.operatingSystem.disk.cachingType
-    disk_size_gb         = each.value.operatingSystem.disk.sizeGB > 0 ? each.value.operatingSystem.disk.sizeGB : null
+    storage_account_type = each.value.osDisk.storageType
+    caching              = each.value.osDisk.cachingType
+    disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
   }
   dynamic plan {
     for_each = each.value.image.plan.publisher != "" ? [1] : []
@@ -155,7 +153,7 @@ resource azurerm_linux_virtual_machine job_manager {
 
 resource azurerm_virtual_machine_extension job_manager_initialize_linux {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.operatingSystem.type) == "linux"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.osDisk.type) == "linux"
   }
   name                       = each.value.extension.custom.name
   type                       = "CustomScript"
@@ -176,7 +174,7 @@ resource azurerm_virtual_machine_extension job_manager_initialize_linux {
 
 resource azurerm_virtual_machine_extension job_manager_monitor_linux {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && virtualMachine.extension.monitor.enable
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "linux" && virtualMachine.extension.monitor.enable
   }
   name                       = each.value.extension.monitor.name
   type                       = "AzureMonitorLinuxAgent"
@@ -200,7 +198,7 @@ resource azurerm_virtual_machine_extension job_manager_monitor_linux {
 
 resource azurerm_monitor_data_collection_rule_association job_manager_linux {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "linux" && virtualMachine.extension.monitor.enable
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "linux" && virtualMachine.extension.monitor.enable
   }
   target_resource_id          = azurerm_linux_virtual_machine.job_manager[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
@@ -208,7 +206,7 @@ resource azurerm_monitor_data_collection_rule_association job_manager_linux {
 
 resource azurerm_windows_virtual_machine job_manager {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "windows"
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.job_manager.name
@@ -228,9 +226,9 @@ resource azurerm_windows_virtual_machine job_manager {
     "${azurerm_resource_group.job_manager.id}/providers/Microsoft.Network/networkInterfaces/${each.value.name}"
   ]
   os_disk {
-    storage_account_type = each.value.operatingSystem.disk.storageType
-    caching              = each.value.operatingSystem.disk.cachingType
-    disk_size_gb         = each.value.operatingSystem.disk.sizeGB > 0 ? each.value.operatingSystem.disk.sizeGB : null
+    storage_account_type = each.value.osDisk.storageType
+    caching              = each.value.osDisk.cachingType
+    disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
   }
   depends_on = [
     azurerm_network_interface.job_manager
@@ -239,7 +237,7 @@ resource azurerm_windows_virtual_machine job_manager {
 
 resource azurerm_virtual_machine_extension job_manager_initialize_windows {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.operatingSystem.type) == "windows"
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && virtualMachine.extension.custom.enable && lower(virtualMachine.osDisk.type) == "windows"
   }
   name                       = each.value.extension.custom.name
   type                       = "CustomScriptExtension"
@@ -263,7 +261,7 @@ resource azurerm_virtual_machine_extension job_manager_initialize_windows {
 
 resource azurerm_virtual_machine_extension job_manager_monitor_windows {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && virtualMachine.extension.monitor.enable
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "windows" && virtualMachine.extension.monitor.enable
   }
   name                       = each.value.extension.monitor.name
   type                       = "AzureMonitorWindowsAgent"
@@ -287,7 +285,7 @@ resource azurerm_virtual_machine_extension job_manager_monitor_windows {
 
 resource azurerm_monitor_data_collection_rule_association job_manager_windows {
   for_each = {
-    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.operatingSystem.type) == "windows" && virtualMachine.extension.monitor.enable
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "windows" && virtualMachine.extension.monitor.enable
   }
   target_resource_id          = azurerm_windows_virtual_machine.job_manager[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id

@@ -8,7 +8,7 @@ virtualMachines = [
   {
     enable = false
     name   = "LnxJobManager"
-    size   = "Standard_E8s_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
       galleryName       = "xstudio"
@@ -20,6 +20,12 @@ virtualMachines = [
         name      = ""
       }
     }
+    osDisk = {
+      type        = "Linux"
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+    }
     network = {
       subnetName = "Farm"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -29,22 +35,6 @@ virtualMachines = [
         enable = false
       }
       staticIpAddress = ""
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = true
-      }
-    }
-    operatingSystem = {
-      type = "Linux"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-      }
     }
     extension = {
       custom = {
@@ -62,11 +52,19 @@ virtualMachines = [
         name   = "Monitor"
       }
     }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = true
+      }
+    }
   },
   {
     enable = false
     name   = "WinJobManager"
-    size   = "Standard_E8s_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
       galleryName       = "xstudio"
@@ -78,6 +76,12 @@ virtualMachines = [
         name      = ""
       }
     }
+    osDisk = {
+      type        = "Windows"
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+    }
     network = {
       subnetName = "Farm"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -87,22 +91,6 @@ virtualMachines = [
         enable = false
       }
       staticIpAddress = "10.0.127.0"
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = false
-      }
-    }
-    operatingSystem = {
-      type = "Windows"
-      disk = {
-        storageType = "Standard_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-      }
     }
     extension = {
       custom = {
@@ -118,6 +106,14 @@ virtualMachines = [
       monitor = {
         enable = false
         name   = "Monitor"
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = false
       }
     }
   }

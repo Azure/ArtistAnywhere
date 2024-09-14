@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~4.1"
+      version = "~>4.2"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -84,6 +84,7 @@ variable existingNetwork {
     enable            = bool
     name              = string
     subnetName        = string
+    subnetNameHA      = string
     regionName        = string
     resourceGroupName = string
     privateDns = object({
@@ -186,6 +187,12 @@ data azurerm_virtual_network studio_region {
 
 data azurerm_subnet cache {
   name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Cache"
+  resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio_region.name
+}
+
+data azurerm_subnet cache_ha {
+  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameHA : "CacheHA"
   resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio_region.name
 }

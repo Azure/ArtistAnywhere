@@ -10,13 +10,13 @@ computeFleets = [
       namePrefix = ""
       sizes = [
         {
-          name = "Standard_HB176rs_v4"
+          name = "Standard_HB120rs_v3"
         },
         {
-          name = "Standard_HB176-144rs_v4"
+          name = "Standard_HB120-96rs_v3"
         },
         {
-          name = "Standard_HB176-96rs_v4"
+          name = "Standard_HB120-64rs_v3"
         }
       ]
       priority = {
@@ -46,6 +46,11 @@ computeFleets = [
           name      = ""
         }
       }
+      adminLogin = {
+        userName     = ""
+        userPassword = ""
+        sshKeyPublic = ""
+      }
     }
     network = {
       subnetName = "Farm"
@@ -56,11 +61,6 @@ computeFleets = [
         enable = false
       }
     }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-    }
   },
   {
     enable = false
@@ -69,13 +69,13 @@ computeFleets = [
       namePrefix = ""
       sizes = [
         {
-          name = "Standard_HB176rs_v4"
+          name = "Standard_HB120rs_v3"
         },
         {
-          name = "Standard_HB176-144rs_v4"
+          name = "Standard_HB120-96rs_v3"
         },
         {
-          name = "Standard_HB176-96rs_v4"
+          name = "Standard_HB120-64rs_v3"
         }
       ]
       priority = {
@@ -105,6 +105,11 @@ computeFleets = [
           name      = ""
         }
       }
+      adminLogin = {
+        userName     = ""
+        userPassword = ""
+        sshKeyPublic = ""
+      }
     }
     network = {
       subnetName = "Farm"
@@ -114,11 +119,6 @@ computeFleets = [
       locationExtended = {
         enable = false
       }
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
     }
   }
 ]

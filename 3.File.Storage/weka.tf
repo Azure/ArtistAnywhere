@@ -25,13 +25,28 @@ variable weka {
           name      = string
         })
       })
-    })
-    adminLogin = object({
-      userName     = string
-      userPassword = string
-      sshKeyPublic = string
-      passwordAuth = object({
-        disable = bool
+      osDisk = object({
+        storageType = string
+        cachingType = string
+        sizeGB      = number
+      })
+      dataDisk = object({
+        storageType = string
+        cachingType = string
+        sizeGB      = number
+      })
+      adminLogin = object({
+        userName      = string
+        userPassword  = string
+        sshKeyPublic  = string
+        sshKeyPrivate = string
+        passwordAuth = object({
+          disable = bool
+        })
+      })
+      terminateNotification = object({
+        enable       = bool
+        delayTimeout = string
       })
     })
     network = object({
@@ -42,10 +57,6 @@ variable weka {
         name       = string
         ttlSeconds = number
       })
-    })
-    terminateNotification = object({
-      enable       = bool
-      delayTimeout = string
     })
     objectTier = object({
       percent = number
@@ -61,16 +72,6 @@ variable weka {
       autoScale    = bool
       authRequired = bool
       loadFiles    = bool
-    })
-    osDisk = object({
-      storageType = string
-      cachingType = string
-      sizeGB      = number
-    })
-    dataDisk = object({
-      storageType = string
-      cachingType = string
-      sizeGB      = number
     })
     dataProtection = object({
       stripeWidth = number
@@ -118,12 +119,13 @@ locals {
           name      = try(data.terraform_remote_state.image.outputs.linuxPlan.sku, var.weka.machine.image.plan.name)
         }
       })
+      adminLogin = {
+        userName      = var.weka.machine.adminLogin.userName != "" ? var.weka.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+        userPassword  = var.weka.machine.adminLogin.userPassword != "" ? var.weka.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+        sshKeyPublic  = var.weka.machine.adminLogin.sshKeyPublic != "" ? var.weka.machine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
+        sshKeyPrivate = var.weka.machine.adminLogin.sshKeyPrivate != "" ? var.weka.machine.adminLogin.sshKeyPrivate : data.azurerm_key_vault_secret.ssh_key_private.value
+      }
     })
-    adminLogin = {
-      userName     = var.weka.adminLogin.userName != "" ? var.weka.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-      userPassword = var.weka.adminLogin.userPassword != "" ? var.weka.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
-      sshKeyPublic = var.weka.adminLogin.sshKeyPublic != "" ? var.weka.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
-    }
     objectTier = merge(var.weka.objectTier, {
       storage = {
         accountName   = var.weka.objectTier.storage.accountName != "" || !var.weka.enable ? var.weka.objectTier.storage.accountName : data.azurerm_storage_account.blob[0].name
@@ -232,15 +234,15 @@ resource azurerm_linux_virtual_machine_scale_set weka {
   sku                             = var.weka.machine.size
   instances                       = var.weka.machine.count
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.weka.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${var.weka.machine.image.galleryName}/images/${var.weka.machine.image.definitionName}/versions/${var.weka.machine.image.versionId}"
-  admin_username                  = local.weka.adminLogin.userName
-  admin_password                  = local.weka.adminLogin.userPassword
-  disable_password_authentication = var.weka.adminLogin.passwordAuth.disable
+  admin_username                  = local.weka.machine.adminLogin.userName
+  admin_password                  = local.weka.machine.adminLogin.userPassword
+  disable_password_authentication = var.weka.machine.adminLogin.passwordAuth.disable
   proximity_placement_group_id    = azurerm_proximity_placement_group.weka[0].id
   single_placement_group          = false
   overprovision                   = false
   custom_data = base64encode(templatefile("terminate.sh", {
     wekaClusterName      = var.weka.name.resource
-    wekaAdminPassword    = local.weka.adminLogin.userPassword
+    wekaAdminPassword    = local.weka.machine.adminLogin.userPassword
     dnsResourceGroupName = data.azurerm_private_dns_zone.studio.resource_group_name
     dnsZoneName          = data.azurerm_private_dns_zone.studio.name
     dnsRecordName        = var.weka.network.dnsRecord.name
@@ -263,20 +265,20 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     enable_accelerated_networking = var.weka.network.acceleration.enable
   }
   os_disk {
-    storage_account_type = var.weka.osDisk.storageType
-    caching              = var.weka.osDisk.cachingType
-    disk_size_gb         = var.weka.osDisk.sizeGB > 0 ? var.weka.osDisk.sizeGB : null
+    storage_account_type = var.weka.machine.osDisk.storageType
+    caching              = var.weka.machine.osDisk.cachingType
+    disk_size_gb         = var.weka.machine.osDisk.sizeGB > 0 ? var.weka.machine.osDisk.sizeGB : null
   }
   data_disk {
-    storage_account_type = var.weka.dataDisk.storageType
-    caching              = var.weka.dataDisk.cachingType
-    disk_size_gb         = var.weka.dataDisk.sizeGB
+    storage_account_type = var.weka.machine.dataDisk.storageType
+    caching              = var.weka.machine.dataDisk.cachingType
+    disk_size_gb         = var.weka.machine.dataDisk.sizeGB
     create_option        = "Empty"
     lun                  = 0
   }
   termination_notification {
-    enabled = var.weka.terminateNotification.enable
-    timeout = var.weka.terminateNotification.delayTimeout
+    enabled = var.weka.machine.terminateNotification.enable
+    timeout = var.weka.machine.terminateNotification.delayTimeout
   }
   extension {
     name                       = "Health"
@@ -304,7 +306,7 @@ resource azurerm_linux_virtual_machine_scale_set weka {
           wekaVersion               = var.weka.version
           wekaApiToken              = var.weka.apiToken
           wekaClusterName           = var.weka.name.resource
-          wekaDataDiskSize          = var.weka.dataDisk.sizeGB
+          wekaDataDiskSize          = var.weka.machine.dataDisk.sizeGB
           wekaMachineSpec           = local.wekaMachineSpec
           wekaCoreIdsScript         = local.wekaCoreIdsScript
           wekaDriveDisksScript      = local.wekaDriveDisksScript
@@ -312,8 +314,8 @@ resource azurerm_linux_virtual_machine_scale_set weka {
           wekaFileSystemName        = var.weka.fileSystem.name
           wekaFileSystemAutoScale   = var.weka.fileSystem.autoScale
           wekaObjectTierPercent     = local.weka.objectTier.percent
-          wekaTerminateNotification = var.weka.terminateNotification
-          wekaAdminPassword         = local.weka.adminLogin.userPassword
+          wekaTerminateNotification = var.weka.machine.terminateNotification
+          wekaAdminPassword         = local.weka.machine.adminLogin.userPassword
           wekaResourceGroupName     = azurerm_resource_group.weka[0].name
           dnsResourceGroupName      = data.azurerm_private_dns_zone.studio.resource_group_name
           dnsZoneName               = data.azurerm_private_dns_zone.studio.name
@@ -335,10 +337,10 @@ resource azurerm_linux_virtual_machine_scale_set weka {
     }
   }
   dynamic admin_ssh_key {
-    for_each = local.weka.adminLogin.sshKeyPublic != "" ? [1] : []
+    for_each = local.weka.machine.adminLogin.sshKeyPublic != "" ? [1] : []
     content {
-      username   = local.weka.adminLogin.userName
-      public_key = local.weka.adminLogin.sshKeyPublic
+      username   = local.weka.machine.adminLogin.userName
+      public_key = local.weka.machine.adminLogin.sshKeyPublic
     }
   }
   depends_on = [
@@ -360,15 +362,15 @@ resource terraform_data weka_cluster_create {
   connection {
     type     = "ssh"
     host     = data.azurerm_virtual_machine_scale_set.weka[0].instances[0].private_ip_address
-    user     = local.weka.adminLogin.userName
-    password = local.weka.adminLogin.userPassword
+    user     = local.weka.machine.adminLogin.userName
+    password = local.weka.machine.adminLogin.userPassword
   }
   provisioner remote-exec {
     inline = [
       "machineSpec='${local.wekaMachineSpec}'",
       "source ${local.wekaDriveDisksScript}",
-      "weka cluster create ${join(" ", data.azurerm_virtual_machine_scale_set.weka[0].instances[*].private_ip_address)} --admin-password ${local.weka.adminLogin.userPassword} 2>&1 | tee weka-cluster-create.log",
-      "weka user login admin ${local.weka.adminLogin.userPassword}",
+      "weka cluster create ${join(" ", data.azurerm_virtual_machine_scale_set.weka[0].instances[*].private_ip_address)} --admin-password ${local.weka.machine.adminLogin.userPassword} 2>&1 | tee weka-cluster-create.log",
+      "weka user login admin ${local.weka.machine.adminLogin.userPassword}",
       "for (( i=0; i<${var.weka.machine.count}; i++ )); do",
       "  hostName=${azurerm_linux_virtual_machine_scale_set.weka[0].name}$(printf %06X $i)",
       "  weka cluster drive add $i --HOST $hostName $nvmeDisks 2>&1 | tee --append weka-cluster-drive-add-$hostName.log",
@@ -382,8 +384,8 @@ resource terraform_data weka_container_setup {
   connection {
     type     = "ssh"
     host     = data.azurerm_virtual_machine_scale_set.weka[0].instances[count.index].private_ip_address
-    user     = local.weka.adminLogin.userName
-    password = local.weka.adminLogin.userPassword
+    user     = local.weka.machine.adminLogin.userName
+    password = local.weka.machine.adminLogin.userPassword
   }
   provisioner remote-exec {
     inline = [
@@ -405,8 +407,8 @@ resource terraform_data weka_cluster_start {
   connection {
     type     = "ssh"
     host     = data.azurerm_virtual_machine_scale_set.weka[0].instances[0].private_ip_address
-    user     = local.weka.adminLogin.userName
-    password = local.weka.adminLogin.userPassword
+    user     = local.weka.machine.adminLogin.userName
+    password = local.weka.machine.adminLogin.userPassword
   }
   provisioner remote-exec {
     inline = [
@@ -431,8 +433,8 @@ resource terraform_data weka_file_system {
   connection {
     type     = "ssh"
     host     = data.azurerm_virtual_machine_scale_set.weka[0].instances[0].private_ip_address
-    user     = local.weka.adminLogin.userName
-    password = local.weka.adminLogin.userPassword
+    user     = local.weka.machine.adminLogin.userName
+    password = local.weka.machine.adminLogin.userPassword
   }
   provisioner remote-exec {
     inline = [
@@ -455,24 +457,24 @@ resource terraform_data weka_file_system {
   ]
 }
 
-resource terraform_data weka_load {
-  count = var.weka.enable && var.weka.fileSystem.loadFiles && var.fileLoadSource.enable ? 1 : 0
+resource terraform_data weka_data {
+  count = var.weka.enable && var.weka.fileSystem.loadFiles && var.dataLoad.enable ? 1 : 0
   connection {
-    type     = "ssh"
-    host     = data.azurerm_virtual_machine_scale_set.weka[0].instances[0].private_ip_address
-    user     = local.weka.adminLogin.userName
-    password = local.weka.adminLogin.userPassword
-  }
+    type        = "ssh"
+    user        = local.weka.machine.adminLogin.userName
+    private_key = local.weka.machine.adminLogin.sshKeyPrivate
+    host        = data.azurerm_virtual_machine_scale_set.weka[0].instances[0].private_ip_address
+   }
   provisioner remote-exec {
     inline = [
       "sudo weka agent install-agent",
-      "mountPath=/mnt/${var.fileLoadSource.containerName}",
-      "sudo mkdir -p $mountPath",
+      "mountPath=/mnt/${var.dataLoad.source.containerName}",
+      "mkdir -p $mountPath",
       "sudo mount -t wekafs ${var.weka.fileSystem.name} $mountPath",
-      "if [ \"${var.fileLoadSource.blobName}\" != \"\" ]; then",
-      "  sudo az storage copy --source-account-name ${var.fileLoadSource.accountName} --source-account-key ${var.fileLoadSource.accountKey} --source-container ${var.fileLoadSource.containerName} --source-blob ${var.fileLoadSource.blobName} --recursive --destination /mnt/${var.fileLoadSource.containerName}",
+      "if [ \"${var.dataLoad.source.blobName}\" != \"\" ]; then",
+      "  az storage copy --source-account-name ${var.dataLoad.source.accountName} --source-account-key ${var.dataLoad.source.accountKey} --source-container ${var.dataLoad.source.containerName} --source-blob ${var.dataLoad.source.blobName} --recursive --destination /mnt/${var.dataLoad.source.containerName}",
       "else",
-      "  sudo az storage copy --source-account-name ${var.fileLoadSource.accountName} --source-account-key ${var.fileLoadSource.accountKey} --source-container ${var.fileLoadSource.containerName} --recursive --destination /mnt",
+      "  az storage copy --source-account-name ${var.dataLoad.source.accountName} --source-account-key ${var.dataLoad.source.accountKey} --source-container ${var.dataLoad.source.containerName} --recursive --destination /mnt",
       "fi"
     ]
   }

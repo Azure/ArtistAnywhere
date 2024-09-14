@@ -144,11 +144,8 @@ output vfxtCacheManagementAddress {
 }
 
 output vfxtCacheDNS {
-  value = var.vfxtCache.enable ? [
-    for dnsRecord in azurerm_private_dns_a_record.cache_vfxt : {
-      name    = dnsRecord.name
-      fqdn    = dnsRecord.fqdn
-      records = dnsRecord.records
-    }
-  ] : null
+  value = var.vfxtCache.enable ? {
+    fqdn    = azurerm_private_dns_a_record.cache_vfxt[0].fqdn
+    records = azurerm_private_dns_a_record.cache_vfxt[0].records
+  } : null
 }

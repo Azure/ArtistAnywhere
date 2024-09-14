@@ -2,25 +2,27 @@ binPaths=""
 binDirectory="/usr/local/bin"
 cd $binDirectory
 
-aaaProfile="/etc/profile.d/aaa.sh"
-touch $aaaProfile
+if [ "$buildConfigEncoded" != "" ]; then
+  aaaProfile="/etc/profile.d/aaa.sh"
+  touch $aaaProfile
 
-echo "Customize (Start): Image Build Parameters"
-dnf -y install jq
-buildConfig=$(echo $buildConfigEncoded | base64 -d)
-machineType=$(echo $buildConfig | jq -r .machineType)
-gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
-binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
-binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
-jobProcessors=$(echo $buildConfig | jq -c .jobProcessors)
-adminUsername=$(echo $buildConfig | jq -r .authCredential.adminUsername)
-adminPassword=$(echo $buildConfig | jq -r .authCredential.adminPassword)
-serviceUsername=$(echo $buildConfig | jq -r .authCredential.serviceUsername)
-servicePassword=$(echo $buildConfig | jq -r .authCredential.servicePassword)
-echo "Machine Type: $machineType"
-echo "GPU Provider: $gpuProvider"
-echo "Job Processors: $jobProcessors"
-echo "Customize (End): Image Build Parameters"
+  echo "Customize (Start): Image Build Parameters"
+  dnf -y install jq
+  buildConfig=$(echo $buildConfigEncoded | base64 -d)
+  machineType=$(echo $buildConfig | jq -r .machineType)
+  gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
+  binStorageHost=$(echo $buildConfig | jq -r .binStorage.host)
+  binStorageAuth=$(echo $buildConfig | jq -r .binStorage.auth)
+  jobProcessors=$(echo $buildConfig | jq -c .jobProcessors)
+  adminUsername=$(echo $buildConfig | jq -r .authCredential.adminUsername)
+  adminPassword=$(echo $buildConfig | jq -r .authCredential.adminPassword)
+  serviceUsername=$(echo $buildConfig | jq -r .authCredential.serviceUsername)
+  servicePassword=$(echo $buildConfig | jq -r .authCredential.servicePassword)
+  echo "Machine Type: $machineType"
+  echo "GPU Provider: $gpuProvider"
+  echo "Job Processors: $jobProcessors"
+  echo "Customize (End): Image Build Parameters"
+fi
 
 function RunProcess {
   exitStatus=-1

@@ -126,11 +126,8 @@ resource azurerm_private_dns_a_record cache_hpc {
 }
 
 output hpcCacheDNS {
-  value = var.hpcCache.enable ? [
-    for dnsRecord in azurerm_private_dns_a_record.cache_hpc : {
-      name    = dnsRecord.name
-      fqdn    = dnsRecord.fqdn
-      records = dnsRecord.records
-    }
-  ] : null
+  value = var.hpcCache.enable ? {
+    fqdn    = azurerm_private_dns_a_record.cache_hpc[0].fqdn
+    records = azurerm_private_dns_a_record.cache_hpc[0].records
+  } : null
 }

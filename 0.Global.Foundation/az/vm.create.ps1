@@ -4,7 +4,7 @@
 
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  regionName       = "SouthCentralUS"
+  regionName       = "WestUS3"
   extendedZoneName = ""
 }
 $virtualNetwork = @{
@@ -48,7 +48,7 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  regionName       = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
+  regionName       = if ($extendedLocation) {"WestUS"} else {"WestUS3"}
   extendedZoneName = "LosAngeles"
 }
 $virtualNetwork = @{
@@ -59,7 +59,7 @@ $virtualNetwork = @{
 }
 $virtualMachine = @{
   name    = if ($osTypeWindows) {"WinJobManager"} else {"LnxJobManager"}
-  size    = "Standard_E8s_v5"
+  size    = "Standard_D8as_v5"
   imageId = if ($osTypeWindows) {"MicrosoftWindowsServer:WindowsServer:2022-Datacenter-Azure-Edition:Latest"} else {"RESF:RockyLinux-x86_64:9-LVM:9.3.20231113"}
   adminLogin = @{
     userName     = az keyvault secret show --vault-name "xstudio" --name "AdminUsername" --query value --output tsv
@@ -86,7 +86,7 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  regionName       = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
+  regionName       = if ($extendedLocation) {"WestUS"} else {"WestUS3"}
   extendedZoneName = "LosAngeles"
 }
 $virtualNetwork = @{
@@ -97,7 +97,7 @@ $virtualNetwork = @{
 }
 $virtualMachine = @{
   name    = if ($osTypeWindows) {"WinFarm"} else {"LnxFarm"}
-  size    = "Standard_HB176rs_v4" # "Standard_NV72ads_A10_v5"
+  size    = "Standard_HB120rs_v3" # "Standard_NV72ads_A10_v5"
   imageId = if ($osTypeWindows) {"MicrosoftWindowsDesktop:Windows-10:Win10-22H2-Ent-G2:Latest"} else {"RESF:RockyLinux-x86_64:9-LVM:9.3.20231113"}
   adminLogin = @{
     userName     = az keyvault secret show --vault-name "xstudio" --name "AdminUsername" --query value --output tsv
@@ -135,7 +135,7 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  regionName       = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
+  regionName       = if ($extendedLocation) {"WestUS"} else {"WestUS3"}
   extendedZoneName = "LosAngeles"
 }
 $virtualNetwork = @{

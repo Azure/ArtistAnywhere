@@ -4,7 +4,7 @@
 
 weka = {
   enable   = false
-  version  = "4.3.4"
+  version  = "4.3.5"
   apiToken = ""
   name = {
     resource = "xstudio"
@@ -24,13 +24,28 @@ weka = {
         name      = ""
       }
     }
-  }
-  adminLogin = {
-    userName     = ""
-    userPassword = ""
-    sshKeyPublic = ""
-    passwordAuth = {
-      disable = true
+    osDisk = {
+      storageType = "Standard_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+    }
+    dataDisk = {
+      storageType = "Standard_LRS"
+      cachingType = "None"
+      sizeGB      = 1024
+    }
+    adminLogin = {
+      userName      = ""
+      userPassword  = ""
+      sshKeyPublic  = ""
+      sshKeyPrivate = ""
+      passwordAuth = {
+        disable = true
+      }
+    }
+    terminateNotification = {
+      enable       = true
+      delayTimeout = "PT15M"
     }
   }
   network = {
@@ -41,10 +56,6 @@ weka = {
       name    = "storage"
       ttlSeconds = 300
     }
-  }
-  terminateNotification = {
-    enable       = true
-    delayTimeout = "PT15M"
   }
   objectTier = {
     percent = 80
@@ -60,16 +71,6 @@ weka = {
     autoScale    = false
     authRequired = false
     loadFiles    = false
-  }
-  osDisk = {
-    storageType = "Standard_LRS"
-    cachingType = "ReadOnly"
-    sizeGB      = 0
-  }
-  dataDisk = {
-    storageType = "Standard_LRS"
-    cachingType = "None"
-    sizeGB      = 1024
   }
   dataProtection = {
     stripeWidth = 3

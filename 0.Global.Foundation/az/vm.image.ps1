@@ -32,6 +32,37 @@ az vm image list --publisher MicrosoftWindowsServer --offer WindowsServer --sku 
 az vm image list --publisher MicrosoftWindowsDesktop --offer Windows-10 --sku Win10-22H2-Ent-G2 --all --edge-zone LosAngeles
 az vm image list --publisher MicrosoftWindowsDesktop --offer Windows-11 --sku Win11-23H2-Ent --all --edge-zone LosAngeles
 
+###############
+# Hammerspace #
+###############
+
+$publisher = "Hammerspace"
+$offer     = "Hammerspace_BYOL_5_0"
+$plan      = "Hammerspace_5_0"
+
+az vm image list --publisher $publisher --offer $offer --sku $plan --all
+[
+  {
+    "architecture": "x64",
+    "offer": "hammerspace_byol_5_0",
+    "publisher": "hammerspace",
+    "sku": "hammerspace_5_0",
+    "urn": "hammerspace:hammerspace_byol_5_0:hammerspace_5_0:24.05.21",
+    "version": "24.05.21"
+  },
+  {
+    "architecture": "x64",
+    "offer": "hammerspace_byol_5_0",
+    "publisher": "hammerspace",
+    "sku": "hammerspace_5_0",
+    "urn": "hammerspace:hammerspace_byol_5_0:hammerspace_5_0:24.06.19",
+    "version": "24.06.19"
+  }
+]
+
+az vm image terms show --publisher $publisher --offer $offer --plan $plan
+az vm image terms accept --publisher $publisher --offer $offer --plan $plan
+
 ##############
 # CycleCloud #
 ##############
@@ -47,24 +78,11 @@ $offer          = "vFXT"
 $planController = "Avere-vFXT-Controller"
 $planNode       = "Avere-vFXT-Node"
 
-az vm image list --publisher $publisher --offer $offer --sku $planController --all # 2023.09.0
-az vm image list --publisher $publisher --offer $offer --sku $planNode --all       # 2024.04.0
+az vm image list --publisher $publisher --offer $offer --sku $planController --all # 2024.08.28
+az vm image list --publisher $publisher --offer $offer --sku $planNode --all       # 2024.04.1
 
 az vm image terms show --publisher $publisher --offer $offer --plan $planController
 az vm image terms accept --publisher $publisher --offer $offer --plan $planController
 
 az vm image terms show --publisher $publisher --offer $offer --plan $planNode
 az vm image terms accept --publisher $publisher --offer $offer --plan $planNode
-
-###############
-# Hammerspace #
-###############
-
-$publisher = "Hammerspace"
-$offer     = "Hammerspace_BYOL_5_0"
-$plan      = "Hammerspace_5_0"
-
-az vm image list --publisher $publisher --offer $offer --sku $plan --all
-
-az vm image terms show --publisher $publisher --offer $offer --plan $plan
-az vm image terms accept --publisher $publisher --offer $offer --plan $plan
