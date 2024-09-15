@@ -70,6 +70,6 @@ function SetFileSystemMount {
   mountOptions=$(echo $fileSystemMount | jq -r .options)
   if [ $(grep -c $mountPath /etc/fstab) ]; then
     sudo mkdir -p $mountPath
-    sudo echo "$mountSource $mountPath $mountType $mountOptions 0 0" >> /etc/fstab
+    echo "$mountSource $mountPath $mountType $mountOptions 0 0" | sudo tee -a /etc/fstab
   fi
 }
