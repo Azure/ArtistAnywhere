@@ -58,8 +58,8 @@ function SetFileSystem {
       fi
     fi
   done
-  systemctl daemon-reload
-  mount -a
+  sudo systemctl daemon-reload
+  sudo mount -a
 }
 
 function SetFileSystemMount {
@@ -69,7 +69,7 @@ function SetFileSystemMount {
   mountSource=$(echo $fileSystemMount | jq -r .source)
   mountOptions=$(echo $fileSystemMount | jq -r .options)
   if [ $(grep -c $mountPath /etc/fstab) ]; then
-    mkdir -p $mountPath
-    echo "$mountSource $mountPath $mountType $mountOptions 0 0" >> /etc/fstab
+    sudo mkdir -p $mountPath
+    sudo echo "$mountSource $mountPath $mountType $mountOptions 0 0" >> /etc/fstab
   fi
 }

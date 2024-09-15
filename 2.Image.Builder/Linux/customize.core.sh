@@ -49,18 +49,6 @@ if [ $machineType == Storage ]; then
   dnf -y install kernel-modules-extra kernel-rpm-macros rpm-build libtool gcc-gfortran pciutils tcl tk
   RunProcess "./MLNX_OFED*/mlnxofedinstall --without-fw-update --add-kernel-support --skip-repo" $binDirectory/$processType
   echo "Customize (End): NVIDIA OFED"
-
-  echo "Customize (Start): Moana Island Data"
-  processType="moana-island-data"
-  installFile="$processType-1.tgz"
-  downloadUrl="https://wdas-datasets-disneyanimation-com.s3-us-west-2.amazonaws.com/moanaislandscene/island-basepackage-v1.1.tgz"
-  curl -o $installFile -L $downloadUrl
-  tar -xzf $installFile -C $binDirectory
-  installFile="$processType-2.tgz"
-  downloadUrl="https://datasets.disneyanimation.com/moanaislandscene/island-pbrtV4-v2.0.tgz"
-  curl -o $installFile -L $downloadUrl
-  tar -xzf $installFile -C $binDirectory
-  echo "Customize (End): Moana Island Data"
 fi
 
 if [ "$gpuProvider" == NVIDIA ]; then
