@@ -3,7 +3,7 @@
 #######################################
 
 $vmSku = "Standard_E32as_v5"
-#$vmSku = "Standard_L8s_v3"
+#$vmSku = "Standard_L8as_v3"
 #$vmSku = "Standard_HB120rs_v3"
 #$vmSku = "Standard_HB176rs_v4"
 #$vmSku = "Standard_HX176rs"
@@ -27,7 +27,7 @@ $locationSkus | Where-Object ({ $_.name -eq $vmSku })
 ###########################################
 
 #$vmSku = "Standard_E32as_v5"
-#$vmSku = "Standard_L8s_v3"
+#$vmSku = "Standard_L8as_v3"
 $vmSku = "Standard_HB120rs_v3"
 #$vmSku = "Standard_HB176rs_v4"
 #$vmSku = "Standard_HX176rs"

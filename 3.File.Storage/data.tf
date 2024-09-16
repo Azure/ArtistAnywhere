@@ -5,7 +5,6 @@ variable dataLoad {
       accountName   = string
       accountKey    = string
       containerName = string
-      blobName      = string
     })
     machine = object({
       enable = bool
@@ -90,6 +89,9 @@ resource azurerm_network_interface storage_data {
     subnet_id                     = data.azurerm_subnet.storage_region.id
   }
   accelerated_networking_enabled = local.dataLoad.network.acceleration.enable
+  depends_on = [
+    azurerm_storage_container.core
+  ]
 }
 
  resource azurerm_linux_virtual_machine storage_data {
@@ -144,12 +146,8 @@ resource terraform_data storage_data {
   provisioner remote-exec {
     inline = [
       "source /tmp/functions.sh",
-      "sudo SetFileSystem '${jsonencode(local.fileSystemLinux)}' true",
-      "if [ \"${local.dataLoad.source.blobName}\" != \"\" ]; then",
-      "  az storage copy --source-account-name ${local.dataLoad.source.accountName} --source-account-key ${local.dataLoad.source.accountKey} --source-container ${local.dataLoad.source.containerName} --source-blob ${local.dataLoad.source.blobName} --recursive --destination /mnt/${local.dataLoad.source.containerName}",
-      "else",
-      "  az storage copy --source-account-name ${local.dataLoad.source.accountName} --source-account-key ${local.dataLoad.source.accountKey} --source-container ${local.dataLoad.source.containerName} --recursive --destination /mnt",
-      "fi"
+      "SetFileSystem '${jsonencode(local.fileSystemLinux)}' true",
+      "sudo az storage copy --source-account-name ${local.dataLoad.source.accountName} --source-account-key ${local.dataLoad.source.accountKey} --source-container ${local.dataLoad.source.containerName} --recursive --destination /mnt",
     ]
   }
 }

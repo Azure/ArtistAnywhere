@@ -22,7 +22,7 @@ virtualMachines = [
     }
     osDisk = {
       type        = "Linux"
-      storageType = "Standard_LRS"
+      storageType = "Premium_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 0
     }
@@ -78,7 +78,7 @@ virtualMachines = [
     }
     osDisk = {
       type        = "Windows"
-      storageType = "Standard_LRS"
+      storageType = "Premium_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 0
     }

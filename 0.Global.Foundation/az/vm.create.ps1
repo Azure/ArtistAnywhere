@@ -15,21 +15,21 @@ $virtualNetwork = @{
 }
 $virtualMachine = @{
   name    = "LnxStorage"
-  size    = "Standard_L8s_v3"
+  size    = "Standard_L8as_v3"
   imageId = "RESF:RockyLinux-x86_64:9-LVM:9.3.20231113"
   adminLogin = @{
     userName     = az keyvault secret show --vault-name "xstudio" --name "AdminUsername" --query value --output tsv
     sshKeyPublic = az keyvault secret show --vault-name "xstudio" --name "SSHKeyPublic" --query value
   }
   osDisk = @{
-    sizeGB  = 1024
+    sizeGB  = 256
     caching = "None"
   }
   dataDisk = @{
     count   = 1
-    sizeGB  = 1024
+    sizeGB  = 512
     caching = "None"
-    type    = "Standard_LRS"
+    type    = "Premium_LRS"
   }
 }
 $subnetId = "/subscriptions/$($virtualNetwork.subscriptionId)/resourceGroups/$($virtualNetwork.resourceGroupName)/providers/Microsoft.Network/virtualNetworks/$($virtualNetwork.name)/subnets/$($virtualNetwork.subnetName)"

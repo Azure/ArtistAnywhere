@@ -471,11 +471,7 @@ resource terraform_data weka_data {
       "mountPath=/mnt/${var.dataLoad.source.containerName}",
       "mkdir -p $mountPath",
       "sudo mount -t wekafs ${var.weka.fileSystem.name} $mountPath",
-      "if [ \"${var.dataLoad.source.blobName}\" != \"\" ]; then",
-      "  az storage copy --source-account-name ${var.dataLoad.source.accountName} --source-account-key ${var.dataLoad.source.accountKey} --source-container ${var.dataLoad.source.containerName} --source-blob ${var.dataLoad.source.blobName} --recursive --destination /mnt/${var.dataLoad.source.containerName}",
-      "else",
-      "  az storage copy --source-account-name ${var.dataLoad.source.accountName} --source-account-key ${var.dataLoad.source.accountKey} --source-container ${var.dataLoad.source.containerName} --recursive --destination /mnt",
-      "fi"
+      "az storage copy --source-account-name ${var.dataLoad.source.accountName} --source-account-key ${var.dataLoad.source.accountKey} --source-container ${var.dataLoad.source.containerName} --recursive --destination /mnt"
     ]
   }
   depends_on = [

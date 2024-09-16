@@ -71,17 +71,17 @@ imageBuilder = {
       }
       build = {
         machineType    = "Storage"
-        machineSize    = "Standard_L8s_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                # NVIDIA or AMD
+        machineSize    = "Standard_L8as_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "0.0.0"
-        osDiskSizeGB   = 1024
+        osDiskSizeGB   = 256
         timeoutMinutes = 240
         jobProcessors = [
         ]
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -111,7 +111,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -142,7 +142,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -174,7 +174,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -206,7 +206,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -238,7 +238,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -270,7 +270,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -300,7 +300,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -331,7 +331,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -363,7 +363,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -395,7 +395,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -427,7 +427,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -459,7 +459,7 @@ imageBuilder = {
       }
       distribute = {
         replicaCount       = 3
-        storageAccountType = "Standard_LRS"
+        storageAccountType = "Premium_LRS"
       }
       errorHandling = {
         validationMode    = "cleanup"

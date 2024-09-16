@@ -11,7 +11,7 @@ weka = {
     display  = "Azure Artist Anywhere"
   }
   machine = {
-    size  = "Standard_L8s_v3"
+    size  = "Standard_L8as_v3"
     count = 6
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
@@ -25,12 +25,12 @@ weka = {
       }
     }
     osDisk = {
-      storageType = "Standard_LRS"
+      storageType = "Premium_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 0
     }
     dataDisk = {
-      storageType = "Standard_LRS"
+      storageType = "Premium_LRS"
       cachingType = "None"
       sizeGB      = 1024
     }

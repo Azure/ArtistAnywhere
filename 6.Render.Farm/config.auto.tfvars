@@ -35,7 +35,7 @@ virtualMachineScaleSets = [
     }
     osDisk = {
       type        = "Linux"
-      storageType = "Standard_LRS"
+      storageType = "Premium_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
@@ -118,7 +118,7 @@ virtualMachineScaleSets = [
     }
     osDisk = {
       type        = "Linux"
-      storageType = "Standard_LRS"
+      storageType = "Premium_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
@@ -201,7 +201,7 @@ virtualMachineScaleSets = [
     }
     osDisk = {
       type        = "Linux"
-      storageType = "Standard_LRS"
+      storageType = "Premium_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
@@ -284,7 +284,7 @@ virtualMachineScaleSets = [
     }
     osDisk = {
       type        = "Windows"
-      storageType = "Standard_LRS"
+      storageType = "Premium_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
@@ -367,7 +367,7 @@ virtualMachineScaleSets = [
     }
     osDisk = {
       type        = "Windows"
-      storageType = "Standard_LRS"
+      storageType = "Premium_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
@@ -450,7 +450,7 @@ virtualMachineScaleSets = [
     }
     osDisk = {
       type        = "Windows"
-      storageType = "Standard_LRS"
+      storageType = "Premium_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks

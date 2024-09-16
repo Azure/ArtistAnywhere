@@ -15,10 +15,10 @@ variable fileSystems {
         { # File Cache
           enable = false
           mount = {
-            type    = "nfs"
+            type    = "aznfs"
             path    = "/mnt/storage"
             source  = "cache.azure.studio:/storage"
-            options = "hard,proto=tcp,mountproto=tcp,retry=30,nolock"
+            options = "defaults"
           }
         },
         { # Job Manager
@@ -67,7 +67,7 @@ variable fileSystems {
         }
       ]
     },
-    { # NetApp Files
+    { # NetApp Files (NFS v3)
       enable = false
       linux = [
         { # File Storage

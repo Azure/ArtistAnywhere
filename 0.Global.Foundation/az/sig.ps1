@@ -3,7 +3,7 @@
 #########
 
 $resourceGroupName   = "ArtistAnywhere.Image"
-$targetExtendedZones = "WestUS=LosAngeles=2=standard_lrs"
+$targetExtendedZones = "WestUS=LosAngeles=2=premium_lrs"
 $image = @{
   galleryName    = "xstudio"
   definitionName = "Linux"
@@ -13,7 +13,7 @@ az sig image-version show --resource-group $resourceGroupName --gallery-name $im
 az sig image-version update --resource-group $resourceGroupName --gallery-name $image.galleryName --gallery-image-definition $image.definitionName --gallery-image-version $image.versionId --target-edge-zones $targetExtendedZones
 
 $resourceGroupName   = "ArtistAnywhere.Image"
-$targetExtendedZones = "WestUS=LosAngeles=2=standard_lrs"
+$targetExtendedZones = "WestUS=LosAngeles=2=premium_lrs"
 $image = @{
   $gpuRender     = $false
   galleryName    = "xstudio"
@@ -24,7 +24,7 @@ az sig image-version show --resource-group $resourceGroupName --gallery-name $im
 az sig image-version update --resource-group $resourceGroupName --gallery-name $image.galleryName --gallery-image-definition $image.definitionName --gallery-image-version $image.versionId --target-edge-zones $targetExtendedZones
 
 $resourceGroupName   = "ArtistAnywhere.Image"
-$targetExtendedZones = "WestUS=LosAngeles=2=standard_lrs"
+$targetExtendedZones = "WestUS=LosAngeles=2=premium_lrs"
 $image = @{
   galleryName    = "xstudio"
   definitionName = "Linux"
@@ -38,7 +38,7 @@ az sig image-version update --resource-group $resourceGroupName --gallery-name $
 ###########
 
 $resourceGroupName   = "ArtistAnywhere.Image"
-$targetExtendedZones = "WestUS=LosAngeles=2=standard_lrs"
+$targetExtendedZones = "WestUS=LosAngeles=2=premium_lrs"
 $image = @{
   galleryName    = "xstudio"
   definitionName = "WinServer"
@@ -48,7 +48,7 @@ az sig image-version show --resource-group $resourceGroupName --gallery-name $im
 az sig image-version update --resource-group $resourceGroupName --gallery-name $image.galleryName --gallery-image-definition $image.definitionName --gallery-image-version $image.versionId --target-edge-zones $targetExtendedZones
 
 $resourceGroupName   = "ArtistAnywhere.Image"
-$targetExtendedZones = "WestUS=LosAngeles=2=standard_lrs"
+$targetExtendedZones = "WestUS=LosAngeles=2=premium_lrs"
 $image = @{
   $gpuRender     = $false
   galleryName    = "xstudio"
@@ -59,7 +59,7 @@ az sig image-version show --resource-group $resourceGroupName --gallery-name $im
 az sig image-version update --resource-group $resourceGroupName --gallery-name $image.galleryName --gallery-image-definition $image.definitionName --gallery-image-version $image.versionId --target-edge-zones $targetExtendedZones
 
 $resourceGroupName   = "ArtistAnywhere.Image"
-$targetExtendedZones = "WestUS=LosAngeles=2=standard_lrs"
+$targetExtendedZones = "WestUS=LosAngeles=2=premium_lrs"
 $image = @{
   galleryName    = "xstudio"
   definitionName = "WinArtist"

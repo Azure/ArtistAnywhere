@@ -31,9 +31,6 @@ variable hsCache {
           cachingType = string
           sizeGB      = number
         })
-        ultraSSD = object({
-          enable = bool
-        })
       })
       network = object({
         acceleration = object({
@@ -68,9 +65,6 @@ variable hsCache {
             enable = bool
           })
         })
-        ultraSSD = object({
-          enable = bool
-        })
       })
       network = object({
         acceleration = object({
@@ -81,13 +75,24 @@ variable hsCache {
     proximityPlacementGroup = object({
       enable = bool
     })
-    storageTargets = list(object({
-      enable  = bool
-      type    = string
-      name    = string
-      address = string
-      options = string
-    }))
+    storageTargets = object({
+      enable = bool
+      nfs = list(object({
+        enable  = bool
+        name    = string
+        type    = string
+        address = string
+        options = string
+      }))
+      nfsBlob = list(object({
+        enable        = bool
+        name          = string
+        accountName   = string
+        accountKey    = string
+        containerName = string
+        mountPath     = string
+      }))
+    })
   })
 }
 
@@ -128,7 +133,7 @@ locals {
   ]
   hsDataNodeDisks = flatten([
     for node in local.hsDataNodes : [
-      for i in range(local.hsDataNodes.machine.dataDisk.count) : merge(node, {
+      for i in range(node.machine.dataDisk.count) : merge(node, {
         machine = merge(node.machine, {
           dataDisk = merge(node.machine.dataDisk, {
             index = i
@@ -177,7 +182,7 @@ locals {
         "storage"
       ]
       storage = {
-        options = local.hsDataNodes.machine.dataDisk.raid0.enable && local.hsDataNodes.machine.dataDisk.count > 1 ? ["raid0"] : []
+        options = var.hsCache.data.machine.dataDisk.raid0.enable && var.hsCache.data.machine.dataDisk.count > 1 ? ["raid0"] : []
       }
       add_volumes = true
     }
@@ -190,7 +195,7 @@ locals {
 
 resource azurerm_availability_set hs_metadata {
   count                        = var.hsCache.enable ? 1 : 0
-  name                         = "${var.hsCache.namePrefix}${local.hsMetadataNodes.machine.namePrefix}"
+  name                         = "${var.hsCache.namePrefix}${var.hsCache.metadata.machine.namePrefix}"
   resource_group_name          = azurerm_resource_group.cache.name
   location                     = azurerm_resource_group.cache.location
   proximity_placement_group_id = var.hsCache.proximityPlacementGroup.enable ? azurerm_proximity_placement_group.hs[0].id : null
@@ -198,7 +203,7 @@ resource azurerm_availability_set hs_metadata {
 
 resource azurerm_availability_set hs_data {
   count                        = var.hsCache.enable ? 1 : 0
-  name                         = "${var.hsCache.namePrefix}${local.hsDataNodes.machine.namePrefix}"
+  name                         = "${var.hsCache.namePrefix}${var.hsCache.data.machine.namePrefix}"
   resource_group_name          = azurerm_resource_group.cache.name
   location                     = azurerm_resource_group.cache.location
   proximity_placement_group_id = var.hsCache.proximityPlacementGroup.enable ? azurerm_proximity_placement_group.hs[0].id : null
@@ -308,9 +313,6 @@ resource azurerm_linux_virtual_machine hs_metadata {
     caching              = each.value.machine.osDisk.cachingType
     disk_size_gb         = each.value.machine.osDisk.sizeGB > 0 ? each.value.machine.osDisk.sizeGB : null
   }
-  additional_capabilities {
-    ultra_ssd_enabled = each.value.machine.ultraSSD.enable
-  }
   source_image_reference {
     publisher = local.hsImage.publisher
     offer     = local.hsImage.product
@@ -364,9 +366,6 @@ resource azurerm_linux_virtual_machine hs_data {
     storage_account_type = each.value.machine.osDisk.storageType
     caching              = each.value.machine.osDisk.cachingType
     disk_size_gb         = each.value.machine.osDisk.sizeGB > 0 ? each.value.machine.osDisk.sizeGB : null
-  }
-  additional_capabilities {
-    ultra_ssd_enabled = each.value.machine.ultraSSD.enable
   }
   source_image_reference {
     publisher = local.hsImage.publisher
@@ -456,8 +455,10 @@ resource azurerm_virtual_machine_extension hs_initialize {
   protected_settings = jsonencode({
     script = base64encode(
       templatefile("hs.sh", {
-        adminPassword  = each.value.machine.adminLogin.userPassword
-        storageTargets = jsonencode(var.hsCache.storageTargets)
+        adminPassword         = each.value.machine.adminLogin.userPassword
+        storageTargetsEnable  = var.hsCache.storageTargets.enable
+        storageTargetsNFS     = jsonencode(var.hsCache.storageTargets.nfs)
+        storageTargetsNFSBlob = jsonencode(var.hsCache.storageTargets.nfsBlob)
       })
     )
   })
@@ -473,7 +474,7 @@ resource azurerm_virtual_machine_extension hs_initialize {
 
 resource azurerm_lb hs_metadata {
   count               = local.hsHighAvailability ? 1 : 0
-  name                = "${var.hsCache.namePrefix}${local.hsMetadataNodes.machine.namePrefix}"
+  name                = "${var.hsCache.namePrefix}${var.hsCache.metadata.machine.namePrefix}"
   resource_group_name = azurerm_resource_group.cache.name
   location            = azurerm_resource_group.cache.location
   sku                 = "Standard"

@@ -20,7 +20,6 @@ variable storageAccounts {
         enable  = bool
         rootAcl = string
       })
-      loadFiles = bool
     }))
     fileShares = list(object({
       enable         = bool
@@ -28,7 +27,6 @@ variable storageAccounts {
       sizeGB         = number
       accessTier     = string
       accessProtocol = string
-      loadFiles      = bool
     }))
     extendedZone = object({
       enable = bool

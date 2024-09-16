@@ -32,9 +32,6 @@ hsCache = {
         cachingType = "None"
         sizeGB      = 256
       }
-      ultraSSD = {
-        enable = false
-      }
     }
     network = {
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -69,9 +66,6 @@ hsCache = {
           enable = false
         }
       }
-      ultraSSD = {
-        enable = false
-      }
     }
     network = {
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -82,15 +76,28 @@ hsCache = {
   proximityPlacementGroup = { # https://learn.microsoft.com/azure/virtual-machines/co-location
     enable = false
   }
-  storageTargets = [
-    {
-      enable  = false
-      type    = ""
-      name    = ""
-      address = ""
-      options = ""
-    }
-  ]
+  storageTargets = {
+    enable = false
+    nfs = [
+      {
+        enable  = false
+        name    = ""
+        type    = ""
+        address = ""
+        options = ""
+      }
+    ]
+    nfsBlob = [
+      {
+        enable        = false
+        name          = ""
+        accountName   = ""
+        accountKey    = ""
+        containerName = ""
+        mountPath     = ""
+      }
+    ]
+  }
 }
 
 ##############################################################################

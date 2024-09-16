@@ -4,12 +4,11 @@ dataLoad = { # For Blob/File, NetApp Files & Weka Storage
     accountName   = ""
     accountKey    = ""
     containerName = ""
-    blobName      = ""
   }
   machine = {
     enable = false
     name   = "xstudio"
-    size   = "Standard_D96as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
       galleryName       = "xstudio"
@@ -23,7 +22,7 @@ dataLoad = { # For Blob/File, NetApp Files & Weka Storage
     }
     osDisk = {
       type        = "Linux"
-      storageType = "Standard_LRS"
+      storageType = "Premium_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 0
     }

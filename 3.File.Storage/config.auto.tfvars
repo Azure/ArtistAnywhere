@@ -25,7 +25,6 @@ storageAccounts = [
           enable  = true
           rootAcl = "user::rwx,group::rwx,other::rwx"
         }
-        loadFiles = false
       }
     ]
     fileShares = [ # https://learn.microsoft.com/azure/storage/files/storage-files-introduction
@@ -55,7 +54,6 @@ storageAccounts = [
         sizeGB         = 5120
         accessTier     = "Premium"
         accessProtocol = "NFS"
-        loadFiles      = false
       }
     ]
     extendedZone = {
