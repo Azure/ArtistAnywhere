@@ -143,7 +143,7 @@ locals {
       })
     ]
   ])
-  hsMetadataNodeConfig = {
+  hsMetadataNodeConfig = var.hsCache.enable ? {
     cluster = {
       domainname = var.hsCache.domainName
     }
@@ -151,7 +151,7 @@ locals {
       hostname = ""
       ha_mode  = ""
     }
-  }
+  } : null
   hsMetadataNodeConfigHA = local.hsHighAvailability ? merge(local.hsMetadataNodeConfig, {
     node = merge(local.hsMetadataNodeConfig.node, {
       networks = {
@@ -166,7 +166,7 @@ locals {
       }
     })
   }) : null
-  hsDataNodeConfig = {
+  hsDataNodeConfig = var.hsCache.enable ? {
     cluster = {
       domainname = var.hsCache.domainName
       metadata = {
@@ -186,7 +186,7 @@ locals {
       }
       add_volumes = true
     }
-  }
+  } : null
 }
 
 ####################################################################################################
