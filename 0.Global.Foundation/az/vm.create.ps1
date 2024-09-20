@@ -4,7 +4,7 @@
 
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  regionName       = "WestUS3"
+  regionName       = "SouthCentralUS"
   extendedZoneName = ""
 }
 $virtualNetwork = @{
@@ -48,7 +48,7 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  regionName       = if ($extendedLocation) {"WestUS"} else {"WestUS3"}
+  regionName       = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
   extendedZoneName = "LosAngeles"
 }
 $virtualNetwork = @{
@@ -86,7 +86,7 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  regionName       = if ($extendedLocation) {"WestUS"} else {"WestUS3"}
+  regionName       = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
   extendedZoneName = "LosAngeles"
 }
 $virtualNetwork = @{
@@ -97,7 +97,7 @@ $virtualNetwork = @{
 }
 $virtualMachine = @{
   name    = if ($osTypeWindows) {"WinFarm"} else {"LnxFarm"}
-  size    = "Standard_HB120rs_v3" # "Standard_NV72ads_A10_v5"
+  size    = "Standard_HX176rs" # "Standard_NV72ads_A10_v5"
   imageId = if ($osTypeWindows) {"MicrosoftWindowsDesktop:Windows-10:Win10-22H2-Ent-G2:Latest"} else {"RESF:RockyLinux-x86_64:9-LVM:9.3.20231113"}
   adminLogin = @{
     userName     = az keyvault secret show --vault-name "xstudio" --name "AdminUsername" --query value --output tsv
@@ -135,7 +135,7 @@ $osTypeWindows     = $false
 $extendedLocation  = $false
 $resourceGroupName = "AAA"
 $resourceLocation = @{
-  regionName       = if ($extendedLocation) {"WestUS"} else {"WestUS3"}
+  regionName       = if ($extendedLocation) {"WestUS"} else {"SouthCentralUS"}
   extendedZoneName = "LosAngeles"
 }
 $virtualNetwork = @{

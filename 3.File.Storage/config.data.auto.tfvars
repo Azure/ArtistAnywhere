@@ -1,4 +1,4 @@
-dataLoad = { # For Blob/File, NetApp Files & Weka Storage
+dataLoad = {
   enable = false
   source = {
     accountName   = ""
@@ -6,9 +6,8 @@ dataLoad = { # For Blob/File, NetApp Files & Weka Storage
     containerName = ""
   }
   machine = {
-    enable = false
-    name   = "xstudio"
-    size   = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    name  = "xstudio"
+    size  = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
       galleryName       = "xstudio"

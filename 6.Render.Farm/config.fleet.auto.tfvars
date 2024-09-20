@@ -10,13 +10,13 @@ computeFleets = [
       namePrefix = ""
       sizes = [
         {
-          name = "Standard_HB120rs_v3"
+          name = "Standard_HX176rs"
         },
         {
-          name = "Standard_HB120-96rs_v3"
+          name = "Standard_HX176-144rs"
         },
         {
-          name = "Standard_HB120-64rs_v3"
+          name = "Standard_HX176-96rs"
         }
       ]
       priority = {
@@ -69,13 +69,13 @@ computeFleets = [
       namePrefix = ""
       sizes = [
         {
-          name = "Standard_HB120rs_v3"
+          name = "Standard_HX176rs"
         },
         {
-          name = "Standard_HB120-96rs_v3"
+          name = "Standard_HX176-144rs"
         },
         {
-          name = "Standard_HB120-64rs_v3"
+          name = "Standard_HX176-96rs"
         }
       ]
       priority = {

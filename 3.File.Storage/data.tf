@@ -7,7 +7,6 @@ variable dataLoad {
       containerName = string
     })
     machine = object({
-      enable = bool
       name   = string
       size   = string
       image = object({
@@ -68,9 +67,9 @@ locals {
   ])
 }
 
-resource azurerm_resource_group storage_data {
-  count    = local.dataLoad.machine.enable ? 1 : 0
-  name     = "${var.resourceGroupName}.Data"
+resource azurerm_resource_group storage_data_load {
+  count    = local.dataLoad.enable ? 1 : 0
+  name     = "${var.resourceGroupName}.DataLoad"
   location = module.global.resourceLocation.regionName
 }
 
@@ -78,11 +77,11 @@ resource azurerm_resource_group storage_data {
 # Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
 #########################################################################
 
-resource azurerm_network_interface storage_data {
-  count               = local.dataLoad.machine.enable ? 1 : 0
+resource azurerm_network_interface storage_data_load {
+  count               = local.dataLoad.enable ? 1 : 0
   name                = local.dataLoad.machine.name
-  resource_group_name = azurerm_resource_group.storage_data[0].name
-  location            = azurerm_resource_group.storage_data[0].location
+  resource_group_name = azurerm_resource_group.storage_data_load[0].name
+  location            = azurerm_resource_group.storage_data_load[0].location
   ip_configuration {
     name                          = "ipConfig"
     private_ip_address_allocation = "Dynamic"
@@ -94,11 +93,11 @@ resource azurerm_network_interface storage_data {
   ]
 }
 
- resource azurerm_linux_virtual_machine storage_data {
-  count                           = local.dataLoad.machine.enable ? 1 : 0
+ resource azurerm_linux_virtual_machine storage_data_load {
+  count                           = local.dataLoad.enable ? 1 : 0
   name                            = local.dataLoad.machine.name
-  resource_group_name             = azurerm_resource_group.storage_data[0].name
-  location                        = azurerm_resource_group.storage_data[0].location
+  resource_group_name             = azurerm_resource_group.storage_data_load[0].name
+  location                        = azurerm_resource_group.storage_data_load[0].location
   size                            = local.dataLoad.machine.size
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.dataLoad.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${local.dataLoad.machine.image.galleryName}/images/${local.dataLoad.machine.image.definitionName}/versions/${local.dataLoad.machine.image.versionId}"
   admin_username                  = local.dataLoad.machine.adminLogin.userName
@@ -111,7 +110,7 @@ resource azurerm_network_interface storage_data {
     ]
   }
   network_interface_ids = [
-    azurerm_network_interface.storage_data[0].id
+    azurerm_network_interface.storage_data_load[0].id
   ]
   os_disk {
     storage_account_type = local.dataLoad.machine.osDisk.storageType
@@ -135,13 +134,13 @@ resource azurerm_network_interface storage_data {
   }
  }
 
-resource terraform_data storage_data {
-  count = local.dataLoad.enable && local.dataLoad.machine.enable ? 1 : 0
+resource terraform_data storage_data_load {
+  count = local.dataLoad.enable ? 1 : 0
   connection {
     type        = "ssh"
     user        = local.dataLoad.machine.adminLogin.userName
     private_key = local.dataLoad.machine.adminLogin.sshKeyPrivate
-    host        = azurerm_linux_virtual_machine.storage_data[0].private_ip_address
+    host        = azurerm_linux_virtual_machine.storage_data_load[0].private_ip_address
   }
   provisioner remote-exec {
     inline = [

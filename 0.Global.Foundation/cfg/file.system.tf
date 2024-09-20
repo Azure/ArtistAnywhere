@@ -9,7 +9,7 @@ variable fileSystems {
             type    = "aznfs"
             path    = "/mnt/storage"
             source  = "xstudio1.blob.core.windows.net:/xstudio1/storage"
-            options = "sec=sys,proto=tcp,vers=3,nolock"
+            options = "vers=3,sec=sys,proto=tcp,nolock"
           }
         },
         { # File Cache
@@ -18,7 +18,7 @@ variable fileSystems {
             type    = "aznfs"
             path    = "/mnt/storage"
             source  = "cache.azure.studio:/storage"
-            options = "defaults"
+            options = "vers=3,sec=sys,proto=tcp,nolock"
           }
         },
         { # Job Manager
@@ -67,6 +67,73 @@ variable fileSystems {
         }
       ]
     },
+    { # File Storage (NFS v4.1)
+      enable = false
+      linux = [
+        { # File Storage
+          enable = false
+          mount = {
+            type    = "aznfs"
+            path    = "/mnt/storage"
+            source  = "xstudio2.file.core.windows.net:/xstudio2/storage"
+            options = "vers=4,minorversion=1,sec=sys,nconnect=4"
+          }
+        },
+        { # File Cache
+          enable = false
+          mount = {
+            type    = "aznfs"
+            path    = "/mnt/storage"
+            source  = "cache.azure.studio:/storage"
+            options = "vers=4,minorversion=1,sec=sys,nconnect=4"
+          }
+        },
+        { # Job Manager
+          enable = true
+          mount = {
+            type    = "nfs"
+            path    = "/mnt/deadline"
+            source  = "job.azure.studio:/deadline"
+            options = "defaults"
+          }
+        }
+      ]
+      windows = [
+        { # File Storage
+          enable = false
+          mount = {
+            type    = ""
+            path    = "X:"
+            source  = "\\\\xstudio2.file.core.windows.net\\xstudio2\\storage"
+            options = "-o anon"
+            userName = ""
+            password = ""
+          }
+        },
+        { # File Cache
+          enable = false
+          mount = {
+            type    = ""
+            path    = "X:"
+            source  = "\\\\cache.azure.studio\\storage"
+            options = "-o anon"
+            userName = ""
+            password = ""
+          }
+        },
+        { # Job Manager
+          enable = true
+          mount = {
+            type     = ""
+            path     = "S:"
+            source   = "\\\\job.azure.studio\\deadline"
+            options  = "-o anon"
+            userName = ""
+            password = ""
+          }
+        }
+      ]
+    },
     { # NetApp Files (NFS v3)
       enable = false
       linux = [
@@ -76,7 +143,7 @@ variable fileSystems {
             type    = "nfs"
             path    = "/mnt/storage"
             source  = "netapp-volume1.azure.studio:/volume1"
-            options = "hard,tcp,vers=3"
+            options = "vers=3,hard,tcp"
           }
         },
         { # File Cache
@@ -85,7 +152,7 @@ variable fileSystems {
             type    = "nfs"
             path    = "/mnt/storage"
             source  = "cache.azure.studio:/storage"
-            options = "hard,proto=tcp,mountproto=tcp,retry=30,nolock"
+            options = "vers=3,hard,tcp"
           }
         },
         { # Job Manager
@@ -105,7 +172,7 @@ variable fileSystems {
             type    = ""
             path    = "X:"
             source  = "\\\\netapp-volume1.azure.studio\\volume1"
-            options = "-o anon nolock"
+            options = "-o anon"
             userName = ""
             password = ""
           }
@@ -116,7 +183,7 @@ variable fileSystems {
             type    = ""
             path    = "X:"
             source  = "\\\\cache.azure.studio\\storage"
-            options = "-o anon nolock"
+            options = "-o anon"
             userName = ""
             password = ""
           }

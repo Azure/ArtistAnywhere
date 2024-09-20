@@ -11,12 +11,13 @@ az account list-locations --query "[?name=='westus2']"
 az account list-locations --query "[?name=='westus3']"
 az account list-locations --query "[?name=='eastus']"
 az account list-locations --query "[?name=='eastus2']"
+az account list-locations --query "[?name=='eastus3']"
 az account list-locations --query "[?name=='southcentralus']"
 
 az account list-locations --query "[?name=='westus'].availabilityZoneMappings[].logicalZone"
 []
 
-az account list-locations --query "[?name=='westus3'].availabilityZoneMappings[].logicalZone"
+az account list-locations --query "[?name=='southcentralus'].availabilityZoneMappings[].logicalZone"
 [
   "1",
   "2",

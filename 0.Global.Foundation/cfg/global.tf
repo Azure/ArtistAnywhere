@@ -4,7 +4,7 @@ variable subscriptionId {
 
 variable resourceLocation {
   default = {
-    regionName = "WestUS3" # Set from "az account list-locations --query [].name"
+    regionName = "SouthCentralUS" # Set from "az account list-locations --query [].name"
     extendedZone = {
       enable     = false
       name       = "LosAngeles"

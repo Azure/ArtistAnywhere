@@ -131,8 +131,8 @@ imageBuilder = {
       }
       build = {
         machineType    = "Farm"
-        machineSize    = "Standard_HB120rs_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                    # NVIDIA or AMD
+        machineSize    = "Standard_HX176rs" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "2.0.0"
         osDiskSizeGB   = 480
         timeoutMinutes = 180
@@ -320,8 +320,8 @@ imageBuilder = {
       }
       build = {
         machineType    = "Farm"
-        machineSize    = "Standard_HB120rs_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                    # NVIDIA or AMD
+        machineSize    = "Standard_HX176rs" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "2.0.0"
         osDiskSizeGB   = 480
         timeoutMinutes = 360
