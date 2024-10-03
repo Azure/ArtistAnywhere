@@ -187,7 +187,10 @@ locals {
 resource azurerm_resource_group weka {
   count    = var.weka.enable ? 1 : 0
   name     = "${var.resourceGroupName}.Weka"
-  location = module.global.resourceLocation.regionName
+  location = local.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
 }
 
 resource azurerm_role_assignment weka_virtual_machine_contributor {

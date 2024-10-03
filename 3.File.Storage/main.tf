@@ -61,6 +61,10 @@ variable resourceGroupName {
   type = string
 }
 
+variable regionName {
+  type = string
+}
+
 data http client_address {
   url = "https://api.ipify.org?format=json"
 }
@@ -151,7 +155,7 @@ data azurerm_resource_group dns {
 
 data azurerm_virtual_network studio_region {
   name                = data.terraform_remote_state.network.outputs.virtualNetworks[0].name
-  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
+  resource_group_name = var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
 data azurerm_virtual_network studio_extended {
@@ -177,6 +181,7 @@ data azurerm_subnet storage_region {
 # }
 
 locals {
+  regionName = var.regionName != "" ? var.regionName : module.global.resourceLocation.regionName
   nfsStorageAccounts = [
     for storageAccount in local.storageAccounts : storageAccount if storageAccount.enableBlobNfsV3 == true || storageAccount.type == "FileStorage"
   ]
@@ -185,7 +190,10 @@ locals {
 resource azurerm_resource_group storage {
   count    = length(local.storageAccounts) > 0 ? 1 : 0
   name     = var.resourceGroupName
-  location = module.global.resourceLocation.regionName
+  location = local.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
 }
 
 output nfsStorageAccount {

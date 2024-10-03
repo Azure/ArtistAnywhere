@@ -117,7 +117,7 @@ if ($gpuProvider -eq "AMD") {
   Write-Host "Customize (End): NVIDIA OptiX"
 }
 
-if ($machineType -eq "Storage" -or $machineType -eq "JobManager") {
+if ($machineType -eq "Storage" -or $machineType -eq "JobScheduler") {
   Write-Host "Customize (Start): Azure CLI (x64)"
   $processType = "azure-cli"
   $installFile = "$processType.msi"
@@ -146,7 +146,7 @@ if ($machineType -eq "Workstation") {
   Write-Host "Customize (End): HP Anyware"
 }
 
-if ($machineType -ne "JobManager") {
+if ($machineType -ne "JobScheduler") {
   Write-Host "Customize (Start): Cinebench"
   $versionPath = "2024"
   $installFile = "Cinebench${versionPath}_win_x86_64.zip"

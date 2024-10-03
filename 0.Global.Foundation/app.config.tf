@@ -30,6 +30,14 @@ resource azurerm_role_assignment studio_app_config_data_reader {
   scope                = azurerm_app_configuration.studio.id
 }
 
+resource time_sleep app_configuration_rbac {
+  create_duration = "30s"
+  depends_on = [
+    azurerm_role_assignment.studio_app_config_data_owner,
+    azurerm_role_assignment.studio_app_config_data_reader
+  ]
+}
+
 resource azurerm_app_configuration studio {
   name                  = module.global.appConfig.name
   resource_group_name   = azurerm_resource_group.studio.name
@@ -57,7 +65,7 @@ resource azurerm_app_configuration_key nvidia_cuda_version {
   key                    = module.global.appConfig.key.nvidiaCUDAVersion
   value                  = "12.6.0"
   depends_on = [
-    azurerm_app_configuration.studio
+    time_sleep.app_configuration_rbac
   ]
 }
 
@@ -66,7 +74,7 @@ resource azurerm_app_configuration_key nvidia_optix_version {
   key                    = module.global.appConfig.key.nvidiaOptiXVersion
   value                  = "8.0.0"
   depends_on = [
-    azurerm_app_configuration.studio
+    time_sleep.app_configuration_rbac
   ]
 }
 
@@ -75,7 +83,7 @@ resource azurerm_app_configuration_key az_blob_nfs_mount_version {
   key                    = module.global.appConfig.key.azBlobNFSMountVersion
   value                  = "2.0.9"
   depends_on = [
-    azurerm_app_configuration.studio
+    time_sleep.app_configuration_rbac
   ]
 }
 
@@ -84,16 +92,25 @@ resource azurerm_app_configuration_key hp_anyware_agent_version {
   key                    = module.global.appConfig.key.hpAnywareAgentVersion
   value                  = "24.07.3"
   depends_on = [
-    azurerm_app_configuration.studio
+    time_sleep.app_configuration_rbac
   ]
 }
 
-resource azurerm_app_configuration_key job_manager_version {
+resource azurerm_app_configuration_key job_scheduler_deadline_version {
   configuration_store_id = local.appConfigStoreId
-  key                    = module.global.appConfig.key.jobManagerVersion
+  key                    = module.global.appConfig.key.jobSchedulerDeadlineVersion
   value                  = "10.3.2.1"
   depends_on = [
-    azurerm_app_configuration.studio
+    time_sleep.app_configuration_rbac
+  ]
+}
+
+resource azurerm_app_configuration_key job_scheduler_slurm_version {
+  configuration_store_id = local.appConfigStoreId
+  key                    = module.global.appConfig.key.jobSchedulerSlurmVersion
+  value                  = "24.05.3"
+  depends_on = [
+    time_sleep.app_configuration_rbac
   ]
 }
 
@@ -102,25 +119,25 @@ resource azurerm_app_configuration_key job_processor_pbrt_version {
   key                    = module.global.appConfig.key.jobProcessorPBRTVersion
   value                  = "v4"
   depends_on = [
-    azurerm_app_configuration.studio
+    time_sleep.app_configuration_rbac
   ]
 }
 
 resource azurerm_app_configuration_key job_processor_blender_version {
   configuration_store_id = local.appConfigStoreId
   key                    = module.global.appConfig.key.jobProcessorBlenderVersion
-  value                  = "4.2.1"
+  value                  = "4.2.2"
   depends_on = [
-    azurerm_app_configuration.studio
+    time_sleep.app_configuration_rbac
   ]
 }
 
 resource azurerm_app_configuration_key monitor_agent_linux_version {
   configuration_store_id = local.appConfigStoreId
   key                    = module.global.appConfig.key.monitorAgentLinuxVersion
-  value                  = "1.32"
+  value                  = "1.33"
   depends_on = [
-    azurerm_app_configuration.studio
+    time_sleep.app_configuration_rbac
   ]
 }
 
@@ -129,6 +146,6 @@ resource azurerm_app_configuration_key monitor_agent_windows_version {
   key                    = module.global.appConfig.key.monitorAgentWindowsVersion
   value                  = "1.29"
   depends_on = [
-    azurerm_app_configuration.studio
+    time_sleep.app_configuration_rbac
   ]
 }

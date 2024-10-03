@@ -70,9 +70,15 @@ data azurerm_client_config studio {}
 resource azurerm_resource_group studio {
   name     = module.global.resourceGroupName
   location = module.global.resourceLocation.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
 }
 
 resource azurerm_resource_group studio_monitor {
   name     = "${module.global.resourceGroupName}.Monitor"
   location = module.global.resourceLocation.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
 }

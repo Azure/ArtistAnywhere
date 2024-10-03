@@ -11,9 +11,6 @@ variable imageBuilder {
         imageDefinition = object({
           name = string
         })
-        # imageVersion = object({
-        #   id = string
-        # })
       })
       build = object({
         machineType    = string
@@ -38,9 +35,15 @@ variable imageBuilder {
 
 variable imageCustomize {
   type = object({
-    core         = bool
-    jobManager   = bool
-    jobProcessor = bool
+    core = bool
+    jobScheduler = object({
+      deadline = bool
+      slurm    = bool
+    })
+    jobProcessor = object({
+      render = bool
+      eda    = bool
+    })
   })
 }
 
@@ -57,13 +60,14 @@ variable binStorage {
 
 locals {
   versionPath = {
-    nvidiaCUDA          = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.nvidiaCUDAVersion])
-    nvidiaOptiX         = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.nvidiaOptiXVersion])
-    azBlobNFSMount      = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.azBlobNFSMountVersion])
-    hpAnywareAgent      = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.hpAnywareAgentVersion])
-    jobManager          = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobManagerVersion])
-    jobProcessorPBRT    = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobProcessorPBRTVersion])
-    jobProcessorBlender = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobProcessorBlenderVersion])
+    nvidiaCUDA           = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.nvidiaCUDAVersion])
+    nvidiaOptiX          = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.nvidiaOptiXVersion])
+    azBlobNFSMount       = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.azBlobNFSMountVersion])
+    hpAnywareAgent       = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.hpAnywareAgentVersion])
+    jobSchedulerDeadline = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobSchedulerDeadlineVersion])
+    jobSchedulerSlurm    = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobSchedulerSlurmVersion])
+    jobProcessorPBRT     = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobProcessorPBRTVersion])
+    jobProcessorBlender  = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobProcessorBlenderVersion])
   }
   authCredential = {
     adminUsername   = data.azurerm_key_vault_secret.admin_username.value
@@ -162,8 +166,13 @@ resource azapi_resource linux {
           },
           {
             type        = "File"
-            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Linux/customize.job.manager.sh"
-            destination = "/tmp/customize.job.manager.sh"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Linux/customize.job.scheduler.deadline.sh"
+            destination = "/tmp/customize.job.scheduler.deadline.sh"
+          },
+          {
+            type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Linux/customize.job.scheduler.slurm.sh"
+            destination = "/tmp/customize.job.scheduler.slurm.sh"
           },
           {
             type        = "File"
@@ -181,7 +190,7 @@ resource azapi_resource linux {
             type = "Shell"
             inline = [
               "dnf -y install nfs-utils",
-              "if [ ${each.value.build.machineType} == JobManager ]; then",
+              "if [ ${each.value.build.machineType} == JobScheduler ]; then",
               "  echo 'Customize (Start): NFS Server'",
               "  systemctl --now enable nfs-server",
               "  echo 'Customize (End): NFS Server'",
@@ -195,11 +204,17 @@ resource azapi_resource linux {
               "if [ ${var.imageCustomize.core} == true ]; then",
               "  cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))} /bin/bash",
               "fi",
-              "if [ ${var.imageCustomize.jobManager} == true ]; then",
-              "  cat /tmp/customize.job.manager.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))} /bin/bash",
+              "if [ ${var.imageCustomize.jobScheduler.deadline} == true ]; then",
+              "  cat /tmp/customize.job.scheduler.deadline.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))} /bin/bash",
               "fi",
-              "if [ ${var.imageCustomize.jobProcessor} == true ]; then",
-              "  cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))} /bin/bash",
+              "if [ ${var.imageCustomize.jobScheduler.slurm} == true ]; then",
+              "  cat /tmp/customize.job.scheduler.slurm.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))} /bin/bash",
+              "fi",
+              "if [ ${var.imageCustomize.jobProcessor.render} == true ]; then",
+              "  cat /tmp/customize.job.processor.render.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))} /bin/bash",
+              "fi",
+              "if [ ${var.imageCustomize.jobProcessor.eda} == true ]; then",
+              "  cat /tmp/customize.job.processor.eda.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))} /bin/bash",
               "fi"
             ]
           }
@@ -294,8 +309,13 @@ resource azapi_resource windows {
           },
           {
             type        = "File"
-            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Windows/customize.job.manager.ps1"
-            destination = "C:\\AzureData\\customize.job.manager.ps1"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Windows/customize.job.scheduler.deadline.ps1"
+            destination = "C:\\AzureData\\customize.job.scheduler.deadline.ps1"
+          },
+          {
+            type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Windows/customize.job.scheduler.slurm.ps1"
+            destination = "C:\\AzureData\\customize.job.scheduler.slurm.ps1"
           },
           {
             type        = "File"
@@ -312,7 +332,7 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "if ('${each.value.build.machineType}' -eq 'JobManager') {",
+              "if ('${each.value.build.machineType}' -eq 'JobScheduler') {",
                 "Write-Host 'Customize (Start): NFS Server'",
                 "Install-WindowsFeature -Name 'FS-NFS-Service'",
                 "Write-Host 'Customize (End): NFS Server'",
@@ -332,11 +352,11 @@ resource azapi_resource windows {
               "if ('${var.imageCustomize.core}' -eq $true) {",
               "  C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))}",
               "}",
-              "if ('${var.imageCustomize.jobManager}' -eq $true) {",
-              "  C:\\AzureData\\customize.job.manager.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))}",
+              "if ('${var.imageCustomize.jobScheduler.deadline}' -eq $true) {",
+              "  C:\\AzureData\\customize.job.scheduler.deadline.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))}",
               "}",
-              "if ('${var.imageCustomize.jobProcessor}' -eq $true) {",
-              "  C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))}",
+              "if ('${var.imageCustomize.jobProcessor.render}' -eq $true) {",
+              "  C:\\AzureData\\customize.job.processor.render.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binStorage = var.binStorage})))}",
               "}"
             ]
             runElevated = true

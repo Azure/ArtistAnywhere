@@ -1,5 +1,7 @@
 resourceGroupName = "ArtistAnywhere.Storage" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
+regionName = "" # Optional default region override
+
 ###################################################################################
 # Storage (https://learn.microsoft.com/azure/storage/common/storage-introduction) #
 ###################################################################################
@@ -49,7 +51,7 @@ storageAccounts = [
     ]
     fileShares = [ # https://learn.microsoft.com/azure/storage/files/storage-files-introduction
       {
-        enable         = true
+        enable         = false
         name           = "storage"
         sizeGB         = 5120
         accessTier     = "Premium"

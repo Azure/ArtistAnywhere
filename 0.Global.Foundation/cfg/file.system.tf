@@ -21,7 +21,7 @@ variable fileSystems {
             options = "vers=3,sec=sys,proto=tcp,nolock"
           }
         },
-        { # Job Manager
+        { # Job Scheduler
           enable = true
           mount = {
             type    = "nfs"
@@ -54,7 +54,7 @@ variable fileSystems {
             password = ""
           }
         },
-        { # Job Manager
+        { # Job Scheduler
           enable = true
           mount = {
             type     = ""
@@ -88,7 +88,7 @@ variable fileSystems {
             options = "vers=4,minorversion=1,sec=sys,nconnect=4"
           }
         },
-        { # Job Manager
+        { # Job Scheduler
           enable = true
           mount = {
             type    = "nfs"
@@ -121,7 +121,7 @@ variable fileSystems {
             password = ""
           }
         },
-        { # Job Manager
+        { # Job Scheduler
           enable = true
           mount = {
             type     = ""
@@ -142,7 +142,7 @@ variable fileSystems {
           mount = {
             type    = "nfs"
             path    = "/mnt/storage"
-            source  = "netapp-volume1.azure.studio:/volume1"
+            source  = "anf-volume1.azure.studio:/volume1"
             options = "vers=3,hard,tcp"
           }
         },
@@ -155,7 +155,7 @@ variable fileSystems {
             options = "vers=3,hard,tcp"
           }
         },
-        { # Job Manager
+        { # Job Scheduler
           enable = true
           mount = {
             type    = "nfs"
@@ -171,7 +171,7 @@ variable fileSystems {
           mount = {
             type    = ""
             path    = "X:"
-            source  = "\\\\netapp-volume1.azure.studio\\volume1"
+            source  = "\\\\anf-volume1.azure.studio\\volume1"
             options = "-o anon"
             userName = ""
             password = ""
@@ -188,7 +188,7 @@ variable fileSystems {
             password = ""
           }
         },
-        { # Job Manager
+        { # Job Scheduler
           enable = true
           mount = {
             type     = ""

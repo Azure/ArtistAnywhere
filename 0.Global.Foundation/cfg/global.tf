@@ -73,15 +73,16 @@ variable appConfig {
   default = {
     name = "xstudio"
     key = {
-      nvidiaCUDAVersion          = "NVIDIA/CUDA/Version"
-      nvidiaOptiXVersion         = "NVIDIA/OptiX/Version"
-      azBlobNFSMountVersion      = "Azure/Blob/NFSMount/Version"
-      hpAnywareAgentVersion      = "HP/Anyware/Agent/Version"
-      jobManagerVersion          = "Job/Manager/Version"
-      jobProcessorPBRTVersion    = "Job/Processor/PBRT/Version"
-      jobProcessorBlenderVersion = "Job/Processor/Blender/Version"
-      monitorAgentLinuxVersion   = "Monitor/Agent/Linux/Version"
-      monitorAgentWindowsVersion = "Monitor/Agent/Windows/Version"
+      nvidiaCUDAVersion           = "NVIDIA/CUDA/Version"
+      nvidiaOptiXVersion          = "NVIDIA/OptiX/Version"
+      azBlobNFSMountVersion       = "Azure/Blob/NFSMount/Version"
+      hpAnywareAgentVersion       = "HP/Anyware/Agent/Version"
+      jobSchedulerDeadlineVersion = "Job/Scheduler/Deadline/Version"
+      jobSchedulerSlurmVersion    = "Job/Scheduler/Slurm/Version"
+      jobProcessorPBRTVersion     = "Job/Processor/PBRT/Version"
+      jobProcessorBlenderVersion  = "Job/Processor/Blender/Version"
+      monitorAgentLinuxVersion    = "Monitor/Agent/Linux/Version"
+      monitorAgentWindowsVersion  = "Monitor/Agent/Windows/Version"
     }
   }
 }

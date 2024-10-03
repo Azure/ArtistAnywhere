@@ -15,10 +15,10 @@ az sig image-version update --resource-group $resourceGroupName --gallery-name $
 $resourceGroupName   = "ArtistAnywhere.Image"
 $targetExtendedZones = "WestUS=LosAngeles=2=premium_lrs"
 $image = @{
-  $gpuRender     = $false
+  $gpuCompute    = $false
   galleryName    = "xstudio"
   definitionName = "Linux"
-  versionId      = if ($gpuRender) {"2.1.0"} else {"2.0.0"}
+  versionId      = if ($gpuCompute) {"2.1.0"} else {"2.0.0"}
 }
 az sig image-version show --resource-group $resourceGroupName --gallery-name $image.galleryName --gallery-image-definition $image.definitionName --gallery-image-version $image.versionId
 az sig image-version update --resource-group $resourceGroupName --gallery-name $image.galleryName --gallery-image-definition $image.definitionName --gallery-image-version $image.versionId --target-edge-zones $targetExtendedZones
@@ -50,10 +50,10 @@ az sig image-version update --resource-group $resourceGroupName --gallery-name $
 $resourceGroupName   = "ArtistAnywhere.Image"
 $targetExtendedZones = "WestUS=LosAngeles=2=premium_lrs"
 $image = @{
-  $gpuRender     = $false
+  $gpuCompute    = $false
   galleryName    = "xstudio"
   definitionName = "WinFarm"
-  versionId      = if ($gpuRender) {"2.1.0"} else {"2.0.0"}
+  versionId      = if ($gpuCompute) {"2.1.0"} else {"2.0.0"}
 }
 az sig image-version show --resource-group $resourceGroupName --gallery-name $image.galleryName --gallery-image-definition $image.definitionName --gallery-image-version $image.versionId
 az sig image-version update --resource-group $resourceGroupName --gallery-name $image.galleryName --gallery-image-definition $image.definitionName --gallery-image-version $image.versionId --target-edge-zones $targetExtendedZones

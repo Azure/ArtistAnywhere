@@ -4,9 +4,9 @@ param (
 
 . C:\AzureData\functions.ps1
 
-Write-Host "Customize (Start): Job Manager"
+Write-Host "Customize (Start): Job Scheduler"
 
-if ($machineType -ne "JobManager") {
+if ($machineType -ne "JobScheduler") {
   Write-Host "Customize (Start): NFS Client"
   $processType = "nfs-client"
   dism /Online /NoRestart /LogPath:"$binDirectory\$processType" /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All
@@ -19,12 +19,12 @@ if ($machineType -ne "JobManager") {
 }
 
 if ($machineType -ne "Storage") {
-  $versionPath = $buildConfig.versionPath.jobManager
+  $versionPath = $buildConfig.versionPath.jobSchedulerDeadline
   $installRoot = "C:\Deadline"
   $databaseHost = $(hostname)
   $databasePath = "C:\DeadlineData"
   $certificateFile = "Deadline10Client.pfx"
-  $binPathJobManager = "$installRoot\bin"
+  $binPathJobScheduler = "$installRoot\bin"
 
   Write-Host "Customize (Start): Deadline Download"
   $installFile = "Deadline-$versionPath-windows-installers.zip"
@@ -34,7 +34,7 @@ if ($machineType -ne "Storage") {
   Write-Host "Customize (End): Deadline Download"
 
   Set-Location -Path Deadline*
-  if ($machineType -eq "JobManager") {
+  if ($machineType -eq "JobScheduler") {
     Write-Host "Customize (Start): Deadline Server"
     $processType = "deadline-repository"
     $installFile = "DeadlineRepository-$versionPath-windows-installer.exe"
@@ -49,7 +49,7 @@ if ($machineType -ne "Storage") {
   $processType = "deadline-client"
   $installFile = "DeadlineClient-$versionPath-windows-installer.exe"
   $installArgs = "--mode unattended --prefix $installRoot"
-  if ($machineType -eq "JobManager") {
+  if ($machineType -eq "JobScheduler") {
     $installArgs = "$installArgs --slavestartup false --launcherservice false"
   } else {
     if ($machineType -eq "Farm") {
@@ -67,12 +67,12 @@ if ($machineType -ne "Storage") {
   Write-Host "Customize (Start): Deadline Client Auth"
   $filePath = "$binDirectory\deadline-client-auth.bat"
   New-Item -Path $filePath -ItemType File
-  Add-Content -Path $filePath -Value "$binPathJobManager\deadlinecommand.exe -StoreDatabaseCredentials $serviceUsername $servicePassword"
-  if ($machineType -eq "JobManager") {
-    Add-Content -Path $filePath -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct $installRoot $installRoot\$certificateFile"
+  Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -StoreDatabaseCredentials $serviceUsername $servicePassword"
+  if ($machineType -eq "JobScheduler") {
+    Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct $installRoot $installRoot\$certificateFile"
   } else {
-    Add-Content -Path $filePath -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\"
-    Add-Content -Path $filePath -Value "$binPathJobManager\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$certificateFile"
+    Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct S:\"
+    Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$certificateFile"
   }
   $registryKeyName = "Run"
   $registryKeyRoot = "HKLM:\Software\Microsoft\Windows\CurrentVersion"
@@ -87,12 +87,12 @@ if ($machineType -ne "Storage") {
   $shortcutPath = "$env:AllUsersProfile\Desktop\Deadline Monitor.lnk"
   $scriptShell = New-Object -ComObject WScript.Shell
   $shortcut = $scriptShell.CreateShortcut($shortcutPath)
-  $shortcut.WorkingDirectory = $binPathJobManager
-  $shortcut.TargetPath = "$binPathJobManager\deadlinemonitor.exe"
+  $shortcut.WorkingDirectory = $binPathJobScheduler
+  $shortcut.TargetPath = "$binPathJobSchedulerr\deadlinemonitor.exe"
   $shortcut.Save()
   Write-Host "Customize (End): Deadline Monitor"
 
-  $binPaths += ";$binPathJobManager"
+  $binPaths += ";$binPathJobScheduler"
 }
 
 if ($binPaths -ne "") {
@@ -100,4 +100,4 @@ if ($binPaths -ne "") {
   setx PATH "$env:PATH$binPaths" /m
 }
 
-Write-Host "Customize (End): Job Manager"
+Write-Host "Customize (End): Job Scheduler"

@@ -209,4 +209,7 @@ locals {
 resource azurerm_resource_group cache {
   name     = var.resourceGroupName
   location = var.existingNetwork.enable ? var.existingNetwork.regionName : module.global.resourceLocation.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
 }

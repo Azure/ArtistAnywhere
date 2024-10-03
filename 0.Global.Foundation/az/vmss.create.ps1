@@ -1,6 +1,6 @@
-###############
-# Render Farm #
-###############
+################
+# Compute Farm #
+################
 
 $osTypeWindows     = $false
 $extendedLocation  = $false

@@ -40,9 +40,9 @@ for ($i = 1; $i -le $virtualMachine.dataDisk.count; $i++) {
   az vm disk attach --resource-group $resourceGroupName --name $dataDiskName --sku $virtualMachine.dataDisk.type --size-gb $virtualMachine.dataDisk.sizeGB --caching $virtualMachine.dataDisk.caching --vm-name $virtualMachine.name --new
 }
 
-###############
-# Job Manager #
-###############
+#################
+# Job Scheduler #
+#################
 
 $osTypeWindows     = $false
 $extendedLocation  = $false
@@ -58,7 +58,7 @@ $virtualNetwork = @{
   subnetName        = "Farm"
 }
 $virtualMachine = @{
-  name    = if ($osTypeWindows) {"WinJobManager"} else {"LnxJobManager"}
+  name    = if ($osTypeWindows) {"WinJobScheduler"} else {"LnxJobScheduler"}
   size    = "Standard_D8as_v5"
   imageId = if ($osTypeWindows) {"MicrosoftWindowsServer:WindowsServer:2022-Datacenter-Azure-Edition:Latest"} else {"RESF:RockyLinux-x86_64:9-LVM:9.3.20231113"}
   adminLogin = @{
@@ -78,9 +78,9 @@ $vmCreate = "az vm create --resource-group $resourceGroupName$extendedZone --nam
 $vmCreate = if ($osTypeWindows) {"$vmCreate --admin-password $($virtualMachine.adminLogin.userPassword)"} else {"$vmCreate --ssh-key-values $($virtualMachine.adminLogin.sshKeyPublic)"}
 Invoke-Expression -Command $vmCreate
 
-###############
-# Render Farm #
-###############
+################
+# Compute Farm #
+################
 
 $osTypeWindows     = $false
 $extendedLocation  = $false

@@ -75,24 +75,22 @@ variable hsCache {
     proximityPlacementGroup = object({
       enable = bool
     })
-    storageTargets = object({
-      enable = bool
-      nfs = list(object({
-        enable  = bool
-        name    = string
-        type    = string
-        address = string
-        options = string
-      }))
-      nfsBlob = list(object({
-        enable        = bool
-        name          = string
-        accountName   = string
-        accountKey    = string
-        containerName = string
-        mountPath     = string
-      }))
-    })
+    storageTargets = list(object({
+      node = object({
+        name = string
+        type = string
+        ip   = string
+      })
+      volume = object({
+        name = string
+        type = string
+        node = string
+        path = string
+        assimilate = object({
+          enable = bool
+        })
+      })
+    }))
   })
 }
 
@@ -455,10 +453,9 @@ resource azurerm_virtual_machine_extension hs_initialize {
   protected_settings = jsonencode({
     script = base64encode(
       templatefile("hs.sh", {
-        adminPassword         = each.value.machine.adminLogin.userPassword
-        storageTargetsEnable  = var.hsCache.storageTargets.enable
-        storageTargetsNFS     = jsonencode(var.hsCache.storageTargets.nfs)
-        storageTargetsNFSBlob = jsonencode(var.hsCache.storageTargets.nfsBlob)
+        adminPassword  = each.value.machine.adminLogin.userPassword
+        adminHostName  = local.hsMetadataNodes[0].machine.name
+        storageTargets = jsonencode(var.hsCache.storageTargets)
       })
     )
   })

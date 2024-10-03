@@ -38,7 +38,7 @@ locals {
   storageAccounts = [
     for storageAccount in var.storageAccounts : merge(storageAccount, {
       resourceGroupName     = var.resourceGroupName
-      resourceGroupLocation = storageAccount.extendedZone.enable && module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
+      resourceGroupLocation = storageAccount.extendedZone.enable && module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : local.regionName
       extendedZoneName      = storageAccount.extendedZone.enable && module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
       storageAccountId      = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
       storageAccountName    = storageAccount.name
@@ -119,6 +119,8 @@ resource azurerm_storage_account studio {
   is_hns_enabled                  = each.value.enableBlobNfsV3
   nfsv3_enabled                   = each.value.enableBlobNfsV3
   large_file_share_enabled        = each.value.enableLargeFileShare ? true : null
+  local_user_enabled              = false
+  shared_access_key_enabled       = false
   allow_nested_items_to_be_public = false
   network_rules {
     default_action = "Deny"

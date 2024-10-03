@@ -70,7 +70,10 @@ locals {
 resource azurerm_resource_group storage_data_load {
   count    = local.dataLoad.enable ? 1 : 0
   name     = "${var.resourceGroupName}.DataLoad"
-  location = module.global.resourceLocation.regionName
+  location = local.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
 }
 
 #########################################################################

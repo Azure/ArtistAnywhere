@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.JobManager" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.JobScheduler" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
 #########################################################################
 # Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
@@ -7,7 +7,7 @@ resourceGroupName = "ArtistAnywhere.JobManager" # Alphanumeric, underscores, hyp
 virtualMachines = [
   {
     enable = false
-    name   = "LnxJobManager"
+    name   = "LnxJobScheduler"
     size   = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
@@ -63,7 +63,7 @@ virtualMachines = [
   },
   {
     enable = false
-    name   = "WinJobManager"
+    name   = "WinJobScheduler"
     size   = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       resourceGroupName = "ArtistAnywhere.Image"

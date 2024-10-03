@@ -6,7 +6,7 @@ netAppFiles = {
   enable = false
   name   = "xstudio"
   dnsRecord = {
-    namePrefix = "netapp"
+    namePrefix = "anf"
     ttlSeconds = 300
   }
   capacityPools = [
@@ -20,7 +20,7 @@ netAppFiles = {
           enable    = true
           name      = "Volume1"
           mountPath = "volume1"
-          sizeGiB   = 2048
+          sizeGiB   = 1024
           network = {
             features = "Standard"
             protocols = [

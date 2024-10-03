@@ -74,30 +74,27 @@ hsCache = {
     }
   }
   proximityPlacementGroup = { # https://learn.microsoft.com/azure/virtual-machines/co-location
-    enable = false
+    enable = true
   }
-  storageTargets = {
-    enable = false
-    nfs = [
-      {
-        enable  = false
-        name    = ""
-        type    = ""
-        address = ""
-        options = ""
+  storageTargets = [
+    {
+      enable  = false
+      node = {
+        name = "ANF"
+        type = "OTHER"
+        ip   = "10.0.193.4"
       }
-    ]
-    nfsBlob = [
-      {
-        enable        = false
-        name          = ""
-        accountName   = ""
-        accountKey    = ""
-        containerName = ""
-        mountPath     = ""
+      volume = {
+        name = "ANF_Volume1"
+        type = "READ_ONLY"
+        node = "ANF"
+        path = "/volume1"
+        assimilate = {
+          enable = true
+        }
       }
-    ]
-  }
+    }
+  ]
 }
 
 ##############################################################################

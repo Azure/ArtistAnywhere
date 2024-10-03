@@ -67,6 +67,9 @@ data terraform_remote_state global {
 resource azurerm_resource_group network {
   name     = var.resourceGroupName
   location = local.virtualNetwork.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
 }
 
 resource azurerm_resource_group network_regions {
@@ -75,4 +78,7 @@ resource azurerm_resource_group network_regions {
   }
   name     = each.value.resourceGroupName
   location = each.value.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
 }

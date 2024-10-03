@@ -8,22 +8,14 @@ storage = {
     redundancy  = "LRS"       # https://learn.microsoft.com/azure/storage/common/storage-redundancy
     performance = "Standard"  # https://learn.microsoft.com/azure/storage/blobs/storage-blob-performance-tiers
   }
-  security = {
-    encryption = {
-      infrastructure = {
-        enable = true
-      }
-      service = {
-        customKey = {
-          enable = false
-        }
-      }
-    }
-    httpsTrafficOnly = {
+  encryption = {
+    infrastructure = {
       enable = true
     }
-    sharedAccessKey = {
-      enable = false
+    service = {
+      customKey = {
+        enable = false
+      }
     }
   }
 }
@@ -114,7 +106,7 @@ monitor = {
 #########################################################################
 
 policy = {
-  disablePasswordAuthLinux = {
-    enable = false
+  denyPasswordAuthLinux = {
+    enable = true
   }
 }

@@ -61,7 +61,10 @@ locals {
 resource azurerm_resource_group netapp {
   count    = var.netAppFiles.enable ? 1 : 0
   name     = "${var.resourceGroupName}.NetApp"
-  location = module.global.resourceLocation.regionName
+  location = local.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
 }
 
 resource azurerm_netapp_account storage {

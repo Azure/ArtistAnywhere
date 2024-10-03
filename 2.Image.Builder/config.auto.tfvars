@@ -65,9 +65,6 @@ imageBuilder = {
         imageDefinition = {
           name = "Linux"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
         machineType    = "Storage"
@@ -90,17 +87,14 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "LnxJobManager"
+      name   = "LnxJobScheduler"
       source = {
         imageDefinition = {
           name = "Linux"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
-        machineType    = "JobManager"
+        machineType    = "JobScheduler"
         machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "1.0.0"
@@ -125,9 +119,6 @@ imageBuilder = {
         imageDefinition = {
           name = "Linux"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
         machineType    = "Farm"
@@ -156,9 +147,6 @@ imageBuilder = {
         imageDefinition = {
           name = "Linux"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
         machineType    = "Farm"
@@ -188,9 +176,6 @@ imageBuilder = {
         imageDefinition = {
           name = "Linux"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
         machineType    = "Farm"
@@ -220,9 +205,6 @@ imageBuilder = {
         imageDefinition = {
           name = "Linux"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
         machineType    = "Workstation"
@@ -252,9 +234,6 @@ imageBuilder = {
         imageDefinition = {
           name = "Linux"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
         machineType    = "Workstation"
@@ -279,17 +258,14 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinJobManager"
+      name   = "WinJobScheduler"
       source = {
         imageDefinition = {
           name = "WinServer"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
-        machineType    = "JobManager"
+        machineType    = "JobScheduler"
         machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "1.0.0"
@@ -314,9 +290,6 @@ imageBuilder = {
         imageDefinition = {
           name = "WinFarm"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
         machineType    = "Farm"
@@ -345,9 +318,6 @@ imageBuilder = {
         imageDefinition = {
           name = "WinFarm"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
         machineType    = "Farm"
@@ -377,9 +347,6 @@ imageBuilder = {
         imageDefinition = {
           name = "WinFarm"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
         machineType    = "Farm"
@@ -409,9 +376,6 @@ imageBuilder = {
         imageDefinition = {
           name = "WinArtist"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
         machineType    = "Workstation"
@@ -441,9 +405,6 @@ imageBuilder = {
         imageDefinition = {
           name = "WinArtist"
         }
-        # imageVersion = {
-        #   id = ""
-        # }
       }
       build = {
         machineType    = "Workstation"
@@ -470,9 +431,15 @@ imageBuilder = {
 }
 
 imageCustomize = { # Enables or disables image build customization scripts
-  core         = true
-  jobManager   = true
-  jobProcessor = true
+  core = true
+  jobScheduler = {
+    deadline = true
+    slurm    = true
+  }
+  jobProcessor = {
+    render = true
+    eda    = true
+  }
 }
 
 binStorage = { # Required for image build customization script access

@@ -90,7 +90,7 @@ if [ "$gpuProvider" == NVIDIA ]; then
   echo "Customize (End): NVIDIA OptiX"
 fi
 
-if [[ $machineType == Storage || $machineType == JobManager ]]; then
+if [[ $machineType == Storage || $machineType == JobScheduler ]]; then
   echo "Customize (Start): Azure CLI"
   rpm --import https://packages.microsoft.com/keys/microsoft.asc
   dnf -y install https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm

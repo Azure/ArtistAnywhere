@@ -2,29 +2,29 @@
 
 ADMIN_PASSWORD=${adminPassword} /usr/bin/hs-init-admin-pw
 
-if [ ${storageTargetsEnable} == true ]; then
-  hscli login --username admin --password ${adminPassword}
+if [ $(hostname) == ${adminHostName} ]; then
 
-  for storageTarget in $(echo "${storageTargetsNFS}" | jq -c '.[]'); do
+  for storageTarget in $(echo "${storageTargets}" | jq -c '.[]'); do
       enable=$(echo $storageTarget | jq -r .enable)
       if [ $enable == true ]; then
-        name=$(echo $storageTarget | jq -r .name)
-        type=$(echo $storageTarget | jq -r .type)
-        address=$(echo $storageTarget | jq -r .address)
-        options=$(echo $storageTarget | jq -r .options)
-        hscli storage add --name $name --type $type --address $address --options $options --protocol NFS
-      fi
-  done
+        nodeName=$(echo $storageTarget | jq -r .node.name)
+        nodeType=$(echo $storageTarget | jq -r .node.type)
+        nodeIP=$(echo $storageTarget | jq -r .node.ip)
 
-  for storageTarget in $(echo "${storageTargetsNFSBlob}" | jq -c '.[]'); do
-      enable=$(echo $storageTarget | jq -r .enable)
-      if [ $enable == true ]; then
-        name=$(echo $storageTarget | jq -r .name)
-        accountName=$(echo $storageTarget | jq -r .accountName)
-        accountKey=$(echo $storageTarget | jq -r .accountKey)
-        containerName=$(echo $storageTarget | jq -r .containerName)
-        mountPath=$(echo $storageTarget | jq -r .mountPath)
-        hscli storage add --name $name --type AzureBlob --account-name $accountName --account-key $accountKey --container-name $containerName --mount-path $mountPath --protocol NFS
+        hscli node-add --name $nodeName --type $nodeType --ip $nodeIP
+
+        volumeName=$(echo $storageTarget | jq -r .volume.name)
+        volumeType=$(echo $storageTarget | jq -r .volume.type)
+        volumeNode=$(echo $storageTarget | jq -r .volume.node)
+        volumePath=$(echo $storageTarget | jq -r .volume.path)
+
+        options=""
+        assimilate=$(echo $storageTarget | jq -r .assimilate.enable)
+        if [ $assimilate == true ]; then
+          options="$options --assimilate"
+        fi
+
+        hscli volume-add$options --name $volumeName --access-type $volumeType --node-name $volumeNode --logical-volume-name $volumePath
       fi
   done
 

@@ -9,22 +9,14 @@ variable storage {
       redundancy  = string
       performance = string
     })
-    security = object({
-      encryption = object({
-        infrastructure = object({
+    encryption = object({
+      infrastructure = object({
+        enable = bool
+      })
+      service = object({
+        customKey = object({
           enable = bool
         })
-        service = object({
-          customKey = object({
-            enable = bool
-          })
-        })
-      })
-      httpsTrafficOnly = object({
-        enable = bool
-      })
-      sharedAccessKey = object({
-        enable = bool
       })
     })
   })
@@ -43,7 +35,7 @@ resource azurerm_role_assignment studio_storage_blob_data_contributor {
 }
 
 resource azurerm_storage_account_customer_managed_key studio {
-  count              = var.storage.security.encryption.service.customKey.enable ? 1 : 0
+  count              = var.storage.encryption.service.customKey.enable ? 1 : 0
   key_vault_id       = azurerm_key_vault.studio.id
   key_name           = module.global.keyVault.keyName.dataEncryption
   storage_account_id = azurerm_storage_account.studio.id
@@ -56,9 +48,9 @@ resource azurerm_storage_account studio {
   account_kind                      = var.storage.account.type
   account_replication_type          = var.storage.account.redundancy
   account_tier                      = var.storage.account.performance
-  infrastructure_encryption_enabled = var.storage.security.encryption.infrastructure.enable
-  https_traffic_only_enabled        = var.storage.security.httpsTrafficOnly.enable
-  shared_access_key_enabled         = var.storage.security.sharedAccessKey.enable
+  infrastructure_encryption_enabled = var.storage.encryption.infrastructure.enable
+  local_user_enabled                = false
+  shared_access_key_enabled         = false
   allow_nested_items_to_be_public   = false
   identity {
     type = "UserAssigned"

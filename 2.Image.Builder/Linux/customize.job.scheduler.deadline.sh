@@ -2,15 +2,15 @@
 
 source /tmp/functions.sh
 
-echo "Customize (Start): Job Manager"
+echo "Customize (Start): Job Scheduler"
 
 if [ $machineType != Storage ]; then
-  versionPath=$(echo $buildConfig | jq -r .versionPath.jobManager)
+  versionPath=$(echo $buildConfig | jq -r .versionPath.jobSchedulerDeadline)
   installRoot="/deadline"
   databaseHost=$(hostname)
   databasePort=27017
   databaseName="deadline10db"
-  binPathJobManager="$installRoot/bin"
+  binPathJobScheduler="$installRoot/bin"
 
   echo "Customize (Start): Deadline Download"
   installFile="Deadline-$versionPath-linux-installers.tar"
@@ -21,7 +21,7 @@ if [ $machineType != Storage ]; then
   tar -xzf $installFile -C $installPath
   echo "Customize (End): Deadline Download"
 
-  if [ $machineType == JobManager ]; then
+  if [ $machineType == JobScheduler ]; then
     echo "Customize (Start): Mongo DB Service"
     if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
       echo never > /sys/kernel/mm/transparent_hugepage/enabled
@@ -84,7 +84,7 @@ if [ $machineType != Storage ]; then
   processType="deadline-client"
   installFile="DeadlineClient-$versionPath-linux-x64-installer.run"
   installArgs="--mode unattended --prefix $installRoot"
-  if [ $machineType == JobManager ]; then
+  if [ $machineType == JobScheduler ]; then
     installArgs="$installArgs --slavestartup false --launcherdaemon false"
   else
     [ $machineType == Farm ] && workerStartup="true" || workerStartup="false"
@@ -95,12 +95,12 @@ if [ $machineType != Storage ]; then
   echo "Customize (End): Deadline Client"
 
   echo "Customize (Start): Deadline Client Auth"
-  [ $machineType == JobManager ] && repositoryPath=$installRoot || repositoryPath="/mnt/deadline"
-  echo "$binPathJobManager/deadlinecommand -StoreDatabaseCredentials $serviceUsername $servicePassword" >> $aaaProfile
-  echo "$binPathJobManager/deadlinecommand -ChangeRepository Direct $repositoryPath" >> $aaaProfile
+  [ $machineType == JobScheduler ] && repositoryPath=$installRoot || repositoryPath="/mnt/deadline"
+  echo "$binPathJobScheduler/deadlinecommand -StoreDatabaseCredentials $serviceUsername $servicePassword" >> $aaaProfile
+  echo "$binPathJobScheduler/deadlinecommand -ChangeRepository Direct $repositoryPath" >> $aaaProfile
   echo "Customize (End): Deadline Client Auth"
 
-  binPaths="$binPaths:$binPathJobManager"
+  binPaths="$binPaths:$binPathJobScheduler"
 fi
 
 if [ "$binPaths" != "" ]; then
@@ -108,4 +108,4 @@ if [ "$binPaths" != "" ]; then
   echo 'PATH=$PATH'$binPaths >> $aaaProfile
 fi
 
-echo "Customize (End): Job Manager"
+echo "Customize (End): Job Scheduler"

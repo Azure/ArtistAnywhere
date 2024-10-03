@@ -123,4 +123,7 @@ locals {
 resource azurerm_resource_group image {
   name     = var.resourceGroupName
   location = module.global.resourceLocation.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
 }

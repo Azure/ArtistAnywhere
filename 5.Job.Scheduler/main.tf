@@ -11,7 +11,7 @@ terraform {
     }
   }
   backend azurerm {
-    key              = "5.Render.Manager"
+    key              = "5.Job.Manager"
     use_azuread_auth = true
   }
 }
@@ -160,12 +160,15 @@ data azurerm_private_dns_zone studio {
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.privateDns.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
 }
 
-resource azurerm_resource_group job_manager {
+resource azurerm_resource_group job_scheduler {
   name     = var.resourceGroupName
   location = module.global.resourceLocation.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
 }
 
-resource azurerm_private_dns_a_record job_manager {
+resource azurerm_private_dns_a_record job_scheduler {
   for_each = {
     for virtualMachine in var.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable
   }
@@ -174,6 +177,6 @@ resource azurerm_private_dns_a_record job_manager {
   zone_name           = data.azurerm_private_dns_zone.studio.name
   ttl                 = var.dnsRecord.ttlSeconds
   records = [
-    azurerm_network_interface.job_manager[each.value.name].private_ip_address
+    azurerm_network_interface.job_scheduler[each.value.name].private_ip_address
   ]
 }

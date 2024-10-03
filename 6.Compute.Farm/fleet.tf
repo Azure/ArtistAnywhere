@@ -11,6 +11,27 @@ variable computeFleets {
       sizes = list(object({
         name = string
       }))
+      image = object({
+        resourceGroupName = string
+        galleryName       = string
+        definitionName    = string
+        versionId         = string
+        plan = object({
+          publisher = string
+          product   = string
+          name      = string
+        })
+      })
+      osDisk = object({
+        type        = string
+        storageType = string
+        cachingType = string
+        sizeGB      = number
+        ephemeral = object({
+          enable    = bool
+          placement = string
+        })
+      })
       priority = object({
         standard = object({
           allocationStrategy = string
@@ -27,15 +48,28 @@ variable computeFleets {
           })
         })
       })
-      image = object({
-        resourceGroupName = string
-        galleryName       = string
-        definitionName    = string
-        versionId         = string
-        plan = object({
-          publisher = string
-          product   = string
-          name      = string
+      extension = object({
+        custom = object({
+          enable   = bool
+          name     = string
+          fileName = string
+          parameters = object({
+            terminateNotification = object({
+              enable       = bool
+              delayTimeout = string
+            })
+          })
+        })
+        health = object({
+          enable      = bool
+          name        = string
+          protocol    = string
+          port        = number
+          requestPath = string
+        })
+        monitor = object({
+          enable = bool
+          name   = string
         })
       })
       adminLogin = object({
@@ -110,6 +144,21 @@ resource azapi_resource fleet {
             imageReference = {
               id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
             }
+            osDisk = {
+              managedDisk = {
+                storageAccountType = each.value.machine.osDisk.storageType
+              }
+              caching    = each.value.machine.osDisk.cachingType
+              diskSizeGB = each.value.machine.osDisk.sizeGB > 0 ? each.value.machine.osDisk.sizeGB : null
+              # dynamic diff_disk_settings {
+              #   for_each = each.value.machine.osDisk.ephemeral.enable ? [1] : []
+              #   content {
+              #     option    = "Local"
+              #     placement = each.value.machine.osDisk.ephemeral.placement
+              #   }
+              # }
+              createOption = "FromImage"
+            }
           }
           osProfile = {
             computerNamePrefix = each.value.machine.namePrefix != "" ? each.value.machine.namePrefix : each.value.name
@@ -117,7 +166,7 @@ resource azapi_resource fleet {
             adminPassword      = each.value.machine.adminLogin.userPassword
           }
           networkProfile = {
-            #networkApiVersion = "2024-03-01"
+            networkApiVersion = "2024-03-01"
             networkInterfaceConfigurations = [
               {
                 name = "nic"
@@ -133,6 +182,32 @@ resource azapi_resource fleet {
                     }
                   ]
                   enableAcceleratedNetworking = each.value.network.acceleration.enable
+                }
+              }
+            ]
+          }
+          extensionProfile = {
+            extensions = [
+              { # Custom
+                name = each.value.machine.extension.custom.name
+                properties = {
+                  type                    = lower(each.value.machine.osDisk.type) == "windows" ? "CustomScriptExtension" :"CustomScript"
+                  publisher               = lower(each.value.machine.osDisk.type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
+                  typeHandlerVersion      = lower(each.value.machine.osDisk.type) == "windows" ? "1.10" : "2.1"
+                  autoUpgradeMinorVersion = true
+                  protectedSettings = jsonencode({
+                    script = lower(each.value.machine.osDisk.type) == "windows" ? null : base64encode(
+                      templatefile(each.value.machine.extension.custom.fileName, merge(each.value.machine.extension.custom.parameters, {
+                        fileSystem = local.fileSystemLinux
+                      }))
+                    )
+                    commandToExecute = lower(each.value.machine.osDisk.type) == "windows" ? "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
+                      templatefile(each.value.machine.extension.custom.fileName, merge(each.value.machine.extension.custom.parameters, {
+                        fileSystem      = local.fileSystemWindows
+                        activeDirectory = each.value.activeDirectory
+                      })), "UTF-16LE"
+                    )}" : null
+                  })
                 }
               }
             ]

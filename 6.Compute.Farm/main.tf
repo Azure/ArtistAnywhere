@@ -23,7 +23,7 @@ terraform {
     }
   }
   backend azurerm {
-    key              = "6.Render.Farm"
+    key              = "6.Compute.Farm"
     use_azuread_auth = true
   }
 }
@@ -169,4 +169,7 @@ locals {
 resource azurerm_resource_group farm {
   name     = var.resourceGroupName
   location = module.global.resourceLocation.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
 }
