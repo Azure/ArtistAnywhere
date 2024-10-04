@@ -105,10 +105,10 @@ resource azurerm_app_configuration_key job_scheduler_deadline_version {
   ]
 }
 
-resource azurerm_app_configuration_key job_scheduler_slurm_version {
+resource azurerm_app_configuration_key job_scheduler_lsf_version {
   configuration_store_id = local.appConfigStoreId
-  key                    = module.global.appConfig.key.jobSchedulerSlurmVersion
-  value                  = "24.05.3"
+  key                    = module.global.appConfig.key.jobSchedulerLSFVersion
+  value                  = "10.2.0.12"
   depends_on = [
     time_sleep.app_configuration_rbac
   ]

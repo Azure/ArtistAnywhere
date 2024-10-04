@@ -434,7 +434,7 @@ imageCustomize = { # Enables or disables image build customization scripts
   core = true
   jobScheduler = {
     deadline = true
-    slurm    = true
+    lsf      = true
   }
   jobProcessor = {
     render = true
