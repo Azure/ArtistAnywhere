@@ -78,7 +78,7 @@ variable appConfig {
       azBlobNFSMountVersion       = "Azure/Blob/NFSMount/Version"
       hpAnywareAgentVersion       = "HP/Anyware/Agent/Version"
       jobSchedulerDeadlineVersion = "Job/Scheduler/Deadline/Version"
-      jobSchedulerSlurmVersion    = "Job/Scheduler/Slurm/Version"
+      jobSchedulerLSFVersion      = "Job/Scheduler/LSF/Version"
       jobProcessorPBRTVersion     = "Job/Processor/PBRT/Version"
       jobProcessorBlenderVersion  = "Job/Processor/Blender/Version"
       monitorAgentLinuxVersion    = "Monitor/Agent/Linux/Version"
