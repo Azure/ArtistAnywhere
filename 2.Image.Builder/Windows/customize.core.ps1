@@ -95,7 +95,7 @@ if ($gpuProvider -eq "AMD") {
   $versionPath = $buildConfig.versionPath.nvidiaCUDA
   $processType = "nvidia-gpu-cuda"
   $installFile = "cuda_${versionPath}_windows_network.exe"
-  $downloadUrl = "$binStorageHost/NVIDIA/CUDA/$versionPath/$installFile$binStorageAuth"
+  $downloadUrl = "$binHost/NVIDIA/CUDA/$versionPath/$installFile"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   RunProcess .\$installFile "-s -n -log:$binDirectory\$processType" $null
   Write-Host "Customize (End): NVIDIA GPU (CUDA)"
@@ -104,7 +104,7 @@ if ($gpuProvider -eq "AMD") {
   $versionPath = $buildConfig.versionPath.nvidiaOptiX
   $processType = "nvidia-optix"
   $installFile = "NVIDIA-OptiX-SDK-$versionPath-win64.exe"
-  $downloadUrl = "$binStorageHost/NVIDIA/OptiX/$versionPath/$installFile$binStorageAuth"
+  $downloadUrl = "$binHost/NVIDIA/OptiX/$versionPath/$installFile"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   RunProcess .\$installFile "/S" $null
   $sdkDirectory = "C:\ProgramData\NVIDIA Corporation\OptiX SDK $versionPath\SDK"
@@ -140,7 +140,7 @@ if ($machineType -eq "Workstation") {
   $versionPath = $buildConfig.versionPath.hpAnywareAgent
   $processType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
   $installFile = "${processType}_$versionPath.exe"
-  $downloadUrl = "$binStorageHost/Teradici/$versionPath/$installFile$binStorageAuth"
+  $downloadUrl = "$binHost/Teradici/$versionPath/$installFile"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   RunProcess .\$installFile "/S /NoPostReboot /Force" "$binDirectory\$processType"
   Write-Host "Customize (End): HP Anyware"
@@ -150,7 +150,7 @@ if ($machineType -ne "JobScheduler") {
   Write-Host "Customize (Start): Cinebench"
   $versionPath = "2024"
   $installFile = "Cinebench${versionPath}_win_x86_64.zip"
-  $downloadUrl = "$binStorageHost/Maxon/Cinebench/$versionPath/$installFile$binStorageAuth"
+  $downloadUrl = "$binHost/Maxon/Cinebench/$versionPath/$installFile"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   Expand-Archive -Path $installFile
   Write-Host "Customize (End): Cinebench"

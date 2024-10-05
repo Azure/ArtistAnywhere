@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -ex
 
 source /tmp/functions.sh
 
@@ -29,7 +29,7 @@ if [[ $jobProcessors == *Blender* ]]; then
   processType="blender"
   installPath="/usr/local/$processType"
   installFile="$processType-$versionPath-$versionType.tar.xz"
-  downloadUrl="$binStorageHost/Blender/$versionPath/$installFile$binStorageAuth"
+  downloadUrl="$binHost/Blender/$versionPath/$installFile"
   curl -o $installFile -L $downloadUrl
   tar -xJf $installFile
   dnf -y install mesa-dri-drivers

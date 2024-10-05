@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -ex
 
 metadataUrl="http://169.254.169.254/metadata"
 eventsUrl="$metadataUrl/scheduledevents?api-version=2020-07-01"

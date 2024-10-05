@@ -60,7 +60,7 @@ locals {
 
 resource azurerm_resource_group netapp {
   count    = var.netAppFiles.enable ? 1 : 0
-  name     = "${var.resourceGroupName}.NetApp"
+  name     = "${var.resourceGroupName}.NetAppFiles"
   location = local.regionName
   tags = {
     AAA = basename(path.cwd)

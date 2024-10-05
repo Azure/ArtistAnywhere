@@ -28,7 +28,7 @@ if ($machineType -ne "Storage") {
 
   Write-Host "Customize (Start): Deadline Download"
   $installFile = "Deadline-$versionPath-windows-installers.zip"
-  $downloadUrl = "$binStorageHost/Deadline/$versionPath/$installFile$binStorageAuth"
+  $downloadUrl = "$binHost/Deadline/$versionPath/$installFile"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   Expand-Archive -Path $installFile
   Write-Host "Customize (End): Deadline Download"

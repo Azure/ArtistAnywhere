@@ -3,12 +3,11 @@ variable dataLoad {
     enable = bool
     source = object({
       accountName   = string
-      accountKey    = string
       containerName = string
     })
     machine = object({
-      name   = string
-      size   = string
+      name = string
+      size = string
       image = object({
         resourceGroupName = string
         galleryName       = string
@@ -135,21 +134,23 @@ resource azurerm_network_interface storage_data_load {
       public_key = local.dataLoad.machine.adminLogin.sshKeyPublic
     }
   }
- }
+}
 
-resource terraform_data storage_data_load {
-  count = local.dataLoad.enable ? 1 : 0
-  connection {
-    type        = "ssh"
-    user        = local.dataLoad.machine.adminLogin.userName
-    private_key = local.dataLoad.machine.adminLogin.sshKeyPrivate
-    host        = azurerm_linux_virtual_machine.storage_data_load[0].private_ip_address
-  }
-  provisioner remote-exec {
-    inline = [
-      "source /tmp/functions.sh",
-      "SetFileSystem '${jsonencode(local.fileSystemLinux)}' true",
-      "sudo az storage copy --source-account-name ${local.dataLoad.source.accountName} --source-account-key ${local.dataLoad.source.accountKey} --source-container ${local.dataLoad.source.containerName} --recursive --destination /mnt",
-    ]
-  }
+resource azurerm_virtual_machine_extension storage_data_load {
+  count                      = local.dataLoad.enable ? 1 : 0
+  name                       = "DataLoad"
+  type                       = "CustomScript"
+  publisher                  = "Microsoft.Azure.Extensions"
+  type_handler_version       = "2.1"
+  automatic_upgrade_enabled  = false
+  auto_upgrade_minor_version = true
+  virtual_machine_id         = azurerm_linux_virtual_machine.storage_data_load[0].id
+  protected_settings = jsonencode({
+    script = base64encode(
+      templatefile("data.sh", {
+        fileSystem     = local.fileSystemLinux
+        dataLoadSource = local.dataLoad.source
+      })
+    )
+  })
 }

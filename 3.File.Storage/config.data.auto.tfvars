@@ -6,8 +6,8 @@ dataLoad = {
     containerName = ""
   }
   machine = {
-    name  = "xstudio"
-    size  = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    name = "xstudio"
+    size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
       galleryName       = "xstudio"

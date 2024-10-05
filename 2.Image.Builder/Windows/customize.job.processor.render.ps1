@@ -24,7 +24,7 @@ if ($jobProcessors -contains "Blender") {
   $versionPath = $buildConfig.versionPath.jobProcessorBlender
   $processType = "blender"
   $installFile = "$processType-$versionPath-windows-x64.msi"
-  $downloadUrl = "$binStorageHost/Blender/$versionPath/$installFile$binStorageAuth"
+  $downloadUrl = "$binHost/Blender/$versionPath/$installFile"
   (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
   RunProcess $installFile "/quiet /norestart /log $processType.log" $null
   $binPaths += ";C:\Program Files\Blender Foundation\Blender $($versionPath.substring(0, 3))"

@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -ex
 
 source /tmp/functions.sh
 
@@ -43,7 +43,7 @@ if [ $machineType == Storage ]; then
   echo "Customize (Start): NVIDIA OFED"
   processType="mellanox-ofed"
   installFile="MLNX_OFED_LINUX-24.07-0.6.1.0-rhel9.3-x86_64.tgz"
-  downloadUrl="$binStorageHost/NVIDIA/OFED/$installFile$binStorageAuth"
+  downloadUrl="$binHost/NVIDIA/OFED/$installFile"
   curl -o $installFile -L $downloadUrl
   tar -xzf $installFile
   dnf -y install kernel-modules-extra kernel-rpm-macros rpm-build libtool gcc-gfortran pciutils tcl tk
@@ -71,7 +71,7 @@ if [ "$gpuProvider" == NVIDIA ]; then
   versionPath=$(echo $buildConfig | jq -r .versionPath.nvidiaOptiX)
   processType="nvidia-optix"
   installFile="NVIDIA-OptiX-SDK-$versionPath-linux64-x86_64.sh"
-  downloadUrl="$binStorageHost/NVIDIA/OptiX/$versionPath/$installFile$binStorageAuth"
+  downloadUrl="$binHost/NVIDIA/OptiX/$versionPath/$installFile"
   curl -o $installFile -L $downloadUrl
   chmod +x $installFile
   installPath="$binDirectory/$processType/$versionPath"
@@ -93,7 +93,7 @@ fi
 if [[ $machineType == Storage || $machineType == JobScheduler ]]; then
   echo "Customize (Start): Azure CLI"
   rpm --import https://packages.microsoft.com/keys/microsoft.asc
-  dnf -y install https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm
+  dnf -y install https://packages.microsoft.com/config/rhel/9.0/packages-microsoft-prod.rpm
   dnf -y install azure-cli
   echo "Customize (End): Azure CLI"
 fi
@@ -103,7 +103,7 @@ if [ $machineType == Workstation ]; then
   versionPath=$(echo $buildConfig | jq -r .versionPath.hpAnywareAgent)
   [ "$gpuProvider" == "" ] && processType="pcoip-agent-standard" || processType="pcoip-agent-graphics"
   installFile="pcoip-agent-offline-rocky9.4_$versionPath-1.el9.x86_64.tar.gz"
-  downloadUrl="$binStorageHost/Teradici/$versionPath/$installFile$binStorageAuth"
+  downloadUrl="$binHost/Teradici/$versionPath/$installFile"
   curl -o $installFile -L $downloadUrl
   mkdir -p $processType
   tar -xzf $installFile -C $processType

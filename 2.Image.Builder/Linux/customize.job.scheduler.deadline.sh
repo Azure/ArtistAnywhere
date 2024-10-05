@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -ex
 
 source /tmp/functions.sh
 
@@ -15,7 +15,7 @@ if [ $machineType != Storage ]; then
   echo "Customize (Start): Deadline Download"
   installFile="Deadline-$versionPath-linux-installers.tar"
   installPath=$(echo ${installFile%.tar})
-  downloadUrl="$binStorageHost/Deadline/$versionPath/$installFile$binStorageAuth"
+  downloadUrl="$binHost/Deadline/$versionPath/$installFile"
   curl -o $installFile -L $downloadUrl
   mkdir -p $installPath
   tar -xzf $installFile -C $installPath

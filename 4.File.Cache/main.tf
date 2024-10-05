@@ -1,22 +1,22 @@
 terraform {
-  required_version = ">=1.9.6"
+  required_version = ">=1.9.7"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.2"
+      version = "~>4.4"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>2.53"
+      version = "~>3.0"
     }
-    avere = {
-      source  = "hashicorp/avere"
-      version = "~>1.3"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "~>0.12"
-    }
+    # avere = {
+    #   source  = "hashicorp/avere"
+    #   version = "~>1.3"
+    # }
+    # time = {
+    #   source  = "hashicorp/time"
+    #   version = "~>0.12"
+    # }
   }
   backend azurerm {
     key              = "4.File.Cache"
@@ -51,26 +51,26 @@ variable resourceGroupName {
   type = string
 }
 
-variable storageTargets {
-  type = list(object({
-    enable            = bool
-    name              = string
-    clientPath        = string
-    usageModel        = string
-    hostName          = string
-    containerName     = string
-    resourceGroupName = string
-    fileIntervals = object({
-      verificationSeconds = number
-      writeBackSeconds    = number
-    })
-    vfxtJunctions = list(object({
-      storageExport = string
-      storagePath   = string
-      clientPath    = string
-    }))
-  }))
-}
+# variable storageTargets {
+#   type = list(object({
+#     enable            = bool
+#     name              = string
+#     clientPath        = string
+#     usageModel        = string
+#     hostName          = string
+#     containerName     = string
+#     resourceGroupName = string
+#     fileIntervals = object({
+#       verificationSeconds = number
+#       writeBackSeconds    = number
+#     })
+#     vfxtJunctions = list(object({
+#       storageExport = string
+#       storagePath   = string
+#       clientPath    = string
+#     }))
+#   }))
+# }
 
 variable dnsRecord {
   type = object({
@@ -154,17 +154,6 @@ data terraform_remote_state network {
     storage_account_name = module.global.storage.accountName
     container_name       = module.global.storage.containerName.terraformState
     key                  = "1.Virtual.Network"
-    use_azuread_auth     = true
-  }
-}
-
-data terraform_remote_state image {
-  backend = "azurerm"
-  config = {
-    resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.storage.accountName
-    container_name       = module.global.storage.containerName.terraformState
-    key                  = "2.Image.Builder"
     use_azuread_auth     = true
   }
 }

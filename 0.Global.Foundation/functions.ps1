@@ -12,8 +12,7 @@ if ($buildConfigEncoded -ne "") {
   $buildConfig = [System.Text.Encoding]::UTF8.GetString($buildConfigBytes) | ConvertFrom-Json
   $machineType = $buildConfig.machineType
   $gpuProvider = $buildConfig.gpuProvider
-  $binStorageHost = $buildConfig.binStorage.host
-  $binStorageAuth = $buildConfig.binStorage.auth
+  $binHost = $buildConfig.binhost
   $jobProcessors = $buildConfig.jobProcessors
   $adminUsername = $buildConfig.authCredential.adminUsername
   $adminPassword = $buildConfig.authCredential.adminPassword
