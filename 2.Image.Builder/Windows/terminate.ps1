@@ -17,7 +17,7 @@ foreach ($scheduledEvent in $scheduledEvents) {
         "Content-Type" = "application/json"
         "Metadata"     = "true"
       }
-      Invoke-WebRequest -Method "POST" -Headers $requestHeaders -Body $requestBody -Uri $eventsUrl
+      Invoke-WebRequest -UseBasicParsing -Headers $requestHeaders -Uri $eventsUrl -Body $requestBody -Method Post
     }
   }
 }

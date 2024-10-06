@@ -36,7 +36,7 @@ function DownloadFile ($fileName, $fileLink, $tenantId, $clientId, $clientSecret
       client_id     = $clientId
       client_secret = $clientSecret
     }
-    $authToken = (Invoke-WebRequest -Uri "https://login.microsoftonline.com/$tenantId/oauth2/token" -Body $body -Method Post).Content
+    $authToken = (Invoke-WebRequest -UseBasicParsing -Uri "https://login.microsoftonline.com/$tenantId/oauth2/token" -Body $body -Method Post).Content
   	$accessToken = (ConvertFrom-Json -InputObject $authToken).access_token
     $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
     $httpClient.DefaultRequestHeaders.Add("x-ms-version", $storageVersion)
