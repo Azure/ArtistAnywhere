@@ -17,7 +17,7 @@ if ($buildConfigEncoded -ne "") {
   $tenantId = $buildConfig.authClient.tenantId
   $clientId = $buildConfig.authClient.clientId
   $clientSecret = $buildConfig.authClient.clientSecret
-  $storageVersion = $buildConfig.storageVersion
+  $storageVersion = $buildConfig.authClient.storageVersion
   $adminUsername = $buildConfig.authCredential.adminUsername
   $adminPassword = $buildConfig.authCredential.adminPassword
   $serviceUsername = $buildConfig.authCredential.serviceUsername
