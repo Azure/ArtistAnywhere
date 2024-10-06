@@ -96,7 +96,7 @@ if ($gpuProvider -eq "AMD") {
   $fileType = "nvidia-gpu-cuda"
   $fileName = "cuda_${version}_windows_network.exe"
   $fileHost = "$binHostUrl/NVIDIA/CUDA/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret
+  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
   RunProcess .\$fileName "-s -n -log:$binDirectory\$fileType" $null
   Write-Host "Customize (End): NVIDIA GPU (CUDA)"
 
@@ -105,7 +105,7 @@ if ($gpuProvider -eq "AMD") {
   $fileType = "nvidia-optix"
   $fileName = "NVIDIA-OptiX-SDK-$version-win64.exe"
   $fileHost = "$binHostUrl/NVIDIA/OptiX/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret
+  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
   RunProcess .\$fileName "/S" $null
   $sdkDirectory = "C:\ProgramData\NVIDIA Corporation\OptiX SDK $version\SDK"
   $buildDirectory = "$sdkDirectory\build"
@@ -141,7 +141,7 @@ if ($machineType -eq "Workstation") {
   $fileType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
   $fileName = "${fileType}_$version.exe"
   $fileHost = "$binHostUrl/Teradici/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret
+  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
   RunProcess .\$fileName "/S /NoPostReboot /Force" "$binDirectory\$fileType"
   Write-Host "Customize (End): HP Anyware"
 }
@@ -151,7 +151,7 @@ if ($machineType -ne "JobScheduler") {
   $version = "2024"
   $fileName = "Cinebench${version}_win_x86_64.zip"
   $fileHost = "$binHostUrl/Maxon/Cinebench/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret
+  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
   Expand-Archive -Path $fileName
   Write-Host "Customize (End): Cinebench"
 }

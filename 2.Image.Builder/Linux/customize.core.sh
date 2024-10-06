@@ -44,7 +44,7 @@ if [ $machineType == Storage ]; then
   fileType="mellanox-ofed"
   fileName="MLNX_OFED_LINUX-24.07-0.6.1.0-rhel9.3-x86_64.tgz"
   fileHost="$binHostUrl/NVIDIA/OFED"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret
+  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
   tar -xzf $fileName
   dnf -y install kernel-modules-extra kernel-rpm-macros rpm-build libtool gcc-gfortran pciutils tcl tk
   RunProcess "./MLNX_OFED*/mlnxofedinstall --without-fw-update --add-kernel-support --skip-repo" $binDirectory/$fileType
@@ -72,7 +72,7 @@ if [ "$gpuProvider" == NVIDIA ]; then
   fileType="nvidia-optix"
   fileName="NVIDIA-OptiX-SDK-$version-linux64-x86_64.sh"
   fileHost="$binHostUrl/NVIDIA/OptiX/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret
+  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
   chmod +x $fileName
   filePath="$binDirectory/$fileType/$version"
   mkdir -p $filePath
@@ -104,7 +104,7 @@ if [ $machineType == Workstation ]; then
   [ "$gpuProvider" == "" ] && fileType="pcoip-agent-standard" || fileType="pcoip-agent-graphics"
   fileName="pcoip-agent-offline-rocky9.4_$version-1.el9.x86_64.tar.gz"
   fileHost="$binHostUrl/Teradici/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret
+  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
   mkdir -p $fileType
   tar -xzf $fileName -C $fileType
   cd $fileType

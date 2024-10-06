@@ -16,7 +16,7 @@ if [ $machineType != Storage ]; then
   fileName="Deadline-$version-linux-installers.tar"
   filePath=$(echo ${fileName%.tar})
   fileHost="$binHostUrl/Deadline/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret
+  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
   mkdir -p $filePath
   tar -xzf $fileName -C $filePath
   echo "Customize (End): Deadline Download"

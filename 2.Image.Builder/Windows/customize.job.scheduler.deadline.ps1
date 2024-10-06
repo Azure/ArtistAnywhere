@@ -29,7 +29,7 @@ if ($machineType -ne "Storage") {
   Write-Host "Customize (Start): Deadline Download"
   $fileName = "Deadline-$version-windows-installers.zip"
   $fileHost = "$binHostUrl/Deadline/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret
+  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
   Expand-Archive -Path $fileName
   Write-Host "Customize (End): Deadline Download"
 

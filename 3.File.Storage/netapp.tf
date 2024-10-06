@@ -15,6 +15,9 @@ variable netAppFiles {
       name    = string
       tier    = string
       sizeTiB = number
+      qos = object({
+        type = string
+      })
       volumes = list(object({
         enable    = bool
         name      = string
@@ -96,6 +99,7 @@ resource azurerm_netapp_pool storage {
   location            = azurerm_resource_group.netapp[0].location
   service_level       = each.value.tier
   size_in_tb          = each.value.sizeTiB
+  qos_type            = each.value.qos.type
   account_name        = var.netAppFiles.name
   depends_on = [
     azurerm_netapp_account.storage

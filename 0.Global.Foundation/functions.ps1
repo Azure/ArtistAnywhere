@@ -17,6 +17,7 @@ if ($buildConfigEncoded -ne "") {
   $tenantId = $buildConfig.authClient.tenantId
   $clientId = $buildConfig.authClient.clientId
   $clientSecret = $buildConfig.authClient.clientSecret
+  $storageVersion = $buildConfig.storageVersion
   $adminUsername = $buildConfig.authCredential.adminUsername
   $adminPassword = $buildConfig.authCredential.adminPassword
   $serviceUsername = $buildConfig.authCredential.serviceUsername
@@ -25,7 +26,8 @@ if ($buildConfigEncoded -ne "") {
   Write-Host "Customize (End): Image Build Parameters"
 }
 
-function DownloadFile ($fileName, $fileHost, $tenantId, $clientId, $clientSecret) {
+function DownloadFile ($fileName, $fileHost, $tenantId, $clientId, $clientSecret, $storageVersion) {
+  Add-Type -AssemblyName System.Net.Http
   $httpClient = New-Object System.Net.Http.HttpClient
   if ($tenantId -ne $null) {
     $body = @{
@@ -37,8 +39,9 @@ function DownloadFile ($fileName, $fileHost, $tenantId, $clientId, $clientSecret
     $authToken = (Invoke-WebRequest -Uri "https://login.microsoftonline.com/$tenantId/oauth2/token" -Body $body -Method Post).Content
   	$accessToken = (ConvertFrom-Json -InputObject $authToken).access_token
     $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
+    $httpClient.DefaultRequestHeaders.Add("x-ms-version", $storageVersion)
   }
-  $blobUrl = "$fileHost/$fileName"
+  $blobUrl = "$fileHost\$fileName"
   $httpResponse = $httpClient.GetAsync($blobUrl).Result
   if ($httpResponse.IsSuccessStatusCode) {
     $stream = $httpResponse.Content.ReadAsStreamAsync().Result
@@ -47,7 +50,7 @@ function DownloadFile ($fileName, $fileHost, $tenantId, $clientId, $clientSecret
     $stream.CopyTo($fileStream)
     $fileStream.Close()
   } else {
-    Write-Error "Failed to download $blobUrl: $($httpResponse.StatusCode)"
+    Write-Error "Failed to download $blobUrl ($($httpResponse.StatusCode))"
   }
 }
 

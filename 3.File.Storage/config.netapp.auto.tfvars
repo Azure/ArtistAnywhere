@@ -15,6 +15,9 @@ netAppFiles = {
       name    = "Pool1"
       tier    = "Premium"
       sizeTiB = 2
+      qos = {
+        type = "Auto" # Auto, Manual
+      }
       volumes = [
         {
           enable    = true

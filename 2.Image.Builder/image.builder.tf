@@ -72,9 +72,10 @@ locals {
     jobProcessorBlender  = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobProcessorBlenderVersion])
   }
   authClient = {
-    tenantId     = data.azurerm_client_config.studio.tenant_id
-    clientId     = var.imageCustomize.storage.authClient.id
-    clientSecret = var.imageCustomize.storage.authClient.secret
+    tenantId       = data.azurerm_client_config.studio.tenant_id
+    clientId       = var.imageCustomize.storage.authClient.id
+    clientSecret   = var.imageCustomize.storage.authClient.secret
+    storageVersion = "2024-11-04"
   }
   authCredential = {
     adminUsername   = data.azurerm_key_vault_secret.admin_username.value
