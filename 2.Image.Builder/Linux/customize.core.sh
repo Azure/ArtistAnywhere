@@ -33,8 +33,8 @@ if [[ $machineType == Storage || "$gpuProvider" != "" ]]; then
   echo "Customize (Start): Linux Kernel Dev"
   dnf -y install elfutils-libelf-devel openssl-devel bison flex
   fileName="kernel-devel-5.14.0-362.8.1.el9_3.x86_64.rpm"
-  fileHost="https://download.rockylinux.org/vault/rocky/9.3/devel/x86_64/os/Packages/k"
-  curl -o $fileName -L $fileHost/$fileName
+  fileLink="https://download.rockylinux.org/vault/rocky/9.3/devel/x86_64/os/Packages/k/$fileName"
+  DownloadFile $fileName $fileLink
   rpm -i $fileName
   echo "Customize (End): Linux Kernel Dev"
 fi
@@ -43,8 +43,8 @@ if [ $machineType == Storage ]; then
   echo "Customize (Start): NVIDIA OFED"
   fileType="mellanox-ofed"
   fileName="MLNX_OFED_LINUX-24.07-0.6.1.0-rhel9.3-x86_64.tgz"
-  fileHost="$binHostUrl/NVIDIA/OFED"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
+  fileLink="$binHostUrl/NVIDIA/OFED/$fileName"
+  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   tar -xzf $fileName
   dnf -y install kernel-modules-extra kernel-rpm-macros rpm-build libtool gcc-gfortran pciutils tcl tk
   RunProcess "./MLNX_OFED*/mlnxofedinstall --without-fw-update --add-kernel-support --skip-repo" $binDirectory/$fileType
@@ -55,8 +55,8 @@ if [ "$gpuProvider" == NVIDIA ]; then
   echo "Customize (Start): NVIDIA GPU (GRID)"
   fileType="nvidia-gpu-grid"
   fileName="$fileType.run"
-  fileHost="https://go.microsoft.com/fwlink/?linkid=874272"
-  curl -o $fileName -L $fileHost
+  fileLink="https://go.microsoft.com/fwlink/?linkid=874272"
+  DownloadFile $fileName $fileLink
   chmod +x $fileName
   dnf -y install libglvnd-devel mesa-vulkan-drivers xorg-x11-drivers pkg-config
   RunProcess "./$fileName --silent" $binDirectory/$fileType
@@ -71,8 +71,8 @@ if [ "$gpuProvider" == NVIDIA ]; then
   version=$(echo $buildConfig | jq -r .version.nvidiaOptiX)
   fileType="nvidia-optix"
   fileName="NVIDIA-OptiX-SDK-$version-linux64-x86_64.sh"
-  fileHost="$binHostUrl/NVIDIA/OptiX/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
+  fileLink="$binHostUrl/NVIDIA/OptiX/$version/$fileName"
+  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   chmod +x $fileName
   filePath="$binDirectory/$fileType/$version"
   mkdir -p $filePath
@@ -103,8 +103,8 @@ if [ $machineType == Workstation ]; then
   version=$(echo $buildConfig | jq -r .version.hpAnywareAgent)
   [ "$gpuProvider" == "" ] && fileType="pcoip-agent-standard" || fileType="pcoip-agent-graphics"
   fileName="pcoip-agent-offline-rocky9.4_$version-1.el9.x86_64.tar.gz"
-  fileHost="$binHostUrl/Teradici/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
+  fileLink="$binHostUrl/Teradici/$version/$fileName"
+  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   mkdir -p $fileType
   tar -xzf $fileName -C $fileType
   cd $fileType

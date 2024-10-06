@@ -24,8 +24,8 @@ if ($jobProcessors -contains "Blender") {
   $version = $buildConfig.version.jobProcessorBlender
   $fileType = "blender"
   $fileName = "$fileType-$version-windows-x64.msi"
-  $fileHost = "$binHostUrl/Blender/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
+  $fileLink = "$binHostUrl/Blender/$version/$fileName"
+  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   RunProcess $fileName "/quiet /norestart /log $fileType.log" $null
   $binPaths += ";C:\Program Files\Blender Foundation\Blender $($version.substring(0, 3))"
   Write-Host "Customize (End): Blender"

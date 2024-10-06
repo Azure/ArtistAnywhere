@@ -21,8 +21,8 @@ netsh advfirewall set allprofiles state off
 Write-Host "Customize (Start): Chocolatey"
 $fileType = "chocolatey"
 $fileName = "$fileType.ps1"
-$fileHost = "https://community.chocolatey.org/install.ps1"
-DownloadFile $fileName $fileHost
+$fileLink = "https://community.chocolatey.org/install.ps1"
+DownloadFile $fileName $fileLink
 RunProcess PowerShell.exe "-ExecutionPolicy Unrestricted -File .\$fileName" "$binDirectory\$fileType"
 $binPathChoco = "C:\ProgramData\chocolatey"
 $binPaths += ";$binPathChoco"
@@ -70,15 +70,15 @@ if ($gpuProvider -eq "AMD") {
   if ($machineType -like "*NG*" -and $machineType -like "*v1*") {
     Write-Host "Customize (Start): AMD GPU (NG v1)"
     $fileName = "$fileType.exe"
-    $fileHost = "https://go.microsoft.com/fwlink/?linkid=2248541"
-    DownloadFile $fileName $fileHost
+    $fileLink = "https://go.microsoft.com/fwlink/?linkid=2248541"
+    DownloadFile $fileName $fileLink
     RunProcess .\$fileName "-install -log $binDirectory\$fileType.log" $null
     Write-Host "Customize (End): AMD GPU (NG v1)"
   } elseif ($machineType -like "*NV*" -and $machineType -like "*v4*") {
     Write-Host "Customize (Start): AMD GPU (NV v4)"
     $fileName = "$fileType.exe"
-    $fileHost = "https://go.microsoft.com/fwlink/?linkid=2175154"
-    DownloadFile $fileName $fileHost
+    $fileLink = "https://go.microsoft.com/fwlink/?linkid=2175154"
+    DownloadFile $fileName $fileLink
     RunProcess .\$fileName "-install -log $binDirectory\$fileType.log" $null
     Write-Host "Customize (End): AMD GPU (NV v4)"
   }
@@ -86,8 +86,8 @@ if ($gpuProvider -eq "AMD") {
   Write-Host "Customize (Start): NVIDIA GPU (GRID)"
   $fileType = "nvidia-gpu-grid"
   $fileName = "$fileType.exe"
-  $fileHost = "https://go.microsoft.com/fwlink/?linkid=874181"
-  DownloadFile $fileName $fileHost
+  $fileLink = "https://go.microsoft.com/fwlink/?linkid=874181"
+  DownloadFile $fileName $fileLink
   RunProcess .\$fileName "-s -n -log:$binDirectory\$fileType" $null
   Write-Host "Customize (End): NVIDIA GPU (GRID)"
 
@@ -95,8 +95,8 @@ if ($gpuProvider -eq "AMD") {
   $version = $buildConfig.version.nvidiaCUDA
   $fileType = "nvidia-gpu-cuda"
   $fileName = "cuda_${version}_windows_network.exe"
-  $fileHost = "$binHostUrl/NVIDIA/CUDA/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
+  $fileLink = "$binHostUrl/NVIDIA/CUDA/$version/$fileName"
+  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   RunProcess .\$fileName "-s -n -log:$binDirectory\$fileType" $null
   Write-Host "Customize (End): NVIDIA GPU (CUDA)"
 
@@ -104,8 +104,8 @@ if ($gpuProvider -eq "AMD") {
   $version = $buildConfig.version.nvidiaOptiX
   $fileType = "nvidia-optix"
   $fileName = "NVIDIA-OptiX-SDK-$version-win64.exe"
-  $fileHost = "$binHostUrl/NVIDIA/OptiX/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
+  $fileLink = "$binHostUrl/NVIDIA/OptiX/$version/$fileName"
+  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   RunProcess .\$fileName "/S" $null
   $sdkDirectory = "C:\ProgramData\NVIDIA Corporation\OptiX SDK $version\SDK"
   $buildDirectory = "$sdkDirectory\build"
@@ -121,8 +121,8 @@ if ($machineType -eq "Storage" -or $machineType -eq "JobScheduler") {
   Write-Host "Customize (Start): Azure CLI (x64)"
   $fileType = "azure-cli"
   $fileName = "$fileType.msi"
-  $fileHost = "https://aka.ms/installazurecliwindowsx64"
-  DownloadFile $fileName $fileHost
+  $fileLink = "https://aka.ms/installazurecliwindowsx64"
+  DownloadFile $fileName $fileLink
   RunProcess $fileName "/quiet /norestart /log $fileType.log" $null
   Write-Host "Customize (End): Azure CLI (x64)"
 }
@@ -140,8 +140,8 @@ if ($machineType -eq "Workstation") {
   $version = $buildConfig.version.hpAnywareAgent
   $fileType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
   $fileName = "${fileType}_$version.exe"
-  $fileHost = "$binHostUrl/Teradici/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
+  $fileLink = "$binHostUrl/Teradici/$version/$fileName"
+  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   RunProcess .\$fileName "/S /NoPostReboot /Force" "$binDirectory\$fileType"
   Write-Host "Customize (End): HP Anyware"
 }
@@ -150,8 +150,8 @@ if ($machineType -ne "JobScheduler") {
   Write-Host "Customize (Start): Cinebench"
   $version = "2024"
   $fileName = "Cinebench${version}_win_x86_64.zip"
-  $fileHost = "$binHostUrl/Maxon/Cinebench/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
+  $fileLink = "$binHostUrl/Maxon/Cinebench/$version/$fileName"
+  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   Expand-Archive -Path $fileName
   Write-Host "Customize (End): Cinebench"
 }

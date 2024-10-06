@@ -27,17 +27,17 @@ fi
 
 function DownloadFile {
   fileName=$1
-  fileHost=$2
+  fileLink=$2
   tenantId=$3
   clientId=$4
   clientSecret=$5
   storageVersion=$6
   if [ "$tenantId" == "" ]; then
-    curl -o $fileName -L $fileHost/$fileName
+    curl -o $fileName -L $fileLink
   else
     authToken=$(curl -d "resource=https://storage.azure.com" -d "grant_type=client_credentials" -d "client_id=$clientId" -d "client_secret=$clientSecret" https://login.microsoftonline.com/$tenantId/oauth2/token)
     accessToken=$(echo $authToken | jq -r .access_token)
-    curl -H "Authorization: Bearer $accessToken" -H "x-ms-version: $storageVersion" -o $fileName -L $fileHost/$fileName
+    curl -H "Authorization: Bearer $accessToken" -H "x-ms-version: $storageVersion" -o $fileName -L $fileLink
   fi
 }
 

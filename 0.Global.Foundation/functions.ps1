@@ -26,7 +26,7 @@ if ($buildConfigEncoded -ne "") {
   Write-Host "Customize (End): Image Build Parameters"
 }
 
-function DownloadFile ($fileName, $fileHost, $tenantId, $clientId, $clientSecret, $storageVersion) {
+function DownloadFile ($fileName, $fileLink, $tenantId, $clientId, $clientSecret, $storageVersion) {
   Add-Type -AssemblyName System.Net.Http
   $httpClient = New-Object System.Net.Http.HttpClient
   if ($tenantId -ne $null) {
@@ -41,8 +41,7 @@ function DownloadFile ($fileName, $fileHost, $tenantId, $clientId, $clientSecret
     $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
     $httpClient.DefaultRequestHeaders.Add("x-ms-version", $storageVersion)
   }
-  $blobUrl = "$fileHost\$fileName"
-  $httpResponse = $httpClient.GetAsync($blobUrl).Result
+  $httpResponse = $httpClient.GetAsync($fileLink).Result
   if ($httpResponse.IsSuccessStatusCode) {
     $stream = $httpResponse.Content.ReadAsStreamAsync().Result
     $filePath = Join-Path -Path $pwd.Path -ChildPath $fileName
@@ -50,7 +49,7 @@ function DownloadFile ($fileName, $fileHost, $tenantId, $clientId, $clientSecret
     $stream.CopyTo($fileStream)
     $fileStream.Close()
   } else {
-    Write-Error "Failed to download $blobUrl ($($httpResponse.StatusCode))"
+    Write-Error "Failed to download $fileLink ($($httpResponse.StatusCode))"
   }
 }
 

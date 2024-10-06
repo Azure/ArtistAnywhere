@@ -29,8 +29,8 @@ if [[ $jobProcessors == *Blender* ]]; then
   fileType="blender"
   filePath="/usr/local/$fileType"
   fileName="$fileType-$version-$hostType.tar.xz"
-  fileHost="$binHostUrl/Blender/$version"
-  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret $storageVersion
+  fileLink="$binHostUrl/Blender/$version/$fileName"
+  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   tar -xJf $fileName
   dnf -y install mesa-dri-drivers
   dnf -y install mesa-libGL
