@@ -8,18 +8,18 @@ Write-Host "Customize (Start): Job Scheduler"
 
 if ($machineType -ne "JobScheduler") {
   Write-Host "Customize (Start): NFS Client"
-  $processType = "nfs-client"
-  dism /Online /NoRestart /LogPath:"$binDirectory\$processType" /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All
+  $fileType = "nfs-client"
+  dism /Online /NoRestart /LogPath:"$binDirectory\$fileType" /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All
   Write-Host "Customize (End): NFS Client"
 
   Write-Host "Customize (Start): AD Tools"
-  $processType = "ad-tools" # RSAT: Active Directory Domain Services and Lightweight Directory Services Tools
-  dism /Online /NoRestart /LogPath:"$binDirectory\$processType" /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
+  $fileType = "ad-tools" # RSAT: Active Directory Domain Services and Lightweight Directory Services Tools
+  dism /Online /NoRestart /LogPath:"$binDirectory\$fileType" /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
   Write-Host "Customize (End): AD Tools"
 }
 
 if ($machineType -ne "Storage") {
-  $versionPath = $buildConfig.versionPath.jobSchedulerDeadline
+  $version = $buildConfig.version.jobSchedulerDeadline
   $installRoot = "C:\Deadline"
   $databaseHost = $(hostname)
   $databasePath = "C:\DeadlineData"
@@ -27,40 +27,40 @@ if ($machineType -ne "Storage") {
   $binPathJobScheduler = "$installRoot\bin"
 
   Write-Host "Customize (Start): Deadline Download"
-  $installFile = "Deadline-$versionPath-windows-installers.zip"
-  $downloadUrl = "$binHost/Deadline/$versionPath/$installFile"
-  (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
-  Expand-Archive -Path $installFile
+  $fileName = "Deadline-$version-windows-installers.zip"
+  $fileHost = "$binHostUrl/Deadline/$version"
+  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret
+  Expand-Archive -Path $fileName
   Write-Host "Customize (End): Deadline Download"
 
   Set-Location -Path Deadline*
   if ($machineType -eq "JobScheduler") {
     Write-Host "Customize (Start): Deadline Server"
-    $processType = "deadline-repository"
-    $installFile = "DeadlineRepository-$versionPath-windows-installer.exe"
-    RunProcess .\$installFile "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$binDirectory\$processType"
-    Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$processType.log
+    $fileType = "deadline-repository"
+    $fileName = "DeadlineRepository-$version-windows-installer.exe"
+    RunProcess .\$fileName "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$binDirectory\$fileType"
+    Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$fileType.log
     Copy-Item -Path $databasePath\certs\$certificateFile -Destination $installRoot\$certificateFile
     New-NfsShare -Name "Deadline" -Path $installRoot -Permission ReadWrite
     Write-Host "Customize (End): Deadline Server"
   }
 
   Write-Host "Customize (Start): Deadline Client"
-  $processType = "deadline-client"
-  $installFile = "DeadlineClient-$versionPath-windows-installer.exe"
-  $installArgs = "--mode unattended --prefix $installRoot"
+  $fileType = "deadline-client"
+  $fileName = "DeadlineClient-$version-windows-installer.exe"
+  $fileArgs = "--mode unattended --prefix $installRoot"
   if ($machineType -eq "JobScheduler") {
-    $installArgs = "$installArgs --slavestartup false --launcherservice false"
+    $fileArgs = "$fileArgs --slavestartup false --launcherservice false"
   } else {
     if ($machineType -eq "Farm") {
       $workerStartup = "true"
     } else {
       $workerStartup = "false"
     }
-    $installArgs = "$installArgs --slavestartup $workerStartup --launcherservice true"
+    $fileArgs = "$fileArgs --slavestartup $workerStartup --launcherservice true"
   }
-  RunProcess .\$installFile $installArgs "$binDirectory\$processType"
-  Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$processType.log
+  RunProcess .\$fileName $fileArgs "$binDirectory\$fileType"
+  Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$fileType.log
   Set-Location -Path $binDirectory
   Write-Host "Customize (End): Deadline Client"
 

@@ -5,7 +5,7 @@ source /tmp/functions.sh
 echo "Customize (Start): Job Scheduler"
 
 if [ $machineType != Storage ]; then
-  versionPath=$(echo $buildConfig | jq -r .versionPath.jobSchedulerDeadline)
+  version=$(echo $buildConfig | jq -r .version.jobSchedulerDeadline)
   installRoot="/deadline"
   databaseHost=$(hostname)
   databasePort=27017
@@ -13,12 +13,12 @@ if [ $machineType != Storage ]; then
   binPathJobScheduler="$installRoot/bin"
 
   echo "Customize (Start): Deadline Download"
-  installFile="Deadline-$versionPath-linux-installers.tar"
-  installPath=$(echo ${installFile%.tar})
-  downloadUrl="$binHost/Deadline/$versionPath/$installFile"
-  curl -o $installFile -L $downloadUrl
-  mkdir -p $installPath
-  tar -xzf $installFile -C $installPath
+  fileName="Deadline-$version-linux-installers.tar"
+  filePath=$(echo ${fileName%.tar})
+  fileHost="$binHostUrl/Deadline/$version"
+  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret
+  mkdir -p $filePath
+  tar -xzf $fileName -C $filePath
   echo "Customize (End): Deadline Download"
 
   if [ $machineType == JobScheduler ]; then
@@ -43,37 +43,37 @@ if [ $machineType != Storage ]; then
     echo "Customize (End): Mongo DB Service"
 
     echo "Customize (Start): Mongo DB Users"
-    processType="mongo-create-admin-user"
-    mongoScript="$processType.js"
-    echo "use admin" > $mongoScript
-    echo "db.createUser({" >> $mongoScript
-    echo "  user: \"$adminUsername\"," >> $mongoScript
-    echo "  pwd: \"$adminPassword\"," >> $mongoScript
-    echo "  roles: [" >> $mongoScript
-    echo "    { role: \"userAdminAnyDatabase\", db: \"admin\" }," >> $mongoScript
-    echo "    { role: \"readWriteAnyDatabase\", db: \"admin\" }" >> $mongoScript
-    echo "  ]" >> $mongoScript
-    echo "})" >> $mongoScript
-    RunProcess "mongosh $mongoScript" $binDirectory/$processType
+    fileType="mongo-create-admin-user"
+    fileName="$fileType.js"
+    echo "use admin" > $fileName
+    echo "db.createUser({" >> $fileName
+    echo "  user: \"$adminUsername\"," >> $fileName
+    echo "  pwd: \"$adminPassword\"," >> $fileName
+    echo "  roles: [" >> $fileName
+    echo "    { role: \"userAdminAnyDatabase\", db: \"admin\" }," >> $fileName
+    echo "    { role: \"readWriteAnyDatabase\", db: \"admin\" }" >> $fileName
+    echo "  ]" >> $fileName
+    echo "})" >> $fileName
+    RunProcess "mongosh $fileName" $binDirectory/$fileType
 
-    processType="mongo-create-database-user"
-    mongoScript="$processType.js"
-    echo "db = db.getSiblingDB(\"$databaseName\");" > $mongoScript
-    echo "db.createUser({" >> $mongoScript
-    echo "  user: \"$serviceUsername\"," >> $mongoScript
-    echo "  pwd: \"$servicePassword\"," >> $mongoScript
-    echo "  roles: [" >> $mongoScript
-    echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $mongoScript
-    echo "  ]" >> $mongoScript
-    echo "})" >> $mongoScript
-    RunProcess "mongosh $mongoScript" $binDirectory/$processType
+    fileType="mongo-create-database-user"
+    fileName="$fileType.js"
+    echo "db = db.getSiblingDB(\"$databaseName\");" > $fileName
+    echo "db.createUser({" >> $fileName
+    echo "  user: \"$serviceUsername\"," >> $fileName
+    echo "  pwd: \"$servicePassword\"," >> $fileName
+    echo "  roles: [" >> $fileName
+    echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $fileName
+    echo "  ]" >> $fileName
+    echo "})" >> $fileName
+    RunProcess "mongosh $fileName" $binDirectory/$fileType
     echo "Customize (End): Mongo DB Users"
 
     echo "Customize (Start): Deadline Server"
-    processType="deadline-repository"
-    installFile="DeadlineRepository-$versionPath-linux-x64-installer.run"
+    fileType="deadline-repository"
+    fileName="DeadlineRepository-$version-linux-x64-installer.run"
     export DB_PASSWORD=$servicePassword
-    RunProcess "$installPath/$installFile --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$processType
+    RunProcess "$filePath/$fileName --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$fileType
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
     echo "$installRoot *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
     exportfs -r
@@ -81,16 +81,16 @@ if [ $machineType != Storage ]; then
   fi
 
   echo "Customize (Start): Deadline Client"
-  processType="deadline-client"
-  installFile="DeadlineClient-$versionPath-linux-x64-installer.run"
-  installArgs="--mode unattended --prefix $installRoot"
+  fileType="deadline-client"
+  fileName="DeadlineClient-$version-linux-x64-installer.run"
+  fileArgs="--mode unattended --prefix $installRoot"
   if [ $machineType == JobScheduler ]; then
-    installArgs="$installArgs --slavestartup false --launcherdaemon false"
+    fileArgs="$fileArgs --slavestartup false --launcherdaemon false"
   else
     [ $machineType == Farm ] && workerStartup="true" || workerStartup="false"
-    installArgs="$installArgs --slavestartup $workerStartup --launcherdaemon true"
+    fileArgs="$fileArgs --slavestartup $workerStartup --launcherdaemon true"
   fi
-  RunProcess "$installPath/$installFile $installArgs" $binDirectory/$processType
+  RunProcess "$filePath/$fileName $fileArgs" $binDirectory/$fileType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
   echo "Customize (End): Deadline Client"
 

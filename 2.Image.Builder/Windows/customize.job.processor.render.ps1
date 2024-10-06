@@ -8,26 +8,26 @@ Write-Host "Customize (Start): Job Processor"
 
 if ($jobProcessors -contains "PBRT") {
   Write-Host "Customize (Start): PBRT"
-  $versionPath = $buildConfig.versionPath.jobProcessorPBRT
-  $processType = "pbrt"
-  $installPath = "C:\Program Files\PBRT"
-  New-Item -ItemType Directory -Path "$installPath" -Force
-  RunProcess "$env:GIT_BIN_PATH\git.exe" "clone --recursive https://github.com/mmp/$processType-$versionPath.git" "$binDirectory\$processType-1"
-  RunProcess "$env:CMAKE_BIN_PATH\cmake.exe" "-B ""$installPath"" -S $binDirectory\$processType-$versionPath" "$binDirectory\$processType-2"
-  RunProcess "$env:MSBUILD_BIN_PATH\MSBuild.exe" """$installPath\PBRT-$versionPath.sln"" -p:Configuration=Release" "$binDirectory\$processType-3"
-  $binPaths += ";$installPath\Release"
+  $version = $buildConfig.version.jobProcessorPBRT
+  $fileType = "pbrt"
+  $filePath = "C:\Program Files\PBRT"
+  New-Item -ItemType Directory -Path "$filePath" -Force
+  RunProcess "$env:GIT_BIN_PATH\git.exe" "clone --recursive https://github.com/mmp/$fileType-$version.git" "$binDirectory\$fileType-1"
+  RunProcess "$env:CMAKE_BIN_PATH\cmake.exe" "-B ""$filePath"" -S $binDirectory\$fileType-$version" "$binDirectory\$fileType-2"
+  RunProcess "$env:MSBUILD_BIN_PATH\MSBuild.exe" """$filePath\PBRT-$version.sln"" -p:Configuration=Release" "$binDirectory\$fileType-3"
+  $binPaths += ";$filePath\Release"
   Write-Host "Customize (End): PBRT"
 }
 
 if ($jobProcessors -contains "Blender") {
   Write-Host "Customize (Start): Blender"
-  $versionPath = $buildConfig.versionPath.jobProcessorBlender
-  $processType = "blender"
-  $installFile = "$processType-$versionPath-windows-x64.msi"
-  $downloadUrl = "$binHost/Blender/$versionPath/$installFile"
-  (New-Object System.Net.WebClient).DownloadFile($downloadUrl, (Join-Path -Path $pwd.Path -ChildPath $installFile))
-  RunProcess $installFile "/quiet /norestart /log $processType.log" $null
-  $binPaths += ";C:\Program Files\Blender Foundation\Blender $($versionPath.substring(0, 3))"
+  $version = $buildConfig.version.jobProcessorBlender
+  $fileType = "blender"
+  $fileName = "$fileType-$version-windows-x64.msi"
+  $fileHost = "$binHostUrl/Blender/$version"
+  DownloadFile $fileName $fileHost $tenantId $clientId $clientSecret
+  RunProcess $fileName "/quiet /norestart /log $fileType.log" $null
+  $binPaths += ";C:\Program Files\Blender Foundation\Blender $($version.substring(0, 3))"
   Write-Host "Customize (End): Blender"
 }
 

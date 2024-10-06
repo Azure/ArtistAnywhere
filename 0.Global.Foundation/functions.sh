@@ -11,17 +11,33 @@ if [ "$buildConfigEncoded" != "" ]; then
   buildConfig=$(echo $buildConfigEncoded | base64 -d)
   machineType=$(echo $buildConfig | jq -r .machineType)
   gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
-  binHost=$(echo $buildConfig | jq -r .binHost)
+  binHostUrl=$(echo $buildConfig | jq -r .binHostUrl)
   jobProcessors=$(echo $buildConfig | jq -c .jobProcessors)
+  tenantId=$(echo $buildConfig | jq -r .authClient.tenantId)
+  clientId=$(echo $buildConfig | jq -r .authClient.clientId)
+  clientSecret=$(echo $buildConfig | jq -r .authClient.clientSecret)
   adminUsername=$(echo $buildConfig | jq -r .authCredential.adminUsername)
   adminPassword=$(echo $buildConfig | jq -r .authCredential.adminPassword)
   serviceUsername=$(echo $buildConfig | jq -r .authCredential.serviceUsername)
   servicePassword=$(echo $buildConfig | jq -r .authCredential.servicePassword)
-  echo "Machine Type: $machineType"
-  echo "GPU Provider: $gpuProvider"
-  echo "Job Processors: $jobProcessors"
+  echo "Build Config: $buildConfig"
   echo "Customize (End): Image Build Parameters"
 fi
+
+function DownloadFile {
+  fileName=$1
+  fileHost=$2
+  tenantId=$3
+  clientId=$4
+  clientSecret=$5
+  if [ "$tenantId" == "" ]; then
+    curl -o $fileName -L $fileHost/$fileName
+  else
+    authToken=$(curl -d "resource=https://storage.azure.com" -d "grant_type=client_credentials" -d "client_id=$clientId" -d "client_secret=$clientSecret" https://login.microsoftonline.com/$tenantId/oauth2/token)
+    accessToken=$(echo $authToken | jq -r .access_token)
+    curl -H "Authorization: Bearer $accessToken" -o $fileName -L $fileHost/$fileName
+  fi
+}
 
 function RunProcess {
   exitStatus=-1

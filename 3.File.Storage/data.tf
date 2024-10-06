@@ -26,10 +26,9 @@ variable dataLoad {
         sizeGB      = number
       })
       adminLogin = object({
-        userName      = string
-        userPassword  = string
-        sshKeyPublic  = string
-        sshKeyPrivate = string
+        userName     = string
+        userPassword = string
+        sshKeyPublic = string
         passwordAuth = object({
           disable = bool
         })
@@ -54,10 +53,9 @@ locals {
         }
       })
       adminLogin = merge(var.dataLoad.machine.adminLogin, {
-        userName      = var.dataLoad.machine.adminLogin.userName != "" ? var.dataLoad.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-        userPassword  = var.dataLoad.machine.adminLogin.userPassword != "" ? var.dataLoad.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
-        sshKeyPublic  = var.dataLoad.machine.adminLogin.sshKeyPublic != "" ? var.dataLoad.machine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
-        sshKeyPrivate = var.dataLoad.machine.adminLogin.sshKeyPrivate != "" ? var.dataLoad.machine.adminLogin.sshKeyPrivate : data.azurerm_key_vault_secret.ssh_key_private.value
+        userName     = var.dataLoad.machine.adminLogin.userName != "" ? var.dataLoad.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+        userPassword = var.dataLoad.machine.adminLogin.userPassword != "" ? var.dataLoad.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+        sshKeyPublic = var.dataLoad.machine.adminLogin.sshKeyPublic != "" ? var.dataLoad.machine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
       })
     })
   })

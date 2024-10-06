@@ -35,7 +35,13 @@ variable imageBuilder {
 
 variable imageCustomize {
   type = object({
-    binHost = string
+    storage = object({
+      binHostUrl = string
+      authClient = object({
+        id     = string
+        secret = string
+      })
+    })
     script = object({
       core = bool
       jobScheduler = object({
@@ -48,15 +54,14 @@ variable imageCustomize {
       })
     })
   })
-}
-
-data azurerm_storage_account studio {
-  name                = "xstudio"
-  resource_group_name = "Shared"
+  validation {
+    condition     = var.imageCustomize.storage.authClient.id != "" && var.imageCustomize.storage.authClient.secret != ""
+    error_message = "Missing required image customize Azure Storage auth client configuration."
+  }
 }
 
 locals {
-  versionPath = {
+  version = {
     nvidiaCUDA           = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.nvidiaCUDAVersion])
     nvidiaOptiX          = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.nvidiaOptiXVersion])
     azBlobNFSMount       = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.azBlobNFSMountVersion])
@@ -65,6 +70,11 @@ locals {
     jobSchedulerLSF      = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobSchedulerLSFVersion])
     jobProcessorPBRT     = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobProcessorPBRTVersion])
     jobProcessorBlender  = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.jobProcessorBlenderVersion])
+  }
+  authClient = {
+    tenantId     = data.azurerm_client_config.studio.tenant_id
+    clientId     = var.imageCustomize.storage.authClient.id
+    clientSecret = var.imageCustomize.storage.authClient.secret
   }
   authCredential = {
     adminUsername   = data.azurerm_key_vault_secret.admin_username.value
@@ -92,19 +102,12 @@ resource azurerm_role_assignment resource_group_contributor {
   scope                = azurerm_resource_group.image.id
 }
 
-resource azurerm_role_assignment storage_blob_data_reader {
-  role_definition_name = "Storage Blob Data Reader" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-reader
-  principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-  scope                = data.azurerm_storage_account.studio.id
-}
-
 resource time_sleep image_builder_rbac {
   create_duration = "30s"
   depends_on = [
     azurerm_role_assignment.managed_identity_operator,
     azurerm_role_assignment.virtual_machine_contributor,
-    azurerm_role_assignment.resource_group_contributor,
-    azurerm_role_assignment.storage_blob_data_reader
+    azurerm_role_assignment.resource_group_contributor
   ]
 }
 
@@ -211,19 +214,19 @@ resource azapi_resource linux {
             type = "Shell"
             inline = [
               "if [ ${var.imageCustomize.script.core} == true ]; then",
-              "  cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binHost = var.imageCustomize.binHost})))} /bin/bash",
+              "  cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))} /bin/bash",
               "fi",
               "if [ ${var.imageCustomize.script.jobScheduler.deadline} == true ]; then",
-              "  cat /tmp/customize.job.scheduler.deadline.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binHost = var.imageCustomize.binHost})))} /bin/bash",
+              "  cat /tmp/customize.job.scheduler.deadline.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))} /bin/bash",
               "fi",
               "if [ ${var.imageCustomize.script.jobScheduler.lsf} == true ]; then",
-              "  cat /tmp/customize.job.scheduler.lsf.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binHost = var.imageCustomize.binHost})))} /bin/bash",
+              "  cat /tmp/customize.job.scheduler.lsf.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))} /bin/bash",
               "fi",
               "if [ ${var.imageCustomize.script.jobProcessor.render} == true ]; then",
-              "  cat /tmp/customize.job.processor.render.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binHost = var.imageCustomize.binHost})))} /bin/bash",
+              "  cat /tmp/customize.job.processor.render.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))} /bin/bash",
               "fi",
               "if [ ${var.imageCustomize.script.jobProcessor.eda} == true ]; then",
-              "  cat /tmp/customize.job.processor.eda.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binHost = var.imageCustomize.binHost})))} /bin/bash",
+              "  cat /tmp/customize.job.processor.eda.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))} /bin/bash",
               "fi"
             ]
           }
@@ -364,19 +367,19 @@ resource azapi_resource windows {
             type = "PowerShell"
             inline = [
               "if ('${var.imageCustomize.script.core}' -eq $true) {",
-              "  C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binHost = var.imageCustomize.binHost})))}",
+              "  C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
               "}",
               "if ('${var.imageCustomize.script.jobScheduler.deadline}' -eq $true) {",
-              "  C:\\AzureData\\customize.job.scheduler.deadline.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binHost = var.imageCustomize.binHost})))}",
+              "  C:\\AzureData\\customize.job.scheduler.deadline.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
               "}",
               "if ('${var.imageCustomize.script.jobScheduler.lsf}' -eq $true) {",
-              "  C:\\AzureData\\customize.job.scheduler.lsf.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binHost = var.imageCustomize.binHost})))}",
+              "  C:\\AzureData\\customize.job.scheduler.lsf.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
               "}",
               "if ('${var.imageCustomize.script.jobProcessor.render}' -eq $true) {",
-              "  C:\\AzureData\\customize.job.processor.render.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binHost = var.imageCustomize.binHost})))}",
+              "  C:\\AzureData\\customize.job.processor.render.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
               "}",
               "if ('${var.imageCustomize.script.jobProcessor.eda}' -eq $true) {",
-              "  C:\\AzureData\\customize.job.processor.eda.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {versionPath = local.versionPath}, {authCredential = local.authCredential}, {binHost = var.imageCustomize.binHost})))}",
+              "  C:\\AzureData\\customize.job.processor.eda.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
               "}"
             ]
             runElevated = true

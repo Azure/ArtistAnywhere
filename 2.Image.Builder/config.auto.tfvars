@@ -431,8 +431,14 @@ imageBuilder = {
 }
 
 imageCustomize = {
-  binHost = "https://xstudio.blob.core.windows.net/bin"
-  script = { # Enables or disables image build customization scripts
+  storage = {
+    binHostUrl = "https://xstudio.blob.core.windows.net/bin"
+    authClient = { # Required for image customization build process
+      id     = ""
+      secret = ""
+    }
+  }
+  script = { # Enables or disables image customization build scripts
     core = true
     jobScheduler = {
       deadline = true

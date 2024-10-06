@@ -26,10 +26,9 @@ dataLoad = {
       sizeGB      = 0
     }
     adminLogin = {
-      userName      = ""
-      userPassword  = ""
-      sshKeyPublic  = ""
-      sshKeyPrivate = ""
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
       passwordAuth = {
         disable = true
       }

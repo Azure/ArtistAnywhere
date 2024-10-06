@@ -12,16 +12,43 @@ if ($buildConfigEncoded -ne "") {
   $buildConfig = [System.Text.Encoding]::UTF8.GetString($buildConfigBytes) | ConvertFrom-Json
   $machineType = $buildConfig.machineType
   $gpuProvider = $buildConfig.gpuProvider
-  $binHost = $buildConfig.binhost
+  $binHostUrl = $buildConfig.binHostUrl
   $jobProcessors = $buildConfig.jobProcessors
+  $tenantId = $buildConfig.authClient.tenantId
+  $clientId = $buildConfig.authClient.clientId
+  $clientSecret = $buildConfig.authClient.clientSecret
   $adminUsername = $buildConfig.authCredential.adminUsername
   $adminPassword = $buildConfig.authCredential.adminPassword
   $serviceUsername = $buildConfig.authCredential.serviceUsername
   $servicePassword = $buildConfig.authCredential.servicePassword
-  Write-Host "Machine Type: $machineType"
-  Write-Host "GPU Provider: $gpuProvider"
-  Write-Host "Job Processors: $jobProcessors"
+  Write-Host "Build Config: $buildConfig"
   Write-Host "Customize (End): Image Build Parameters"
+}
+
+function DownloadFile ($fileName, $fileHost, $tenantId, $clientId, $clientSecret) {
+  $httpClient = New-Object System.Net.Http.HttpClient
+  if ($tenantId -ne $null) {
+    $body = @{
+      resource      = "https://storage.azure.com"
+      grant_type    = "client_credentials"
+      client_id     = $clientId
+      client_secret = $clientSecret
+    }
+    $authToken = (Invoke-WebRequest -Uri "https://login.microsoftonline.com/$tenantId/oauth2/token" -Body $body -Method Post).Content
+  	$accessToken = (ConvertFrom-Json -InputObject $authToken).access_token
+    $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
+  }
+  $blobUrl = "$fileHost/$fileName"
+  $httpResponse = $httpClient.GetAsync($blobUrl).Result
+  if ($httpResponse.IsSuccessStatusCode) {
+    $stream = $httpResponse.Content.ReadAsStreamAsync().Result
+    $filePath = Join-Path -Path $pwd.Path -ChildPath $fileName
+    $fileStream = [System.IO.File]::Create($filePath)
+    $stream.CopyTo($fileStream)
+    $fileStream.Close()
+  } else {
+    Write-Error "Failed to download $blobUrl: $($httpResponse.StatusCode)"
+  }
 }
 
 function RunProcess ($filePath, $argumentList, $logFile) {
