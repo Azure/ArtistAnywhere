@@ -17,9 +17,9 @@ variable resourceGroupName {
   default = "ArtistAnywhere" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 }
 
-#####################################################################################################################
-# Managed Identity (https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) #
-#####################################################################################################################
+#############################################################################################################
+# Managed Identity (https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview) #
+#############################################################################################################
 
 variable managedIdentity {
   default = {

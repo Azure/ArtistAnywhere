@@ -1,6 +1,6 @@
-#####################################################################################################################
-# Managed Identity (https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) #
-#####################################################################################################################
+#############################################################################################################
+# Managed Identity (https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview) #
+#############################################################################################################
 
 resource azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name

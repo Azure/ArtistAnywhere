@@ -21,7 +21,6 @@ if [ "$buildConfigEncoded" != "" ]; then
   adminPassword=$(echo $buildConfig | jq -r .authCredential.adminPassword)
   serviceUsername=$(echo $buildConfig | jq -r .authCredential.serviceUsername)
   servicePassword=$(echo $buildConfig | jq -r .authCredential.servicePassword)
-  echo "Build Config: $buildConfig"
   echo "Customize (End): Image Build Parameters"
 fi
 

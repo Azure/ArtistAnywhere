@@ -2,7 +2,6 @@ dataLoad = {
   enable = false
   source = {
     accountName   = ""
-    accountKey    = ""
     containerName = ""
   }
   machine = {

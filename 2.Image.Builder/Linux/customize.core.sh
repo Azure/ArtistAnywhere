@@ -4,16 +4,6 @@ source /tmp/functions.sh
 
 echo "Customize (Start): Core"
 
-echo "Customize (Start): Resize Root Partition"
-rootBlockDevice=$(lsblk -J | jq '.blockdevices[] | .["maj:min"] as $version | select($version == "8:0")')
-partitionDevice=$(echo $rootBlockDevice | jq -r .name)
-partitionNumber=$(echo $rootBlockDevice | jq -r '.children | length')
-rootFileSystem=$(df | grep /dev/mapper | cut -d' ' -f1)
-growpart /dev/$partitionDevice $partitionNumber
-lvextend -l +100%Free $rootFileSystem
-xfs_growfs /
-echo "Customize (End): Resize Root Partition"
-
 echo "Customize (Start): Image Build Platform"
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
 dnf -y install epel-release python3-devel gcc gcc-c++ perl lsof cmake git

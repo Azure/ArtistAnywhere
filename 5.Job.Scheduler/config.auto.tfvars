@@ -128,9 +128,9 @@ dnsRecord = {
   ttlSeconds  = 300
 }
 
-###############################################################################################################
-# Active Directory (https://learn.microsoft.comtroubleshoot/windows-server/identity/active-directory-overview #
-###############################################################################################################
+#################################################################################################################################################
+# Active Directory (https://learn.microsoft.com/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview) #
+#################################################################################################################################################
 
 activeDirectory = {
   enable     = true

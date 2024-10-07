@@ -23,7 +23,7 @@ computeGallery = {
       generation = "V2"
       publisher  = "RESF"
       offer      = "RockyLinux-x86_64"
-      sku        = "9-LVM"
+      sku        = "9-Base"
     },
     {
       name       = "WinServer"

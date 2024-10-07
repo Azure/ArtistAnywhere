@@ -22,7 +22,6 @@ if ($buildConfigEncoded -ne "") {
   $adminPassword = $buildConfig.authCredential.adminPassword
   $serviceUsername = $buildConfig.authCredential.serviceUsername
   $servicePassword = $buildConfig.authCredential.servicePassword
-  Write-Host "Build Config: $buildConfig"
   Write-Host "Customize (End): Image Build Parameters"
 }
 
