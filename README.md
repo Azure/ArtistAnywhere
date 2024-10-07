@@ -3,7 +3,7 @@
 Azure Artist Anywhere (AAA) is a *modular & flexible* [Infrastructure as Code (IaC)](https://learn.microsoft.com/devops/deliver/what-is-infrastructure-as-code) solution deployment framework for<br/>[Azure High-Performance Computing (HPC)](https://azure.microsoft.com/solutions/high-performance-computing) workloads. Enable remote artist productivity with [global Azure scale](https://azure.microsoft.com/global-infrastructure) via<br/>[Compute Fleet](https://learn.microsoft.com/azure/azure-compute-fleet/overview) AI-enabled deployments with up to 10,000 [Spot](https://learn.microsoft.com/azure/virtual-machines/spot-vms) / [Standard VMs](https://learn.microsoft.com/azure/virtual-machines/overview) and up to 15 [VM sizes](https://learn.microsoft.com/azure/virtual-machines/sizes/overview) per request.
 
 The following solution design principles and features are implemented throughout the AAA deployment framework.
-* Defense-in-depth layered security with integration of core services including [Managed Identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview), [Key Vault](https://learn.microsoft.com/azure/key-vault/general/overview),</br>[Private Link](https://learn.microsoft.com/azure/private-link/private-link-overview) / [ Endpoints](https://learn.microsoft.com/azure/private-link/private-endpoint-overview), [Network Security Groups](https://learn.microsoft.com/azure/virtual-network/network-security-groups-overview), [NAT Gateway](https://learn.microsoft.com/azure/nat-gateway/nat-overview), [Bastion](https://learn.microsoft.com/azure/bastion/bastion-overview), [Defender for Cloud](https://learn.microsoft.com/azure/defender-for-cloud/defender-for-cloud-introduction), [Policy](https://learn.microsoft.com/azure/governance/policy/overview), etc
+* Defense-in-depth layered security with integration of core services including [Managed Identity](https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview), [Key Vault](https://learn.microsoft.com/azure/key-vault/general/overview),</br>[Private Link](https://learn.microsoft.com/azure/private-link/private-link-overview) / [ Endpoints](https://learn.microsoft.com/azure/private-link/private-endpoint-overview), [Network Security Groups](https://learn.microsoft.com/azure/virtual-network/network-security-groups-overview), [NAT Gateway](https://learn.microsoft.com/azure/nat-gateway/nat-overview), [Bastion](https://learn.microsoft.com/azure/bastion/bastion-overview), [Policy](https://learn.microsoft.com/azure/governance/policy/overview), [Defender for Cloud](https://learn.microsoft.com/azure/defender-for-cloud/defender-for-cloud-introduction), etc
 * Any 3<sup>rd</sup>-party or custom software (e.g., job scheduler) is supported in a custom image [Compute Gallery](https://learn.microsoft.com/azure/virtual-machines/shared-image-galleries)
 * Integration of [Microsoft Cost Management](https://learn.microsoft.com/azure/cost-management-billing/costs/overview-cost-management) across all AAA-deployed Azure resource groups / services
 * Multi-Region and [Extended Zone](https://learn.microsoft.com/azure/extended-zones/overview) deployments are supported via a [Virtual Network](https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview) per region / zone
@@ -11,7 +11,7 @@ The following solution design principles and features are implemented throughout
 
 | **Module Name** | **Module Description** | **Required for<br/>Burst Compute?** | **Required for<br/>Full Solution?<br/>(*Compute & Storage*)** |
 | - | - | - | - |
-| [0&#160;Global&#160;Foundation](https://github.com/Azure/ArtistAnywhere/tree/main/0.Global.Foundation) | Defines&#160;global&#160;config&#160;([Azure&#160;Region](https://azure.microsoft.com/regions)) and core services ([Terraform Storage](https://developer.hashicorp.com/terraform/language/settings/backends/azurerm), [Managed Identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview), [Key Vault](https://learn.microsoft.com/azure/key-vault/general/overview), etc) | Yes | Yes |
+| [0&#160;Global&#160;Foundation](https://github.com/Azure/ArtistAnywhere/tree/main/0.Global.Foundation) | Defines&#160;global&#160;config&#160;([Azure&#160;Region](https://azure.microsoft.com/regions)) and core services ([Terraform Storage](https://developer.hashicorp.com/terraform/language/settings/backends/azurerm), [Managed Identity](https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview), [Key Vault](https://learn.microsoft.com/azure/key-vault/general/overview), etc) | Yes | Yes |
 | [1 Virtual Network](https://github.com/Azure/ArtistAnywhere/tree/main/1.Virtual.Network) | Deploys [Virtual Network](https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview) with [VPN](https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-about-vpngateways)<br/>or [ExpressRoute](https://learn.microsoft.com/azure/expressroute/expressroute-about-virtual-network-gateways) gateway services | Yes,&#160;if&#160;[Virtual&#160;Network](https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview) is not yet deployed | Yes,&#160;if&#160;[Virtual&#160;Network](https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview) is not yet deployed |
 | [2 Image Builder](https://github.com/Azure/ArtistAnywhere/tree/main/2.Image.Builder) | Deploys [Image Builder](https://learn.microsoft.com/azure/virtual-machines/image-builder-overview) and [Compute Gallery](https://learn.microsoft.com/azure/virtual-machines/shared-image-galleries) with image customize scripts | No, use your custom image config [here](https://github.com/Azure/ArtistAnywhere/tree/main/6.Compute.Farm/config.auto.tfvars#L15) | No, use your custom image config [here](https://github.com/Azure/ArtistAnywhere/tree/main/6.Compute.Farm/config.auto.tfvars#L15) |
 | [3 File Storage](https://github.com/Azure/ArtistAnywhere/tree/main/3.File.Storage) | Deploys native ([Blob [NFS]](https://learn.microsoft.com/azure/storage/blobs/network-file-system-protocol-support), [Files](https://learn.microsoft.com/azure/storage/files/storage-files-introduction), [NetApp Files](https://learn.microsoft.com/azure/azure-netapp-files/azure-netapp-files-introduction), [Qumulo](https://learn.microsoft.com/azure/partner-solutions/qumulo/qumulo-overview), [Lustre](https://learn.microsoft.com/azure/azure-managed-lustre/amlfs-overview)) or hosted ([Weka](https://azuremarketplace.microsoft.com/marketplace/apps/weka1652213882079.weka_data_platform)) storage services | No, use your current NAS via [4 File Cache](https://github.com/Azure/ArtistAnywhere/tree/main/4.File.Cache) | Yes |
@@ -22,22 +22,21 @@ The following solution design principles and features are implemented throughout
 
 ## Local Installation Process
 
-The following installation process is required for local deployment orchestration.
+The following local installation process is required for deployment orchestration.
 
 1. Make sure the [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) is installed locally and accessible in your PATH environment variable.
 1. Make sure the [Terraform CLI](https://developer.hashicorp.com/terraform/downloads) is installed locally and accessible in your PATH environment variable.
-1. Run `az login` locally to authenticate to your Azure account. This is how Terraform connects to Azure.
-1. Clone this GitHub repo to your local workstation for module configuration and deployment orchestration.
+1. Clone this GitHub repository to your local workstation for module configuration and deployment orchestration.
 
 ## Module Configuration & Deployment
 
 For each module, here is the recommended configuration and deployment process.
 
 1. Review and edit the config values in each `config.auto.tfvars` file for your target deployment.
-   * In module `0 Global Foundation`, review and edit the following required config files.<br/>For example, your Azure subscription id must be set in /cfg/global.tf
-      * `/cfg/global.tf`
-      * `/cfg/file.system.tf`
-      * `/cfg/backend.config`
+   * In module `0 Global Foundation`, review and edit the following required config files.<br/>For example, your Azure subscription id **must** be set in the `/cfg/global.tf` file
+      * `/cfg/global.tf` - defines global config (subscription id, default region name, etc)
+      * `/cfg/file.system.tf` - defines the active file system(s) for compute node mount
+      * `/cfg/backend.config` - defines Terraform backend state file Azure Blob storage
    * In modules `2 Image Builder`, `5 Job Scheduler` and `7 Artist Workstation`, make sure you have sufficient **Standard** compute cores quota available on your Azure subscription for each configured virtual machine type / size in your target region.
    * In module `6 Compute Farm`, make sure you have sufficient [Spot](https://learn.microsoft.com/azure/virtual-machines/spot-vms) compute cores quota available on your Azure subscription for each configured virtual machine type / size in your target region.
    * In modules `5 Job Scheduler`, `6 Compute Farm` and `7 Artist Workstation`, make sure each **image** config references the correct [Compute Gallery](https://learn.microsoft.com/azure/virtual-machines/shared-image-galleries) custom image in your Azure subscription.
@@ -46,7 +45,7 @@ For each module, here is the recommended configuration and deployment process.
 1. Run `terraform apply` to generate the Terraform deployment [Plan](https://www.terraform.io/docs/cli/run/index.html#planning) (append `-destroy` to delete Azure resources).
 1. Review the Terraform deployment Plan *before* confirming to add, change and/or destroy Azure resources.
    * In module `2 Image Builder`,
-      * The following Azure Marketplace Rocky Linux image terms must be accepted on your Azure subscription.<br/>`az vm image terms accept --publisher RESF --offer RockyLinux-x86_64 --plan 9-LVM`
+      * The following Azure Marketplace Rocky Linux image terms must be accepted on your Azure subscription.<br/>`az vm image terms accept --publisher RESF --offer RockyLinux-x86_64 --plan 9-Base`
       * Use the Azure management portal or [Image Builder CLI](https://learn.microsoft.com/cli/azure/image/builder#az-image-builder-run) to start image build runs as needed.
 
 ## Render Job Samples
