@@ -6,14 +6,14 @@ resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens,
 
 hsCache = {
   enable     = false
-  version    = "latest"
+  version    = "24.06.19"
   namePrefix = "xstudio"
   domainName = "azure.studio"
   metadata = { # Anvil
     machine = {
-      namePrefix  = "-anvil"
-      size        = "Standard_E4as_v5"
-      count       = 2
+      namePrefix = "-anvil"
+      size       = "Standard_E4as_v5"
+      count      = 2
       adminLogin = {
         userName     = ""
         userPassword = ""
@@ -61,7 +61,7 @@ hsCache = {
         storageType = "Premium_LRS"
         cachingType = "None"
         sizeGB      = 256
-        count       = 2
+        count       = 3
         raid0 = {
           enable = false
         }
@@ -76,23 +76,63 @@ hsCache = {
   proximityPlacementGroup = { # https://learn.microsoft.com/azure/virtual-machines/co-location
     enable = true
   }
+  shares = [
+    {
+      enable      = true
+      name        = "ro"
+      path        = "/ro"
+      size        = 0
+      export      = "*,ro,no-root-squash"
+      description = ""
+    },
+    {
+      enable      = false
+      name        = "rw"
+      path        = "/rw"
+      size        = 0
+      export      = "*,rw,no-root-squash"
+      description = ""
+    }
+  ]
   storageTargets = [
     {
-      enable  = false
+      enable = true
       node = {
-        name = "ANF"
+        name = "anf-node1"
         type = "OTHER"
-        ip   = "10.0.193.4"
+        ip   = "10.1.193.4"
       }
       volume = {
-        name = "ANF_Volume1"
-        type = "READ_ONLY"
-        node = "ANF"
-        path = "/volume1"
-        assimilate = {
-          enable = true
-        }
+        name      = "anf-volume1"
+        type      = "READ_ONLY"
+        path      = "/volume1"
+        shareName = "ro"
       }
+    },
+    {
+      enable = true
+      node = {
+        name = "anf-node2"
+        type = "OTHER"
+        ip   = "10.1.193.5"
+      }
+      volume = {
+        name      = "anf-volume2"
+        type      = "READ_ONLY"
+        path      = "/volume2"
+        shareName = "ro"
+      }
+    }
+  ]
+  volumeGroups = [
+    {
+      enable      = true
+      name        = "anf"
+      description = "Azure NetApp Files (ANF)"
+      volumeNames = [
+        "anf-volume1",
+        "anf-volume2"
+      ]
     }
   ]
 }

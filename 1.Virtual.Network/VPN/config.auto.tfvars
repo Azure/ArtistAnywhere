@@ -45,7 +45,7 @@ vpnGatewayLocal = {
 
 virtualNetwork = {
   name              = "Studio"
-  resourceGroupName = "ArtistAnywhere.Network.WestUS"
+  resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
   gateway = {
     ipAddress1 = {
       name              = "xstudio"

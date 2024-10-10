@@ -75,21 +75,33 @@ variable hsCache {
     proximityPlacementGroup = object({
       enable = bool
     })
+    shares = list(object({
+      enable      = bool
+      name        = string
+      path        = string
+      size        = number
+      export      = string
+      description = string
+    }))
     storageTargets = list(object({
+      enable = bool
       node = object({
         name = string
         type = string
         ip   = string
       })
       volume = object({
-        name = string
-        type = string
-        node = string
-        path = string
-        assimilate = object({
-          enable = bool
-        })
+        name      = string
+        type      = string
+        path      = string
+        shareName = string
       })
+    }))
+    volumeGroups = list(object({
+      enable      = bool
+      name        = string
+      description = string
+      volumeNames = list(string)
     }))
   })
 }
@@ -439,7 +451,7 @@ resource azurerm_virtual_machine_data_disk_attachment hs_data {
   ]
 }
 
-resource azurerm_virtual_machine_extension hs_initialize {
+resource azurerm_virtual_machine_extension hs_node_initialize {
   for_each = {
     for node in concat(local.hsMetadataNodes, local.hsDataNodes) : node.machine.name => node
   }
@@ -452,16 +464,24 @@ resource azurerm_virtual_machine_extension hs_initialize {
   virtual_machine_id         = "${azurerm_resource_group.cache.id}/providers/Microsoft.Compute/virtualMachines/${each.value.machine.name}"
   protected_settings = jsonencode({
     script = base64encode(
-      templatefile("hs.sh", {
-        adminPassword  = each.value.machine.adminLogin.userPassword
-        adminHostName  = local.hsMetadataNodes[0].machine.name
-        storageTargets = jsonencode(var.hsCache.storageTargets)
+      templatefile("hs.node.sh", {
+        adminPassword = each.value.machine.adminLogin.userPassword
       })
     )
   })
   depends_on = [
     azurerm_virtual_machine_data_disk_attachment.hs_metadata,
     azurerm_virtual_machine_data_disk_attachment.hs_data
+  ]
+}
+
+resource terraform_data hs_cluster_initialize {
+  count = var.hsCache.enable ? 1 : 0
+  provisioner local-exec {
+    command = "az vm extension set --resource-group ${azurerm_resource_group.cache.name} --vm-name ${local.hsMetadataNodes[0].machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("hs.cluster.sh", {shares = var.hsCache.shares, storageTargets = var.hsCache.storageTargets, volumeGroups = var.hsCache.volumeGroups}))})}"
+  }
+  depends_on = [
+    azurerm_virtual_machine_extension.hs_node_initialize
   ]
 }
 
