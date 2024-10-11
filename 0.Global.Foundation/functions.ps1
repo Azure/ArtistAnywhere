@@ -26,46 +26,64 @@ if ($buildConfigEncoded -ne "") {
 }
 
 function DownloadFile ($fileName, $fileLink, $tenantId, $clientId, $clientSecret, $storageVersion) {
-  Add-Type -AssemblyName System.Net.Http
-  $httpClient = New-Object System.Net.Http.HttpClient
-  if ($tenantId -ne $null) {
-    $body = @{
-      resource      = "https://storage.azure.com"
-      grant_type    = "client_credentials"
-      client_id     = $clientId
-      client_secret = $clientSecret
+  try {
+    Add-Type -AssemblyName System.Net.Http
+    $httpClient = New-Object System.Net.Http.HttpClient
+    if ($tenantId -ne $null) {
+      $body = @{
+        resource      = "https://storage.azure.com"
+        grant_type    = "client_credentials"
+        client_id     = $clientId
+        client_secret = $clientSecret
+      }
+      $authToken = (Invoke-WebRequest -UseBasicParsing -Uri "https://login.microsoftonline.com/$tenantId/oauth2/token" -Body $body -Method Post).Content
+      $accessToken = (ConvertFrom-Json -InputObject $authToken).access_token
+      $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
+      $httpClient.DefaultRequestHeaders.Add("x-ms-version", $storageVersion)
     }
-    $authToken = (Invoke-WebRequest -UseBasicParsing -Uri "https://login.microsoftonline.com/$tenantId/oauth2/token" -Body $body -Method Post).Content
-  	$accessToken = (ConvertFrom-Json -InputObject $authToken).access_token
-    $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
-    $httpClient.DefaultRequestHeaders.Add("x-ms-version", $storageVersion)
-  }
-  $httpResponse = $httpClient.GetAsync($fileLink).Result
-  if ($httpResponse.IsSuccessStatusCode) {
-    $stream = $httpResponse.Content.ReadAsStreamAsync().Result
-    $filePath = Join-Path -Path $pwd.Path -ChildPath $fileName
-    $fileStream = [System.IO.File]::Create($filePath)
-    $stream.CopyTo($fileStream)
-    $fileStream.Close()
-  } else {
-    Write-Error "Failed to download $fileLink ($($httpResponse.StatusCode))"
+    $httpResponse = $httpClient.GetAsync($fileLink).Result
+    if ($httpResponse.IsSuccessStatusCode) {
+      $stream = $httpResponse.Content.ReadAsStreamAsync().Result
+      $filePath = Join-Path -Path $pwd.Path -ChildPath $fileName
+      $fileStream = [System.IO.File]::Create($filePath)
+      $stream.CopyTo($fileStream)
+      $fileStream.Close()
+    } else {
+      throw [Microsoft.PowerShell.Commands.HttpResponseException]::new($httpResponse.ReasonPhrase, $httpResponse)
+    }
+  } catch {
+    Write-Error "DownloadFile Error: $_.Exception.Message"
+    Write-Error "FileName: $fileName"
+    Write-Error "FileLink: $fileLink"
+    Write-Error "TenantId: $tenantId"
+    Write-Error "ClientId: $clientId"
+    Write-Error "ClientSecret: $clientSecret"
+    Write-Error "StorageVersion: $storageVersion"
+    throw
   }
 }
 
 function RunProcess ($filePath, $argumentList, $logFile) {
-  if ($logFile) {
-    if ($argumentList) {
-      Start-Process -FilePath $filePath -ArgumentList $argumentList -Wait -RedirectStandardOutput $logFile-out -RedirectStandardError $logFile-err
+  try {
+    if ($logFile) {
+      if ($argumentList) {
+        Start-Process -FilePath $filePath -ArgumentList $argumentList -Wait -RedirectStandardOutput $logFile-out -RedirectStandardError $logFile-err
+      } else {
+        Start-Process -FilePath $filePath -Wait -RedirectStandardOutput $logFile-out -RedirectStandardError $logFile-err
+      }
+      Get-Content -Path $logFile-err | Write-Host
     } else {
-      Start-Process -FilePath $filePath -Wait -RedirectStandardOutput $logFile-out -RedirectStandardError $logFile-err
+      if ($argumentList) {
+        Start-Process -FilePath $filePath -ArgumentList $argumentList -Wait
+      } else {
+        Start-Process -FilePath $filePath -Wait
+      }
     }
-    Get-Content -Path $logFile-err | Write-Host
-  } else {
-    if ($argumentList) {
-      Start-Process -FilePath $filePath -ArgumentList $argumentList -Wait
-    } else {
-      Start-Process -FilePath $filePath -Wait
-    }
+  } catch {
+    Write-Error "RunProcess Error: $_.Exception.Message"
+    Write-Error "FilePath: $filePath"
+    Write-Error "ArgumentList: $argumentList"
+    throw
   }
 }
 
