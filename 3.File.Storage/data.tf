@@ -1,10 +1,16 @@
 variable dataLoad {
   type = object({
-    enable = bool
+    enable     = bool
+    remoteMode = bool
     source = object({
       accountName   = string
       containerName = string
+      blobs = list(object({
+        enable = bool
+        name   = string
+      }))
     })
+    destination = string
     machine = object({
       name = string
       size = string
@@ -65,7 +71,7 @@ locals {
 }
 
 resource azurerm_resource_group storage_data_load {
-  count    = local.dataLoad.enable ? 1 : 0
+  count    = var.dataLoad.enable && var.dataLoad.remoteMode ? 1 : 0
   name     = "${var.resourceGroupName}.DataLoad"
   location = local.regionName
   tags = {
@@ -78,8 +84,8 @@ resource azurerm_resource_group storage_data_load {
 #########################################################################
 
 resource azurerm_network_interface storage_data_load {
-  count               = local.dataLoad.enable ? 1 : 0
-  name                = local.dataLoad.machine.name
+  count               = var.dataLoad.enable && var.dataLoad.remoteMode ? 1 : 0
+  name                = var.dataLoad.machine.name
   resource_group_name = azurerm_resource_group.storage_data_load[0].name
   location            = azurerm_resource_group.storage_data_load[0].location
   ip_configuration {
@@ -87,18 +93,18 @@ resource azurerm_network_interface storage_data_load {
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = data.azurerm_subnet.storage_region.id
   }
-  accelerated_networking_enabled = local.dataLoad.network.acceleration.enable
+  accelerated_networking_enabled = var.dataLoad.network.acceleration.enable
   depends_on = [
     azurerm_storage_container.core
   ]
 }
 
  resource azurerm_linux_virtual_machine storage_data_load {
-  count                           = local.dataLoad.enable ? 1 : 0
-  name                            = local.dataLoad.machine.name
+  count                           = var.dataLoad.enable && var.dataLoad.remoteMode ? 1 : 0
+  name                            = var.dataLoad.machine.name
   resource_group_name             = azurerm_resource_group.storage_data_load[0].name
   location                        = azurerm_resource_group.storage_data_load[0].location
-  size                            = local.dataLoad.machine.size
+  size                            = var.dataLoad.machine.size
   source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.dataLoad.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${local.dataLoad.machine.image.galleryName}/images/${local.dataLoad.machine.image.definitionName}/versions/${local.dataLoad.machine.image.versionId}"
   admin_username                  = local.dataLoad.machine.adminLogin.userName
   admin_password                  = local.dataLoad.machine.adminLogin.userPassword
@@ -113,9 +119,9 @@ resource azurerm_network_interface storage_data_load {
     azurerm_network_interface.storage_data_load[0].id
   ]
   os_disk {
-    storage_account_type = local.dataLoad.machine.osDisk.storageType
-    caching              = local.dataLoad.machine.osDisk.cachingType
-    disk_size_gb         = local.dataLoad.machine.osDisk.sizeGB > 0 ? local.dataLoad.machine.osDisk.sizeGB : null
+    storage_account_type = var.dataLoad.machine.osDisk.storageType
+    caching              = var.dataLoad.machine.osDisk.cachingType
+    disk_size_gb         = var.dataLoad.machine.osDisk.sizeGB > 0 ? var.dataLoad.machine.osDisk.sizeGB : null
   }
   dynamic plan {
     for_each = local.dataLoad.machine.image.plan.publisher != "" ? [1] : []
@@ -135,7 +141,7 @@ resource azurerm_network_interface storage_data_load {
 }
 
 resource azurerm_virtual_machine_extension storage_data_load {
-  count                      = local.dataLoad.enable ? 1 : 0
+  count                      = var.dataLoad.enable && var.dataLoad.remoteMode ? 1 : 0
   name                       = "DataLoad"
   type                       = "CustomScript"
   publisher                  = "Microsoft.Azure.Extensions"
@@ -146,9 +152,21 @@ resource azurerm_virtual_machine_extension storage_data_load {
   protected_settings = jsonencode({
     script = base64encode(
       templatefile("data.sh", {
-        fileSystem     = local.fileSystemLinux
-        dataLoadSource = local.dataLoad.source
+        dataLoadSource      = var.dataLoad.source
+        dataLoadDestination = var.dataLoad.destination
       })
     )
   })
+  timeouts {
+    create = "90m"
+  }
+}
+
+resource terraform_data storage {
+  for_each = {
+    for blob in var.dataLoad.source.blobs : blob.name => blob if var.dataLoad.enable && !var.dataLoad.remoteMode && blob.enable
+  }
+  provisioner local-exec {
+    command = "az storage copy --source-account-name ${var.dataLoad.source.accountName} --source-container ${var.dataLoad.source.containerName} --source-blob ${each.value.name} --destination ${var.dataLoad.destination} --recursive"
+  }
 }

@@ -6,7 +6,7 @@ subscriptionId = "" # Set to your Azure subscription id
 
 vpnGateway = {
   name       = "Gateway-VPN"
-  tier       = "VpnGw2"
+  tier       = "VpnGw2AZ" # https://learn.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-about-vpngateways#gwsku
   type       = "RouteBased"
   generation = "Generation2"
   sharedKey  = ""

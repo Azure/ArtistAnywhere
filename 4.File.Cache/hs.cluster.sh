@@ -1,11 +1,10 @@
 #!/bin/bash -x
 
 while true; do
-  hscli cluster-view
-  if [ $? -eq 0 ]; then
+  if hscli cluster-view | grep -q "Metadata servers:"; then
     break
   fi
-  sleep 60s
+  sleep 1m
 done
 
 shares='${jsonencode(shares)}'
@@ -16,8 +15,7 @@ while read share; do
     path="$(echo $share | jq -r .path)"
     size="$(echo $share | jq -r .size)"
     export="$(echo $share | jq -r .export)"
-    description="$(echo $share | jq -r .description)"
-    hscli share-create --name "$name" --path "$path" --size "$size" --export-option "$export" --description "$description"
+    hscli share-create --name "$name" --path "$path" --size "$size" --export-option "$export"
   fi
 done < <(echo $shares | jq -c .[])
 
@@ -43,7 +41,6 @@ while read volumeGroup; do
   enable=$(echo $volumeGroup | jq -r .enable)
   if [ $enable == true ]; then
     name="$(echo $volumeGroup | jq -r .name)"
-    description="$(echo $volumeGroup | jq -r .description)"
     expressions=""
     while read volumeName; do
       if [ "$expressions" == "" ]; then
@@ -52,6 +49,6 @@ while read volumeGroup; do
         expressions="$expressions,volume:$volumeName"
       fi
     done < <(echo $volumeGroup | jq -cr .volumeNames[])
-    hscli volume-group-create --name "$name" --description "$description" --expressions "$expressions"
+    hscli volume-group-create --name "$name" --expressions "$expressions"
   fi
 done < <(echo $volumeGroups | jq -c .[])

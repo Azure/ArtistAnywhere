@@ -9,6 +9,13 @@ hsCache = {
   version    = "24.06.19"
   namePrefix = "xstudio"
   domainName = "azure.studio"
+  activeDirectory = {
+    enable   = false
+    servers  = "WinJobScheduler"
+    orgUnit  = ""
+    username = ""
+    password = ""
+  }
   metadata = { # Anvil
     machine = {
       namePrefix = "-anvil"
@@ -78,20 +85,18 @@ hsCache = {
   }
   shares = [
     {
-      enable      = true
-      name        = "ro"
-      path        = "/ro"
-      size        = 0
-      export      = "*,ro,no-root-squash"
-      description = ""
+      enable = true
+      name   = "ro"
+      path   = "/ro"
+      size   = 0
+      export = "*,ro,no-root-squash"
     },
     {
-      enable      = false
-      name        = "rw"
-      path        = "/rw"
-      size        = 0
-      export      = "*,rw,no-root-squash"
-      description = ""
+      enable = false
+      name   = "rw"
+      path   = "/rw"
+      size   = 0
+      export = "*,rw,no-root-squash"
     }
   ]
   storageTargets = [
@@ -126,9 +131,8 @@ hsCache = {
   ]
   volumeGroups = [
     {
-      enable      = true
-      name        = "anf"
-      description = "Azure NetApp Files (ANF)"
+      enable = true
+      name   = "anf"
       volumeNames = [
         "anf-volume1",
         "anf-volume2"

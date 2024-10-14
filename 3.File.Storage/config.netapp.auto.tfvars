@@ -14,16 +14,14 @@ netAppFiles = {
       enable  = true
       name    = "Pool1"
       tier    = "Premium"
-      sizeTiB = 2
-      qos = {
-        type = "Auto" # Auto, Manual
-      }
+      sizeTiB = 1
       volumes = [
         {
-          enable    = true
-          name      = "Volume1"
-          mountPath = "volume1"
-          sizeGiB   = 512
+          enable      = true
+          name        = "Volume1"
+          mountPath   = "volume1"
+          sizeGiB     = 512
+          permissions = 7777
           network = {
             features = "Standard"
             protocols = [
@@ -33,6 +31,7 @@ netAppFiles = {
           exportPolicies = [
             {
               ruleIndex  = 1
+              ownerMode  = "Restricted"
               readOnly   = false
               readWrite  = true
               rootAccess = true
@@ -46,10 +45,11 @@ netAppFiles = {
           ]
         },
         {
-          enable    = true
-          name      = "Volume2"
-          mountPath = "volume2"
-          sizeGiB   = 512
+          enable      = true
+          name        = "Volume2"
+          mountPath   = "volume2"
+          sizeGiB     = 512
+          permissions = 7777
           network = {
             features = "Standard"
             protocols = [
@@ -59,6 +59,7 @@ netAppFiles = {
           exportPolicies = [
             {
               ruleIndex  = 1
+              ownerMode  = "Restricted"
               readOnly   = false
               readWrite  = true
               rootAccess = true

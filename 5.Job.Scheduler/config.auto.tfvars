@@ -60,6 +60,15 @@ virtualMachines = [
         disable = true
       }
     }
+    autoScale = {
+      enable                   = false
+      resourceGroupName        = "ArtistAnywhere.Farm"
+      computeFarmName          = "LnxFarmC"
+      computeFarmNodeCountMax  = 100
+      jobWaitThresholdSeconds  = 300
+      workerIdleDeleteSeconds  = 600
+      detectionIntervalSeconds = 60
+    }
   },
   {
     enable = false
@@ -115,6 +124,15 @@ virtualMachines = [
       passwordAuth = {
         disable = false
       }
+    }
+    autoScale = {
+      enable                   = false
+      resourceGroupName        = "ArtistAnywhere.Farm"
+      computeFarmName          = "WinFarmC"
+      computeFarmNodeCountMax  = 100
+      jobWaitThresholdSeconds  = 300
+      workerIdleDeleteSeconds  = 600
+      detectionIntervalSeconds = 60
     }
   }
 ]

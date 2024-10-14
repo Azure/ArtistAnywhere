@@ -1,3 +1,7 @@
+# 2024-07-01
+az provider show --namespace Microsoft.NetApp --query "resourceTypes[?resourceType=='netAppAccounts/capacityPools'].apiVersions[]"
+az provider show --namespace Microsoft.NetApp --query "resourceTypes[?resourceType=='netAppAccounts/capacityPools/volumes'].apiVersions[]"
+
 # 2023-12-01
 az provider show --namespace Microsoft.Web --query "resourceTypes[?resourceType=='serverFarms'].apiVersions[]"
 az provider show --namespace Microsoft.Web --query "resourceTypes[?resourceType=='sites'].apiVersions[]"

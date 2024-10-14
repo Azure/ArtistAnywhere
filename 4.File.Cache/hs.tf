@@ -8,6 +8,13 @@ variable hsCache {
     version    = string
     namePrefix = string
     domainName = string
+    activeDirectory = object({
+      enable   = bool
+      servers  = string
+      orgUnit  = string
+      username = string
+      password = string
+    })
     metadata = object({
       machine = object({
         namePrefix = string
@@ -76,12 +83,11 @@ variable hsCache {
       enable = bool
     })
     shares = list(object({
-      enable      = bool
-      name        = string
-      path        = string
-      size        = number
-      export      = string
-      description = string
+      enable = bool
+      name   = string
+      path   = string
+      size   = number
+      export = string
     }))
     storageTargets = list(object({
       enable = bool
@@ -100,7 +106,6 @@ variable hsCache {
     volumeGroups = list(object({
       enable      = bool
       name        = string
-      description = string
       volumeNames = list(string)
     }))
   })
@@ -113,6 +118,10 @@ locals {
     name      = "Hammerspace_5_0"
     version   = var.hsCache.version
   }
+  hsActiveDirectory = merge(var.hsCache.activeDirectory, {
+    username = var.hsCache.activeDirectory.username != "" ? var.hsCache.activeDirectory.username : data.azurerm_key_vault_secret.admin_username.value
+    password = var.hsCache.activeDirectory.password != "" ? var.hsCache.activeDirectory.password : data.azurerm_key_vault_secret.admin_password.value
+  })
   hsCacheSubnetSize  = "/${reverse(split("/", data.azurerm_subnet.cache.address_prefixes[0]))[0]}"
   hsHighAvailability = var.hsCache.enable && length(local.hsMetadataNodes) > 1 ? true : false
   hsMetadataNodes = [
@@ -465,7 +474,8 @@ resource azurerm_virtual_machine_extension hs_node_initialize {
   protected_settings = jsonencode({
     script = base64encode(
       templatefile("hs.node.sh", {
-        adminPassword = each.value.machine.adminLogin.userPassword
+        adminPassword   = each.value.machine.adminLogin.userPassword
+        activeDirectory = local.hsActiveDirectory
       })
     )
   })
