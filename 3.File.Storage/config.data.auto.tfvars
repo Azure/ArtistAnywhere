@@ -1,6 +1,5 @@
 dataLoad = {
-  enable     = false
-  remoteMode = true
+  enable = false
   source = {
     accountName   = "xstudio"
     containerName = "storage"

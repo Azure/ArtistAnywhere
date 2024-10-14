@@ -1,7 +1,6 @@
 variable dataLoad {
   type = object({
-    enable     = bool
-    remoteMode = bool
+    enable = bool
     source = object({
       accountName   = string
       containerName = string
@@ -71,7 +70,7 @@ locals {
 }
 
 resource azurerm_resource_group storage_data_load {
-  count    = var.dataLoad.enable && var.dataLoad.remoteMode ? 1 : 0
+  count    = var.dataLoad.enable ? 1 : 0
   name     = "${var.resourceGroupName}.DataLoad"
   location = local.regionName
   tags = {
@@ -84,7 +83,7 @@ resource azurerm_resource_group storage_data_load {
 #########################################################################
 
 resource azurerm_network_interface storage_data_load {
-  count               = var.dataLoad.enable && var.dataLoad.remoteMode ? 1 : 0
+  count               = var.dataLoad.enable ? 1 : 0
   name                = var.dataLoad.machine.name
   resource_group_name = azurerm_resource_group.storage_data_load[0].name
   location            = azurerm_resource_group.storage_data_load[0].location
@@ -100,7 +99,7 @@ resource azurerm_network_interface storage_data_load {
 }
 
  resource azurerm_linux_virtual_machine storage_data_load {
-  count                           = var.dataLoad.enable && var.dataLoad.remoteMode ? 1 : 0
+  count                           = var.dataLoad.enable ? 1 : 0
   name                            = var.dataLoad.machine.name
   resource_group_name             = azurerm_resource_group.storage_data_load[0].name
   location                        = azurerm_resource_group.storage_data_load[0].location
@@ -141,7 +140,7 @@ resource azurerm_network_interface storage_data_load {
 }
 
 resource azurerm_virtual_machine_extension storage_data_load {
-  count                      = var.dataLoad.enable && var.dataLoad.remoteMode ? 1 : 0
+  count                      = var.dataLoad.enable ? 1 : 0
   name                       = "DataLoad"
   type                       = "CustomScript"
   publisher                  = "Microsoft.Azure.Extensions"
@@ -159,14 +158,5 @@ resource azurerm_virtual_machine_extension storage_data_load {
   })
   timeouts {
     create = "90m"
-  }
-}
-
-resource terraform_data storage {
-  for_each = {
-    for blob in var.dataLoad.source.blobs : blob.name => blob if var.dataLoad.enable && !var.dataLoad.remoteMode && blob.enable
-  }
-  provisioner local-exec {
-    command = "az storage copy --source-account-name ${var.dataLoad.source.accountName} --source-container ${var.dataLoad.source.containerName} --source-blob ${each.value.name} --destination ${var.dataLoad.destination} --recursive"
   }
 }
