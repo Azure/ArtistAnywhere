@@ -54,11 +54,11 @@ The following Disney Moana Island scene was rendered on Azure via the [Physicall
 
 To render the Disney Moana Island scene on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** or **Windows** artist workstation.
 
-```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt -arguments "--outfile /mnt/storage/pbrt/moana/island-v4.png /mnt/storage/pbrt/moana/island/pbrt-v4/island.pbrt"```
+```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt -arguments "--outfile /mnt/storage/island-v4.png /mnt/storage/island/pbrt-v4/island.pbrt"```
 
 To render the Disney Moana Island scene on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** or **Windows** artist workstation.
 
-```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt.exe -arguments "--outfile X:\pbrt\moana\island-v4.png X:\pbrt\moana\island\pbrt-v4\island.pbrt"```
+```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt.exe -arguments "--outfile X:\island-v4.png X:\island\pbrt-v4\island.pbrt"```
 
 ### [Blender Splash Screen](https://www.blender.org/download/demo-files/#splash)
 
