@@ -100,7 +100,6 @@ resource time_sleep image_builder_rbac {
   create_duration = "30s"
   depends_on = [
     azurerm_role_assignment.managed_identity_operator,
-    azurerm_role_assignment.virtual_machine_contributor,
     azurerm_role_assignment.resource_group_contributor
   ]
 }

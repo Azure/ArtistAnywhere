@@ -13,3 +13,9 @@ resource azurerm_role_assignment virtual_machine_contributor {
   principal_id         = azurerm_user_assigned_identity.studio.principal_id
   scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}"
 }
+
+resource azurerm_role_assignment private_dns_zone_contributor {
+  role_definition_name = "Private DNS Zone Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/networking#private-dns-zone-contributor
+  principal_id         = azurerm_user_assigned_identity.studio.principal_id
+  scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}"
+}

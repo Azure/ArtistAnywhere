@@ -193,22 +193,6 @@ resource azurerm_resource_group weka {
   }
 }
 
-resource azurerm_role_assignment weka_private_dns_zone_contributor {
-  count                = var.weka.enable ? 1 : 0
-  role_definition_name = "Private DNS Zone Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/networking#private-dns-zone-contributor
-  principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-  scope                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${data.azurerm_virtual_network.studio_region.resource_group_name}"
-}
-
-resource time_sleep weka_rbac {
-  count           = var.weka.enable ? 1 : 0
-  create_duration = "30s"
-  depends_on = [
-    azurerm_role_assignment.weka_virtual_machine_contributor,
-    azurerm_role_assignment.weka_private_dns_zone_contributor
-  ]
-}
-
 resource azurerm_proximity_placement_group weka {
   count               = var.weka.enable ? 1 : 0
   name                = var.weka.name.resource
@@ -339,9 +323,6 @@ resource azurerm_linux_virtual_machine_scale_set weka {
       public_key = local.weka.machine.adminLogin.sshKeyPublic
     }
   }
-  depends_on = [
-    time_sleep.weka_rbac
-  ]
 }
 
 resource azurerm_private_dns_a_record weka_cluster {
