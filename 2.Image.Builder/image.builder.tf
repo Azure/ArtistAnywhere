@@ -43,7 +43,6 @@ variable imageCustomize {
       })
     })
     script = object({
-      core = bool
       jobScheduler = object({
         deadline = bool
         lsf      = bool
@@ -89,12 +88,6 @@ resource azurerm_role_assignment managed_identity_operator {
   role_definition_name = "Managed Identity Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/identity#managed-identity-operator
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_user_assigned_identity.studio.id
-}
-
-resource azurerm_role_assignment virtual_machine_contributor {
-  role_definition_name = "Virtual Machine Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/compute#virtual-machine-contributor
-  principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-  scope                = data.azurerm_resource_group.network.id
 }
 
 resource azurerm_role_assignment resource_group_contributor {
@@ -174,6 +167,11 @@ resource azapi_resource linux {
           },
           {
             type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Linux/customize.job.scheduler.sh"
+            destination = "/tmp/customize.job.scheduler.sh"
+          },
+          {
+            type        = "File"
             sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Linux/customize.job.scheduler.deadline.sh"
             destination = "/tmp/customize.job.scheduler.deadline.sh"
           },
@@ -214,9 +212,8 @@ resource azapi_resource linux {
           {
             type = "Shell"
             inline = [
-              "if [ ${var.imageCustomize.script.core} == true ]; then",
-              "  cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))} /bin/bash",
-              "fi",
+              "cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))} /bin/bash",
+              "cat /tmp/customize.job.scheduler.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))} /bin/bash",
               "if [ ${var.imageCustomize.script.jobScheduler.deadline} == true ]; then",
               "  cat /tmp/customize.job.scheduler.deadline.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))} /bin/bash",
               "fi",
@@ -322,6 +319,11 @@ resource azapi_resource windows {
           },
           {
             type        = "File"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Windows/customize.job.scheduler.ps1"
+            destination = "C:\\AzureData\\customize.job.scheduler.ps1"
+          },
+          {
+            type        = "File"
             sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Windows/customize.job.scheduler.deadline.ps1"
             destination = "C:\\AzureData\\customize.job.scheduler.deadline.ps1"
           },
@@ -367,9 +369,8 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "if ('${var.imageCustomize.script.core}' -eq $true) {",
-              "  C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
-              "}",
+              "C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
+              "C:\\AzureData\\customize.job.scheduler.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
               "if ('${var.imageCustomize.script.jobScheduler.deadline}' -eq $true) {",
               "  C:\\AzureData\\customize.job.scheduler.deadline.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = local.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
               "}",

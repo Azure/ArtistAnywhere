@@ -2,7 +2,7 @@
 
 source /tmp/functions.sh
 
-echo "Customize (Start): Job Processor"
+echo "Customize (Start): Job Processor (Render)"
 
 if [[ $jobProcessors == *PBRT* ]]; then
   echo "Customize (Start): PBRT"
@@ -49,4 +49,4 @@ if [ "$binPaths" != "" ]; then
   echo 'PATH=$PATH'$binPaths >> $aaaProfile
 fi
 
-echo "Customize (End): Job Processor"
+echo "Customize (End): Job Processor (Render)"

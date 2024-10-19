@@ -439,7 +439,6 @@ imageCustomize = {
     }
   }
   script = { # Enables or disables image customization build scripts
-    core = true
     jobScheduler = {
       deadline = true
       lsf      = true

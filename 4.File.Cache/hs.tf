@@ -82,6 +82,9 @@ variable hsCache {
     proximityPlacementGroup = object({
       enable = bool
     })
+    privateDnsTier = object({
+      metadata = bool
+    })
     shares = list(object({
       enable = bool
       name   = string
@@ -561,7 +564,7 @@ resource azurerm_private_dns_a_record cache_hs {
   name                = var.dnsRecord.name
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = var.existingNetwork.enable ? var.existingNetwork.privateDns.zoneName : data.azurerm_private_dns_zone.studio.name
-  records             = [local.hsHighAvailability ? azurerm_lb.hs_metadata[0].frontend_ip_configuration[0].private_ip_address : azurerm_linux_virtual_machine.hs_metadata[local.hsMetadataNodes[0].machine.name].private_ip_address]
+  records             = var.hsCache.privateDnsTier.metadata ? [local.hsHighAvailability ? azurerm_lb.hs_metadata[0].frontend_ip_configuration[0].private_ip_address : azurerm_linux_virtual_machine.hs_metadata[local.hsMetadataNodes[0].machine.name].private_ip_address] : [for vm in azurerm_linux_virtual_machine.hs_data : vm.private_ip_address]
   ttl                 = var.dnsRecord.ttlSeconds
 }
 

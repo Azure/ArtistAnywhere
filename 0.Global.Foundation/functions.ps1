@@ -92,12 +92,14 @@ function FileExists ($filePath) {
 }
 
 function SetFileSystem ($fileSystemConfig) {
-  foreach ($fileSystem in $fileSystemConfig) {
-    if ($fileSystem.enable) {
-      SetFileSystemMount $fileSystem.mount
+  if ($fileSystemConfig -ne $null) {
+    foreach ($fileSystem in $fileSystemConfig) {
+      if ($fileSystem.enable) {
+        SetFileSystemMount $fileSystem.mount
+      }
     }
+    RegisterFileSystemMounts
   }
-  RegisterFileSystemMounts
 }
 
 function SetFileSystemMount ($fileSystemMount) {

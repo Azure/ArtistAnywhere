@@ -94,8 +94,8 @@ locals {
   computeFleets = [
     for computeFleet in var.computeFleets : merge(computeFleet, {
       resourceLocation = {
-        regionName       = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
-        extendedZoneName = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
+        regionName       = computeFleet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
+        extendedZoneName = computeFleet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.name : null
       }
       machine = merge(computeFleet.machine, {
         image = merge(computeFleet.machine.image, {
@@ -127,7 +127,7 @@ resource azapi_resource fleet {
     for computeFleet in local.computeFleets : computeFleet.name => computeFleet
   }
   name      = each.value.name
-  type      = "Microsoft.AzureFleet/fleets@2024-05-01-preview"
+  type      = "Microsoft.AzureFleet/fleets@2024-11-01"
   parent_id = azurerm_resource_group.farm.id
   location  = azurerm_resource_group.farm.location
   identity {
@@ -166,7 +166,7 @@ resource azapi_resource fleet {
             adminPassword      = each.value.machine.adminLogin.userPassword
           }
           networkProfile = {
-            networkApiVersion = "2024-03-01"
+            networkApiVersion = "2024-05-01"
             networkInterfaceConfigurations = [
               {
                 name = "nic"

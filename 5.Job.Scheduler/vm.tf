@@ -42,6 +42,13 @@ variable virtualMachines {
         parameters = object({
           autoScale = object({
             enable = bool
+            resourceGroupName        = string
+            jobSchedulerName         = string
+            computeFarmName          = string
+            computeFarmNodeCountMax  = number
+            workerIdleDeleteSeconds  = number
+            jobWaitThresholdSeconds  = number
+            detectionIntervalSeconds = number
           })
         })
       })
@@ -58,15 +65,6 @@ variable virtualMachines {
         disable = bool
       })
     })
-    autoScale = object({
-      enable                   = bool
-      resourceGroupName        = string
-      computeFarmName          = string
-      computeFarmNodeCountMax  = number
-      jobWaitThresholdSeconds  = number
-      workerIdleDeleteSeconds  = number
-      detectionIntervalSeconds = number
-    })
   }))
 }
 
@@ -74,8 +72,8 @@ locals {
   virtualMachines = [
     for virtualMachine in var.virtualMachines : merge(virtualMachine, {
       resourceLocation = {
-        regionName       = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
-        extendedZoneName = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
+        regionName       = virtualMachine.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
+        extendedZoneName = virtualMachine.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.name : null
       }
       image = merge(virtualMachine.image, {
         plan = {

@@ -63,7 +63,7 @@ resource azurerm_app_configuration studio {
 resource azurerm_app_configuration_key nvidia_cuda_version {
   configuration_store_id = local.appConfigStoreId
   key                    = module.global.appConfig.key.nvidiaCUDAVersion
-  value                  = "12.6.0"
+  value                  = "12.6.2"
   depends_on = [
     time_sleep.app_configuration_rbac
   ]
@@ -126,7 +126,7 @@ resource azurerm_app_configuration_key job_processor_pbrt_version {
 resource azurerm_app_configuration_key job_processor_blender_version {
   configuration_store_id = local.appConfigStoreId
   key                    = module.global.appConfig.key.jobProcessorBlenderVersion
-  value                  = "4.2.2"
+  value                  = "4.2.3"
   depends_on = [
     time_sleep.app_configuration_rbac
   ]

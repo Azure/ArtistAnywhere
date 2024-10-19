@@ -43,7 +43,14 @@ virtualMachines = [
         fileName = "initialize.sh"
         parameters = {
           autoScale = {
-            enable = false
+            enable                   = true
+            resourceGroupName        = "ArtistAnywhere.Farm"
+            jobSchedulerName         = "Deadline"
+            computeFarmName          = "LnxFarmC"
+            computeFarmNodeCountMax  = 100
+            workerIdleDeleteSeconds  = 300
+            jobWaitThresholdSeconds  = 60
+            detectionIntervalSeconds = 30
           }
         }
       }
@@ -59,15 +66,6 @@ virtualMachines = [
       passwordAuth = {
         disable = true
       }
-    }
-    autoScale = {
-      enable                   = false
-      resourceGroupName        = "ArtistAnywhere.Farm"
-      computeFarmName          = "LnxFarmC"
-      computeFarmNodeCountMax  = 100
-      jobWaitThresholdSeconds  = 300
-      workerIdleDeleteSeconds  = 600
-      detectionIntervalSeconds = 60
     }
   },
   {
@@ -108,7 +106,14 @@ virtualMachines = [
         fileName = "initialize.ps1"
         parameters = {
           autoScale = {
-            enable = false
+            enable                   = true
+            resourceGroupName        = "ArtistAnywhere.Farm"
+            jobSchedulerName         = "Deadline"
+            computeFarmName          = "WinFarmC"
+            computeFarmNodeCountMax  = 100
+            workerIdleDeleteSeconds  = 300
+            jobWaitThresholdSeconds  = 60
+            detectionIntervalSeconds = 30
           }
         }
       }
@@ -124,15 +129,6 @@ virtualMachines = [
       passwordAuth = {
         disable = false
       }
-    }
-    autoScale = {
-      enable                   = false
-      resourceGroupName        = "ArtistAnywhere.Farm"
-      computeFarmName          = "WinFarmC"
-      computeFarmNodeCountMax  = 100
-      jobWaitThresholdSeconds  = 300
-      workerIdleDeleteSeconds  = 600
-      detectionIntervalSeconds = 60
     }
   }
 ]

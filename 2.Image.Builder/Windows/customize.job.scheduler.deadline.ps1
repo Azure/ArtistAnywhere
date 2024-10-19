@@ -4,19 +4,7 @@ param (
 
 . C:\AzureData\functions.ps1
 
-Write-Host "Customize (Start): Job Scheduler"
-
-if ($machineType -ne "JobScheduler") {
-  Write-Host "Customize (Start): NFS Client"
-  $fileType = "nfs-client"
-  dism /Online /NoRestart /LogPath:"$binDirectory\$fileType" /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All
-  Write-Host "Customize (End): NFS Client"
-
-  Write-Host "Customize (Start): AD Tools"
-  $fileType = "ad-tools" # RSAT: Active Directory Domain Services and Lightweight Directory Services Tools
-  dism /Online /NoRestart /LogPath:"$binDirectory\$fileType" /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
-  Write-Host "Customize (End): AD Tools"
-}
+Write-Host "Customize (Start): Job Scheduler (Deadline)"
 
 if ($machineType -ne "Storage") {
   $version = $buildConfig.version.jobSchedulerDeadline
@@ -88,7 +76,7 @@ if ($machineType -ne "Storage") {
   $scriptShell = New-Object -ComObject WScript.Shell
   $shortcut = $scriptShell.CreateShortcut($shortcutPath)
   $shortcut.WorkingDirectory = $binPathJobScheduler
-  $shortcut.TargetPath = "$binPathJobSchedulerr\deadlinemonitor.exe"
+  $shortcut.TargetPath = "$binPathJobScheduler\deadlinemonitor.exe"
   $shortcut.Save()
   Write-Host "Customize (End): Deadline Monitor"
 
@@ -100,4 +88,4 @@ if ($binPaths -ne "") {
   setx PATH "$env:PATH$binPaths" /m
 }
 
-Write-Host "Customize (End): Job Scheduler"
+Write-Host "Customize (End): Job Scheduler (Deadline)"

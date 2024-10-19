@@ -92,8 +92,8 @@ locals {
   virtualMachineScaleSets = [
     for virtualMachineScaleSet in var.virtualMachineScaleSets : merge(virtualMachineScaleSet, {
       resourceLocation = {
-        regionName       = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
-        extendedZoneName = module.global.resourceLocation.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
+        regionName       = virtualMachineScaleSet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
+        extendedZoneName = virtualMachineScaleSet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.name : null
       }
       machine = merge(virtualMachineScaleSet.machine, {
         image = merge(virtualMachineScaleSet.machine.image, {

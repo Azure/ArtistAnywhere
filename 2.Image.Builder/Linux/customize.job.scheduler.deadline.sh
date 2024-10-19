@@ -2,7 +2,7 @@
 
 source /tmp/functions.sh
 
-echo "Customize (Start): Job Scheduler"
+echo "Customize (Start): Job Scheduler (Deadline)"
 
 if [ $machineType != Storage ]; then
   version=$(echo $buildConfig | jq -r .version.jobSchedulerDeadline)
@@ -108,4 +108,4 @@ if [ "$binPaths" != "" ]; then
   echo 'PATH=$PATH'$binPaths >> $aaaProfile
 fi
 
-echo "Customize (End): Job Scheduler"
+echo "Customize (End): Job Scheduler (Deadline)"

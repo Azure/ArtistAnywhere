@@ -26,7 +26,7 @@ hsCache = {
         userPassword = ""
         sshKeyPublic = ""
         passwordAuth = {
-          disable = true
+          disable = false
         }
       }
       osDisk = {
@@ -56,7 +56,7 @@ hsCache = {
         userPassword = ""
         sshKeyPublic = ""
         passwordAuth = {
-          disable = true
+          disable = false
         }
       }
       osDisk = {
@@ -81,22 +81,25 @@ hsCache = {
     }
   }
   proximityPlacementGroup = { # https://learn.microsoft.com/azure/virtual-machines/co-location
-    enable = true
+    enable = false
+  }
+  privateDnsTier = {
+    metadata = false
   }
   shares = [
     {
       enable = true
-      name   = "ro"
-      path   = "/ro"
+      name   = "volume1"
+      path   = "/volume1"
       size   = 0
       export = "*,ro,no-root-squash"
     },
     {
-      enable = false
-      name   = "rw"
-      path   = "/rw"
+      enable = true
+      name   = "volume2"
+      path   = "/volume2"
       size   = 0
-      export = "*,rw,no-root-squash"
+      export = "*,ro,no-root-squash"
     }
   ]
   storageTargets = [
@@ -111,7 +114,7 @@ hsCache = {
         name      = "anf-volume1"
         type      = "READ_ONLY"
         path      = "/volume1"
-        shareName = "ro"
+        shareName = "volume1"
       }
     },
     {
@@ -125,7 +128,7 @@ hsCache = {
         name      = "anf-volume2"
         type      = "READ_ONLY"
         path      = "/volume2"
-        shareName = "ro"
+        shareName = "volume2"
       }
     }
   ]

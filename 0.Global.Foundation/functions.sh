@@ -65,17 +65,19 @@ function SetFileSystem {
   fileSystemConfig="$1"
   firstMountOnly=$2
   continueMounts=true
-  for fileSystem in $(echo $fileSystemConfig | jq -r '.[] | @base64'); do
-    if [[ $(GetEncodedValue $fileSystem .enable) == true && $continueMounts == true ]]; then
-      SetFileSystemMount "$(GetEncodedValue $fileSystem .mount)"
-      if [ $firstMountOnly == true ]; then
-        continueMounts=false
-        break
+  if [ "$fileSystemConfig" != null ]; then
+    for fileSystem in $(echo $fileSystemConfig | jq -r '.[] | @base64'); do
+      if [[ $(GetEncodedValue $fileSystem .enable) == true && $continueMounts == true ]]; then
+        SetFileSystemMount "$(GetEncodedValue $fileSystem .mount)"
+        if [ $firstMountOnly == true ]; then
+          continueMounts=false
+          break
+        fi
       fi
-    fi
-  done
-  sudo systemctl daemon-reload
-  sudo mount -a
+    done
+    sudo systemctl daemon-reload
+    sudo mount -a
+  fi
 }
 
 function SetFileSystemMount {
