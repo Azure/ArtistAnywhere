@@ -11,7 +11,7 @@ hsCache = {
   domainName = "azure.studio"
   activeDirectory = {
     enable   = false
-    servers  = "WinJobScheduler"
+    realm    = "azure.studio"
     orgUnit  = ""
     username = ""
     password = ""
@@ -26,7 +26,7 @@ hsCache = {
         userPassword = ""
         sshKeyPublic = ""
         passwordAuth = {
-          disable = false
+          disable = true
         }
       }
       osDisk = {
@@ -56,7 +56,7 @@ hsCache = {
         userPassword = ""
         sshKeyPublic = ""
         passwordAuth = {
-          disable = false
+          disable = true
         }
       }
       osDisk = {

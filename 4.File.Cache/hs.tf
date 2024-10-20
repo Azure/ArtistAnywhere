@@ -10,7 +10,7 @@ variable hsCache {
     domainName = string
     activeDirectory = object({
       enable   = bool
-      servers  = string
+      realm    = string
       orgUnit  = string
       username = string
       password = string
@@ -463,7 +463,7 @@ resource azurerm_virtual_machine_data_disk_attachment hs_data {
   ]
 }
 
-resource azurerm_virtual_machine_extension hs_node_initialize {
+resource azurerm_virtual_machine_extension hs_node {
   for_each = {
     for node in concat(local.hsMetadataNodes, local.hsDataNodes) : node.machine.name => node
   }
@@ -477,8 +477,7 @@ resource azurerm_virtual_machine_extension hs_node_initialize {
   protected_settings = jsonencode({
     script = base64encode(
       templatefile("hs.node.sh", {
-        adminPassword   = each.value.machine.adminLogin.userPassword
-        activeDirectory = local.hsActiveDirectory
+        adminPassword = each.value.machine.adminLogin.userPassword
       })
     )
   })
@@ -491,10 +490,32 @@ resource azurerm_virtual_machine_extension hs_node_initialize {
 resource terraform_data hs_cluster_initialize {
   count = var.hsCache.enable ? 1 : 0
   provisioner local-exec {
-    command = "az vm extension set --resource-group ${azurerm_resource_group.cache.name} --vm-name ${local.hsMetadataNodes[0].machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("hs.cluster.sh", {shares = var.hsCache.shares, storageTargets = var.hsCache.storageTargets, volumeGroups = var.hsCache.volumeGroups}))})}"
+    command = "az vm extension set --resource-group ${azurerm_resource_group.cache.name} --vm-name ${local.hsMetadataNodes[0].machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("hs.cluster.init.sh", {}))})}"
   }
   depends_on = [
-    azurerm_virtual_machine_extension.hs_node_initialize
+    azurerm_virtual_machine_extension.hs_node
+  ]
+}
+
+resource terraform_data hs_cluster_node {
+  for_each = {
+    for node in concat(local.hsMetadataNodes, local.hsDataNodes) : node.machine.name => node
+  }
+  provisioner local-exec {
+    command = "az vm extension set --resource-group ${azurerm_resource_group.cache.name} --vm-name ${each.value.machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("hs.cluster.node.sh", {activeDirectory = local.hsActiveDirectory}))})}"
+  }
+  depends_on = [
+    terraform_data.hs_cluster_initialize
+  ]
+}
+
+resource terraform_data hs_cluster_data {
+  count = var.hsCache.enable ? 1 : 0
+  provisioner local-exec {
+    command = "az vm extension set --resource-group ${azurerm_resource_group.cache.name} --vm-name ${local.hsMetadataNodes[0].machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("hs.cluster.data.sh", {shares = var.hsCache.shares, storageTargets = var.hsCache.storageTargets, volumeGroups = var.hsCache.volumeGroups}))})}"
+  }
+  depends_on = [
+    terraform_data.hs_cluster_node
   ]
 }
 
