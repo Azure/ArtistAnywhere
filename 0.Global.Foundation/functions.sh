@@ -31,6 +31,12 @@ function DownloadFile {
   clientId=$4
   clientSecret=$5
   storageVersion=$6
+  echo "fileName=$fileName"
+  echo "fileLink=$fileLink"
+  echo "tenantId=$tenantId"
+  echo "clientId=$clientId"
+  echo "clientSecret=$clientSecret"
+  echo "storageVersion=$storageVersion"
   if [ "$tenantId" == "" ]; then
     curl -o $fileName -L $fileLink
   else
