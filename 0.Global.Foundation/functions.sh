@@ -31,10 +31,10 @@ fi
 function DownloadFile {
   fileName=$1
   fileLink=$2
-  tenantId=$3
-  clientId=$4
-  clientSecret=$5
-  storageVersion=$6
+  local tenantId=$3
+  local clientId=$4
+  local clientSecret=$5
+  local storageVersion=$6
   echo "fileName=$fileName"
   echo "fileLink=$fileLink"
   echo "tenantId=$tenantId"
