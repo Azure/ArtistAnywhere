@@ -29,8 +29,8 @@ if [ "$buildConfigEncoded" != "" ]; then
 fi
 
 function DownloadFile {
-  fileName=$1
-  fileLink=$2
+  local fileName=$1
+  local fileLink=$2
   local tenantId=$3
   local clientId=$4
   local clientSecret=$5
@@ -44,17 +44,17 @@ function DownloadFile {
   if [ "$tenantId" == "" ]; then
     curl -o $fileName -L $fileLink
   else
-    authToken=$(curl -d "resource=https://storage.azure.com" -d "grant_type=client_credentials" -d "client_id=$clientId" -d "client_secret=$clientSecret" https://login.microsoftonline.com/$tenantId/oauth2/token)
-    accessToken=$(echo $authToken | jq -r .access_token)
+    local authToken=$(curl -d "resource=https://storage.azure.com" -d "grant_type=client_credentials" -d "client_id=$clientId" -d "client_secret=$clientSecret" https://login.microsoftonline.com/$tenantId/oauth2/token)
+    local accessToken=$(echo $authToken | jq -r .access_token)
     curl -H "Authorization: Bearer $accessToken" -H "x-ms-version: $storageVersion" -o $fileName -L $fileLink
   fi
 }
 
 function RunProcess {
-  exitStatus=-1
-  retryCount=0
-  command="$1"
-  logFile=$2
+  local exitStatus=-1
+  local retryCount=0
+  local command="$1"
+  local logFile=$2
   while [[ $exitStatus && $retryCount -lt 3 ]]; do
     $command 1> $logFile.out 2> $logFile.err
     exitStatus=$?
@@ -72,9 +72,9 @@ function GetEncodedValue {
 }
 
 function SetFileSystem {
-  fileSystemConfig="$1"
-  firstMountOnly=$2
-  continueMounts=true
+  local fileSystemConfig="$1"
+  local firstMountOnly=$2
+  local continueMounts=true
   if [ "$fileSystemConfig" != null ]; then
     for fileSystem in $(echo $fileSystemConfig | jq -r '.[] | @base64'); do
       if [[ $(GetEncodedValue $fileSystem .enable) == true && $continueMounts == true ]]; then
@@ -91,11 +91,11 @@ function SetFileSystem {
 }
 
 function SetFileSystemMount {
-  fileSystemMount="$1"
-  mountType=$(echo $fileSystemMount | jq -r .type)
-  mountPath=$(echo $fileSystemMount | jq -r .path)
-  mountSource=$(echo $fileSystemMount | jq -r .source)
-  mountOptions=$(echo $fileSystemMount | jq -r .options)
+  local fileSystemMount="$1"
+  local mountType=$(echo $fileSystemMount | jq -r .type)
+  local mountPath=$(echo $fileSystemMount | jq -r .path)
+  local mountSource=$(echo $fileSystemMount | jq -r .source)
+  local mountOptions=$(echo $fileSystemMount | jq -r .options)
   if [ $(grep -c $mountPath /etc/fstab) ]; then
     sudo mkdir -p $mountPath
     echo "$mountSource $mountPath $mountType $mountOptions 0 0" | sudo tee -a /etc/fstab
