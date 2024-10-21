@@ -21,10 +21,6 @@ if [ "$buildConfigEncoded" != "" ]; then
   adminPassword=$(echo $buildConfig | jq -r .authCredential.adminPassword)
   serviceUsername=$(echo $buildConfig | jq -r .authCredential.serviceUsername)
   servicePassword=$(echo $buildConfig | jq -r .authCredential.servicePassword)
-  echo "tenantId=$tenantId"
-  echo "clientId=$clientId"
-  echo "clientSecret=$clientSecret"
-  echo "storageVersion=$storageVersion"
   echo "Customize (End): Image Build Parameters"
 fi
 
@@ -35,12 +31,6 @@ function DownloadFile {
   local clientId=$4
   local clientSecret=$5
   local storageVersion=$6
-  echo "fileName=$fileName"
-  echo "fileLink=$fileLink"
-  echo "tenantId=$tenantId"
-  echo "clientId=$clientId"
-  echo "clientSecret=$clientSecret"
-  echo "storageVersion=$storageVersion"
   if [ "$tenantId" == "" ]; then
     curl -o $fileName -L $fileLink
   else
