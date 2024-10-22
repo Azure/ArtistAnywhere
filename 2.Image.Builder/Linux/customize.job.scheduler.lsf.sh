@@ -17,9 +17,14 @@ if [ $machineType != Storage ]; then
   tar -xf lsf*/lsf/lsf10.1_lsf*
   echo "Customize (End): LSF Download"
 
-  dnf -y install libnsl ed
+  echo "Customize (Start): LSF Server"
+  lsfAdmin="lsfadmin"
+  useradd $lsfAdmin
+  echo $adminPassword | passwd --stdin $lsfAdmin
+
   cd lsf10*
-  sed -i "/# LSF_ADMINS=/c\LSF_ADMINS=root" install.config
+  dnf -y install libnsl ed
+  sed -i "/# LSF_ADMINS=/c\LSF_ADMINS=$lsfAdmin" install.config
   sed -i "/# LSF_TOP=/c\LSF_TOP=$installRoot" install.config
   sed -i "/# LSF_CLUSTER_NAME=/c\LSF_CLUSTER_NAME=Default" install.config
   sed -i "/# LSF_MASTER_LIST=/c\LSF_MASTER_LIST=$(hostname)" install.config
@@ -28,6 +33,7 @@ if [ $machineType != Storage ]; then
   sed -i "/# SILENT_INSTALL=/c\SILENT_INSTALL=Y" install.config
   sed -i "/# ACCEPT_LICENSE=/c\ACCEPT_LICENSE=Y" install.config
   ./lsfinstall -f install.config
+  echo "Customize (End): LSF Server"
 
   #binPaths="$binPaths:$binPathJobScheduler"
 fi
