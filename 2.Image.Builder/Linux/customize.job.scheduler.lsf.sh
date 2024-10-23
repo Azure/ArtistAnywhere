@@ -7,7 +7,7 @@ echo "Customize (Start): Job Scheduler (LSF)"
 if [ $machineType != Storage ]; then
   version=$(echo $buildConfig | jq -r .version.jobSchedulerLSF)
   installRoot="/lsf"
-  #binPathJobScheduler="$installRoot/10.1/linux2.6-glibc2.3-x86_64/bin"
+  binPathJobScheduler="$installRoot/10.1/linux2.6-glibc2.3-x86_64/bin"
 
   echo "Customize (Start): LSF Download"
   fileName="lsfsce$version-x86_64.tar.gz"
@@ -35,7 +35,7 @@ if [ $machineType != Storage ]; then
   ./lsfinstall -f install.config
   echo "Customize (End): LSF Server"
 
-  #binPaths="$binPaths:$binPathJobScheduler"
+  binPaths="$binPaths:$binPathJobScheduler"
 fi
 
 if [ "$binPaths" != "" ]; then
