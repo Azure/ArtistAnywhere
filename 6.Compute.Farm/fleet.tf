@@ -136,7 +136,7 @@ resource azapi_resource fleet {
       data.azurerm_user_assigned_identity.studio.id
     ]
   }
-  body = jsonencode({
+  body = {
     properties = {
       computeProfile = {
         baseVirtualMachineProfile = {
@@ -227,6 +227,6 @@ resource azapi_resource fleet {
       }
       vmSizesProfile = each.value.machine.sizes
     }
-  })
+  }
   schema_validation_enabled = false
 }

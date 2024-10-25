@@ -18,9 +18,6 @@ az provider show --namespace Microsoft.StreamAnalytics --query "resourceTypes[?r
 # 2024-06-19
 az provider show --namespace Qumulo.Storage --query "resourceTypes[?resourceType=='fileSystems'].apiVersions[]"
 
-# 2023-12-01
+# 2024-04-01
 az provider show --namespace Microsoft.Web --query "resourceTypes[?resourceType=='serverFarms'].apiVersions[]"
 az provider show --namespace Microsoft.Web --query "resourceTypes[?resourceType=='sites'].apiVersions[]"
-
-# 2024-09-23-preview
-az provider show --namespace Microsoft.VideoIndexer --query "resourceTypes[?resourceType=='accounts'].apiVersions[]"

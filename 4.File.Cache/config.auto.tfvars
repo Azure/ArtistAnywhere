@@ -92,14 +92,14 @@ hsCache = {
       name   = "volume1"
       path   = "/volume1"
       size   = 0
-      export = "*,ro,no-root-squash"
+      export = "*,ro,no-root-squash,insecure"
     },
     {
       enable = true
       name   = "volume2"
       path   = "/volume2"
       size   = 0
-      export = "*,ro,no-root-squash"
+      export = "*,ro,no-root-squash,insecure"
     }
   ]
   storageTargets = [

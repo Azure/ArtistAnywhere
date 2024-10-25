@@ -40,7 +40,7 @@ resource azapi_resource qumulo {
   type      = "Qumulo.Storage/fileSystems@2024-06-09"
   parent_id = azurerm_resource_group.qumulo[0].id
   location  = azurerm_resource_group.qumulo[0].location
-  body = jsonencode({
+  body = {
     properties = {
       marketplaceDetails = {
         publisherId = "qumulo1584033880660"
@@ -55,6 +55,6 @@ resource azapi_resource qumulo {
       delegatedSubnetId = data.azurerm_subnet.storage_qumulo[0].id
       adminPassword     = var.qumulo.adminLogin.userPassword != "" ? var.qumulo.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
     }
-  })
+  }
   schema_validation_enabled = false
 }

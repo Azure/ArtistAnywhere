@@ -118,7 +118,7 @@ resource azapi_resource linux {
       data.azurerm_user_assigned_identity.studio.id
     ]
   }
-  body = jsonencode({
+  body = {
     properties = {
       buildTimeoutInMinutes = each.value.build.timeoutMinutes
       vmProfile = {
@@ -249,7 +249,7 @@ resource azapi_resource linux {
         }
       ]
     }
-  })
+  }
   schema_validation_enabled = false
   lifecycle {
     ignore_changes = [
@@ -275,7 +275,7 @@ resource azapi_resource windows {
       data.azurerm_user_assigned_identity.studio.id
     ]
   }
-  body = jsonencode({
+  body = {
     properties = {
       buildTimeoutInMinutes = each.value.build.timeoutMinutes
       vmProfile = {
@@ -411,7 +411,7 @@ resource azapi_resource windows {
         }
       ]
     }
-  })
+  }
   schema_validation_enabled = false
   lifecycle {
     ignore_changes = [

@@ -15,6 +15,10 @@ variable netAppFiles {
       name    = string
       tier    = string
       sizeTiB = number
+      coolAccess = object({
+        enable = bool
+        period = number
+      })
       volumes = list(object({
         enable      = bool
         name        = string
@@ -53,8 +57,9 @@ locals {
   netAppVolumes = flatten([
     for capacityPool in var.netAppFiles.capacityPools : [
       for volume in capacityPool.volumes : merge(volume, {
-        capacityPoolName = capacityPool.name
-        capacityPoolTier = capacityPool.tier
+        capacityPoolName       = capacityPool.name
+        capacityPoolTier       = capacityPool.tier
+        capacityPoolCoolAccess = capacityPool.coolAccess
       }) if volume.enable
     ] if var.netAppFiles.enable && capacityPool.enable
   ])
@@ -145,12 +150,13 @@ resource azapi_resource capacity_pool {
   type      = "Microsoft.NetApp/netAppAccounts/capacityPools@2024-07-01"
   parent_id = azurerm_netapp_account.storage[0].id
   location  = azurerm_netapp_account.storage[0].location
-  body = jsonencode({
+  body = {
     properties = {
       serviceLevel = each.value.tier
       size         = each.value.sizeTiB * 1099511627776
+      coolAccess   = each.value.coolAccess.enable
     }
-  })
+  }
   schema_validation_enabled = false
 }
 
@@ -162,7 +168,7 @@ resource azapi_resource volume {
   type      = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes@2024-07-01"
   parent_id = azapi_resource.capacity_pool[each.value.capacityPoolName].id
   location  = azapi_resource.capacity_pool[each.value.capacityPoolName].location
-  body = jsonencode({
+  body = {
     properties = {
       subnetId        = data.azurerm_subnet.storage_netapp[0].id
       serviceLevel    = each.value.capacityPoolTier
@@ -171,6 +177,8 @@ resource azapi_resource volume {
       networkFeatures = each.value.network.features
       unixPermissions = tostring(each.value.permissions)
       creationToken   = each.value.mountPath
+      coolAccess      = each.value.capacityPoolCoolAccess.enable
+      coolnessPeriod  = each.value.capacityPoolCoolAccess.period
       exportPolicy = {
         rules = [
           {
@@ -192,7 +200,7 @@ resource azapi_resource volume {
         ]
       }
     }
-  })
+  }
   response_export_values = [
     "properties.mountTargets"
   ]
@@ -210,6 +218,6 @@ resource azurerm_private_dns_a_record netapp {
   name                = "${var.netAppFiles.dnsRecord.namePrefix}-${lower(each.value.name)}"
   resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = data.azurerm_private_dns_zone.studio.name
-  records             = jsondecode(azapi_resource.volume[each.key].output).properties.mountTargets[*].ipAddress
+  records             = azapi_resource.volume[each.key].output.properties.mountTargets[*].ipAddress
   ttl                 = var.netAppFiles.dnsRecord.ttlSeconds
 }
