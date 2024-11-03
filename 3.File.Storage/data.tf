@@ -1,15 +1,7 @@
 variable dataLoad {
   type = object({
     enable = bool
-    source = object({
-      accountName   = string
-      containerName = string
-      blobs = list(object({
-        enable = bool
-        name   = string
-      }))
-    })
-    destination = string
+    target = string
     machine = object({
       name = string
       size = string
@@ -104,7 +96,7 @@ resource azurerm_network_interface storage_data_load {
   resource_group_name             = azurerm_resource_group.storage_data_load[0].name
   location                        = azurerm_resource_group.storage_data_load[0].location
   size                            = var.dataLoad.machine.size
-  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${local.dataLoad.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${local.dataLoad.machine.image.galleryName}/images/${local.dataLoad.machine.image.definitionName}/versions/${local.dataLoad.machine.image.versionId}"
+  source_image_id                 = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${local.dataLoad.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${local.dataLoad.machine.image.galleryName}/images/${local.dataLoad.machine.image.definitionName}/versions/${local.dataLoad.machine.image.versionId}"
   admin_username                  = local.dataLoad.machine.adminLogin.userName
   admin_password                  = local.dataLoad.machine.adminLogin.userPassword
   disable_password_authentication = local.dataLoad.machine.adminLogin.passwordAuth.disable
@@ -151,8 +143,7 @@ resource azurerm_virtual_machine_extension storage_data_load {
   protected_settings = jsonencode({
     script = base64encode(
       templatefile("data.sh", {
-        dataLoadSource      = var.dataLoad.source
-        dataLoadDestination = var.dataLoad.destination
+        dataLoadTarget = var.dataLoad.target
       })
     )
   })

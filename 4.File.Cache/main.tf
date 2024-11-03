@@ -9,6 +9,10 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~>3.0"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "~>2.5"
+    }
     # avere = {
     #   source  = "hashicorp/avere"
     #   version = "~>1.3"
@@ -93,8 +97,6 @@ variable existingNetwork {
     })
   })
 }
-
-data azurerm_client_config studio {}
 
 data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name

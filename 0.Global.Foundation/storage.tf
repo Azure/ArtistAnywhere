@@ -67,7 +67,7 @@ resource azurerm_storage_account studio {
       for_each = module.global.defender.storage.malwareScanning.enable ? [1] : []
       content {
         endpoint_tenant_id   = data.azurerm_client_config.studio.tenant_id
-        endpoint_resource_id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/providers/Microsoft.Security/datascanners/storageDataScanner"
+        endpoint_resource_id = "/subscriptions/${module.global.subscriptionId}/providers/Microsoft.Security/datascanners/storageDataScanner"
       }
     }
   }
@@ -79,11 +79,4 @@ resource azurerm_storage_container studio {
   }
   name                 = each.value
   storage_account_name = azurerm_storage_account.studio.name
-}
-
-resource azurerm_security_center_storage_defender studio {
-  storage_account_id                          = azurerm_storage_account.studio.id
-  malware_scanning_on_upload_enabled          = module.global.defender.storage.malwareScanning.enable
-  malware_scanning_on_upload_cap_gb_per_month = module.global.defender.storage.malwareScanning.maxPerMonthGB
-  sensitive_data_discovery_enabled            = module.global.defender.storage.sensitiveDataDiscovery.enable
 }

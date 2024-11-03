@@ -70,8 +70,6 @@ variable existingNetwork {
   })
 }
 
-data azurerm_client_config studio {}
-
 data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name
   resource_group_name = module.global.resourceGroupName

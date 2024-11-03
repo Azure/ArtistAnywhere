@@ -131,7 +131,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   edge_zone                       = each.value.resourceLocation.extendedZoneName
   sku                             = each.value.machine.size
   instances                       = each.value.machine.count
-  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+  source_image_id                 = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
@@ -271,7 +271,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   edge_zone                   = each.value.resourceLocation.extendedZoneName
   sku                         = each.value.machine.size
   instances                   = each.value.machine.count
-  source_image_id             = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+  source_image_id             = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   admin_username              = each.value.adminLogin.userName
   admin_password              = each.value.adminLogin.userPassword
   priority                    = each.value.spot.enable ? "Spot" : "Regular"
@@ -395,7 +395,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
   # edge_zone                   = each.value.resourceLocation.extendedZoneName
   sku_name                    = each.value.machine.size
   instances                   = each.value.machine.count
-  source_image_id             = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+  source_image_id             = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   priority                    = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy             = each.value.spot.enable ? each.value.spot.evictionPolicy : null
   platform_fault_domain_count = each.value.faultDomainCount

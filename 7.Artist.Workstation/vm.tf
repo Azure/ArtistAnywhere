@@ -117,7 +117,7 @@ resource azurerm_linux_virtual_machine workstation {
   location                        = each.value.resourceLocation.regionName
   edge_zone                       = each.value.resourceLocation.extendedZoneName
   size                            = each.value.size
-  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
+  source_image_id                 = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
@@ -219,7 +219,7 @@ resource azurerm_windows_virtual_machine workstation {
   location            = each.value.resourceLocation.regionName
   edge_zone           = each.value.resourceLocation.extendedZoneName
   size                = each.value.size
-  source_image_id     = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
+  source_image_id     = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username      = each.value.adminLogin.userName
   admin_password      = each.value.adminLogin.userPassword
   identity {

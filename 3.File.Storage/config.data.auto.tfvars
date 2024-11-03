@@ -1,20 +1,6 @@
 dataLoad = {
   enable = false
-  source = {
-    accountName   = "xstudio"
-    containerName = "storage"
-    blobs = [
-      {
-        enable = true
-        name   = "pbrt"
-      },
-      {
-        enable = false
-        name   = "blender"
-      }
-    ]
-  }
-  destination = "10.1.193.4:/volume1"
+  target = "10.1.193.4:/volume1"
   machine = {
     name = "xstudio"
     size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes

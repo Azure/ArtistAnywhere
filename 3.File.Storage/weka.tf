@@ -213,7 +213,7 @@ resource azurerm_linux_virtual_machine_scale_set weka {
   location                        = azurerm_resource_group.weka[0].location
   sku                             = var.weka.machine.size
   instances                       = var.weka.machine.count
-  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.weka.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${var.weka.machine.image.galleryName}/images/${var.weka.machine.image.definitionName}/versions/${var.weka.machine.image.versionId}"
+  source_image_id                 = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${var.weka.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${var.weka.machine.image.galleryName}/images/${var.weka.machine.image.definitionName}/versions/${var.weka.machine.image.versionId}"
   admin_username                  = local.weka.machine.adminLogin.userName
   admin_password                  = local.weka.machine.adminLogin.userPassword
   disable_password_authentication = var.weka.machine.adminLogin.passwordAuth.disable
@@ -431,27 +431,5 @@ resource terraform_data weka_file_system {
   depends_on = [
     azurerm_storage_container.weka,
     terraform_data.weka_cluster_start
-  ]
-}
-
-resource terraform_data weka_data {
-  count = var.weka.enable && var.weka.fileSystem.loadFiles && var.dataLoad.enable ? 1 : 0
-  connection {
-    type        = "ssh"
-    user        = local.weka.machine.adminLogin.userName
-    private_key = local.weka.machine.adminLogin.sshKeyPrivate
-    host        = data.azurerm_virtual_machine_scale_set.weka[0].instances[0].private_ip_address
-   }
-  provisioner remote-exec {
-    inline = [
-      "sudo weka agent install-agent",
-      "mountPath=/mnt/${var.dataLoad.source.containerName}",
-      "mkdir -p $mountPath",
-      "sudo mount -t wekafs ${var.weka.fileSystem.name} $mountPath",
-      "az storage copy --source-account-name ${var.dataLoad.source.accountName} --source-container ${var.dataLoad.source.containerName} --recursive --destination /mnt"
-    ]
-  }
-  depends_on = [
-    terraform_data.weka_file_system
   ]
 }

@@ -14,7 +14,7 @@ resource azurerm_subscription_policy_assignment deny_password_auth_linux {
   count                = var.policy.denyPasswordAuthLinux.enable ? 1 : 0
   name                 = azurerm_policy_definition.deny_password_auth_linux.name
   policy_definition_id = azurerm_policy_definition.deny_password_auth_linux.id
-  subscription_id      = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}"
+  subscription_id      = "/subscriptions/${module.global.subscriptionId}"
   location             = azurerm_resource_group.studio.location
   identity {
     type = "UserAssigned"

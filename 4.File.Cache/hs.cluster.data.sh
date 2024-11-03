@@ -1,4 +1,14 @@
-#!/bin/bash -x
+#!/bin/bash -ex
+
+metadataIP=$(echo ${cacheSubnetIPs} | base64 -d | jq -cr .[0])
+hscli floating-ip-add --cluster --ip $metadataIP/32
+
+dataIPs=$(echo ${cacheSubnetIPs} | base64 -d | jq -c .)
+while read dataIP; do
+  if [ $dataIP != $metadataIP ]; then
+    hscli floating-ip-add --portal --ip $dataIP/32
+  fi
+done < <(echo $dataIPs | jq -r .[])
 
 shares='${jsonencode(shares)}'
 while read share; do

@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -ex
 
 activeDirectory='${jsonencode(activeDirectory)}'
 enable=$(echo $activeDirectory | jq -r .enable)

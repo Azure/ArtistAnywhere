@@ -142,7 +142,7 @@ resource azapi_resource fleet {
         baseVirtualMachineProfile = {
           storageProfile = {
             imageReference = {
-              id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+              id = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
             }
             osDisk = {
               managedDisk = {

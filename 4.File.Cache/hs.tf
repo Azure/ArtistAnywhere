@@ -114,7 +114,16 @@ variable hsCache {
   })
 }
 
+data local_file hs_cache {
+  count    = var.hsCache.enable ? 1 : 0
+  filename = "${path.module}/${local.hsCache}"
+  depends_on = [
+    terraform_data.hs_cluster_network
+  ]
+}
+
 locals {
+  hsCache = "hs.cluster.json"
   hsImage = {
     publisher = "Hammerspace"
     product   = "Hammerspace_BYOL_5_0"
@@ -487,13 +496,23 @@ resource azurerm_virtual_machine_extension hs_node {
   ]
 }
 
+resource terraform_data hs_cluster_network {
+  count = var.hsCache.enable ? 1 : 0
+  provisioner local-exec {
+    command = "az network vnet subnet list-available-ips --ids ${data.azurerm_subnet.cache.id} --query [:${var.hsCache.data.machine.count + 1}] > ${local.hsCache}"
+  }
+  depends_on = [
+    azurerm_virtual_machine_extension.hs_node
+  ]
+}
+
 resource terraform_data hs_cluster_initialize {
   count = var.hsCache.enable ? 1 : 0
   provisioner local-exec {
     command = "az vm extension set --resource-group ${azurerm_resource_group.cache.name} --vm-name ${local.hsMetadataNodes[0].machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("hs.cluster.init.sh", {}))})}"
   }
   depends_on = [
-    azurerm_virtual_machine_extension.hs_node
+    terraform_data.hs_cluster_network
   ]
 }
 
@@ -512,7 +531,7 @@ resource terraform_data hs_cluster_node {
 resource terraform_data hs_cluster_data {
   count = var.hsCache.enable ? 1 : 0
   provisioner local-exec {
-    command = "az vm extension set --resource-group ${azurerm_resource_group.cache.name} --vm-name ${local.hsMetadataNodes[0].machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("hs.cluster.data.sh", {shares = var.hsCache.shares, storageTargets = var.hsCache.storageTargets, volumeGroups = var.hsCache.volumeGroups}))})}"
+    command = "az vm extension set --resource-group ${azurerm_resource_group.cache.name} --vm-name ${local.hsMetadataNodes[0].machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("hs.cluster.data.sh", {cacheSubnetIPs = data.local_file.hs_cache[0].content_base64, shares = var.hsCache.shares, storageTargets = var.hsCache.storageTargets, volumeGroups = var.hsCache.volumeGroups}))})}"
   }
   depends_on = [
     terraform_data.hs_cluster_node
@@ -585,8 +604,14 @@ resource azurerm_private_dns_a_record cache_hs {
   name                = var.dnsRecord.name
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = var.existingNetwork.enable ? var.existingNetwork.privateDns.zoneName : data.azurerm_private_dns_zone.studio.name
-  records             = var.hsCache.privateDnsTier.metadata ? [local.hsHighAvailability ? azurerm_lb.hs_metadata[0].frontend_ip_configuration[0].private_ip_address : azurerm_linux_virtual_machine.hs_metadata[local.hsMetadataNodes[0].machine.name].private_ip_address] : [for vm in azurerm_linux_virtual_machine.hs_data : vm.private_ip_address]
+  records             = var.hsCache.privateDnsTier.metadata ? [local.hsHighAvailability ? azurerm_lb.hs_metadata[0].frontend_ip_configuration[0].private_ip_address : jsondecode(data.local_file.hs_cache[0].content)[0]] : [for i in range(1, var.hsCache.data.machine.count + 1) : jsondecode(data.local_file.hs_cache[0].content)[i]]
   ttl                 = var.dnsRecord.ttlSeconds
+}
+
+output hsCachePortal {
+  value = var.hsCache.enable ? {
+    ip = azurerm_linux_virtual_machine.hs_metadata[local.hsMetadataNodes[0].machine.name].private_ip_address
+  } : null
 }
 
 output hsCacheDNS {

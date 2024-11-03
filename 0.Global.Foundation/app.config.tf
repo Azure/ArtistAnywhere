@@ -15,7 +15,7 @@ variable appConfig {
 }
 
 locals {
-  appConfigStoreId = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${lower(azurerm_resource_group.studio.name)}/providers/Microsoft.AppConfiguration/configurationStores/${module.global.appConfig.name}"
+  appConfigStoreId = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${lower(azurerm_resource_group.studio.name)}/providers/Microsoft.AppConfiguration/configurationStores/${module.global.appConfig.name}"
 }
 
 resource azurerm_role_assignment studio_app_config_data_owner {
@@ -99,7 +99,7 @@ resource azurerm_app_configuration_key hp_anyware_agent_version {
 resource azurerm_app_configuration_key job_scheduler_deadline_version {
   configuration_store_id = local.appConfigStoreId
   key                    = module.global.appConfig.key.jobSchedulerDeadlineVersion
-  value                  = "10.3.2.1"
+  value                  = "10.4.0.8"
   depends_on = [
     time_sleep.app_configuration_rbac
   ]

@@ -40,7 +40,7 @@ locals {
       resourceGroupName     = var.resourceGroupName
       resourceGroupLocation = storageAccount.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : local.regionName
       extendedZoneName      = storageAccount.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
-      storageAccountId      = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
+      storageAccountId      = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
       storageAccountName    = storageAccount.name
     }) if storageAccount.enable
   ]
@@ -131,7 +131,7 @@ resource azurerm_storage_account studio {
       for_each = module.global.defender.storage.malwareScanning.enable ? [1] : []
       content {
         endpoint_tenant_id   = data.azurerm_client_config.studio.tenant_id
-        endpoint_resource_id = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/providers/Microsoft.Security/datascanners/storageDataScanner"
+        endpoint_resource_id = "/subscriptions/${module.global.subscriptionId}/providers/Microsoft.Security/datascanners/storageDataScanner"
       }
     }
   }

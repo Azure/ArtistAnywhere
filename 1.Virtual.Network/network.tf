@@ -29,18 +29,18 @@ locals {
   virtualNetwork = local.virtualNetworks[0]
   virtualNetworks = flatten([
     for virtualNetwork in local.virtualNetworksConfig : merge(virtualNetwork, {
-      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.regionName}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}"
+      id                = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.regionName}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}"
       key               = "${virtualNetwork.name}-${virtualNetwork.regionName}"
-      resourceGroupId   = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.regionName}"
+      resourceGroupId   = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.regionName}"
       resourceGroupName = "${var.resourceGroupName}.${virtualNetwork.regionName}"
       extendedZoneName  = ""
     })
   ])
   virtualNetworksExtended = distinct(concat(local.virtualNetworks, !module.global.resourceLocation.extendedZone.enable ? [local.virtualNetwork] : [
     merge(local.virtualNetwork, {
-      id                = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}.${module.global.resourceLocation.extendedZone.name}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetwork.name}"
+      id                = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}.${module.global.resourceLocation.extendedZone.name}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetwork.name}"
       key               = "${local.virtualNetwork.name}-${module.global.resourceLocation.extendedZone.regionName}-${module.global.resourceLocation.extendedZone.name}"
-      resourceGroupId   = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}.${module.global.resourceLocation.extendedZone.name}"
+      resourceGroupId   = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}.${module.global.resourceLocation.extendedZone.name}"
       resourceGroupName = "${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}.${module.global.resourceLocation.extendedZone.name}"
       regionName        = module.global.resourceLocation.extendedZone.regionName
       extendedZoneName  = module.global.resourceLocation.extendedZone.name

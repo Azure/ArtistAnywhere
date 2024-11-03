@@ -119,7 +119,7 @@ resource azurerm_linux_virtual_machine job_scheduler {
   resource_group_name             = azurerm_resource_group.job_scheduler.name
   location                        = each.value.resourceLocation.regionName
   edge_zone                       = each.value.resourceLocation.extendedZoneName
-  source_image_id                 = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
+  source_image_id                 = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                            = each.value.size
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
@@ -220,7 +220,7 @@ resource azurerm_windows_virtual_machine job_scheduler {
   resource_group_name = azurerm_resource_group.job_scheduler.name
   location            = each.value.resourceLocation.regionName
   edge_zone           = each.value.resourceLocation.extendedZoneName
-  source_image_id     = "/subscriptions/${data.azurerm_client_config.studio.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
+  source_image_id     = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                = each.value.size
   admin_username      = each.value.adminLogin.userName
   admin_password      = each.value.adminLogin.userPassword

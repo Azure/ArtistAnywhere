@@ -50,7 +50,7 @@ virtualMachines = [
             computeFarmNodeCountMax  = 100
             workerIdleDeleteSeconds  = 300
             jobWaitThresholdSeconds  = 60
-            detectionIntervalSeconds = 30
+            detectionIntervalSeconds = 60
           }
         }
       }
@@ -113,7 +113,7 @@ virtualMachines = [
             computeFarmNodeCountMax  = 100
             workerIdleDeleteSeconds  = 300
             jobWaitThresholdSeconds  = 60
-            detectionIntervalSeconds = 30
+            detectionIntervalSeconds = 60
           }
         }
       }
