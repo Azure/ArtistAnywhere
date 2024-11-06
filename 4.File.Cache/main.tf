@@ -13,14 +13,14 @@ terraform {
       source  = "hashicorp/local"
       version = "~>2.5"
     }
-    # avere = {
-    #   source  = "hashicorp/avere"
-    #   version = "~>1.3"
-    # }
-    # time = {
-    #   source  = "hashicorp/time"
-    #   version = "~>0.12"
-    # }
+    avere = {
+      source  = "hashicorp/avere"
+      version = "~>1.3"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~>0.12"
+    }
   }
   backend azurerm {
     key              = "4.File.Cache"
@@ -55,26 +55,26 @@ variable resourceGroupName {
   type = string
 }
 
-# variable storageTargets {
-#   type = list(object({
-#     enable            = bool
-#     name              = string
-#     clientPath        = string
-#     usageModel        = string
-#     hostName          = string
-#     containerName     = string
-#     resourceGroupName = string
-#     fileIntervals = object({
-#       verificationSeconds = number
-#       writeBackSeconds    = number
-#     })
-#     vfxtJunctions = list(object({
-#       storageExport = string
-#       storagePath   = string
-#       clientPath    = string
-#     }))
-#   }))
-# }
+variable storageTargets {
+  type = list(object({
+    enable            = bool
+    name              = string
+    clientPath        = string
+    usageModel        = string
+    hostName          = string
+    containerName     = string
+    resourceGroupName = string
+    fileIntervals = object({
+      verificationSeconds = number
+      writeBackSeconds    = number
+    })
+    vfxtJunctions = list(object({
+      storageExport = string
+      storagePath   = string
+      clientPath    = string
+    }))
+  }))
+}
 
 variable dnsRecord {
   type = object({
