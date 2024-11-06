@@ -1,7 +1,6 @@
 #!/bin/bash -ex
 
 source /tmp/functions.sh
-source /etc/profile.d/aaa.sh
 
 serviceFile="aaaAutoScaler"
 serviceName="AAA Auto Scaler"
@@ -46,3 +45,5 @@ if [ ${autoScale.enable} == true ]; then
   systemctl --now enable $serviceFile.timer
   systemctl --now enable $serviceFile.service
 fi
+
+source /etc/profile.d/aaa.sh
