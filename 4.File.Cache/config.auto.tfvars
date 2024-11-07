@@ -184,7 +184,7 @@ vfxtCache = {
     sshKeyPublic  = ""
     localTimezone = "UTC"
     enableDevMode = false
-    imageId = {
+    imageUrn = {
       controller = ""
       node       = ""
     }
