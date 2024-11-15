@@ -24,6 +24,7 @@ The following solution design principles and features are implemented throughout
 The following local installation process is required for deployment orchestration.
 
 1. Make sure the [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) is installed locally and accessible in your PATH environment variable.
+1. Install Application Insights extension via `az extension add --name application-insights`.
 1. Make sure the [Terraform CLI](https://developer.hashicorp.com/terraform/downloads) is installed locally and accessible in your PATH environment variable.
 1. Clone this GitHub repository to your local workstation for module configuration and deployment.
 
