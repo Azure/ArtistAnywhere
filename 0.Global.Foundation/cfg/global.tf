@@ -36,7 +36,6 @@ variable storage {
     accountName = "xstudio0" # Set to a globally unique name (lowercase alphanumeric)
     containerName = {
       terraformState = "terraform-state"
-      videoIndexer   = "video-indexer"
     }
   }
 }

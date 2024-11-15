@@ -1,25 +1,25 @@
 terraform {
-  required_version = ">=1.9.7"
+  required_version = ">=1.9.8"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.7"
+      version = "~>4.10.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>3.0"
+      version = "~>3.0.0"
     }
     external = {
       source  = "hashicorp/external"
-      version = "~>2.3"
+      version = "~>2.3.0"
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4"
+      version = "~>3.4.0"
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>2.0"
+      version = "~>2.0.0"
     }
   }
   backend azurerm {

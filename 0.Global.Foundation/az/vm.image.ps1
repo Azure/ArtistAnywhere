@@ -78,8 +78,8 @@ $offer          = "vFXT"
 $planController = "Avere-vFXT-Controller"
 $planNode       = "Avere-vFXT-Node"
 
-az vm image list --publisher $publisher --offer $offer --sku $planController --all # 2024.08.28
-az vm image list --publisher $publisher --offer $offer --sku $planNode --all       # 2024.04.1
+az vm image list --publisher $publisher --offer $offer --sku $planController --all # 2024.10.29
+az vm image list --publisher $publisher --offer $offer --sku $planNode --all       # 2024.04.2
 
 az vm image terms show --publisher $publisher --offer $offer --plan $planController
 az vm image terms accept --publisher $publisher --offer $offer --plan $planController

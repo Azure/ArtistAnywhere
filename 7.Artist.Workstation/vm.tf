@@ -169,7 +169,7 @@ resource azurerm_virtual_machine_extension workstation_initialize_linux {
   protected_settings = jsonencode({
     script = base64encode(
       templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
-        fileSystem = local.fileSystemLinux
+        fileSystem = module.global.fileSystem.linux
       }))
     )
   })
@@ -255,7 +255,7 @@ resource azurerm_virtual_machine_extension workstation_initialize_windows {
   protected_settings = jsonencode({
     commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
       templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
-        fileSystem      = local.fileSystemWindows
+        fileSystem      = module.global.fileSystem.windows
         activeDirectory = each.value.activeDirectory
       })), "UTF-16LE"
     )}"

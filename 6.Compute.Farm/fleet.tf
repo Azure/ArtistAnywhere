@@ -198,12 +198,12 @@ resource azapi_resource fleet {
                   protectedSettings = jsonencode({
                     script = lower(each.value.machine.osDisk.type) == "windows" ? null : base64encode(
                       templatefile(each.value.machine.extension.custom.fileName, merge(each.value.machine.extension.custom.parameters, {
-                        fileSystem = local.fileSystemLinux
+                        fileSystem = module.global.fileSystem.linux
                       }))
                     )
                     commandToExecute = lower(each.value.machine.osDisk.type) == "windows" ? "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
                       templatefile(each.value.machine.extension.custom.fileName, merge(each.value.machine.extension.custom.parameters, {
-                        fileSystem      = local.fileSystemWindows
+                        fileSystem      = module.global.fileSystem.windows
                         activeDirectory = each.value.activeDirectory
                       })), "UTF-16LE"
                     )}" : null

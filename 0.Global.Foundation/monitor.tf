@@ -84,6 +84,13 @@ resource azurerm_monitor_data_collection_endpoint studio {
   ]
 }
 
+resource time_sleep monitor_data_collection_endpoint {
+  create_duration = "180s"
+  depends_on = [
+    azurerm_monitor_data_collection_endpoint.studio
+  ]
+}
+
 resource azurerm_monitor_data_collection_rule studio {
   name                        = module.global.monitor.name
   resource_group_name         = azurerm_resource_group.studio_monitor.name
@@ -109,6 +116,9 @@ resource azurerm_monitor_data_collection_rule studio {
       workspace_resource_id = azurerm_log_analytics_workspace.studio.id
     }
   }
+  depends_on = [
+    time_sleep.monitor_data_collection_endpoint
+  ]
 }
 
 output monitor {

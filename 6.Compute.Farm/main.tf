@@ -1,25 +1,25 @@
 terraform {
-  required_version = ">=1.9.7"
+  required_version = ">=1.9.8"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.7"
+      version = "~>4.10.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>3.0"
+      version = "~>3.0.0"
     }
     local = {
       source  = "hashicorp/local"
-      version = "~>2.5"
+      version = "~>2.5.0"
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4"
+      version = "~>3.4.0"
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>2.0"
+      version = "~>2.0.0"
     }
   }
   backend azurerm {
@@ -153,15 +153,6 @@ data azurerm_virtual_network studio_region {
 data azurerm_virtual_network studio_extended {
   name                = var.existingNetwork.enable ? var.existingNetwork.name : reverse(data.terraform_remote_state.network.outputs.virtualNetworks)[0].name
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : reverse(data.terraform_remote_state.network.outputs.virtualNetworks)[0].resourceGroupName
-}
-
-locals {
-  fileSystemLinux = one([
-    for fileSystem in module.global.fileSystems : fileSystem.linux if fileSystem.enable
-  ])
-  fileSystemWindows = one([
-    for fileSystem in module.global.fileSystems : fileSystem.windows if fileSystem.enable
-  ])
 }
 
 resource azurerm_resource_group farm {

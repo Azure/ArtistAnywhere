@@ -188,7 +188,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
       protected_settings = jsonencode({
         script = base64encode(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
-            fileSystem = local.fileSystemLinux
+            fileSystem = module.global.fileSystem.linux
           }))
         )
       })
@@ -319,7 +319,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
       protected_settings = jsonencode({
         commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
-            fileSystem      = local.fileSystemWindows
+            fileSystem      = module.global.fileSystem.windows
             activeDirectory = each.value.activeDirectory
           })), "UTF-16LE"
         )}"
@@ -472,12 +472,12 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
       protected_settings = jsonencode({
         script = lower(each.value.osDisk.type) == "windows" ? null : base64encode(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
-            fileSystem = local.fileSystemLinux
+            fileSystem = module.global.fileSystem.linux
           }))
         )
         commandToExecute = lower(each.value.osDisk.type) == "windows" ? "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
-            fileSystem      = local.fileSystemWindows
+            fileSystem      = module.global.fileSystem.windows
             activeDirectory = each.value.activeDirectory
           })), "UTF-16LE"
         )}" : null

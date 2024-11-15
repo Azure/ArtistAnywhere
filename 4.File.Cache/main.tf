@@ -1,25 +1,25 @@
 terraform {
-  required_version = ">=1.9.7"
+  required_version = ">=1.9.8"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.7"
+      version = "~>4.10.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>3.0"
+      version = "~>3.0.0"
     }
     local = {
       source  = "hashicorp/local"
-      version = "~>2.5"
+      version = "~>2.5.0"
     }
     avere = {
       source  = "hashicorp/avere"
-      version = "~>1.3"
+      version = "~>1.3.0"
     }
     time = {
       source  = "hashicorp/time"
-      version = "~>0.12"
+      version = "~>0.12.0"
     }
   }
   backend azurerm {

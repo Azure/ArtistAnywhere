@@ -56,9 +56,6 @@ locals {
       })
     })
   })
-  fileSystemLinux = one([
-    for fileSystem in module.global.fileSystems : fileSystem.linux if fileSystem.enable
-  ])
 }
 
 resource azurerm_resource_group storage_data_load {

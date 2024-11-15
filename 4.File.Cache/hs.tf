@@ -535,10 +535,26 @@ resource azurerm_lb hs_metadata {
   }
 }
 
+resource azurerm_lb hs_data {
+  name                = "${var.hsCache.namePrefix}${var.hsCache.data.machine.namePrefix}"
+  resource_group_name = azurerm_resource_group.cache.name
+  location            = azurerm_resource_group.cache.location
+  sku                 = "Standard"
+  frontend_ip_configuration {
+    name      = "ipConfig"
+    subnet_id = data.azurerm_subnet.cache.id
+  }
+}
+
 resource azurerm_lb_backend_address_pool hs_metadata {
   count           = local.hsHighAvailability ? 1 : 0
   name            = "MetadataPool"
   loadbalancer_id = azurerm_lb.hs_metadata[0].id
+}
+
+resource azurerm_lb_backend_address_pool hs_data {
+  name            = "DataPool"
+  loadbalancer_id = azurerm_lb.hs_data.id
 }
 
 resource azurerm_network_interface_backend_address_pool_association hs_metadata {
@@ -550,6 +566,18 @@ resource azurerm_network_interface_backend_address_pool_association hs_metadata 
   ip_configuration_name   = "ipConfig"
   depends_on = [
     azurerm_network_interface.hs_metadata
+  ]
+}
+
+resource azurerm_network_interface_backend_address_pool_association hs_data {
+  for_each = {
+    for node in local.hsDataNodes : node.machine.name => node
+  }
+  backend_address_pool_id = azurerm_lb_backend_address_pool.hs_data.id
+  network_interface_id    = "${azurerm_resource_group.cache.id}/providers/Microsoft.Network/networkInterfaces/${each.value.machine.name}"
+  ip_configuration_name   = "ipConfig"
+  depends_on = [
+    azurerm_network_interface.hs_data
   ]
 }
 
@@ -568,10 +596,31 @@ resource azurerm_lb_rule hs_metadata {
   ]
 }
 
+resource azurerm_lb_rule hs_data {
+  name                           = "DataRule"
+  loadbalancer_id                = azurerm_lb.hs_data.id
+  frontend_ip_configuration_name = azurerm_lb.hs_data.frontend_ip_configuration[0].name
+  probe_id                       = azurerm_lb_probe.hs_data.id
+  enable_floating_ip             = true
+  protocol                       = "All"
+  frontend_port                  = 0
+  backend_port                   = 0
+  backend_address_pool_ids = [
+    azurerm_lb_backend_address_pool.hs_data.id
+  ]
+}
+
 resource azurerm_lb_probe hs_metadata {
   count           = local.hsHighAvailability ? 1 : 0
   name            = "MetadataProbe"
   loadbalancer_id = azurerm_lb.hs_metadata[0].id
+  protocol        = "Tcp"
+  port            = 4505
+}
+
+resource azurerm_lb_probe hs_data {
+  name            = "DataProbe"
+  loadbalancer_id = azurerm_lb.hs_data.id
   protocol        = "Tcp"
   port            = 4505
 }
@@ -585,7 +634,7 @@ resource azurerm_private_dns_a_record cache_hs {
   name                = var.dnsRecord.name
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = var.existingNetwork.enable ? var.existingNetwork.privateDns.zoneName : data.azurerm_private_dns_zone.studio.name
-  records             = var.hsCache.privateDnsTier.metadata ? [local.hsHighAvailability ? azurerm_lb.hs_metadata[0].frontend_ip_configuration[0].private_ip_address : azurerm_linux_virtual_machine.hs_metadata[local.hsMetadataNodes[0].machine.name].private_ip_address] : [for vm in azurerm_linux_virtual_machine.hs_data : vm.private_ip_address]
+  records             = [var.hsCache.privateDnsTier.metadata ? local.hsHighAvailability ? azurerm_lb.hs_metadata[0].frontend_ip_configuration[0].private_ip_address : azurerm_linux_virtual_machine.hs_metadata[local.hsMetadataNodes[0].machine.name].private_ip_address : azurerm_lb.hs_data[0].frontend_ip_configuration[0].private_ip_address]
   ttl                 = var.dnsRecord.ttlSeconds
 }
 

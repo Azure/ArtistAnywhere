@@ -340,7 +340,7 @@ networkPeering = {
   allowRemoteForwardedTraffic = true
   allowGatewayTransit         = true
   useRemoteGateways = {
-    compute = true
+    compute = false
     storage = false
   }
 }

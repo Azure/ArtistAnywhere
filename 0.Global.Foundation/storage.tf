@@ -77,6 +77,6 @@ resource azurerm_storage_container studio {
   for_each = {
     for containerName in module.global.storage.containerName : containerName => containerName
   }
-  name                 = each.value
-  storage_account_name = azurerm_storage_account.studio.name
+  name               = each.value
+  storage_account_id = azurerm_storage_account.studio.id
 }
