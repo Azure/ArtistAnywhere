@@ -92,7 +92,7 @@ if ($gpuProvider -eq "AMD") {
   Write-Host "Customize (End): NVIDIA GPU (GRID)"
 
   Write-Host "Customize (Start): NVIDIA GPU (CUDA)"
-  $version = $buildConfig.version.nvidiaCUDA
+  $version = $buildConfig.version.nvidia_cuda
   $fileType = "nvidia-gpu-cuda"
   $fileName = "cuda_${version}_windows_network.exe"
   $fileLink = "$binHostUrl/NVIDIA/CUDA/$version/$fileName"
@@ -101,7 +101,7 @@ if ($gpuProvider -eq "AMD") {
   Write-Host "Customize (End): NVIDIA GPU (CUDA)"
 
   Write-Host "Customize (Start): NVIDIA OptiX"
-  $version = $buildConfig.version.nvidiaOptiX
+  $version = $buildConfig.version.nvidia_optix
   $fileType = "nvidia-optix"
   $fileName = "NVIDIA-OptiX-SDK-$version-win64.exe"
   $fileLink = "$binHostUrl/NVIDIA/OptiX/$version/$fileName"
@@ -110,7 +110,7 @@ if ($gpuProvider -eq "AMD") {
   $sdkDirectory = "C:\ProgramData\NVIDIA Corporation\OptiX SDK $version\SDK"
   $buildDirectory = "$sdkDirectory\build"
   New-Item -ItemType Directory $buildDirectory
-  $version = ($buildConfig.version.nvidiaCUDA -split '\.')[0..1] -join '.'
+  $version = ($buildConfig.version.nvidia_cuda -split '\.')[0..1] -join '.'
   RunProcess "$binPathCMake\cmake.exe" "-B ""$buildDirectory"" -S ""$sdkDirectory"" -D CUDA_TOOLKIT_ROOT_DIR=""C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v$version""" "$binDirectory\$fileType-1"
   RunProcess "$binPathMSBuild\MSBuild.exe" """$buildDirectory\OptiX-Samples.sln"" -p:Configuration=Release" "$binDirectory\$fileType-2"
   $binPaths += ";$buildDirectory\bin\Release"
@@ -137,7 +137,7 @@ if ($machineType -eq "Farm") {
 
 if ($machineType -eq "Workstation") {
   Write-Host "Customize (Start): HP Anyware"
-  $version = $buildConfig.version.hpAnywareAgent
+  $version = $buildConfig.version.hp_anyware_agent
   $fileType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
   $fileName = "${fileType}_$version.exe"
   $fileLink = "$binHostUrl/Teradici/$version/$fileName"

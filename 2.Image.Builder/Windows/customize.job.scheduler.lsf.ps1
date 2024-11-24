@@ -7,7 +7,7 @@ param (
 Write-Host "Customize (Start): Job Scheduler (LSF)"
 
 if ($machineType -ne "Storage") {
-  $version = $buildConfig.version.jobSchedulerLSF
+  $version = $buildConfig.version.job_scheduler_lsf
   # $installRoot = "C:\LSF"
 
   Write-Host "Customize (Start): LSF Download"

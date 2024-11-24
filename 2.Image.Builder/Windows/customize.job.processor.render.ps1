@@ -8,7 +8,7 @@ Write-Host "Customize (Start): Job Processor (Render)"
 
 if ($jobProcessors -contains "PBRT") {
   Write-Host "Customize (Start): PBRT"
-  $version = $buildConfig.version.jobProcessorPBRT
+  $version = $buildConfig.version.job_processor_pbrt
   $fileType = "pbrt"
   $filePath = "C:\Program Files\PBRT"
   New-Item -ItemType Directory -Path "$filePath" -Force
@@ -21,7 +21,7 @@ if ($jobProcessors -contains "PBRT") {
 
 if ($jobProcessors -contains "Blender") {
   Write-Host "Customize (Start): Blender"
-  $version = $buildConfig.version.jobProcessorBlender
+  $version = $buildConfig.version.job_processor_blender
   $fileType = "blender"
   $fileName = "$fileType-$version-windows-x64.msi"
   $fileLink = "$binHostUrl/Blender/$version/$fileName"

@@ -5,7 +5,7 @@ source /tmp/functions.sh
 echo "Customize (Start): Job Scheduler (Deadline)"
 
 if [ $machineType != Storage ]; then
-  version=$(echo $buildConfig | jq -r .version.jobSchedulerDeadline)
+  version=$(echo $buildConfig | jq -r .version.job_scheduler_deadline)
   installRoot="/deadline"
   databaseHost=$(hostname)
   databasePort=27017

@@ -7,7 +7,7 @@ param (
 Write-Host "Customize (Start): Job Scheduler (Deadline)"
 
 if ($machineType -ne "Storage") {
-  $version = $buildConfig.version.jobSchedulerDeadline
+  $version = $buildConfig.version.job_scheduler_deadline
   $installRoot = "C:\Deadline"
   $databaseHost = $(hostname)
   $databasePath = "C:\DeadlineData"

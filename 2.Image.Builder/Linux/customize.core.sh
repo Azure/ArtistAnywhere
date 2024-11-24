@@ -8,7 +8,7 @@ echo "Customize (Start): Image Build Platform"
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
 dnf -y install epel-release python3-devel gcc gcc-c++ perl lsof cmake bzip2 git
 export AZNFS_NONINTERACTIVE_INSTALL=1
-version=$(echo $buildConfig | jq -r .version.azBlobNFSMount)
+version=$(echo $buildConfig | jq -r .version.az_blob_nfs_mount)
 curl -L https://github.com/Azure/AZNFS-mount/releases/download/$version/aznfs_install.sh | bash
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): Image Build Platform (Workstation)"
@@ -58,7 +58,7 @@ if [ "$gpuProvider" == NVIDIA ]; then
   echo "Customize (End): NVIDIA GPU (CUDA)"
 
   echo "Customize (Start): NVIDIA OptiX"
-  version=$(echo $buildConfig | jq -r .version.nvidiaOptiX)
+  version=$(echo $buildConfig | jq -r .version.nvidia_optix)
   fileType="nvidia-optix"
   fileName="NVIDIA-OptiX-SDK-$version-linux64-x86_64.sh"
   fileLink="$binHostUrl/NVIDIA/OptiX/$version/$fileName"
@@ -90,7 +90,7 @@ fi
 
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): HP Anyware"
-  version=$(echo $buildConfig | jq -r .version.hpAnywareAgent)
+  version=$(echo $buildConfig | jq -r .version.hp_anyware_agent)
   [ "$gpuProvider" == "" ] && fileType="pcoip-agent-standard" || fileType="pcoip-agent-graphics"
   fileName="pcoip-agent-offline-rocky9.4_$version-1.el9.x86_64.tar.gz"
   fileLink="$binHostUrl/Teradici/$version/$fileName"

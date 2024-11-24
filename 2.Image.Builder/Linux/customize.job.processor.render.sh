@@ -6,7 +6,7 @@ echo "Customize (Start): Job Processor (Render)"
 
 if [[ $jobProcessors == *PBRT* ]]; then
   echo "Customize (Start): PBRT"
-  version=$(echo $buildConfig | jq -r .version.jobProcessorPBRT)
+  version=$(echo $buildConfig | jq -r .version.job_processor_pbrt)
   fileType="pbrt"
   filePath="/usr/local/$fileType"
   mkdir -p $filePath
@@ -24,7 +24,7 @@ fi
 
 if [[ $jobProcessors == *Blender* ]]; then
   echo "Customize (Start): Blender"
-  version=$(echo $buildConfig | jq -r .version.jobProcessorBlender)
+  version=$(echo $buildConfig | jq -r .version.job_processor_blender)
   hostType="linux-x64"
   fileType="blender"
   filePath="/usr/local/$fileType"

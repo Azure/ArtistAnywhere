@@ -5,7 +5,7 @@ source /tmp/functions.sh
 echo "Customize (Start): Job Scheduler (LSF)"
 
 if [ $machineType != Storage ]; then
-  version=$(echo $buildConfig | jq -r .version.jobSchedulerLSF)
+  version=$(echo $buildConfig | jq -r .version.job_scheduler_lsf)
   installRoot="/lsf"
   binPathJobScheduler="$installRoot/10.1/linux2.6-glibc2.3-x86_64/bin"
 
