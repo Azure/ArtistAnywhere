@@ -6,7 +6,7 @@ echo "Customize (Start): Core"
 
 echo "Customize (Start): Image Build Platform"
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-dnf -y install epel-release python3-devel gcc gcc-c++ perl lsof cmake bzip2 git
+dnf -y install epel-release python3-devel gcc gcc-c++ perl lsof cmake bzip2 git openssh
 export AZNFS_NONINTERACTIVE_INSTALL=1
 version=$(echo $buildConfig | jq -r .version.az_blob_nfs_mount)
 curl -L https://github.com/Azure/AZNFS-mount/releases/download/$version/aznfs_install.sh | bash
