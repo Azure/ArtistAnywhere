@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">=1.9.8"
+  required_version = ">=1.10.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.10.0"
+      version = "~>4.12.0"
     }
   }
   backend azurerm {
@@ -32,7 +32,7 @@ provider azurerm {
 }
 
 module global {
-  source = "../0.Global.Foundation/cfg"
+  source = "../0.Global.Foundation/config"
 }
 
 variable resourceGroupName {
@@ -94,15 +94,6 @@ data azurerm_log_analytics_workspace studio {
   resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
 }
 
-data azurerm_app_configuration studio {
-  name                = module.global.appConfig.name
-  resource_group_name = module.global.resourceGroupName
-}
-
-data azurerm_app_configuration_keys studio {
-  configuration_store_id = data.azurerm_app_configuration.studio.id
-}
-
 data terraform_remote_state global {
   backend = "local"
   config = {
@@ -132,7 +123,7 @@ data terraform_remote_state image {
   }
 }
 
-data azurerm_virtual_network studio_region {
+data azurerm_virtual_network studio {
   name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetworks[0].name
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }

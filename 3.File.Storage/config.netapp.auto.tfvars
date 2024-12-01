@@ -5,10 +5,6 @@
 netAppFiles = {
   enable = false
   name   = "xstudio"
-  dnsRecord = {
-    namePrefix = "anf"
-    ttlSeconds = 300
-  }
   capacityPools = [
     {
       enable  = true

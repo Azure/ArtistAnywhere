@@ -71,14 +71,14 @@ resource time_sleep lustre_storage_rbac {
   ]
 }
 
-resource azurerm_managed_lustre_file_system lab {
+resource azurerm_managed_lustre_file_system studio {
   count                  = var.lustre.enable ? 1 : 0
   name                   = var.lustre.name
   resource_group_name    = azurerm_resource_group.lustre[0].name
   location               = azurerm_resource_group.lustre[0].location
   sku_name               = var.lustre.tier
   storage_capacity_in_tb = var.lustre.sizeTiB
-  subnet_id              = data.azurerm_subnet.storage_region.id
+  subnet_id              = data.azurerm_subnet.storage.id
   zones                  = ["1"]
   identity {
     type = "UserAssigned"
@@ -112,13 +112,13 @@ resource azurerm_managed_lustre_file_system lab {
 }
 
 resource azurerm_storage_container lustre {
-  count                = var.lustre.enable && var.lustre.blobStorage.enable ? 1 : 0
-  name                 = var.lustre.blobStorage.containerName.archive
-  storage_account_name = var.lustre.blobStorage.accountName
+  count              = var.lustre.enable && var.lustre.blobStorage.enable ? 1 : 0
+  name               = var.lustre.blobStorage.containerName.archive
+  storage_account_id = data.azurerm_storage_account.lustre[0].id
 }
 
 resource azurerm_storage_container lustre_logging {
-  count                = var.lustre.enable && var.lustre.blobStorage.enable ? 1 : 0
-  name                 = var.lustre.blobStorage.containerName.logging
-  storage_account_name = var.lustre.blobStorage.accountName
+  count              = var.lustre.enable && var.lustre.blobStorage.enable ? 1 : 0
+  name               = var.lustre.blobStorage.containerName.logging
+  storage_account_id = data.azurerm_storage_account.lustre[0].id
 }

@@ -1,34 +1,19 @@
 resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
-######################################################################################################
-# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) #
-######################################################################################################
+###################################################
+# Hammerspace (https://www.hammerspace.com/azure) #
+###################################################
 
-hsCache = {
+hammerspace = {
   enable     = false
   version    = "24.06.19"
   namePrefix = "xstudio"
   domainName = "azure.studio"
-  activeDirectory = {
-    enable   = false
-    realm    = "azure.studio"
-    orgUnit  = ""
-    username = ""
-    password = ""
-  }
   metadata = { # Anvil
     machine = {
       namePrefix = "-anvil"
-      size       = "Standard_E4as_v5"
-      count      = 2
-      adminLogin = {
-        userName     = ""
-        userPassword = ""
-        sshKeyPublic = ""
-        passwordAuth = {
-          disable = true
-        }
-      }
+      size       = "Standard_E8as_v5"
+      count      = 1
       osDisk = {
         storageType = "Premium_LRS"
         cachingType = "ReadWrite"
@@ -37,7 +22,15 @@ hsCache = {
       dataDisk = {
         storageType = "Premium_LRS"
         cachingType = "None"
-        sizeGB      = 256
+        sizeGB      = 1024
+      }
+      adminLogin = {
+        userName     = ""
+        userPassword = ""
+        sshKeyPublic = ""
+        passwordAuth = {
+          disable = true
+        }
       }
     }
     network = {
@@ -50,15 +43,7 @@ hsCache = {
     machine = {
       namePrefix = "-dsx"
       size       = "Standard_E32as_v5"
-      count      = 3
-      adminLogin = {
-        userName     = ""
-        userPassword = ""
-        sshKeyPublic = ""
-        passwordAuth = {
-          disable = true
-        }
-      }
+      count      = 2
       osDisk = {
         storageType = "Premium_LRS"
         cachingType = "ReadWrite"
@@ -67,10 +52,18 @@ hsCache = {
       dataDisk = {
         storageType = "Premium_LRS"
         cachingType = "None"
-        sizeGB      = 256
-        count       = 3
+        sizeGB      = 1024
+        count       = 4
         raid0 = {
           enable = false
+        }
+      }
+      adminLogin = {
+        userName     = ""
+        userPassword = ""
+        sshKeyPublic = ""
+        passwordAuth = {
+          disable = true
         }
       }
     }
@@ -83,62 +76,73 @@ hsCache = {
   proximityPlacementGroup = { # https://learn.microsoft.com/azure/virtual-machines/co-location
     enable = false
   }
-  privateDnsTier = {
-    metadata = false
-  }
+  storageAccounts = [
+    {
+      enable    = false
+      name      = ""
+      accessKey = ""
+    }
+  ]
   shares = [
     {
-      enable = true
-      name   = "volume1"
-      path   = "/volume1"
-      size   = 0
-      export = "*,ro,no-root-squash,insecure"
-    },
-    {
-      enable = true
-      name   = "volume2"
-      path   = "/volume2"
+      enable = false
+      name   = "cache"
+      path   = "/cache"
       size   = 0
       export = "*,ro,no-root-squash,insecure"
     }
   ]
-  storageTargets = [
+  volumes = [
     {
-      enable = true
+      enable = false
+      name   = "volume1"
+      type   = "READ_ONLY"
+      path   = "/volume1"
       node = {
-        name = "anf-node1"
-        type = "OTHER"
-        ip   = "10.1.193.4"
+        name    = "node1"
+        type    = "OTHER"
+        address = "10.1.193.4"
       }
-      volume = {
-        name      = "anf-volume1"
-        type      = "READ_ONLY"
-        path      = "/volume1"
-        shareName = "volume1"
+      assimilation = {
+        enable = true
+        share = {
+          name = "cache"
+          path = {
+            source      = "/"
+            destination = "/moana"
+          }
+        }
       }
     },
     {
-      enable = true
+      enable = false
+      name   = "volume2"
+      type   = "READ_ONLY"
+      path   = "/volume2"
       node = {
-        name = "anf-node2"
-        type = "OTHER"
-        ip   = "10.1.193.4"
+        name    = "node2"
+        type    = "OTHER"
+        address = "10.1.193.5"
       }
-      volume = {
-        name      = "anf-volume2"
-        type      = "READ_ONLY"
-        path      = "/volume2"
-        shareName = "volume2"
+      assimilation = {
+        enable = true
+        share = {
+          name = "cache"
+          path = {
+            source      = "/"
+            destination = "/blender"
+          }
+        }
       }
     }
   ]
   volumeGroups = [
     {
-      enable = true
-      name   = "anf"
+      enable = false
+      name   = "cache"
       volumeNames = [
-        "anf-volume1",
-        "anf-volume2"
+        "volume1",
+        "volume2"
       ]
     }
   ]
@@ -241,16 +245,14 @@ storageTargets = [
   }
 ]
 
-##################################################
-# Pre-Existing Resource Dependency Configuration #
-##################################################
+##########################
+# Pre-Existing Resources #
+##########################
 
 existingNetwork = {
   enable            = false
   name              = ""
   subnetName        = ""
-  subnetNameHA      = ""
-  regionName        = ""
   resourceGroupName = ""
   privateDns = {
     zoneName          = ""

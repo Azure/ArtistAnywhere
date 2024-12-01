@@ -55,10 +55,11 @@ resource azurerm_shared_image studio {
   }
 }
 
-output linuxPlan {
+output linux {
   value = !var.computeGallery.platform.linux.enable || length(local.imageDefinitionLinux) == 0 ? null : {
     publisher = lower(local.imageDefinitionLinux[0].publisher)
     offer     = lower(local.imageDefinitionLinux[0].offer)
     sku       = lower(local.imageDefinitionLinux[0].sku)
+    version   = var.computeGallery.platform.linux.version
   }
 }

@@ -73,20 +73,6 @@ keyVault = {
   ]
 }
 
-##########################################################################################
-# App Configuration (https://learn.microsoft.com/azure/azure-app-configuration/overview) #
-##########################################################################################
-
-appConfig = {
-  tier = "standard"
-  localAuth = {
-    enable = false
-  }
-  encryption = {
-    enable = false
-  }
-}
-
 ######################################################################
 # Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
 ######################################################################
@@ -96,9 +82,9 @@ monitor = {
     tier = "PerGB2018"
   }
   appInsight = {
-    type = "web"
+    type = "other"
   }
-  retentionDays = 90
+  retentionDays = 365
 }
 
 #########################################################################

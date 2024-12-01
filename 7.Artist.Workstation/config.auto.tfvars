@@ -223,9 +223,9 @@ virtualMachines = [
   }
 ]
 
-##################################################
-# Pre-Existing Resource Dependency Configuration #
-##################################################
+##########################
+# Pre-Existing Resources #
+##########################
 
 activeDirectory = {
   enable           = false

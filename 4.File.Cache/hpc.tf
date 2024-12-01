@@ -22,18 +22,24 @@ data azuread_service_principal hpc_cache {
   display_name = "HPC Cache Resource Provider"
 }
 
+locals {
+  nfsBlobStorageAccount = one([
+    for storageTarget in var.storageTargets : storageTarget if storageTarget.enable && storageTarget.containerName != ""
+  ])
+}
+
 resource azurerm_role_assignment storage_account_contributor {
-  count                = var.hpcCache.enable ? 1 : 0
+  count                = var.hpcCache.enable && local.nfsBlobStorageAccount != null ? 1 : 0
   role_definition_name = "Storage Account Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-account-contributor
   principal_id         = data.azuread_service_principal.hpc_cache[0].object_id
-  scope                = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${local.nfsStorageAccount.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.nfsStorageAccount.name}"
+  scope                = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${local.nfsBlobStorageAccount.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.nfsBlobStorageAccount.name}"
 }
 
 resource azurerm_role_assignment storage_blob_data_contributor {
-  count                = var.hpcCache.enable ? 1 : 0
+  count                = var.hpcCache.enable && local.nfsBlobStorageAccount != null ? 1 : 0
   role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
   principal_id         = data.azuread_service_principal.hpc_cache[0].object_id
-  scope                = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${local.nfsStorageAccount.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.nfsStorageAccount.name}"
+  scope                = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${local.nfsBlobStorageAccount.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.nfsBlobStorageAccount.name}"
 }
 
 resource time_sleep hpc_cache_storage_rbac {

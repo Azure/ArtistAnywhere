@@ -15,6 +15,8 @@ if [[ $jobProcessors == *PBRT* ]]; then
   dnf -y install libXinerama-devel
   dnf -y install libXcursor-devel
   dnf -y install libXi-devel
+  dnf -y install libxkbcommon-devel
+  dnf -y install wayland-devel
   RunProcess "git clone --recursive https://github.com/mmp/$fileType-$version.git" $binDirectory/$fileType-1
   RunProcess "cmake -B $filePath -S $binDirectory/$fileType-$version" $binDirectory/$fileType-2
   RunProcess "make -C $filePath" $binDirectory/$fileType-3

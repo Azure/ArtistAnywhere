@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">=1.9.8"
+  required_version = ">=1.10.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.10.0"
+      version = "~>4.12.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -31,7 +31,7 @@ provider azurerm {
 }
 
 module global {
-  source = "../0.Global.Foundation/cfg"
+  source = "../0.Global.Foundation/config"
 }
 
 variable resourceGroupName {
@@ -79,15 +79,6 @@ data azurerm_key_vault_secret service_password {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
-data azurerm_app_configuration studio {
-  name                = module.global.appConfig.name
-  resource_group_name = module.global.resourceGroupName
-}
-
-data azurerm_app_configuration_keys studio {
-  configuration_store_id = data.azurerm_app_configuration.studio.id
-}
-
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
@@ -99,19 +90,19 @@ data terraform_remote_state network {
   }
 }
 
-data azurerm_virtual_network studio_region {
+data azurerm_virtual_network studio {
   name                = data.terraform_remote_state.network.outputs.virtualNetworks[0].name
   resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
 data azurerm_subnet farm {
   name                 = "Farm"
-  resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio_region.name
+  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
 data azurerm_resource_group network {
-  name = data.azurerm_virtual_network.studio_region.resource_group_name
+  name = data.azurerm_virtual_network.studio.resource_group_name
 }
 
 locals {
@@ -122,6 +113,15 @@ locals {
 
 resource azurerm_resource_group image {
   name     = var.resourceGroupName
+  location = module.global.resourceLocation.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
+}
+
+resource azurerm_resource_group image_registry {
+  count    = var.containerRegistry.enable ? 1 : 0
+  name     = "${azurerm_resource_group.image.name}.Registry"
   location = module.global.resourceLocation.regionName
   tags = {
     AAA = basename(path.cwd)

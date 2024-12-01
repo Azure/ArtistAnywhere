@@ -1,14 +1,13 @@
 variable fileSystem {
-  default = { # NetApp Files (ANF)
-    enable = false
+  default = {
     linux = [
       { # File Storage
         enable = false
         mount = {
           type    = "nfs"
           path    = "/mnt/storage"
-          source  = "anf-volume1.azure.studio:/volume1"
-          options = "vers=3,hard,tcp"
+          source  = "storage-data.azure.studio:/volume1"
+          options = "vers=3"
         }
       },
       { # File Cache
@@ -16,8 +15,8 @@ variable fileSystem {
         mount = {
           type    = "nfs"
           path    = "/mnt/cache"
-          source  = "cache.azure.studio:/volume1"
-          options = "defaults"
+          source  = "cache-data.azure.studio:/cache"
+          options = "vers=3"
         }
       },
       { # Job Scheduler
@@ -36,7 +35,7 @@ variable fileSystem {
         mount = {
           type    = ""
           path    = "X:"
-          source  = "\\\\anf-volume1.azure.studio\\volume1"
+          source  = "\\\\storage-data.azure.studio\\volume1"
           options = "-o anon"
         }
       },
@@ -45,7 +44,7 @@ variable fileSystem {
         mount = {
           type    = ""
           path    = "Y:"
-          source  = "\\\\cache.azure.studio\\storage"
+          source  = "\\\\cache-data.azure.studio\\cache"
           options = "-o anon"
         }
       },

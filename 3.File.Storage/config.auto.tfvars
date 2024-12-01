@@ -21,12 +21,8 @@ storageAccounts = [
     ]
     blobContainers = [ # https://learn.microsoft.com/azure/storage/blobs/storage-blobs-introduction
       {
-        enable    = true
-        name      = "storage"
-        fileSystem = {
-          enable  = true
-          rootAcl = "user::rwx,group::rwx,other::rwx"
-        }
+        enable = true
+        name   = "storage"
       }
     ]
     fileShares = [ # https://learn.microsoft.com/azure/storage/files/storage-files-introduction
@@ -63,3 +59,27 @@ storageAccounts = [
     }
   }
 ]
+
+############################################################################
+# Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
+############################################################################
+
+dnsRecord = {
+  name       = "storage"
+  ttlSeconds = 300
+}
+
+##########################
+# Pre-Existing Resources #
+##########################
+
+existingNetwork = {
+  enable            = false
+  name              = ""
+  subnetName        = ""
+  resourceGroupName = ""
+  privateDns = {
+    zoneName          = ""
+    resourceGroupName = ""
+  }
+}

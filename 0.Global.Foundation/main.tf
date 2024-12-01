@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">=1.9.8"
+  required_version = ">=1.10.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.10.0"
+      version = "~>4.12.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -58,7 +58,7 @@ provider azurerm {
 }
 
 module global {
-  source = "./cfg"
+  source = "./config"
 }
 
 data http client_address {

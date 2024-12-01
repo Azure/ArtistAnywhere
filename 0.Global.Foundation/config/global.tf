@@ -149,3 +149,20 @@ output monitor {
 output defender {
   value = var.defender
 }
+
+output version {
+  value = {
+    nvidia_cuda              = "12.6.2"
+    nvidia_optix             = "8.0.0"
+    az_blob_nfs_mount        = "2.0.9"
+    hp_anyware_agent         = "24.07.3"
+    job_scheduler_deadline   = "10.4.0.8"
+    job_scheduler_lsf        = "10.2.0.12"
+    job_processor_pbrt       = "v4"
+    job_processor_blender    = "4.3.0"
+    script_extension_linux   = "2.1"
+    script_extension_windows = "1.10"
+    monitor_agent_linux      = "1.33"
+    monitor_agent_windows    = "1.31"
+  }
+}

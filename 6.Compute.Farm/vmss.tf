@@ -81,11 +81,20 @@ variable virtualMachineScaleSets {
         disable = bool
       })
     })
+    availabilityZones = object({
+      enable  = bool
+      evenDistribution = object({
+        enable = bool
+      })
+    })
     flexMode = object({
       enable = bool
     })
-    faultDomainCount = number
   }))
+}
+
+data azurerm_location region {
+  location = module.global.resourceLocation.regionName
 }
 
 locals {
@@ -98,14 +107,14 @@ locals {
       machine = merge(virtualMachineScaleSet.machine, {
         image = merge(virtualMachineScaleSet.machine.image, {
           plan = {
-            publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher, virtualMachineScaleSet.machine.image.plan.publisher)
-            product   = try(data.terraform_remote_state.image.outputs.linuxPlan.offer, virtualMachineScaleSet.machine.image.plan.product)
-            name      = try(data.terraform_remote_state.image.outputs.linuxPlan.sku, virtualMachineScaleSet.machine.image.plan.name)
+            publisher = try(data.terraform_remote_state.image.outputs.linux.publisher, virtualMachineScaleSet.machine.image.plan.publisher)
+            product   = try(data.terraform_remote_state.image.outputs.linux.offer, virtualMachineScaleSet.machine.image.plan.product)
+            name      = try(data.terraform_remote_state.image.outputs.linux.sku, virtualMachineScaleSet.machine.image.plan.name)
           }
         })
       })
       network = merge(virtualMachineScaleSet.network, {
-        subnetId = "${virtualMachineScaleSet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
+        subnetId = "${virtualMachineScaleSet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
       })
       adminLogin = merge(virtualMachineScaleSet.adminLogin, {
         userName     = virtualMachineScaleSet.adminLogin.userName != "" ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -137,7 +146,8 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
   priority                        = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy                 = each.value.spot.enable ? each.value.spot.evictionPolicy : null
-  platform_fault_domain_count     = each.value.faultDomainCount
+  zones                           = each.value.availabilityZones.enable && length(data.azurerm_location.region.zone_mappings) > 0 ? [for i in range(1, length(data.azurerm_location.region.zone_mappings) + 1) : i] : null
+  zone_balance                    = each.value.availabilityZones.enable && length(data.azurerm_location.region.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
   single_placement_group          = false
   overprovision                   = false
   identity {
@@ -182,7 +192,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
       name                       = each.value.extension.custom.name
       type                       = "CustomScript"
       publisher                  = "Microsoft.Azure.Extensions"
-      type_handler_version       = "2.1"
+      type_handler_version       = module.global.version.script_extension_linux
       automatic_upgrade_enabled  = false
       auto_upgrade_minor_version = true
       protected_settings = jsonencode({
@@ -216,7 +226,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
       name                       = each.value.extension.monitor.name
       type                       = "AzureMonitorLinuxAgent"
       publisher                  = "Microsoft.Azure.Monitor"
-      type_handler_version       = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionLinux])
+      type_handler_version       = module.global.version.monitor_agent_linux
       automatic_upgrade_enabled  = true
       auto_upgrade_minor_version = true
       settings = jsonencode({
@@ -264,21 +274,22 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "windows" && !virtualMachineScaleSet.flexMode.enable
   }
-  name                        = each.value.name
-  computer_name_prefix        = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
-  resource_group_name         = azurerm_resource_group.farm.name
-  location                    = each.value.resourceLocation.regionName
-  edge_zone                   = each.value.resourceLocation.extendedZoneName
-  sku                         = each.value.machine.size
-  instances                   = each.value.machine.count
-  source_image_id             = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
-  admin_username              = each.value.adminLogin.userName
-  admin_password              = each.value.adminLogin.userPassword
-  priority                    = each.value.spot.enable ? "Spot" : "Regular"
-  eviction_policy             = each.value.spot.enable ? each.value.spot.evictionPolicy : null
-  platform_fault_domain_count = each.value.faultDomainCount
-  single_placement_group      = false
-  overprovision               = false
+  name                   = each.value.name
+  computer_name_prefix   = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
+  resource_group_name    = azurerm_resource_group.farm.name
+  location               = each.value.resourceLocation.regionName
+  edge_zone              = each.value.resourceLocation.extendedZoneName
+  sku                    = each.value.machine.size
+  instances              = each.value.machine.count
+  source_image_id        = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+  admin_username         = each.value.adminLogin.userName
+  admin_password         = each.value.adminLogin.userPassword
+  priority               = each.value.spot.enable ? "Spot" : "Regular"
+  eviction_policy        = each.value.spot.enable ? each.value.spot.evictionPolicy : null
+  zones                  = each.value.availabilityZones.enable && length(data.azurerm_location.region.zone_mappings) > 0 ? [for i in range(1, length(data.azurerm_location.region.zone_mappings) + 1) : i] : null
+  zone_balance           = each.value.availabilityZones.enable && length(data.azurerm_location.region.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
+  single_placement_group = false
+  overprovision          = false
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -313,7 +324,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
       name                       = each.value.extension.custom.name
       type                       = "CustomScriptExtension"
       publisher                  = "Microsoft.Compute"
-      type_handler_version       = "1.10"
+      type_handler_version       = module.global.version.script_extension_windows
       automatic_upgrade_enabled  = false
       auto_upgrade_minor_version = true
       protected_settings = jsonencode({
@@ -348,7 +359,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
       name                       = each.value.extension.monitor.name
       type                       = "AzureMonitorWindowsAgent"
       publisher                  = "Microsoft.Azure.Monitor"
-      type_handler_version       = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionWindows])
+      type_handler_version       = module.global.version.monitor_agent_windows
       automatic_upgrade_enabled  = true
       auto_upgrade_minor_version = true
       settings = jsonencode({
@@ -398,7 +409,9 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
   source_image_id             = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   priority                    = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy             = each.value.spot.enable ? each.value.spot.evictionPolicy : null
-  platform_fault_domain_count = each.value.faultDomainCount
+  zones                       = each.value.availabilityZones.enable && length(data.azurerm_location.region.zone_mappings) > 0 ? [for i in range(1, length(data.azurerm_location.region.zone_mappings) + 1) : i] : null
+  zone_balance                = each.value.availabilityZones.enable && length(data.azurerm_location.region.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
+  platform_fault_domain_count = each.value.availabilityZones.enable || each.value.spot.enable ? 1 : 3
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -467,7 +480,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
       name                               = each.value.extension.custom.name
       type                               = lower(each.value.osDisk.type) == "windows" ? "CustomScriptExtension" :"CustomScript"
       publisher                          = lower(each.value.osDisk.type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
-      type_handler_version               = lower(each.value.osDisk.type) == "windows" ? "1.10" : "2.1"
+      type_handler_version               = lower(each.value.osDisk.type) == "windows" ? module.global.version.script_extension_windows : module.global.version.script_extension_linux
       auto_upgrade_minor_version_enabled = true
       protected_settings = jsonencode({
         script = lower(each.value.osDisk.type) == "windows" ? null : base64encode(
@@ -505,7 +518,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
       name                               = each.value.extension.monitor.name
       type                               = lower(each.value.osDisk.type) == "windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
       publisher                          = "Microsoft.Azure.Monitor"
-      type_handler_version               = lower(each.value.osDisk.type) == "windows" ? one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionWindows]) : one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionLinux])
+      type_handler_version               = lower(each.value.osDisk.type) == "windows" ? module.global.version.monitor_agent_windows : module.global.version.monitor_agent_linux
       auto_upgrade_minor_version_enabled = true
       settings = jsonencode({
         authentication = {

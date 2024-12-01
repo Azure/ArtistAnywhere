@@ -77,13 +77,13 @@ locals {
       }
       image = merge(virtualMachine.image, {
         plan = {
-          publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher, virtualMachine.image.plan.publisher)
-          product   = try(data.terraform_remote_state.image.outputs.linuxPlan.offer, virtualMachine.image.plan.product)
-          name      = try(data.terraform_remote_state.image.outputs.linuxPlan.sku, virtualMachine.image.plan.name)
+          publisher = try(data.terraform_remote_state.image.outputs.linux.publisher, virtualMachine.image.plan.publisher)
+          product   = try(data.terraform_remote_state.image.outputs.linux.offer, virtualMachine.image.plan.product)
+          name      = try(data.terraform_remote_state.image.outputs.linux.sku, virtualMachine.image.plan.name)
         }
       })
       network = merge(virtualMachine.network, {
-        subnetId = "${virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
+        subnetId = "${virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
       })
       adminLogin = merge(virtualMachine.adminLogin, {
         userName     = virtualMachine.adminLogin.userName != "" ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -166,7 +166,7 @@ resource azurerm_virtual_machine_extension job_scheduler_initialize_linux {
   name                       = each.value.extension.custom.name
   type                       = "CustomScript"
   publisher                  = "Microsoft.Azure.Extensions"
-  type_handler_version       = "2.1"
+  type_handler_version       = module.global.version.script_extension_linux
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
   virtual_machine_id         = "${azurerm_resource_group.job_scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
@@ -187,7 +187,7 @@ resource azurerm_virtual_machine_extension job_scheduler_monitor_linux {
   name                       = each.value.extension.monitor.name
   type                       = "AzureMonitorLinuxAgent"
   publisher                  = "Microsoft.Azure.Monitor"
-  type_handler_version       = one([for x in data.azurerm_app_configuration_keys.studio.items : x.value if x.key == module.global.appConfig.key.monitorAgentVersionLinux])
+  type_handler_version       = module.global.version.monitor_agent_linux
   automatic_upgrade_enabled  = true
   auto_upgrade_minor_version = true
   virtual_machine_id         = "${azurerm_resource_group.job_scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
@@ -251,7 +251,7 @@ resource azurerm_virtual_machine_extension job_scheduler_initialize_windows {
   name                       = each.value.extension.custom.name
   type                       = "CustomScriptExtension"
   publisher                  = "Microsoft.Compute"
-  type_handler_version       = "1.10"
+  type_handler_version       = module.global.version.script_extension_windows
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
   virtual_machine_id         = "${azurerm_resource_group.job_scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
@@ -275,7 +275,7 @@ resource azurerm_virtual_machine_extension job_scheduler_monitor_windows {
   name                       = each.value.extension.monitor.name
   type                       = "AzureMonitorWindowsAgent"
   publisher                  = "Microsoft.Azure.Monitor"
-  type_handler_version       = data.azurerm_app_configuration_keys.studio.items[module.global.appConfig.key.monitorAgentVersionWindows]
+  type_handler_version       = module.global.version.monitor_agent_windows
   automatic_upgrade_enabled  = true
   auto_upgrade_minor_version = true
   virtual_machine_id         = "${azurerm_resource_group.job_scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"

@@ -6,10 +6,6 @@ variable netAppFiles {
   type = object({
     enable = bool
     name   = string
-    dnsRecord = object({
-      namePrefix = string
-      ttlSeconds = number
-    })
     capacityPools = list(object({
       enable  = bool
       name    = string
@@ -49,8 +45,8 @@ variable netAppFiles {
 data azurerm_subnet storage_netapp {
   count                = var.netAppFiles.enable ? 1 : 0
   name                 = "StorageNetApp"
-  resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio_region.name
+  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
 locals {
@@ -212,12 +208,9 @@ resource azapi_resource volume {
 ############################################################################
 
 resource azurerm_private_dns_a_record netapp {
-  for_each = {
-    for volume in local.netAppVolumes : "${volume.capacityPoolName}-${volume.name}" => volume
-  }
-  name                = "${var.netAppFiles.dnsRecord.namePrefix}-${lower(each.value.name)}"
+  name                = "${var.dnsRecord.name}-data"
   resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = data.azurerm_private_dns_zone.studio.name
-  records             = azapi_resource.volume[each.key].output.properties.mountTargets[*].ipAddress
-  ttl                 = var.netAppFiles.dnsRecord.ttlSeconds
+  records             = distinct([for volume in azapi_resource.volume : volume.output.properties.mountTargets[0].ipAddress])
+  ttl                 = var.dnsRecord.ttlSeconds
 }

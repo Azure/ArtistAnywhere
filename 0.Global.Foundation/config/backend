@@ -1,0 +1,8 @@
+#######################################################################
+# Terraform Azure Resource Manager (ARM) backend state storage config #
+# https://developer.hashicorp.com/terraform/language/backend/azurerm  #
+#######################################################################
+
+resource_group_name  = "ArtistAnywhere"  # Set to same value in global.tf file as resourceGroupName
+storage_account_name = "xstudio0"        # Set to same value in global.tf file as storage.accountName
+container_name       = "terraform-state" # Set to same value in global.tf file as storage.containerName.terraformState

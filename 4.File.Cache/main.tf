@@ -1,17 +1,13 @@
 terraform {
-  required_version = ">=1.9.8"
+  required_version = ">=1.10.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.10.0"
+      version = "~>4.12.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
       version = "~>3.0.0"
-    }
-    local = {
-      source  = "hashicorp/local"
-      version = "~>2.5.0"
     }
     avere = {
       source  = "hashicorp/avere"
@@ -48,11 +44,156 @@ provider azurerm {
 }
 
 module global {
-  source = "../0.Global.Foundation/cfg"
+  source = "../0.Global.Foundation/config"
+}
+
+module hammerspace {
+  count       = var.hammerspace.enable ? 1 : 0
+  source      = "../3.File.Storage/Hammerspace"
+  hammerspace = var.hammerspace
+  resourceGroup = {
+    name     = azurerm_resource_group.cache.name
+    location = azurerm_resource_group.cache.location
+  }
+  virtualNetwork = {
+    name              = data.azurerm_subnet.cache.virtual_network_name
+    subnetName        = data.azurerm_subnet.cache.name
+    resourceGroupName = data.azurerm_subnet.cache.resource_group_name
+  }
+  privateDns = {
+    zoneName          = data.azurerm_private_dns_zone.studio.name
+    resourceGroupName = data.azurerm_private_dns_zone.studio.resource_group_name
+    aRecord = {
+      name       = var.dnsRecord.name
+      ttlSeconds = var.dnsRecord.ttlSeconds
+    }
+  }
+  adminLogin = {
+    userName     = data.azurerm_key_vault_secret.admin_username.value
+    userPassword = data.azurerm_key_vault_secret.admin_password.value
+    sshKeyPublic = data.azurerm_key_vault_secret.ssh_key_public.value
+  }
+  depends_on = [
+    azurerm_resource_group.cache
+  ]
 }
 
 variable resourceGroupName {
   type = string
+}
+
+variable hammerspace {
+  type = object({
+    enable     = bool
+    version    = string
+    namePrefix = string
+    domainName = string
+    metadata = object({
+      machine = object({
+        namePrefix = string
+        size       = string
+        count      = number
+        osDisk = object({
+          storageType = string
+          cachingType = string
+          sizeGB      = number
+        })
+        dataDisk = object({
+          storageType = string
+          cachingType = string
+          sizeGB      = number
+        })
+        adminLogin = object({
+          userName     = string
+          userPassword = string
+          sshKeyPublic = string
+          passwordAuth = object({
+            disable = bool
+          })
+        })
+      })
+      network = object({
+        acceleration = object({
+          enable = bool
+        })
+      })
+    })
+    data = object({
+      machine = object({
+        namePrefix = string
+        size       = string
+        count      = number
+        osDisk = object({
+          storageType = string
+          cachingType = string
+          sizeGB      = number
+        })
+        dataDisk = object({
+          storageType = string
+          cachingType = string
+          sizeGB      = number
+          count       = number
+          raid0 = object({
+            enable = bool
+          })
+        })
+        adminLogin = object({
+          userName     = string
+          userPassword = string
+          sshKeyPublic = string
+          passwordAuth = object({
+            disable = bool
+          })
+        })
+      })
+      network = object({
+        acceleration = object({
+          enable = bool
+        })
+      })
+    })
+    proximityPlacementGroup = object({
+      enable = bool
+    })
+    storageAccounts = list(object({
+      enable    = bool
+      name      = string
+      accessKey = string
+    }))
+    shares = list(object({
+      enable = bool
+      name   = string
+      path   = string
+      size   = number
+      export = string
+    }))
+    volumes = list(object({
+      enable = bool
+      name   = string
+      type   = string
+      path   = string
+      node = object({
+        name    = string
+        type    = string
+        address = string
+      })
+      assimilation = object({
+        enable = bool
+        share = object({
+          name = string
+          path = object({
+            source      = string
+            destination = string
+          })
+        })
+      })
+    }))
+    volumeGroups = list(object({
+      enable      = bool
+      name        = string
+      volumeNames = list(string)
+    }))
+  })
 }
 
 variable storageTargets {
@@ -88,8 +229,6 @@ variable existingNetwork {
     enable            = bool
     name              = string
     subnetName        = string
-    subnetNameHA      = string
-    regionName        = string
     resourceGroupName = string
     privateDns = object({
       zoneName          = string
@@ -133,15 +272,6 @@ data azurerm_log_analytics_workspace studio {
   resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
 }
 
-data azurerm_app_configuration studio {
-  name                = module.global.appConfig.name
-  resource_group_name = module.global.resourceGroupName
-}
-
-data azurerm_app_configuration_keys studio {
-  configuration_store_id = data.azurerm_app_configuration.studio.id
-}
-
 data terraform_remote_state global {
   backend = "local"
   config = {
@@ -171,30 +301,20 @@ data terraform_remote_state storage {
   }
 }
 
-data azurerm_virtual_network studio_region {
+data azurerm_virtual_network studio {
   name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetworks[0].name
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
 data azurerm_subnet cache {
   name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Cache"
-  resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio_region.name
-}
-
-data azurerm_subnet cache_ha {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameHA : "CacheHA"
-  resource_group_name  = data.azurerm_virtual_network.studio_region.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio_region.name
+  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
 data azurerm_private_dns_zone studio {
   name                = var.existingNetwork.enable ? var.existingNetwork.privateDns.zoneName : data.terraform_remote_state.network.outputs.privateDns.zoneName
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.privateDns.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
-}
-
-locals {
-  nfsStorageAccount = try(data.terraform_remote_state.storage.outputs.nfsStorageAccount, {})
 }
 
 resource azurerm_resource_group cache {
@@ -203,4 +323,12 @@ resource azurerm_resource_group cache {
   tags = {
     AAA = basename(path.cwd)
   }
+}
+
+output hammerspaceDNSMetadata {
+  value = var.hammerspace.enable ? module.hammerspace[0].dnsMetadata : null
+}
+
+output hammerspaceDNSData {
+  value = var.hammerspace.enable ? module.hammerspace[0].dnsData : null
 }

@@ -76,9 +76,6 @@ resource azurerm_monitor_data_collection_endpoint studio {
   resource_group_name           = azurerm_resource_group.studio_monitor.name
   location                      = azurerm_resource_group.studio_monitor.location
   public_network_access_enabled = false
-  lifecycle {
-    create_before_destroy = true
-  }
   depends_on = [
     azurerm_user_assigned_identity.studio
   ]
@@ -119,6 +116,18 @@ resource azurerm_monitor_data_collection_rule studio {
   depends_on = [
     time_sleep.monitor_data_collection_endpoint
   ]
+}
+
+resource azurerm_monitor_diagnostic_setting key_vault {
+  name                       = azurerm_key_vault.studio.name
+  target_resource_id         = azurerm_key_vault.studio.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.studio.id
+  enabled_log {
+    category = "AuditEvent"
+  }
+  metric {
+    category = "AllMetrics"
+  }
 }
 
 output monitor {

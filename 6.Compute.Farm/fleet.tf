@@ -100,9 +100,9 @@ locals {
       machine = merge(computeFleet.machine, {
         image = merge(computeFleet.machine.image, {
           plan = {
-            publisher = try(data.terraform_remote_state.image.outputs.linuxPlan.publisher, computeFleet.machine.image.plan.publisher)
-            product   = try(data.terraform_remote_state.image.outputs.linuxPlan.offer, computeFleet.machine.image.plan.product)
-            name      = try(data.terraform_remote_state.image.outputs.linuxPlan.sku, computeFleet.machine.image.plan.name)
+            publisher = try(data.terraform_remote_state.image.outputs.linux.publisher, computeFleet.machine.image.plan.publisher)
+            product   = try(data.terraform_remote_state.image.outputs.linux.offer, computeFleet.machine.image.plan.product)
+            name      = try(data.terraform_remote_state.image.outputs.linux.sku, computeFleet.machine.image.plan.name)
           }
         })
         adminLogin = merge(computeFleet.machine.adminLogin, {
@@ -112,7 +112,7 @@ locals {
         })
       })
       network = merge(computeFleet.network, {
-        subnetId = "${computeFleet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio_region.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : computeFleet.network.subnetName}"
+        subnetId = "${computeFleet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : computeFleet.network.subnetName}"
       })
       activeDirectory = merge(var.activeDirectory, {
         adminUsername = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value
@@ -121,6 +121,12 @@ locals {
     }) if computeFleet.enable
   ]
 }
+
+# resource azurerm_role_assignment managed_identity_operator {
+#   role_definition_name = "Managed Identity Operator" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/identity#managed-identity-operator
+#   principal_id         = "abed6e1f-d97c-4920-b0e2-3578e6d46549" # DEV-fleetAadApp
+#   scope                = data.azurerm_user_assigned_identity.studio.id
+# }
 
 resource azapi_resource fleet {
   for_each = {
@@ -137,6 +143,19 @@ resource azapi_resource fleet {
     ]
   }
   body = {
+    # dynamic plan {
+    #   for_each = each.value.machine.image.plan.publisher != "" ? [1] : []
+    #   content {
+    #     publisher = each.value.machine.image.plan.publisher
+    #     product   = each.value.machine.image.plan.product
+    #     name      = each.value.machine.image.plan.name
+    #   }
+    # }
+    # plan = {
+    #   publisher = each.value.machine.image.plan.publisher
+    #   product   = each.value.machine.image.plan.product
+    #   name      = each.value.machine.image.plan.name
+    # }
     properties = {
       computeProfile = {
         baseVirtualMachineProfile = {
@@ -193,7 +212,7 @@ resource azapi_resource fleet {
                 properties = {
                   type                    = lower(each.value.machine.osDisk.type) == "windows" ? "CustomScriptExtension" :"CustomScript"
                   publisher               = lower(each.value.machine.osDisk.type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
-                  typeHandlerVersion      = lower(each.value.machine.osDisk.type) == "windows" ? "1.10" : "2.1"
+                  typeHandlerVersion      = lower(each.value.machine.osDisk.type) == "windows" ? module.global.version.script_extension_windows : module.global.version.script_extension_linux
                   autoUpgradeMinorVersion = true
                   protectedSettings = jsonencode({
                     script = lower(each.value.machine.osDisk.type) == "windows" ? null : base64encode(
@@ -211,6 +230,12 @@ resource azapi_resource fleet {
                 }
               }
             ]
+          }
+          scheduledEventsProfile = {
+            terminateNotificationProfile = {
+              enable           = each.value.machine.extension.custom.parameters.terminateNotification.enable
+              notBeforeTimeout = each.value.machine.extension.custom.parameters.terminateNotification.delayTimeout
+            }
           }
         }
       }

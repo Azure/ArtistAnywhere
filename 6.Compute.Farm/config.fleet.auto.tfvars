@@ -36,21 +36,21 @@ computeFleets = [
         cachingType = "ReadOnly"
         sizeGB      = 0
         ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
+          enable    = false
           placement = "ResourceDisk"
         }
       }
       priority = {
         standard = {
           allocationStrategy = "LowestPrice"
-          capacityTarget     = 0
-          capacityMinimum    = 0
+          capacityTarget     = 2
+          capacityMinimum    = 1
         }
         spot = {
           allocationStrategy = "PriceCapacityOptimized"
           evictionPolicy     = "Delete"
-          capacityTarget     = 2
-          capacityMinimum    = 2
+          capacityTarget     = 0
+          capacityMinimum    = 0
           capacityMaintain = {
             enable = true
           }
@@ -129,21 +129,21 @@ computeFleets = [
         cachingType = "ReadOnly"
         sizeGB      = 0
         ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
+          enable    = false
           placement = "ResourceDisk"
         }
       }
       priority = {
         standard = {
           allocationStrategy = "LowestPrice"
-          capacityTarget     = 0
-          capacityMinimum    = 0
+          capacityTarget     = 2
+          capacityMinimum    = 1
         }
         spot = {
           allocationStrategy = "PriceCapacityOptimized"
           evictionPolicy     = "Delete"
-          capacityTarget     = 2
-          capacityMinimum    = 2
+          capacityTarget     = 0
+          capacityMinimum    = 0
           capacityMaintain = {
             enable = true
           }

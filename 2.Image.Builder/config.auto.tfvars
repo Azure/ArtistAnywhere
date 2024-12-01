@@ -449,3 +449,51 @@ imageCustomize = {
     }
   }
 }
+
+######################################################################################################
+# Container Registry (https://learn.microsoft.com/azure/container-registry/container-registry-intro) #
+######################################################################################################
+
+containerRegistry = {
+  enable = true
+  name   = "xstudio"
+  type   = "Premium"
+  adminUser = {
+    enable = true
+  }
+  dataEndpoint = {
+    enable = true
+  }
+  zoneRedundancy = {
+    enable = true
+  }
+  quarantinePolicy = {
+    enable = true
+  }
+  exportPolicy = {
+    enable = true
+  }
+  trustPolicy = {
+    enable = true
+  }
+  anonymousPull = {
+    enable = true
+  }
+  encryption = {
+    enable = false
+  }
+  retentionPolicy = {
+    days = 7
+  }
+  replicationRegions = [
+    {
+      name = "WestUS"
+      regionEndpoint = {
+        enable = true
+      }
+      zoneRedundancy = {
+        enable = false
+      }
+    }
+  ]
+}

@@ -16,10 +16,6 @@ variable storageAccounts {
     blobContainers = list(object({
       enable = bool
       name   = string
-      fileSystem = object({
-        enable  = bool
-        rootAcl = string
-      })
     }))
     fileShares = list(object({
       enable         = bool
@@ -41,7 +37,6 @@ locals {
       resourceGroupLocation = storageAccount.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : local.regionName
       extendedZoneName      = storageAccount.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
       storageAccountId      = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
-      storageAccountName    = storageAccount.name
     }) if storageAccount.enable
   ]
   privateEndpoints = flatten([
@@ -144,8 +139,8 @@ resource azurerm_storage_container core {
   for_each = {
     for blobContainer in local.blobContainers : blobContainer.key => blobContainer
   }
-  name                 = each.value.name
-  storage_account_name = each.value.storageAccountName
+  name               = each.value.name
+  storage_account_id = each.value.storageAccountId
   depends_on = [
     time_sleep.storage_rbac
   ]
@@ -155,11 +150,11 @@ resource azurerm_storage_share core {
   for_each = {
     for fileShare in local.fileShares : fileShare.key => fileShare
   }
-  name                 = each.value.name
-  access_tier          = each.value.accessTier
-  enabled_protocol     = each.value.accessProtocol
-  storage_account_name = each.value.storageAccountName
-  quota                = each.value.sizeGB
+  name               = each.value.name
+  access_tier        = each.value.accessTier
+  enabled_protocol   = each.value.accessProtocol
+  storage_account_id = each.value.storageAccountId
+  quota              = each.value.sizeGB
   depends_on = [
     azurerm_private_endpoint.storage
   ]
@@ -173,9 +168,9 @@ resource azurerm_private_endpoint storage {
   resource_group_name = each.value.resourceGroupName
   location            = each.value.resourceGroupLocation
   # edge_zone           = each.value.extendedZoneName != "" ? each.value.extendedZoneName : null
-  subnet_id           = data.azurerm_subnet.storage_region.id
+  subnet_id           = data.azurerm_subnet.storage.id
   private_service_connection {
-    name                           = each.value.storageAccountName
+    name                           = basename(each.value.storageAccountId)
     private_connection_resource_id = each.value.storageAccountId
     is_manual_connection           = false
     subresource_names = [
@@ -183,7 +178,7 @@ resource azurerm_private_endpoint storage {
     ]
   }
   private_dns_zone_group {
-    name = each.value.storageAccountName
+    name = basename(each.value.storageAccountId)
     private_dns_zone_ids = [
       each.value.dnsZoneId
     ]

@@ -39,15 +39,15 @@ virtualMachineScaleSets = [
       cachingType = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-        enable    = true
+        enable    = false
         placement = "ResourceDisk"
       }
     }
     spot = {
-      enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
+      enable         = false    # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
-      tryRestore = {
-        enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+      tryRestore = {            # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        enable  = false
         timeout = "PT1H"
       }
     }
@@ -83,10 +83,15 @@ virtualMachineScaleSets = [
         disable = true
       }
     }
-    flexMode = {
-      enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+    availabilityZones = {
+      enable = false
+      evenDistribution = {
+        enable = true
+      }
     }
-    faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
+    flexMode = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+      enable = false
+    }
   },
   {
     enable = false
@@ -122,15 +127,15 @@ virtualMachineScaleSets = [
       cachingType = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-        enable    = true
+        enable    = false
         placement = "ResourceDisk"
       }
     }
     spot = {
-      enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
+      enable         = false    # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
-      tryRestore = {
-        enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+      tryRestore = {            # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        enable  = false
         timeout = "PT1H"
       }
     }
@@ -166,10 +171,15 @@ virtualMachineScaleSets = [
         disable = true
       }
     }
-    flexMode = {
-      enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+    availabilityZones = {
+      enable = false
+      evenDistribution = {
+        enable = true
+      }
     }
-    faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
+    flexMode = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+      enable = false
+    }
   },
   {
     enable = false
@@ -205,15 +215,15 @@ virtualMachineScaleSets = [
       cachingType = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-        enable    = true
+        enable    = false
         placement = "ResourceDisk"
       }
     }
     spot = {
-      enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
+      enable         = false    # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
-      tryRestore = {
-        enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+      tryRestore = {            # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        enable  = false
         timeout = "PT1H"
       }
     }
@@ -249,10 +259,15 @@ virtualMachineScaleSets = [
         disable = true
       }
     }
-    flexMode = {
-      enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+    availabilityZones = {
+      enable = false
+      evenDistribution = {
+        enable = true
+      }
     }
-    faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
+    flexMode = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+      enable = false
+    }
   },
   {
     enable = false
@@ -288,15 +303,15 @@ virtualMachineScaleSets = [
       cachingType = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-        enable    = true
+        enable    = false
         placement = "ResourceDisk"
       }
     }
     spot = {
-      enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
+      enable         = false    # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
-      tryRestore = {
-        enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+      tryRestore = {            # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        enable  = false
         timeout = "PT1H"
       }
     }
@@ -332,10 +347,15 @@ virtualMachineScaleSets = [
         disable = false
       }
     }
-    flexMode = {
-      enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+    availabilityZones = {
+      enable = false
+      evenDistribution = {
+        enable = true
+      }
     }
-    faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
+    flexMode = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+      enable = false
+    }
   },
   {
     enable = false
@@ -371,15 +391,15 @@ virtualMachineScaleSets = [
       cachingType = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-        enable    = true
+        enable    = false
         placement = "ResourceDisk"
       }
     }
     spot = {
-      enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
+      enable         = false    # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
-      tryRestore = {
-        enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+      tryRestore = {            # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        enable  = false
         timeout = "PT1H"
       }
     }
@@ -415,10 +435,15 @@ virtualMachineScaleSets = [
         disable = false
       }
     }
-    flexMode = {
-      enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+    availabilityZones = {
+      enable = false
+      evenDistribution = {
+        enable = true
+      }
     }
-    faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
+    flexMode = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+      enable = false
+    }
   },
   {
     enable = false
@@ -454,15 +479,15 @@ virtualMachineScaleSets = [
       cachingType = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-        enable    = true
+        enable    = false
         placement = "ResourceDisk"
       }
     }
     spot = {
-      enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
+      enable         = false    # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
-      tryRestore = {
-        enable  = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+      tryRestore = {            # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        enable  = false
         timeout = "PT1H"
       }
     }
@@ -498,16 +523,21 @@ virtualMachineScaleSets = [
         disable = false
       }
     }
-    flexMode = {
-      enable = false # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+    availabilityZones = {
+      enable = false
+      evenDistribution = {
+        enable = true
+      }
     }
-    faultDomainCount = 1 # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains
+    flexMode = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+      enable = false
+    }
   }
 ]
 
-##################################################
-# Pre-Existing Resource Dependency Configuration #
-##################################################
+##########################
+# Pre-Existing Resources #
+##########################
 
 activeDirectory = {
   enable           = false
