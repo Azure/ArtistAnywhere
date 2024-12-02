@@ -156,7 +156,7 @@ output version {
     nvidia_optix             = "8.0.0"
     az_blob_nfs_mount        = "2.0.9"
     hp_anyware_agent         = "24.07.3"
-    job_scheduler_deadline   = "10.4.0.8"
+    job_scheduler_deadline   = "10.4.0.10"
     job_scheduler_lsf        = "10.2.0.12"
     job_processor_pbrt       = "v4"
     job_processor_blender    = "4.3.0"

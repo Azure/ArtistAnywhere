@@ -441,11 +441,11 @@ imageCustomize = {
   script = { # Enables or disables image customization build scripts
     jobScheduler = {
       deadline = true
-      lsf      = true
+      lsf      = false
     }
     jobProcessor = {
       render = true
-      eda    = true
+      eda    = false
     }
   }
 }
