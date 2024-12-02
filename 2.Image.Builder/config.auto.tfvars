@@ -59,7 +59,7 @@ computeGallery = {
 imageBuilder = {
   templates = [
     {
-      enable = true
+      enable = false
       name   = "LnxStorage"
       source = {
         imageDefinition = {

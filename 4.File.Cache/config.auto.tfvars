@@ -89,7 +89,7 @@ hammerspace = {
       name   = "cache"
       path   = "/cache"
       size   = 0
-      export = "*,ro,no-root-squash,insecure"
+      export = "*,ro,root-squash,insecure"
     }
   ]
   volumes = [
