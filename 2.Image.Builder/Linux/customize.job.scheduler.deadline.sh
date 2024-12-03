@@ -94,11 +94,11 @@ if [ $machineType != Storage ]; then
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
   echo "Customize (End): Deadline Client"
 
-  echo "Customize (Start): Deadline Client Auth"
+  echo "Customize (Start): Deadline Repository"
   [ $machineType == JobScheduler ] && repositoryPath=$installRoot || repositoryPath="/mnt/deadline"
   echo "$binPathJobScheduler/deadlinecommand -StoreDatabaseCredentials $serviceUsername $servicePassword" >> $aaaProfile
   echo "$binPathJobScheduler/deadlinecommand -ChangeRepository Direct $repositoryPath" >> $aaaProfile
-  echo "Customize (End): Deadline Client Auth"
+  echo "Customize (End): Deadline Repository"
 
   binPaths="$binPaths:$binPathJobScheduler"
 fi

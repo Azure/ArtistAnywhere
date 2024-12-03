@@ -8,11 +8,11 @@ Write-Host "Customize (Start): Job Scheduler (Deadline)"
 
 if ($machineType -ne "Storage") {
   $version = $buildConfig.version.job_scheduler_deadline
-  $installRoot = "C:\Deadline"
   $databaseHost = $(hostname)
   $databasePath = "C:\DeadlineData"
-  $certificateFile = "Deadline10Client.pfx"
-  $binPathJobScheduler = "$installRoot\bin"
+  $deadlinePath = "C:\DeadlineServer"
+  $deadlineCertificate = "Deadline10Client.pfx"
+  $binPathJobScheduler = "C:\Deadline\bin"
 
   Write-Host "Customize (Start): Deadline Download"
   $fileName = "Deadline-$version-windows-installers.zip"
@@ -26,17 +26,17 @@ if ($machineType -ne "Storage") {
     Write-Host "Customize (Start): Deadline Server"
     $fileType = "deadline-repository"
     $fileName = "DeadlineRepository-$version-windows-installer.exe"
-    RunProcess .\$fileName "--mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$binDirectory\$fileType"
+    RunProcess .\$fileName "--mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$binDirectory\$fileType"
     Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$fileType.log
-    Copy-Item -Path $databasePath\certs\$certificateFile -Destination $installRoot\$certificateFile
-    New-NfsShare -Name "Deadline" -Path $installRoot -Permission ReadWrite
+    Copy-Item -Path $databasePath\certs\$deadlineCertificate -Destination $deadlinePath\$deadlineCertificate
+    New-NfsShare -Name "Deadline" -Path $deadlinePath -Permission ReadWrite
     Write-Host "Customize (End): Deadline Server"
   }
 
   Write-Host "Customize (Start): Deadline Client"
   $fileType = "deadline-client"
   $fileName = "DeadlineClient-$version-windows-installer.exe"
-  $fileArgs = "--mode unattended --prefix $installRoot"
+  $fileArgs = "--mode unattended --prefix $deadlinePath"
   if ($machineType -eq "JobScheduler") {
     $fileArgs = "$fileArgs --slavestartup false --launcherservice false"
   } else {
@@ -52,15 +52,13 @@ if ($machineType -ne "Storage") {
   Set-Location -Path $binDirectory
   Write-Host "Customize (End): Deadline Client"
 
-  Write-Host "Customize (Start): Deadline Client Auth"
-  $filePath = "$binDirectory\deadline-client-auth.bat"
+  Write-Host "Customize (Start): Deadline Repository"
+  $filePath = "$binDirectory\deadline-repository.bat"
   New-Item -Path $filePath -ItemType File
-  Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -StoreDatabaseCredentials $serviceUsername $servicePassword"
   if ($machineType -eq "JobScheduler") {
-    Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct $installRoot $installRoot\$certificateFile"
+    Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate"
   } else {
-    Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct S:\"
-    Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$certificateFile"
+    Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$deadlineCertificate"
   }
   $registryKeyName = "Run"
   $registryKeyRoot = "HKLM:\Software\Microsoft\Windows\CurrentVersion"
@@ -68,8 +66,8 @@ if ($machineType -ne "Storage") {
   if (-not (Test-Path -Path $registryKeyPath)) {
     New-Item -Path $registryKeyRoot -Name $registryKeyName
   }
-  Set-ItemProperty -Path $registryKeyPath -Name "DeadlineClientAuth" -Value $filePath
-  Write-Host "Customize (End): Deadline Client Auth"
+  Set-ItemProperty -Path $registryKeyPath -Name "DeadlineRepository" -Value $filePath
+  Write-Host "Customize (End): Deadline Repository"
 
   Write-Host "Customize (Start): Deadline Monitor"
   $shortcutPath = "$env:AllUsersProfile\Desktop\Deadline Monitor.lnk"
