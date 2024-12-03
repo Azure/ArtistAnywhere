@@ -6,11 +6,11 @@ echo "Customize (Start): Job Scheduler (Deadline)"
 
 if [ $machineType != Storage ]; then
   version=$(echo $buildConfig | jq -r .version.job_scheduler_deadline)
-  installRoot="/deadline"
+  deadlinePath="/deadline"
+  databaseName="deadline10db"
   databaseHost=$(hostname)
   databasePort=27017
-  databaseName="deadline10db"
-  binPathJobScheduler="$installRoot/bin"
+  binPathJobScheduler="$deadlinePath/bin"
 
   echo "Customize (Start): Deadline Download"
   fileName="Deadline-$version-linux-installers.tar"
@@ -73,9 +73,9 @@ if [ $machineType != Storage ]; then
     fileType="deadline-repository"
     fileName="DeadlineRepository-$version-linux-x64-installer.run"
     export DB_PASSWORD=$servicePassword
-    RunProcess "$filePath/$fileName --mode unattended --dbLicenseAcceptance accept --prefix $installRoot --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$fileType
+    RunProcess "$filePath/$fileName --mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$fileType
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
-    echo "$installRoot *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
+    echo "$deadlinePath *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
     exportfs -r
     echo "Customize (End): Deadline Server"
   fi
@@ -83,7 +83,7 @@ if [ $machineType != Storage ]; then
   echo "Customize (Start): Deadline Client"
   fileType="deadline-client"
   fileName="DeadlineClient-$version-linux-x64-installer.run"
-  fileArgs="--mode unattended --prefix $installRoot"
+  fileArgs="--mode unattended --prefix $deadlinePath"
   if [ $machineType == JobScheduler ]; then
     fileArgs="$fileArgs --slavestartup false --launcherdaemon false"
   else
@@ -95,7 +95,7 @@ if [ $machineType != Storage ]; then
   echo "Customize (End): Deadline Client"
 
   echo "Customize (Start): Deadline Repository"
-  [ $machineType == JobScheduler ] && repositoryPath=$installRoot || repositoryPath="/mnt/deadline"
+  [ $machineType == JobScheduler ] && repositoryPath=$deadlinePath || repositoryPath="/mnt/deadline"
   echo "$binPathJobScheduler/deadlinecommand -StoreDatabaseCredentials $serviceUsername $servicePassword" >> $aaaProfile
   echo "$binPathJobScheduler/deadlinecommand -ChangeRepository Direct $repositoryPath" >> $aaaProfile
   echo "Customize (End): Deadline Repository"

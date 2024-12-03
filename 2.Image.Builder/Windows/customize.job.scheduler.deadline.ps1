@@ -12,7 +12,7 @@ if ($machineType -ne "Storage") {
   $databasePath = "C:\DeadlineData"
   $deadlinePath = "C:\DeadlineServer"
   $deadlineCertificate = "Deadline10Client.pfx"
-  $binPathJobScheduler = "C:\Deadline\bin"
+  $binPathJobScheduler = "$deadlinePath\bin"
 
   Write-Host "Customize (Start): Deadline Download"
   $fileName = "Deadline-$version-windows-installers.zip"
