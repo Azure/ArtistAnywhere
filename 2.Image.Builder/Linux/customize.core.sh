@@ -80,6 +80,19 @@ if [ "$gpuProvider" == NVIDIA ]; then
   echo "Customize (End): NVIDIA OptiX"
 fi
 
+echo "Customize (Start): Azure Managed Lustre (AMLFS) Client"
+rpm --import https://packages.microsoft.com/keys/microsoft.asc
+repoName="amlfs"
+repoPath="/etc/yum.repos.d/$repoName.repo"
+echo "[$repoName]" > $repoPath
+echo "name=Azure Lustre Packages" >> $repoPath
+echo "baseurl=https://packages.microsoft.com/yumrepos/amlfs-el9" >> $repoPath
+echo "enabled=1" >> $repoPath
+echo "gpgcheck=1" >> $repoPath
+echo "gpgkey=https://packages.microsoft.com/keys/microsoft.asc" >> $repoPath
+dnf install amlfs-lustre-client-2.15.5_41_gc010524-$(uname -r | sed -e "s/\.$(uname -p)$//" | sed -re 's/[-_]/\./g')-1
+echo "Customize (End): Azure Managed Lustre (AMLFS) Client"
+
 if [[ $machineType == Storage || $machineType == JobScheduler ]]; then
   echo "Customize (Start): Azure CLI"
   rpm --import https://packages.microsoft.com/keys/microsoft.asc
