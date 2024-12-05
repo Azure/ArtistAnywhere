@@ -55,13 +55,6 @@ if ($machineType -ne "Storage") {
   } else {
     Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$deadlineCertificate"
   }
-  $registryKeyName = "Run"
-  $registryKeyRoot = "HKLM:\Software\Microsoft\Windows\CurrentVersion"
-  $registryKeyPath = "$registryKeyRoot\$registryKeyName"
-  if (-not (Test-Path -Path $registryKeyPath)) {
-    New-Item -Path $registryKeyRoot -Name $registryKeyName
-  }
-  Set-ItemProperty -Path $registryKeyPath -Name "DeadlineRepository" -Value $filePath
   Write-Host "Customize (End): Deadline Repository"
 
   Write-Host "Customize (Start): Deadline Monitor"
