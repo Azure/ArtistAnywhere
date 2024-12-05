@@ -28,6 +28,11 @@ $binPathChoco = "C:\ProgramData\chocolatey"
 $binPaths += ";$binPathChoco"
 Write-Host "Customize (End): Chocolatey"
 
+Write-Host "Customize (Start): Carbon"
+$fileType = "carbon"
+RunProcess "$binPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$binDirectory\$fileType"
+Write-Host "Customize (End): Carbon"
+
 Write-Host "Customize (Start): Python"
 $fileType = "python"
 RunProcess "$binPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$binDirectory\$fileType"
@@ -47,11 +52,6 @@ $binPathGit = "C:\Program Files\Git\bin"
 $binPaths += ";$binPathGit"
 $env:GIT_BIN_PATH = $binPathGit
 Write-Host "Customize (End): Git"
-
-Write-Host "Customize (Start): Carbon"
-$fileType = "carbon"
-RunProcess "$binPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$binDirectory\$fileType"
-Write-Host "Customize (End): Carbon"
 
 Write-Host "Customize (Start): 7-Zip"
 $fileType = "7zip"
