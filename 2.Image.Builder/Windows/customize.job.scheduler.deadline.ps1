@@ -48,7 +48,7 @@ if ($machineType -ne "Storage") {
   Write-Host "Customize (End): Deadline Client"
 
   Write-Host "Customize (Start): Deadline Repository"
-  $filePath = "$binDirectory\deadline-repository.bat"
+  $filePath = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup\deadline-repository.bat"
   New-Item -Path $filePath -ItemType File
   if ($machineType -eq "JobScheduler") {
     Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate"
