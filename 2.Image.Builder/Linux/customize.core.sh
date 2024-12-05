@@ -90,7 +90,7 @@ echo "baseurl=https://packages.microsoft.com/yumrepos/amlfs-el9" >> $repoPath
 echo "enabled=1" >> $repoPath
 echo "gpgcheck=1" >> $repoPath
 echo "gpgkey=https://packages.microsoft.com/keys/microsoft.asc" >> $repoPath
-dnf install amlfs-lustre-client-2.15.5_41_gc010524-$(uname -r | sed -e "s/\.$(uname -p)$//" | sed -re 's/[-_]/\./g')-1
+dnf -y install amlfs-lustre-client-2.15.5_41_gc010524-$(uname -r | sed -e "s/\.$(uname -p)$//" | sed -re 's/[-_]/\./g')-1
 echo "Customize (End): Azure Managed Lustre (AMLFS) Client"
 
 if [[ $machineType == Storage || $machineType == JobScheduler ]]; then
