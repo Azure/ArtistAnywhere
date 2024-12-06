@@ -47,15 +47,18 @@ if ($machineType -ne "Storage") {
   Set-Location -Path $binDirectory
   Write-Host "Customize (End): Deadline Client"
 
-  Write-Host "Customize (Start): Deadline Repository"
-  $filePath = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup\deadline-repository.bat"
+  Write-Host "Customize (Start): Deadline Repository Startup App"
+  $appsPath = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
+  $fileName = "deadline-repository"
+  $filePath = "$appsPath\$fileName.bat"
   New-Item -Path $filePath -ItemType File
   if ($machineType -eq "JobScheduler") {
-    Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate"
+    Add-Content -NoNewLine -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate"
   } else {
-    Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$deadlineCertificate"
+    Add-Content -NoNewLine -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$deadlineCertificate"
   }
-  Write-Host "Customize (End): Deadline Repository"
+  Add-Content -Path $filePath -Value " > ""$appsPath\$fileName.txt"" 2>&1"
+  Write-Host "Customize (End): Deadline Repository Startup App"
 
   Write-Host "Customize (Start): Deadline Monitor"
   $shortcutPath = "$env:AllUsersProfile\Desktop\Deadline Monitor.lnk"
