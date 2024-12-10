@@ -42,6 +42,9 @@ if ($machineType -ne "Storage") {
   if ($machineType -eq "Farm") {
     $workerService = "true"
     $workerStartup = "true"
+    $securePassword = ConvertTo-SecureString $servicePassword -AsPlainText -Force
+    New-LocalUser -Name $serviceUsername -Password $securePassword -PasswordNeverExpires
+    $fileArgs = "$fileArgs --serviceuser $serviceUsername --servicepassword $servicePassword"
   }
   $fileArgs = "$fileArgs --launcherservice $workerService --slavestartup $workerStartup"
   RunProcess .\$fileName $fileArgs "$binDirectory\$fileType"
