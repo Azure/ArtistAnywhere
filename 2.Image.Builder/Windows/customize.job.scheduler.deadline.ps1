@@ -36,12 +36,14 @@ if ($machineType -ne "Storage") {
   Write-Host "Customize (Start): Deadline Client"
   $fileType = "deadline-client"
   $fileName = "DeadlineClient-$version-windows-installer.exe"
-  $fileArgs = "--mode unattended --prefix $deadlinePath --launcherservice false"
+  $fileArgs = "--mode unattended --prefix $deadlinePath"
+  $workerService = "false"
   $workerStartup = "false"
   if ($machineType -eq "Farm") {
+    $workerService = "true"
     $workerStartup = "true"
   }
-  $fileArgs = "$fileArgs --slavestartup $workerStartup"
+  $fileArgs = "$fileArgs --launcherservice $workerService --slavestartup $workerStartup"
   RunProcess .\$fileName $fileArgs "$binDirectory\$fileType"
   Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$fileType.log
   Set-Location -Path $binDirectory

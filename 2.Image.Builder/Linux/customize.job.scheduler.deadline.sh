@@ -86,7 +86,7 @@ if [ $machineType != Storage ]; then
   fileArgs="--mode unattended --prefix $deadlinePath"
   [ $machineType == JobScheduler ] && workerService="false" || workerService="true"
   [ $machineType == Farm ] && workerStartup="true" || workerStartup="false"
-  fileArgs="$fileArgs --slavestartup $workerStartup --launcherdaemon $workerService"
+  fileArgs="$fileArgs --launcherdaemon $workerService --slavestartup $workerStartup"
   RunProcess "$filePath/$fileName $fileArgs" $binDirectory/$fileType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
   echo "Customize (End): Deadline Client"
