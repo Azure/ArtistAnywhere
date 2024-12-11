@@ -19,7 +19,7 @@ if [ $machineType == Workstation ]; then
 fi
 echo "Customize (End): Image Build Platform"
 
-if [[ $machineType == Storage || "$gpuProvider" != "" ]]; then
+if [ "$gpuProvider" != "" ]; then
   echo "Customize (Start): Linux Kernel Dev"
   dnf -y install elfutils-libelf-devel openssl-devel bison flex
   fileName="kernel-devel-5.14.0-362.8.1.el9_3.x86_64.rpm"
@@ -27,18 +27,6 @@ if [[ $machineType == Storage || "$gpuProvider" != "" ]]; then
   DownloadFile $fileName $fileLink
   rpm -i $fileName
   echo "Customize (End): Linux Kernel Dev"
-fi
-
-if [ $machineType == Storage ]; then
-  echo "Customize (Start): NVIDIA OFED"
-  fileType="mellanox-ofed"
-  fileName="MLNX_OFED_LINUX-24.07-0.6.1.0-rhel9.3-x86_64.tgz"
-  fileLink="$binHostUrl/NVIDIA/OFED/$fileName"
-  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
-  tar -xzf $fileName
-  dnf -y install kernel-modules-extra kernel-rpm-macros rpm-build libtool gcc-gfortran pciutils tcl tk
-  RunProcess "./MLNX_OFED*/mlnxofedinstall --without-fw-update --add-kernel-support --skip-repo" $binDirectory/$fileType
-  echo "Customize (End): NVIDIA OFED"
 fi
 
 if [ "$gpuProvider" == NVIDIA ]; then
@@ -93,7 +81,7 @@ echo "gpgkey=https://packages.microsoft.com/keys/microsoft.asc" >> $repoPath
 dnf -y install amlfs-lustre-client-2.15.5_41_gc010524-$(uname -r | sed -e "s/\.$(uname -p)$//" | sed -re 's/[-_]/\./g')-1
 echo "Customize (End): Azure Managed Lustre (AMLFS) Client"
 
-if [[ $machineType == Storage || $machineType == JobScheduler ]]; then
+if [ $machineType == JobScheduler ]; then
   echo "Customize (Start): Azure CLI"
   rpm --import https://packages.microsoft.com/keys/microsoft.asc
   dnf -y install https://packages.microsoft.com/config/rhel/9/packages-microsoft-prod.rpm

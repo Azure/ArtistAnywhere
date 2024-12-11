@@ -108,7 +108,7 @@ if ($gpuProvider -eq "AMD") {
   Write-Host "Customize (Start): NVIDIA OptiX"
   $version = $buildConfig.version.nvidia_optix
   $fileType = "nvidia-optix"
-  $fileName = "NVIDIA-OptiX-SDK-$version-win64.exe"
+  $fileName = "NVIDIA-OptiX-SDK-$version-win64$($buildConfig.version.nvidia_optix_suffix).exe"
   $fileLink = "$binHostUrl/NVIDIA/OptiX/$version/$fileName"
   DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   RunProcess .\$fileName "/S" $null
@@ -122,7 +122,7 @@ if ($gpuProvider -eq "AMD") {
   Write-Host "Customize (End): NVIDIA OptiX"
 }
 
-if ($machineType -eq "Storage" -or $machineType -eq "JobScheduler") {
+if ($machineType -eq "JobScheduler") {
   Write-Host "Customize (Start): Azure CLI (x64)"
   $fileType = "azure-cli"
   $fileName = "$fileType.msi"
