@@ -54,9 +54,9 @@ Write-Host "Customize (End): Deadline Client"
 Write-Host "Customize (Start): Deadline Repository"
 $fileType = "deadline-repository"
 if ($machineType -eq "JobScheduler") {
-  Run-Process "$binPathJobScheduler\deadlinecommand.exe" "-ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate" "$binDirectory\$fileType"
+  RunProcess "$binPathJobScheduler\deadlinecommand.exe" "-ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate" "$binDirectory\$fileType"
 } else {
-  Run-Process "$binPathJobScheduler\deadlinecommand.exe" "-ChangeRepositorySkipValidation Direct S:\ S:\$deadlineCertificate" "$binDirectory\$fileType"
+  RunProcess "$binPathJobScheduler\deadlinecommand.exe" "-ChangeRepositorySkipValidation Direct S:\ S:\$deadlineCertificate" "$binDirectory\$fileType"
 }
 Write-Host "Customize (End): Deadline Repository"
 
