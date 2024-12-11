@@ -53,12 +53,10 @@ Write-Host "Customize (End): Deadline Client"
 
 Write-Host "Customize (Start): Deadline Repository"
 $fileType = "deadline-repository"
-$filePath = "$binDirectory\$fileType.bat"
-New-Item -Path $filePath -ItemType File
 if ($machineType -eq "JobScheduler") {
-  Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate"
+  Run-Process "$binPathJobScheduler\deadlinecommand.exe" "-ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate" "$binDirectory\$fileType"
 } else {
-  Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$deadlineCertificate"
+  Run-Process "$binPathJobScheduler\deadlinecommand.exe" "-ChangeRepositorySkipValidation Direct S:\ S:\$deadlineCertificate" "$binDirectory\$fileType"
 }
 Write-Host "Customize (End): Deadline Repository"
 

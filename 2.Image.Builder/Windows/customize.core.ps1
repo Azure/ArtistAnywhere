@@ -28,11 +28,6 @@ $binPathChoco = "C:\ProgramData\chocolatey"
 $binPaths += ";$binPathChoco"
 Write-Host "Customize (End): Chocolatey"
 
-Write-Host "Customize (Start): Carbon"
-$fileType = "carbon"
-RunProcess "$binPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$binDirectory\$fileType"
-Write-Host "Customize (End): Carbon"
-
 Write-Host "Customize (Start): Python"
 $fileType = "python"
 RunProcess "$binPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$binDirectory\$fileType"
@@ -130,6 +125,16 @@ if ($machineType -eq "JobScheduler") {
   DownloadFile $fileName $fileLink
   RunProcess $fileName "/quiet /norestart /log $fileType.log" $null
   Write-Host "Customize (End): Azure CLI (x64)"
+} else {
+  Write-Host "Customize (Start): NFS Client"
+  $fileType = "nfs-client"
+  dism /Online /NoRestart /LogPath:"$binDirectory\$fileType" /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All
+  Write-Host "Customize (End): NFS Client"
+
+  Write-Host "Customize (Start): AD Tools"
+  $fileType = "ad-tools" # RSAT: Active Directory Domain Services and Lightweight Directory Services Tools
+  dism /Online /NoRestart /LogPath:"$binDirectory\$fileType" /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
+  Write-Host "Customize (End): AD Tools"
 }
 
 if ($machineType -eq "Farm") {
