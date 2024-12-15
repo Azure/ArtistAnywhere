@@ -10,8 +10,9 @@ variable virtualNetworks {
     addressSpace = list(string)
     dnsAddresses = list(string)
     subnets = list(object({
-      name         = string
-      addressSpace = list(string)
+      name             = string
+      addressSpace     = list(string)
+      serviceEndpoints = list(string)
       serviceDelegation = object({
         service = string
         actions = list(string)
@@ -64,7 +65,7 @@ locals {
     for subnet in local.virtualNetworksSubnets : subnet if subnet.name == "Storage" && subnet.virtualNetworkExtendedZoneName == ""
   ]
   virtualNetworksSubnetsSecurity = [
-    for subnet in local.virtualNetworksSubnets : subnet if subnet.name != "GatewaySubnet"
+    for subnet in local.virtualNetworksSubnets : subnet if subnet.name != "GatewaySubnet" && subnet.name != "AzureFirewallSubnet" && subnet.name != "AzureFirewallManagementSubnet"
   ]
 }
 
@@ -91,6 +92,7 @@ resource azurerm_subnet studio {
   resource_group_name                           = each.value.resourceGroupName
   virtual_network_name                          = each.value.virtualNetworkName
   address_prefixes                              = each.value.addressSpace
+  service_endpoints                             = length(each.value.serviceEndpoints) > 0 ? each.value.serviceEndpoints : null
   private_endpoint_network_policies             = each.value.name == "GatewaySubnet" ? "Enabled" : "Disabled"
   private_link_service_network_policies_enabled = each.value.name == "GatewaySubnet"
   default_outbound_access_enabled               = false

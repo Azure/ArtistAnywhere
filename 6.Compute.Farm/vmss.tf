@@ -93,7 +93,7 @@ variable virtualMachineScaleSets {
   }))
 }
 
-data azurerm_location region {
+data azurerm_location studio {
   location = module.global.resourceLocation.regionName
 }
 
@@ -146,8 +146,8 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
   priority                        = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy                 = each.value.spot.enable ? each.value.spot.evictionPolicy : null
-  zones                           = each.value.availabilityZones.enable && length(data.azurerm_location.region.zone_mappings) > 0 ? [for i in range(1, length(data.azurerm_location.region.zone_mappings) + 1) : i] : null
-  zone_balance                    = each.value.availabilityZones.enable && length(data.azurerm_location.region.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
+  zones                           = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? data.azurerm_location.studio.zone_mappings[*].logical_zone : null
+  zone_balance                    = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
   single_placement_group          = false
   overprovision                   = false
   identity {
@@ -286,8 +286,8 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   admin_password         = each.value.adminLogin.userPassword
   priority               = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy        = each.value.spot.enable ? each.value.spot.evictionPolicy : null
-  zones                  = each.value.availabilityZones.enable && length(data.azurerm_location.region.zone_mappings) > 0 ? [for i in range(1, length(data.azurerm_location.region.zone_mappings) + 1) : i] : null
-  zone_balance           = each.value.availabilityZones.enable && length(data.azurerm_location.region.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
+  zones                  = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? data.azurerm_location.studio.zone_mappings[*].logical_zone : null
+  zone_balance           = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
   single_placement_group = false
   overprovision          = false
   identity {
@@ -409,8 +409,8 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
   source_image_id             = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   priority                    = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy             = each.value.spot.enable ? each.value.spot.evictionPolicy : null
-  zones                       = each.value.availabilityZones.enable && length(data.azurerm_location.region.zone_mappings) > 0 ? [for i in range(1, length(data.azurerm_location.region.zone_mappings) + 1) : i] : null
-  zone_balance                = each.value.availabilityZones.enable && length(data.azurerm_location.region.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
+  zones                       = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? data.azurerm_location.studio.zone_mappings[*].logical_zone : null
+  zone_balance                = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
   platform_fault_domain_count = each.value.availabilityZones.enable || each.value.spot.enable ? 1 : 3
   identity {
     type = "UserAssigned"

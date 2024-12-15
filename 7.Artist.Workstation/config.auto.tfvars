@@ -223,14 +223,14 @@ virtualMachines = [
   }
 ]
 
-##########################
-# Pre-Existing Resources #
-##########################
+########################
+# Brownfield Resources #
+########################
 
 activeDirectory = {
   enable           = false
   domainName       = "azure.studio"
-  domainServerName = "WinJobScheduler"
+  domainServerName = "WinActiveDomain"
   orgUnitPath      = ""
   adminUsername    = ""
   adminPassword    = ""

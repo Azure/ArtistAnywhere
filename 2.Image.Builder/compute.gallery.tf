@@ -34,8 +34,8 @@ locals {
 
 resource azurerm_shared_image_gallery studio {
   name                = var.computeGallery.name
-  resource_group_name = azurerm_resource_group.image.name
-  location            = azurerm_resource_group.image.location
+  resource_group_name = azurerm_resource_group.image_gallery.name
+  location            = azurerm_resource_group.image_gallery.location
 }
 
 resource azurerm_shared_image studio {
@@ -43,8 +43,8 @@ resource azurerm_shared_image studio {
     for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if (var.computeGallery.platform.linux.enable && lower(imageDefinition.type) == "linux") || (var.computeGallery.platform.windows.enable && lower(imageDefinition.type) == "windows")
   }
   name                = each.value.name
-  resource_group_name = azurerm_resource_group.image.name
-  location            = azurerm_resource_group.image.location
+  resource_group_name = azurerm_resource_group.image_gallery.name
+  location            = azurerm_resource_group.image_gallery.location
   gallery_name        = azurerm_shared_image_gallery.studio.name
   hyper_v_generation  = each.value.generation
   os_type             = each.value.type

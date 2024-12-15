@@ -8,9 +8,9 @@ variable networkPeering {
     allowRemoteNetworkAccess    = bool
     allowRemoteForwardedTraffic = bool
     allowGatewayTransit         = bool
-    useRemoteGateways = object({
-      compute = bool
-      storage = bool
+    useRemoteGateway = object({
+      computeNetwork = bool
+      storageNetwork = bool
     })
   })
 }
@@ -24,7 +24,7 @@ resource azurerm_virtual_network_peering compute {
   allow_virtual_network_access = var.networkPeering.allowRemoteNetworkAccess
   allow_forwarded_traffic      = var.networkPeering.allowRemoteForwardedTraffic
   allow_gateway_transit        = var.networkPeering.allowGatewayTransit
-  use_remote_gateways          = var.networkPeering.useRemoteGateways.compute
+  use_remote_gateways          = var.networkPeering.useRemoteGateway.computeNetwork
   depends_on = [
     azurerm_subnet_network_security_group_association.studio
   ]
@@ -39,7 +39,7 @@ resource azurerm_virtual_network_peering storage {
   allow_virtual_network_access = var.networkPeering.allowRemoteNetworkAccess
   allow_forwarded_traffic      = var.networkPeering.allowRemoteForwardedTraffic
   allow_gateway_transit        = var.networkPeering.allowGatewayTransit
-  use_remote_gateways          = var.networkPeering.useRemoteGateways.storage
+  use_remote_gateways          = var.networkPeering.useRemoteGateway.storageNetwork
   depends_on = [
     azurerm_subnet_network_security_group_association.studio
   ]

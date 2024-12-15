@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.12.0"
+      version = "~>4.14.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -15,7 +15,7 @@ terraform {
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>2.0.0"
+      version = "~>2.1.0"
     }
   }
   backend azurerm {
@@ -31,6 +31,10 @@ provider azurerm {
     }
     managed_disk {
       expand_without_downtime = true
+    }
+    netapp {
+      prevent_volume_destruction             = true
+      delete_backups_on_backup_vault_destroy = false
     }
     virtual_machine {
       delete_os_disk_on_deletion            = true
@@ -215,10 +219,11 @@ variable dnsRecord {
 
 variable existingNetwork {
   type = object({
-    enable            = bool
-    name              = string
-    subnetName        = string
-    resourceGroupName = string
+    enable             = bool
+    name               = string
+    subnetNameIdentity = string
+    subnetNameStorage  = string
+    resourceGroupName  = string
     privateDns = object({
       zoneName          = string
       resourceGroupName = string
@@ -230,7 +235,11 @@ data http client_address {
   url = "https://api.ipify.org?format=json"
 }
 
-data azurerm_client_config studio {}
+data azurerm_client_config current {}
+
+data azurerm_location studio {
+  location = local.regionName
+}
 
 data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name
@@ -315,8 +324,14 @@ data azurerm_private_dns_zone studio {
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.privateDns.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
 }
 
+data azurerm_subnet identity {
+  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameIdentity : "Identity"
+  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio.name
+}
+
 data azurerm_subnet storage {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Storage"
+  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameStorage : "Storage"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
@@ -341,12 +356,47 @@ resource azurerm_resource_group hammerspace {
   tags = {
     AAA = basename(path.cwd)
   }
+  depends_on = [
+    azurerm_virtual_machine_extension.active_directory
+  ]
 }
 
-output hammerspaceDNSMetadata {
-  value = var.hammerspace.enable ? module.hammerspace[0].dnsMetadata : null
+output storageAccounts {
+  value = [
+    for storageAccount in azurerm_storage_account.studio : {
+      name         = storageAccount.name
+      regionName   = storageAccount.primary_location
+      blobEndpoint = storageAccount.primary_blob_endpoint
+      fileEndpoint = storageAccount.primary_file_endpoint
+    }
+  ]
 }
 
-output hammerspaceDNSData {
-  value = var.hammerspace.enable ? module.hammerspace[0].dnsData : null
+output netAppFiles {
+  value = var.netAppFiles.enable ? {
+    volumes = [
+      for volume in azapi_resource.volume : {
+        name      = volume.name
+        ipAddress = volume.output.properties.mountTargets[0].ipAddress
+      }
+    ]
+    privateDNS = {
+      fqdn    = azurerm_private_dns_a_record.netapp[0].fqdn
+      records = azurerm_private_dns_a_record.netapp[0].records
+    }
+  } : null
+}
+
+output managedLustre {
+  value = var.managedLustre.enable ? {
+    name      = azurerm_managed_lustre_file_system.studio[0].name
+    ipAddress = azurerm_managed_lustre_file_system.studio[0].mgs_address
+  } : null
+}
+
+output hammerspace {
+  value = var.hammerspace.enable ? {
+    metadata = module.hammerspace[0].dnsMetadata
+    data     = module.hammerspace[0].dnsData
+  } : null
 }

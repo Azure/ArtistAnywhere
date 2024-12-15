@@ -11,6 +11,12 @@ variable privateDns {
   })
 }
 
+resource azurerm_role_assignment private_dns_zone_contributor {
+  role_definition_name = "Private DNS Zone Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/networking#private-dns-zone-contributor
+  principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
+  scope                = azurerm_private_dns_zone.studio.id
+}
+
 resource azurerm_private_dns_zone studio {
   name                = var.privateDns.zoneName
   resource_group_name = azurerm_resource_group.network.name

@@ -79,7 +79,7 @@ keyVault = {
 
 monitor = {
   logWorkspace = {
-    tier = "PerGB2018"
+    type = "PerGB2018"
   }
   appInsight = {
     type = "other"

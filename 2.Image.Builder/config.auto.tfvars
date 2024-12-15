@@ -59,33 +59,6 @@ computeGallery = {
 imageBuilder = {
   templates = [
     {
-      enable = false
-      name   = "LnxStorage"
-      source = {
-        imageDefinition = {
-          name = "Linux"
-        }
-      }
-      build = {
-        machineType    = "Storage"
-        machineSize    = "Standard_L8as_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                 # NVIDIA or AMD
-        imageVersion   = "0.0.0"
-        osDiskSizeGB   = 256
-        timeoutMinutes = 240
-        jobProcessors = [
-        ]
-      }
-      distribute = {
-        replicaCount       = 3
-        storageAccountType = "Premium_LRS"
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
-      }
-    },
-    {
       enable = true
       name   = "LnxJobScheduler"
       source = {
@@ -104,7 +77,7 @@ imageBuilder = {
         ]
       }
       distribute = {
-        replicaCount       = 3
+        replicaCount       = 1
         storageAccountType = "Premium_LRS"
       }
       errorHandling = {
@@ -132,7 +105,7 @@ imageBuilder = {
         ]
       }
       distribute = {
-        replicaCount       = 3
+        replicaCount       = 1
         storageAccountType = "Premium_LRS"
       }
       errorHandling = {
@@ -161,8 +134,8 @@ imageBuilder = {
         ]
       }
       distribute = {
-        replicaCount       = 3
         storageAccountType = "Premium_LRS"
+        replicaCount       = 1
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -190,7 +163,7 @@ imageBuilder = {
         ]
       }
       distribute = {
-        replicaCount       = 3
+        replicaCount       = 1
         storageAccountType = "Premium_LRS"
       }
       errorHandling = {
@@ -219,7 +192,7 @@ imageBuilder = {
         ]
       }
       distribute = {
-        replicaCount       = 3
+        replicaCount       = 1
         storageAccountType = "Premium_LRS"
       }
       errorHandling = {
@@ -248,7 +221,34 @@ imageBuilder = {
         ]
       }
       distribute = {
-        replicaCount       = 3
+        replicaCount       = 1
+        storageAccountType = "Premium_LRS"
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
+      }
+    },
+    {
+      enable = true
+      name   = "WinActiveDomain"
+      source = {
+        imageDefinition = {
+          name = "WinServer"
+        }
+      }
+      build = {
+        machineType    = "DomainController"
+        machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                 # NVIDIA or AMD
+        imageVersion   = "0.0.0"
+        osDiskSizeGB   = 1024
+        timeoutMinutes = 180
+        jobProcessors = [
+        ]
+      }
+      distribute = {
+        replicaCount       = 1
         storageAccountType = "Premium_LRS"
       }
       errorHandling = {
@@ -270,13 +270,13 @@ imageBuilder = {
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "1.0.0"
         osDiskSizeGB   = 1024
-        timeoutMinutes = 360
+        timeoutMinutes = 180
         jobProcessors = [
         ]
       }
       distribute = {
-        replicaCount       = 3
         storageAccountType = "Premium_LRS"
+        replicaCount       = 1
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -303,8 +303,8 @@ imageBuilder = {
         ]
       }
       distribute = {
-        replicaCount       = 3
         storageAccountType = "Premium_LRS"
+        replicaCount       = 1
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -332,8 +332,8 @@ imageBuilder = {
         ]
       }
       distribute = {
-        replicaCount       = 3
         storageAccountType = "Premium_LRS"
+        replicaCount       = 1
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -361,8 +361,8 @@ imageBuilder = {
         ]
       }
       distribute = {
-        replicaCount       = 3
         storageAccountType = "Premium_LRS"
+        replicaCount       = 1
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -390,8 +390,8 @@ imageBuilder = {
         ]
       }
       distribute = {
-        replicaCount       = 3
         storageAccountType = "Premium_LRS"
+        replicaCount       = 1
       }
       errorHandling = {
         validationMode    = "cleanup"
@@ -419,8 +419,8 @@ imageBuilder = {
         ]
       }
       distribute = {
-        replicaCount       = 3
         storageAccountType = "Premium_LRS"
+        replicaCount       = 1
       }
       errorHandling = {
         validationMode    = "cleanup"

@@ -6,17 +6,26 @@ variable fileSystem {
         mount = {
           type    = "nfs"
           path    = "/mnt/storage"
-          source  = "storage-data.azure.studio:/volume1"
+          target  = "storage-data.azure.studio:/data"
           options = "vers=3"
         }
       },
-      { # File Cache
+      { # File Cache (NFS)
         enable = false
         mount = {
           type    = "nfs"
           path    = "/mnt/cache"
-          source  = "cache-data.azure.studio:/cache"
+          target  = "cache-data.azure.studio:/cache"
           options = "vers=3"
+        }
+      },
+      { # File Cache (Lustre)
+        enable = false
+        mount = {
+          type    = "lustre"
+          path    = "/mnt/cache"
+          target  = "cache-data.azure.studio@tcp:/lustrefs"
+          options = "noatime,flock,_netdev,x-systemd.automount,x-systemd.requires=network.service"
         }
       },
       { # Job Scheduler
@@ -24,7 +33,7 @@ variable fileSystem {
         mount = {
           type    = "nfs"
           path    = "/mnt/deadline"
-          source  = "job.azure.studio:/deadline"
+          target  = "job.azure.studio:/deadline"
           options = "defaults"
         }
       }
@@ -35,7 +44,7 @@ variable fileSystem {
         mount = {
           type    = ""
           path    = "X:"
-          source  = "\\\\storage-data.azure.studio\\volume1"
+          target  = "\\\\storage-data.azure.studio\\data"
           options = "-o anon"
         }
       },
@@ -44,7 +53,7 @@ variable fileSystem {
         mount = {
           type    = ""
           path    = "Y:"
-          source  = "\\\\cache-data.azure.studio\\cache"
+          target  = "\\\\cache-data.azure.studio\\cache"
           options = "-o anon"
         }
       },
@@ -53,7 +62,7 @@ variable fileSystem {
         mount = {
           type    = ""
           path    = "S:"
-          source  = "\\\\job.azure.studio\\deadline"
+          target  = "\\\\job.azure.studio\\deadline"
           options = "-o anon"
         }
       }

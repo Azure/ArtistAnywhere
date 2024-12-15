@@ -1,0 +1,101 @@
+{
+  "location": {
+    "value": "southcentralus"
+  },
+  "adminUsername": {
+    "value": "hpcadmin"
+  },
+  "adminPassword": {
+    "value": "P@ssword1234"
+  },
+  "adminSshPublicKey": {
+    "value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDnnueUdcHeNOOB6iyC0MwBBrBPeD3wxz/1iOPYhe9Q8tyRG/AzSRmqOsrBWi6X0JGL0C2aUj9h4XjFm7dNbw/fpHPbFJvVmLv3bHn+Q/mhSfQ3WcVvVf/IKcDSmAmp2WOlZs7JzhfcMxXgy8giywWueTw3MkhjncC9madZnxbrSV7rhQ1IUhL5KJQtiwQBU6jw/8g1Q2kF+u/fdvld6ZCg0mJ2suRnXXzgnBV7PMipd8I8Gc5HHaq5DcguSuZDKosUt/07Vlj8q1CwK01pRPgG6a+dNcEgYq0jjLutTfqv6NqRrj37sFnLsTWZPGjMVPlkmmPwP1eagd9lZD9v998ho0WzuWp21AWblcfksFrDGg7GMY42BHcQ7Gu/xR6VMFySyiBLw0brsvHKZl03UwfZynqt4NczGvBMprHnGVyDyfCMTUC2F5TXExEBJleecMqnIMHFAy/mIY5hnF2ZbpoWMI+Vhh1WI2MG3jE75X/zWaxvg9dBRzOigroWShHfohxCNSJ5kOEmQ0ZHu8aajE9PdTcf2EwQJ/MrZjIQ3Y0Nxl3ucpi6JQNbe1rreJ6HG5Dq/OR+0f/I6OWu6kqa6LgIzKk1iNEPcaW1eUoeNEDq7MIsTSB7e1wiiHyX0AwDROd00gano71Mo1HJBXML19cyFOvNaz9qTSKqZC0N6ShZ3Q=="
+  },
+  "ccVMSize": {
+    "value": "Standard_D4as_v4"
+  },
+  "resourceGroup": {
+    "value": "ArtistAnywhere.CCWS"
+  },
+  "sharedFilesystem": {
+    "value": {
+      "type": "nfs-existing",
+      "ipAddress": "10.1.193.4",
+      "exportPath": "/shared",
+      "mountOptions": "rw,hard,rsize=262144,wsize=262144,vers=3,tcp,_netdev"
+    }
+  },
+  "additionalFilesystem": {
+    "value": {
+      "type": "nfs-existing",
+      "ipAddress": "10.1.193.4",
+      "mountPath": "/data",
+      "exportPath": "/mnt/data",
+      "mountOptions": "rw,hard,rsize=262144,wsize=262144,vers=3,tcp,_netdev"
+    }
+  },
+  "network": {
+    "value": {
+      "type": "existing",
+      "name": "Studio",
+      "id": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Network.SouthCentralUS/providers/Microsoft.Network/virtualNetworks/Studio",
+      "cyclecloudSubnet": "Web",
+      "computeSubnet": "Farm"
+    }
+  },
+  "databaseAdminPassword": {
+    "value": "P@ssword1234"
+  },
+  "databaseConfig": {
+    "value": {
+      "type": "fqdn",
+      "databaseUser": "hpcdbadmin",
+      "fqdn": "xstudio.mysql.database.azure.com"
+    }
+  },
+  "slurmSettings": {
+    "value": {
+      "version": "23.11.7-1",
+      "healthCheckEnabled": true
+    }
+  },
+  "schedulerNode": {
+    "value": {
+      "sku": "Standard_D4as_v4",
+      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
+    }
+  },
+  "loginNodes": {
+    "value": {
+      "sku": "Standard_F4s_v2",
+      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0",
+      "initialNodes": 1,
+      "maxNodes": 1
+    }
+  },
+  "htc": {
+    "value": {
+      "sku": "Standard_F2s_v2",
+      "maxNodes": 100,
+      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0",
+      "useSpot": false
+    }
+  },
+  "hpc": {
+    "value": {
+      "sku": "Standard_HB120rs_v3",
+      "maxNodes": 16,
+      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
+    }
+  },
+  "gpu": {
+    "value": {
+      "sku": "Standard_D4as_v4",
+      "maxNodes": 8,
+      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
+    }
+  },
+  "tags": {
+    "value": {}
+  }
+}

@@ -64,24 +64,21 @@ variable keyVault {
   }
 }
 
-##########################################################################################
-# App Configuration (https://learn.microsoft.com/azure/azure-app-configuration/overview) #
-##########################################################################################
+##############################################################################
+# Event Grid (https://learn.microsoft.com/azure/event-grid/overview)         #
+# Event Hub  (https://learn.microsoft.com/azure/event-hubs/event-hubs-about) #
+##############################################################################
 
-variable appConfig {
+variable message {
   default = {
-    name = "xstudio"
-    key = {
-      nvidiaCUDAVersion           = "NVIDIA/CUDA/Version"
-      nvidiaOptiXVersion          = "NVIDIA/OptiX/Version"
-      azBlobNFSMountVersion       = "Azure/Blob/NFSMount/Version"
-      hpAnywareAgentVersion       = "HP/Anyware/Agent/Version"
-      jobSchedulerDeadlineVersion = "Job/Scheduler/Deadline/Version"
-      jobSchedulerLSFVersion      = "Job/Scheduler/LSF/Version"
-      jobProcessorPBRTVersion     = "Job/Processor/PBRT/Version"
-      jobProcessorBlenderVersion  = "Job/Processor/Blender/Version"
-      monitorAgentLinuxVersion    = "Monitor/Agent/Linux/Version"
-      monitorAgentWindowsVersion  = "Monitor/Agent/Windows/Version"
+    eventGrid = {
+      name     = "xstudio"
+      type     = "Standard"
+      capacity = 1
+    }
+    eventHub = {
+      name = "xstudio"
+      type = "Standard"
     }
   }
 }
@@ -138,8 +135,8 @@ output keyVault {
   value = var.keyVault
 }
 
-output appConfig {
-  value = var.appConfig
+output message {
+  value = var.message
 }
 
 output monitor {
@@ -152,14 +149,15 @@ output defender {
 
 output version {
   value = {
-    nvidia_cuda              = "12.6.2"
-    nvidia_optix             = "8.0.0"
-    az_blob_nfs_mount        = "2.0.9"
-    hp_anyware_agent         = "24.07.3"
+    nvidia_cuda              = "12.6.3"
+    nvidia_optix             = "8.1.0"
+    nvidia_optix_suffix      = "-35015278"
+    az_blob_nfs_mount        = "2.0.10"
+    hp_anyware_agent         = "24.10.0"
     job_scheduler_deadline   = "10.4.0.10"
     job_scheduler_lsf        = "10.2.0.12"
     job_processor_pbrt       = "v4"
-    job_processor_blender    = "4.3.0"
+    job_processor_blender    = "4.3.1"
     script_extension_linux   = "2.1"
     script_extension_windows = "1.10"
     monitor_agent_linux      = "1.33"

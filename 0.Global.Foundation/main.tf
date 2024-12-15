@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.12.0"
+      version = "~>4.14.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -31,10 +31,6 @@ provider azurerm {
     }
     application_insights {
       disable_generated_rule = false
-    }
-    app_configuration {
-      purge_soft_delete_on_destroy = true
-      recover_soft_deleted         = true
     }
     key_vault {
       purge_soft_delete_on_destroy                                = true
@@ -65,7 +61,9 @@ data http client_address {
   url = "https://api.ipify.org?format=json"
 }
 
-data azurerm_client_config studio {}
+data azurerm_subscription current {}
+
+data azurerm_client_config current {}
 
 resource azurerm_resource_group studio {
   name     = module.global.resourceGroupName
@@ -75,9 +73,17 @@ resource azurerm_resource_group studio {
   }
 }
 
+resource azurerm_resource_group studio_message {
+  name     = "${azurerm_resource_group.studio.name}.Message"
+  location = azurerm_resource_group.studio.location
+  tags = {
+    AAA = basename(path.cwd)
+  }
+}
+
 resource azurerm_resource_group studio_monitor {
-  name     = "${module.global.resourceGroupName}.Monitor"
-  location = module.global.resourceLocation.regionName
+  name     = "${azurerm_resource_group.studio.name}.Monitor"
+  location = azurerm_resource_group.studio.location
   tags = {
     AAA = basename(path.cwd)
   }

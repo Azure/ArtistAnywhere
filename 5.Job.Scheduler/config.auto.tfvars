@@ -142,18 +142,9 @@ dnsRecord = {
   ttlSeconds = 300
 }
 
-#################################################################################################################################################
-# Active Directory (https://learn.microsoft.com/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview) #
-#################################################################################################################################################
-
-activeDirectory = {
-  enable     = true
-  domainName = "azure.studio"
-}
-
-##########################
-# Pre-Existing Resources #
-##########################
+########################
+# Brownfield Resources #
+########################
 
 existingNetwork = {
   enable            = false

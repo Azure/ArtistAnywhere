@@ -69,15 +69,50 @@ dnsRecord = {
   ttlSeconds = 300
 }
 
+#################################################################################################################################################
+# Active Directory (https://learn.microsoft.com/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview) #
+#################################################################################################################################################
+
+activeDirectory = {
+  enable     = false
+  domainName = "azure.studio"
+  machine = {
+    name = "xstudio"
+    size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    image = {
+      resourceGroupName = "ArtistAnywhere.Image"
+      galleryName       = "xstudio"
+      definitionName    = "WinServer"
+      versionId         = "0.0.0"
+    }
+    osDisk = {
+      storageType = "Premium_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+    }
+  }
+  network = {
+    acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+      enable = true
+    }
+    staticAddress = "10.1.192.4"
+  }
+}
+
 ##########################
 # Pre-Existing Resources #
 ##########################
 
 existingNetwork = {
-  enable            = false
-  name              = ""
-  subnetName        = ""
-  resourceGroupName = ""
+  enable             = false
+  name               = ""
+  subnetNameIdentity = ""
+  subnetNameStorage  = ""
+  resourceGroupName  = ""
   privateDns = {
     zoneName          = ""
     resourceGroupName = ""

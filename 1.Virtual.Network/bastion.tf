@@ -5,7 +5,7 @@
 variable bastion {
   type = object({
     enable              = bool
-    tier                = string
+    type                = string
     scaleUnitCount      = number
     enableFileCopy      = bool
     enableCopyPaste     = bool
@@ -150,8 +150,8 @@ resource azurerm_public_ip bastion {
   sku                 = "Standard"
   allocation_method   = "Static"
   depends_on = [
-    azurerm_subnet_network_security_group_association.bastion
-  ]
+    azurerm_resource_group.network_regions
+ ]
 }
 
 resource azurerm_bastion_host studio {
@@ -161,13 +161,14 @@ resource azurerm_bastion_host studio {
   name                   = "Bastion-${each.value.name}"
   resource_group_name    = each.value.resourceGroupName
   location               = each.value.regionName
-  sku                    = var.bastion.tier
+  sku                    = var.bastion.type
   scale_units            = var.bastion.scaleUnitCount
   file_copy_enabled      = var.bastion.enableFileCopy
   copy_paste_enabled     = var.bastion.enableCopyPaste
   ip_connect_enabled     = var.bastion.enableIpConnect
   tunneling_enabled      = var.bastion.enableTunneling
   shareable_link_enabled = var.bastion.enableShareableLink
+  zones                  = data.azurerm_location.studio[each.value.key].zone_mappings[*].logical_zone
   ip_configuration {
     name                 = "ipConfig"
     public_ip_address_id = azurerm_public_ip.bastion[each.value.key].id

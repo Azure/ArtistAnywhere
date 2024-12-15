@@ -1,9 +1,11 @@
 dataLoad = {
   enable = false
-  targets = [
-    "10.1.193.4:/volume1",
-    "10.1.193.5:/volume2"
-  ]
+  mount = {
+    type    = "nfs" # "lustre"
+    path    = "/mnt/data"
+    target  = "10.1.194.4:/data" # 10.1.193.24@tcp:/lustrefs
+    options = "vers=3" # "noatime"
+  }
   machine = {
     name = "xstudio"
     size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
@@ -14,7 +16,6 @@ dataLoad = {
       version   = ""
     }
     osDisk = {
-      type        = "Linux"
       storageType = "Premium_LRS"
       cachingType = "ReadOnly"
       sizeGB      = 0

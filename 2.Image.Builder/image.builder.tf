@@ -22,8 +22,8 @@ variable imageBuilder {
         jobProcessors  = list(string)
       })
       distribute = object({
-        replicaCount       = number
         storageAccountType = string
+        replicaCount       = number
       })
       errorHandling = object({
         validationMode    = string
@@ -61,7 +61,7 @@ variable imageCustomize {
 
 locals {
   authClient = {
-    tenantId       = data.azurerm_client_config.studio.tenant_id
+    tenantId       = data.azurerm_client_config.current.tenant_id
     clientId       = var.imageCustomize.storage.authClient.id
     clientSecret   = var.imageCustomize.storage.authClient.secret
     storageVersion = "2025-01-05"
@@ -75,9 +75,9 @@ locals {
 }
 
 resource azurerm_role_assignment compute_gallery_artifacts_publisher {
-  role_definition_name = "Compute Gallery Artifacts Publisher" # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/compute#compute-gallery-artifacts-publisher
+  role_definition_name = "Compute Gallery Artifacts Publisher" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/compute#compute-gallery-artifacts-publisher
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-  scope                = azurerm_resource_group.image.id
+  scope                = azurerm_resource_group.image_gallery.id
 }
 
 resource time_sleep image_builder_rbac {
@@ -93,8 +93,8 @@ resource azapi_resource linux {
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2024-02-01"
-  parent_id = azurerm_resource_group.image.id
-  location  = azurerm_resource_group.image.location
+  parent_id = azurerm_resource_group.image_builder.id
+  location  = azurerm_resource_group.image_builder.location
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -149,11 +149,6 @@ resource azapi_resource linux {
           },
           {
             type        = "File"
-            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Linux/customize.job.scheduler.sh"
-            destination = "/tmp/customize.job.scheduler.sh"
-          },
-          {
-            type        = "File"
             sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Linux/customize.job.scheduler.deadline.sh"
             destination = "/tmp/customize.job.scheduler.deadline.sh"
           },
@@ -195,7 +190,6 @@ resource azapi_resource linux {
             type = "Shell"
             inline = [
               "cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))} /bin/bash",
-              "cat /tmp/customize.job.scheduler.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))} /bin/bash",
               "if [ ${var.imageCustomize.script.jobScheduler.deadline} == true ]; then",
               "  cat /tmp/customize.job.scheduler.deadline.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))} /bin/bash",
               "fi",
@@ -250,8 +244,8 @@ resource azapi_resource windows {
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2024-02-01"
-  parent_id = azurerm_resource_group.image.id
-  location  = azurerm_resource_group.image.location
+  parent_id = azurerm_resource_group.image_builder.id
+  location  = azurerm_resource_group.image_builder.location
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -301,11 +295,6 @@ resource azapi_resource windows {
           },
           {
             type        = "File"
-            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Windows/customize.job.scheduler.ps1"
-            destination = "C:\\AzureData\\customize.job.scheduler.ps1"
-          },
-          {
-            type        = "File"
             sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/2.Image.Builder/Windows/customize.job.scheduler.deadline.ps1"
             destination = "C:\\AzureData\\customize.job.scheduler.deadline.ps1"
           },
@@ -334,15 +323,17 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "if ('${each.value.build.machineType}' -eq 'JobScheduler') {",
-                "Write-Host 'Customize (Start): NFS Server'",
-                "Install-WindowsFeature -Name 'FS-NFS-Service'",
-                "Write-Host 'Customize (End): NFS Server'",
+              "if ('${each.value.build.machineType}' -eq 'DomainController') {",
                 "Write-Host 'Customize (Start): AD Domain Services'",
                 "Install-WindowsFeature -Name 'AD-Domain-Services' -IncludeManagementTools",
                 "Write-Host 'Customize (End): AD Domain Services'",
               "}",
-              "Rename-Computer -NewName ${each.value.name}"
+              "if ('${each.value.build.machineType}' -eq 'JobScheduler') {",
+                "Write-Host 'Customize (Start): NFS Server'",
+                "Install-WindowsFeature -Name 'FS-NFS-Service'",
+                "Write-Host 'Customize (End): NFS Server'",
+              "}",
+              "Rename-Computer -NewName ${each.value.name} -Force"
             ]
           },
           {
@@ -351,19 +342,20 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
-              "C:\\AzureData\\customize.job.scheduler.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
-              "if ('${var.imageCustomize.script.jobScheduler.deadline}' -eq $true) {",
-              "  C:\\AzureData\\customize.job.scheduler.deadline.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
-              "}",
-              "if ('${var.imageCustomize.script.jobScheduler.lsf}' -eq $true) {",
-              "  C:\\AzureData\\customize.job.scheduler.lsf.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
-              "}",
-              "if ('${var.imageCustomize.script.jobProcessor.render}' -eq $true) {",
-              "  C:\\AzureData\\customize.job.processor.render.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
-              "}",
-              "if ('${var.imageCustomize.script.jobProcessor.eda}' -eq $true) {",
-              "  C:\\AzureData\\customize.job.processor.eda.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
+              "if ('${each.value.build.machineType}' -ne 'DomainController') {",
+              "  C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
+              "  if ('${var.imageCustomize.script.jobScheduler.deadline}' -eq $true) {",
+              "    C:\\AzureData\\customize.job.scheduler.deadline.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
+              "  }",
+              "  if ('${var.imageCustomize.script.jobScheduler.lsf}' -eq $true) {",
+              "    C:\\AzureData\\customize.job.scheduler.lsf.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
+              "  }",
+              "  if ('${var.imageCustomize.script.jobProcessor.render}' -eq $true) {",
+              "    C:\\AzureData\\customize.job.processor.render.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
+              "  }",
+              "  if ('${var.imageCustomize.script.jobProcessor.eda}' -eq $true) {",
+              "    C:\\AzureData\\customize.job.processor.eda.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.storage.binHostUrl})))}",
+              "  }",
               "}"
             ]
             runElevated = true

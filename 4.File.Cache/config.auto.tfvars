@@ -95,9 +95,9 @@ hammerspace = {
   volumes = [
     {
       enable = false
-      name   = "volume1"
+      name   = "data-cpu"
       type   = "READ_ONLY"
-      path   = "/volume1"
+      path   = "/data/cpu"
       node = {
         name    = "node1"
         type    = "OTHER"
@@ -116,13 +116,13 @@ hammerspace = {
     },
     {
       enable = false
-      name   = "volume2"
+      name   = "data-gpu"
       type   = "READ_ONLY"
-      path   = "/volume2"
+      path   = "/data/gpu"
       node = {
         name    = "node2"
         type    = "OTHER"
-        address = "10.1.193.5"
+        address = "10.1.193.4"
       }
       assimilation = {
         enable = true
@@ -141,8 +141,8 @@ hammerspace = {
       enable = false
       name   = "cache"
       volumeNames = [
-        "volume1",
-        "volume2"
+        "data-cpu",
+        "data-gpu"
       ]
     }
   ]
@@ -245,9 +245,9 @@ storageTargets = [
   }
 ]
 
-##########################
-# Pre-Existing Resources #
-##########################
+########################
+# Brownfield Resources #
+########################
 
 existingNetwork = {
   enable            = false

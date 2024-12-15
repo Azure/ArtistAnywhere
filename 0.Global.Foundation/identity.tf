@@ -14,6 +14,12 @@ resource azurerm_role_assignment managed_identity_operator {
   scope                = azurerm_user_assigned_identity.studio.id
 }
 
+resource azurerm_role_assignment storage_blob_data_owner {
+  role_definition_name = "Storage Blob Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-owner
+  principal_id         = azurerm_user_assigned_identity.studio.principal_id
+  scope                = azurerm_storage_account.studio.id
+}
+
 resource azurerm_role_assignment virtual_machine_contributor {
   role_definition_name = "Virtual Machine Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/compute#virtual-machine-contributor
   principal_id         = azurerm_user_assigned_identity.studio.principal_id

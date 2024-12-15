@@ -54,7 +54,7 @@ resource azurerm_key_vault studio {
   name                            = module.global.keyVault.name
   resource_group_name             = azurerm_resource_group.studio.name
   location                        = azurerm_resource_group.studio.location
-  tenant_id                       = data.azurerm_client_config.studio.tenant_id
+  tenant_id                       = data.azurerm_client_config.current.tenant_id
   sku_name                        = var.keyVault.type
   enabled_for_deployment          = var.keyVault.enableForDeployment
   enabled_for_disk_encryption     = var.keyVault.enableForDiskEncryption

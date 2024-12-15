@@ -1,7 +1,12 @@
 variable dataLoad {
   type = object({
-    enable  = bool
-    targets = list(string)
+    enable = bool
+    mount = object({
+      type    = string
+      path    = string
+      target  = string
+      options = string
+    })
     machine = object({
       name = string
       size = string
@@ -12,7 +17,6 @@ variable dataLoad {
         version   = string
       })
       osDisk = object({
-        type        = string
         storageType = string
         cachingType = string
         sizeGB      = number
@@ -76,9 +80,6 @@ resource azurerm_network_interface storage_data_load {
     subnet_id                     = data.azurerm_subnet.storage.id
   }
   accelerated_networking_enabled = var.dataLoad.network.acceleration.enable
-  depends_on = [
-    azurerm_storage_container.core
-  ]
 }
 
  resource azurerm_linux_virtual_machine storage_data_load {
@@ -136,7 +137,8 @@ resource azurerm_virtual_machine_extension storage_data_load {
   protected_settings = jsonencode({
     script = base64encode(
       templatefile("data.sh", {
-        dataLoadTargets = var.dataLoad.targets
+        managedLustre = var.managedLustre
+        dataLoadMount = var.dataLoad.mount
       })
     )
   })

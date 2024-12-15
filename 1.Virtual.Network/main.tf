@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">=1.9.8"
+  required_version = ">=1.10.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.10.0"
+      version = "~>4.14.0"
     }
   }
   backend azurerm {
@@ -23,11 +23,18 @@ provider azurerm {
 }
 
 module global {
-  source = "../0.Global.Foundation/cfg"
+  source = "../0.Global.Foundation/config"
 }
 
 variable resourceGroupName {
   type = string
+}
+
+data azurerm_location studio {
+  for_each = {
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork
+  }
+  location = each.value.regionName
 }
 
 data azurerm_user_assigned_identity studio {
@@ -50,9 +57,14 @@ data azurerm_key_vault_secret gateway_connection {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
-data azurerm_app_configuration studio {
-  name                = module.global.appConfig.name
-  resource_group_name = module.global.resourceGroupName
+# data azurerm_eventgrid_namespace studio {
+#   name                = module.global.message.eventGrid.name
+#   resource_group_name = data.terraform_remote_state.global.outputs.message.resourceGroupName
+# }
+
+data azurerm_eventhub_namespace studio {
+  name                = module.global.message.eventHub.name
+  resource_group_name = data.terraform_remote_state.global.outputs.message.resourceGroupName
 }
 
 data terraform_remote_state global {

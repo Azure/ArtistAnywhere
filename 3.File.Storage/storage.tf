@@ -69,7 +69,7 @@ resource azurerm_role_assignment storage_blob_data_owner {
     for storageAccount in local.storageAccounts : storageAccount.name => storageAccount
   }
   role_definition_name = "Storage Blob Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-owner
-  principal_id         = data.azurerm_client_config.studio.object_id
+  principal_id         = data.azurerm_client_config.current.object_id
   scope                = each.value.storageAccountId
   depends_on = [
     azurerm_storage_account.studio
@@ -125,7 +125,7 @@ resource azurerm_storage_account studio {
     dynamic private_link_access {
       for_each = module.global.defender.storage.malwareScanning.enable ? [1] : []
       content {
-        endpoint_tenant_id   = data.azurerm_client_config.studio.tenant_id
+        endpoint_tenant_id   = data.azurerm_client_config.current.tenant_id
         endpoint_resource_id = "/subscriptions/${module.global.subscriptionId}/providers/Microsoft.Security/datascanners/storageDataScanner"
       }
     }

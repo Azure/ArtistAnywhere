@@ -20,6 +20,9 @@ virtualNetworks = [
         addressSpace = [
           "10.0.0.0/17"
         ]
+        serviceEndpoints = [
+          "Microsoft.Storage"
+        ]
         serviceDelegation = null
       },
       {
@@ -27,26 +30,36 @@ virtualNetworks = [
         addressSpace = [
           "10.0.128.0/18"
         ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = null
+      },
+      {
+        name = "Identity"
+        addressSpace = [
+          "10.0.192.0/24"
+        ]
+        serviceEndpoints = [
+          "Microsoft.Storage"
+        ]
         serviceDelegation = null
       },
       {
         name = "Storage"
         addressSpace = [
-          "10.0.192.0/24"
+          "10.0.193.0/24"
         ]
-        serviceDelegation = null
-      },
-      {
-        name = "StorageHA"
-        addressSpace = [
-          "10.0.201.0/28"
+        serviceEndpoints = [
+          "Microsoft.Storage"
         ]
         serviceDelegation = null
       },
       {
         name = "StorageNetApp"
         addressSpace = [
-          "10.0.193.0/24"
+          "10.0.194.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Microsoft.Netapp/volumes"
@@ -59,7 +72,9 @@ virtualNetworks = [
       {
         name = "StorageQumulo"
         addressSpace = [
-          "10.0.194.0/24"
+          "10.0.195.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Qumulo.Storage/fileSystems"
@@ -71,14 +86,32 @@ virtualNetworks = [
       {
         name = "Data"
         addressSpace = [
-          "10.0.195.0/24"
+          "10.0.196.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = null
       },
       {
+        name = "DataMySQL"
+        addressSpace = [
+          "10.0.197.0/24"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = {
+          service = "Microsoft.DBforMySQL/flexibleServers"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
+      },
+      {
         name = "DataPostgreSQL"
         addressSpace = [
-          "10.0.196.0/24"
+          "10.0.198.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Microsoft.DBforPostgreSQL/flexibleServers"
@@ -90,7 +123,9 @@ virtualNetworks = [
       {
         name = "DataCassandra"
         addressSpace = [
-          "10.0.197.0/24"
+          "10.0.199.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Microsoft.DocumentDB/cassandraClusters"
@@ -102,21 +137,18 @@ virtualNetworks = [
       {
         name = "Cache"
         addressSpace = [
-          "10.0.198.0/24"
+          "10.0.200.0/24"
         ]
-        serviceDelegation = null
-      },
-      {
-        name = "CacheHA"
-        addressSpace = [
-          "10.0.202.0/28"
+        serviceEndpoints = [
         ]
         serviceDelegation = null
       },
       {
         name = "App"
         addressSpace = [
-          "10.0.199.0/24"
+          "10.0.201.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Microsoft.App/environments"
@@ -128,26 +160,46 @@ virtualNetworks = [
       {
         name = "Web"
         addressSpace = [
-          "10.0.200.0/24"
+          "10.0.202.0/24"
         ]
-        serviceDelegation = {
-          service = "Microsoft.Web/serverFarms"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/action"
-          ]
-        }
+        serviceEndpoints = [
+          "Microsoft.Storage"
+        ]
+        serviceDelegation = null
       },
       {
         name = "GatewaySubnet"
         addressSpace = [
-          "10.0.255.0/26"
+          "10.0.254.0/26"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = null
       },
       {
         name = "AzureBastionSubnet"
         addressSpace = [
+          "10.0.254.64/26"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = null
+      },
+      {
+        name = "AzureFirewallSubnet"
+        addressSpace = [
+          "10.0.255.0/26"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = null
+      },
+      {
+        name = "AzureFirewallManagementSubnet"
+        addressSpace = [
           "10.0.255.64/26"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = null
       }
@@ -168,6 +220,9 @@ virtualNetworks = [
         addressSpace = [
           "10.1.0.0/17"
         ]
+        serviceEndpoints = [
+          "Microsoft.Storage"
+        ]
         serviceDelegation = null
       },
       {
@@ -175,26 +230,36 @@ virtualNetworks = [
         addressSpace = [
           "10.1.128.0/18"
         ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = null
+      },
+      {
+        name = "Identity"
+        addressSpace = [
+          "10.1.192.0/24"
+        ]
+        serviceEndpoints = [
+          "Microsoft.Storage"
+        ]
         serviceDelegation = null
       },
       {
         name = "Storage"
         addressSpace = [
-          "10.1.192.0/24"
+          "10.1.193.0/24"
         ]
-        serviceDelegation = null
-      },
-      {
-        name = "StorageHA"
-        addressSpace = [
-          "10.1.201.0/28"
+        serviceEndpoints = [
+          "Microsoft.Storage"
         ]
         serviceDelegation = null
       },
       {
         name = "StorageNetApp"
         addressSpace = [
-          "10.1.193.0/24"
+          "10.1.194.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Microsoft.Netapp/volumes"
@@ -207,7 +272,9 @@ virtualNetworks = [
       {
         name = "StorageQumulo"
         addressSpace = [
-          "10.1.194.0/24"
+          "10.1.195.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Qumulo.Storage/fileSystems"
@@ -219,14 +286,32 @@ virtualNetworks = [
       {
         name = "Data"
         addressSpace = [
-          "10.1.195.0/24"
+          "10.1.196.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = null
       },
       {
+        name = "DataMySQL"
+        addressSpace = [
+          "10.1.197.0/24"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = {
+          service = "Microsoft.DBforMySQL/flexibleServers"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
+      },
+      {
         name = "DataPostgreSQL"
         addressSpace = [
-          "10.1.196.0/24"
+          "10.1.198.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Microsoft.DBforPostgreSQL/flexibleServers"
@@ -238,7 +323,9 @@ virtualNetworks = [
       {
         name = "DataCassandra"
         addressSpace = [
-          "10.1.197.0/24"
+          "10.1.199.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Microsoft.DocumentDB/cassandraClusters"
@@ -250,21 +337,18 @@ virtualNetworks = [
       {
         name = "Cache"
         addressSpace = [
-          "10.1.198.0/24"
+          "10.1.200.0/24"
         ]
-        serviceDelegation = null
-      },
-      {
-        name = "CacheHA"
-        addressSpace = [
-          "10.1.202.0/28"
+        serviceEndpoints = [
         ]
         serviceDelegation = null
       },
       {
         name = "App"
         addressSpace = [
-          "10.1.199.0/24"
+          "10.1.201.0/24"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = {
           service = "Microsoft.App/environments"
@@ -276,26 +360,46 @@ virtualNetworks = [
       {
         name = "Web"
         addressSpace = [
-          "10.1.200.0/24"
+          "10.1.202.0/24"
         ]
-        serviceDelegation = {
-          service = "Microsoft.Web/serverFarms"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/action"
-          ]
-        }
+        serviceEndpoints = [
+          "Microsoft.Storage"
+        ]
+        serviceDelegation = null
       },
       {
         name = "GatewaySubnet"
         addressSpace = [
-          "10.1.255.0/26"
+          "10.1.254.0/26"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = null
       },
       {
         name = "AzureBastionSubnet"
         addressSpace = [
+          "10.1.254.64/26"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = null
+      },
+      {
+        name = "AzureFirewallSubnet"
+        addressSpace = [
+          "10.1.255.0/26"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = null
+      },
+      {
+        name = "AzureFirewallManagementSubnet"
+        addressSpace = [
           "10.1.255.64/26"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = null
       }
@@ -314,20 +418,43 @@ privateDns = {
   }
 }
 
+##################################################################
+# Firewall (https://learn.microsoft.com/azure/firewall/overview) #
+##################################################################
+
+firewall = {
+  enable = false
+  name   = "xstudio"
+  type   = "AZFW_VNet"
+  tier   = "Standard"
+}
+
 ########################################################################
 # Bastion (https://learn.microsoft.com/azure/bastion/bastion-overview) #
 ########################################################################
 
 bastion = {
   enable              = true
-  tier                = "Standard"
+  type                = "Standard"
   scaleUnitCount      = 2
   enableFileCopy      = true
   enableCopyPaste     = true
   enableIpConnect     = true
   enableTunneling     = true
-  enablePerRegion     = true
+  enablePerRegion     = false
   enableShareableLink = false
+}
+
+##########################################################################################################################
+# Network Address Translation (NAT) Gateway (https://learn.microsoft.com/azure/virtual-network/nat-gateway/nat-overview) #
+##########################################################################################################################
+
+natGateway = {
+  enable = false
+  ipAddress = {
+    type = "Standard"
+    tier = "Regional"
+  }
 }
 
 ################################################################################################################
@@ -339,8 +466,8 @@ networkPeering = {
   allowRemoteNetworkAccess    = true
   allowRemoteForwardedTraffic = true
   allowGatewayTransit         = true
-  useRemoteGateways = {
-    compute = false
-    storage = false
+  useRemoteGateway = {
+    computeNetwork = false
+    storageNetwork = false
   }
 }

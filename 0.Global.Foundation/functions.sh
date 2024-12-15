@@ -84,10 +84,10 @@ function SetFileSystemMount {
   local fileSystemMount="$1"
   local mountType=$(echo $fileSystemMount | jq -r .type)
   local mountPath=$(echo $fileSystemMount | jq -r .path)
-  local mountSource=$(echo $fileSystemMount | jq -r .source)
+  local mountTarget=$(echo $fileSystemMount | jq -r .target)
   local mountOptions=$(echo $fileSystemMount | jq -r .options)
   if [ $(grep -c $mountPath /etc/fstab) ]; then
     sudo mkdir -p $mountPath
-    echo "$mountSource $mountPath $mountType $mountOptions 0 0" | sudo tee -a /etc/fstab
+    echo "$mountTarget $mountPath $mountType $mountOptions 0 0" | sudo tee -a /etc/fstab
   fi
 }

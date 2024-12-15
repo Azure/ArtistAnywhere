@@ -52,13 +52,16 @@ Set-Location -Path $binDirectory
 Write-Host "Customize (End): Deadline Client"
 
 Write-Host "Customize (Start): Deadline Repository"
-$filePath = "$binDirectory\deadline-repository.bat"
-New-Item -Path $filePath -ItemType File
+$taskName = "AAA Deadline Repository"
 if ($machineType -eq "JobScheduler") {
-  Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate"
+  $taskAction = New-ScheduledTaskAction -Execute "$binPathJobScheduler\deadlinecommand.exe" -Argument "-ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate"
 } else {
-  Add-Content -Path $filePath -Value "$binPathJobScheduler\deadlinecommand.exe -ChangeRepository Direct S:\ S:\$deadlineCertificate"
+  $taskAction = New-ScheduledTaskAction -Execute "$binPathJobScheduler\deadlinecommand.exe" -Argument "-ChangeRepository Direct S:\ S:\$deadlineCertificate"
 }
+$taskTrigger = New-ScheduledTaskTrigger -AtLogOn
+$taskPrincipal = New-ScheduledTaskPrincipal -GroupId "Users"
+$task = New-ScheduledTask -Action $taskAction -Trigger $taskTrigger -Principal $taskPrincipal
+Register-ScheduledTask -TaskName $taskName -InputObject $task
 Write-Host "Customize (End): Deadline Repository"
 
 Write-Host "Customize (Start): Deadline Monitor"

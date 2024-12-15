@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.12.0"
+      version = "~>4.14.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -20,9 +20,6 @@ provider azurerm {
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
-    }
-    managed_disk {
-      expand_without_downtime = true
     }
     virtual_machine {
       delete_os_disk_on_deletion            = true
@@ -47,13 +44,6 @@ variable dnsRecord {
   type = object({
     name       = string
     ttlSeconds = number
-  })
-}
-
-variable activeDirectory {
-  type = object({
-    enable     = bool
-    domainName = string
   })
 }
 

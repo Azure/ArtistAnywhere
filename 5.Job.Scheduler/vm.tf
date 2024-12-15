@@ -32,7 +32,6 @@ variable virtualMachines {
       locationExtended = object({
         enable = bool
       })
-      staticIpAddress = string
     })
     extension = object({
       custom = object({
@@ -104,9 +103,8 @@ resource azurerm_network_interface job_scheduler {
   edge_zone           = each.value.resourceLocation.extendedZoneName
   ip_configuration {
     name                          = "ipConfig"
+    private_ip_address_allocation = "Dynamic"
     subnet_id                     = each.value.network.subnetId
-    private_ip_address            = each.value.network.staticIpAddress != "" ? each.value.network.staticIpAddress : null
-    private_ip_address_allocation = each.value.network.staticIpAddress != "" ? "Static" : "Dynamic"
   }
   accelerated_networking_enabled = each.value.network.acceleration.enable
 }
@@ -124,7 +122,7 @@ resource azurerm_linux_virtual_machine job_scheduler {
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
-  custom_data                     = base64encode(templatefile("scale.sh", {}))
+  custom_data                     = base64encode(file("scale.sh"))
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -172,7 +170,7 @@ resource azurerm_virtual_machine_extension job_scheduler_initialize_linux {
   virtual_machine_id         = "${azurerm_resource_group.job_scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
   protected_settings = jsonencode({
     script = base64encode(
-      templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {}))
+      templatefile(each.value.extension.custom.fileName, each.value.extension.custom.parameters)
     )
   })
   depends_on = [
@@ -257,10 +255,7 @@ resource azurerm_virtual_machine_extension job_scheduler_initialize_windows {
   virtual_machine_id         = "${azurerm_resource_group.job_scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
   protected_settings = jsonencode({
     commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
-      templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
-        adminPassword   = each.value.adminLogin.userPassword
-        activeDirectory = var.activeDirectory
-      })), "UTF-16LE"
+      templatefile(each.value.extension.custom.fileName, each.value.extension.custom.parameters), "UTF-16LE"
     )}"
   })
   depends_on = [

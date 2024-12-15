@@ -17,8 +17,13 @@ resource azurerm_private_dns_zone key_vault {
   resource_group_name = azurerm_resource_group.network.name
 }
 
-resource azurerm_private_dns_zone app_config {
-  name                = "privatelink.azconfig.io"
+resource azurerm_private_dns_zone event_grid {
+  name                = "privatelink.eventgrid.azure.net"
+  resource_group_name = azurerm_resource_group.network.name
+}
+
+resource azurerm_private_dns_zone event_hub {
+  name                = "privatelink.servicebus.windows.net"
   resource_group_name = azurerm_resource_group.network.name
 }
 
@@ -52,10 +57,20 @@ resource azurerm_private_dns_zone_virtual_network_link key_vault {
   ]
 }
 
-resource azurerm_private_dns_zone_virtual_network_link app_config {
-  name                  = "app-config"
-  resource_group_name   = azurerm_private_dns_zone.app_config.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.app_config.name
+resource azurerm_private_dns_zone_virtual_network_link event_grid {
+  name                  = "event-grid"
+  resource_group_name   = azurerm_private_dns_zone.event_grid.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.event_grid.name
+  virtual_network_id    = local.virtualNetwork.id
+  depends_on = [
+    azurerm_virtual_network.studio
+  ]
+}
+
+resource azurerm_private_dns_zone_virtual_network_link event_hub {
+  name                  = "event-hub"
+  resource_group_name   = azurerm_private_dns_zone.event_hub.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.event_hub.name
   virtual_network_id    = local.virtualNetwork.id
   depends_on = [
     azurerm_virtual_network.studio

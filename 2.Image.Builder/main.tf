@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.12.0"
+      version = "~>4.14.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -11,7 +11,7 @@ terraform {
     }
     azapi = {
       source = "azure/azapi"
-      version = "~>2.0.0"
+      version = "~>2.1.0"
     }
   }
   backend azurerm {
@@ -42,7 +42,7 @@ data http client_address {
   url = "https://api.ipify.org?format=json"
 }
 
-data azurerm_client_config studio {}
+data azurerm_client_config current {}
 
 data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name
@@ -111,8 +111,16 @@ locals {
   ])
 }
 
-resource azurerm_resource_group image {
-  name     = var.resourceGroupName
+resource azurerm_resource_group image_builder {
+  name     = "${var.resourceGroupName}.Builder"
+  location = module.global.resourceLocation.regionName
+  tags = {
+    AAA = basename(path.cwd)
+  }
+}
+
+resource azurerm_resource_group image_gallery {
+  name     = "${var.resourceGroupName}.Gallery"
   location = module.global.resourceLocation.regionName
   tags = {
     AAA = basename(path.cwd)
@@ -121,7 +129,7 @@ resource azurerm_resource_group image {
 
 resource azurerm_resource_group image_registry {
   count    = var.containerRegistry.enable ? 1 : 0
-  name     = "${azurerm_resource_group.image.name}.Registry"
+  name     = "${var.resourceGroupName}.Registry"
   location = module.global.resourceLocation.regionName
   tags = {
     AAA = basename(path.cwd)

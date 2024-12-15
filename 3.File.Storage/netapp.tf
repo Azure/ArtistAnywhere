@@ -9,7 +9,7 @@ variable netAppFiles {
     capacityPools = list(object({
       enable  = bool
       name    = string
-      tier    = string
+      type    = string
       sizeTiB = number
       coolAccess = object({
         enable = bool
@@ -18,7 +18,7 @@ variable netAppFiles {
       volumes = list(object({
         enable      = bool
         name        = string
-        mountPath   = string
+        path        = string
         sizeGiB     = number
         permissions = number
         network = object({
@@ -36,6 +36,19 @@ variable netAppFiles {
         }))
       }))
     }))
+    backup = object({
+      enable = bool
+      name   = string
+      policy = object({
+        enable = bool
+        name   = string
+        retention = object({
+          daily   = number
+          weekly  = number
+          monthly = number
+        })
+      })
+    })
     encryption = object({
       enable = bool
     })
@@ -54,7 +67,7 @@ locals {
     for capacityPool in var.netAppFiles.capacityPools : [
       for volume in capacityPool.volumes : merge(volume, {
         capacityPoolName       = capacityPool.name
-        capacityPoolTier       = capacityPool.tier
+        capacityPoolType       = capacityPool.type
         capacityPoolCoolAccess = capacityPool.coolAccess
       }) if volume.enable
     ] if var.netAppFiles.enable && capacityPool.enable
@@ -63,14 +76,17 @@ locals {
 
 resource azurerm_resource_group netapp {
   count    = var.netAppFiles.enable ? 1 : 0
-  name     = "${var.resourceGroupName}.NetAppFiles"
+  name     = "${var.resourceGroupName}.NetApp"
   location = local.regionName
   tags = {
     AAA = basename(path.cwd)
   }
+  depends_on = [
+    azurerm_virtual_machine_extension.active_directory
+  ]
 }
 
-resource azurerm_netapp_account storage {
+resource azurerm_netapp_account studio {
   count               = var.netAppFiles.enable ? 1 : 0
   name                = var.netAppFiles.name
   resource_group_name = azurerm_resource_group.netapp[0].name
@@ -83,29 +99,29 @@ resource azurerm_netapp_account storage {
   }
 }
 
-resource azurerm_netapp_account_encryption storage {
+resource azurerm_netapp_account_encryption studio {
   count                     = var.netAppFiles.enable && var.netAppFiles.encryption.enable ? 1 : 0
-  netapp_account_id         = azurerm_netapp_account.storage[0].id
+  netapp_account_id         = azurerm_netapp_account.studio[0].id
   user_assigned_identity_id = data.azurerm_user_assigned_identity.studio.id
   encryption_key            = data.azurerm_key_vault_key.data_encryption.versionless_id
 }
 
-# resource azurerm_netapp_pool storage {
+# resource azurerm_netapp_pool studio {
 #   for_each = {
 #     for capacityPool in var.netAppFiles.capacityPools : capacityPool.name => capacityPool if var.netAppFiles.enable && capacityPool.enable
 #   }
 #   name                = each.value.name
 #   resource_group_name = azurerm_resource_group.netapp[0].name
 #   location            = azurerm_resource_group.netapp[0].location
-#   service_level       = each.value.tier
+#   service_level       = each.value.type
 #   size_in_tb          = each.value.sizeTiB
 #   account_name        = var.netAppFiles.name
 #   depends_on = [
-#     azurerm_netapp_account.storage
+#     azurerm_netapp_account.studio
 #   ]
 # }
 
-# resource azurerm_netapp_volume storage {
+# resource azurerm_netapp_volume studio {
 #   for_each = {
 #     for volume in local.netAppVolumes : "${volume.capacityPoolName}-${volume.name}" => volume
 #   }
@@ -113,9 +129,9 @@ resource azurerm_netapp_account_encryption storage {
 #   resource_group_name           = azurerm_resource_group.netapp[0].name
 #   location                      = azurerm_resource_group.netapp[0].location
 #   pool_name                     = each.value.capacityPoolName
-#   service_level                 = each.value.capacityPoolTier
+#   service_level                 = each.value.capacityPoolType
+#   volume_path                   = each.value.path
 #   storage_quota_in_gb           = each.value.sizeGiB
-#   volume_path                   = each.value.mountPath
 #   network_features              = each.value.network.features
 #   protocols                     = each.value.network.protocols
 #   subnet_id                     = data.azurerm_subnet.storage_netapp[0].id
@@ -134,7 +150,7 @@ resource azurerm_netapp_account_encryption storage {
 #     }
 #   }
 #   depends_on = [
-#     azurerm_netapp_pool.storage
+#     azurerm_netapp_pool.studio
 #   ]
 # }
 
@@ -144,11 +160,11 @@ resource azapi_resource capacity_pool {
   }
   name      = each.value.name
   type      = "Microsoft.NetApp/netAppAccounts/capacityPools@2024-07-01"
-  parent_id = azurerm_netapp_account.storage[0].id
-  location  = azurerm_netapp_account.storage[0].location
+  parent_id = azurerm_netapp_account.studio[0].id
+  location  = azurerm_netapp_account.studio[0].location
   body = {
     properties = {
-      serviceLevel = each.value.tier
+      serviceLevel = each.value.type
       size         = each.value.sizeTiB * 1099511627776
       coolAccess   = each.value.coolAccess.enable
     }
@@ -167,12 +183,12 @@ resource azapi_resource volume {
   body = {
     properties = {
       subnetId        = data.azurerm_subnet.storage_netapp[0].id
-      serviceLevel    = each.value.capacityPoolTier
+      serviceLevel    = each.value.capacityPoolType
       usageThreshold  = each.value.sizeGiB * 1073741824
       protocolTypes   = each.value.network.protocols
       networkFeatures = each.value.network.features
       unixPermissions = tostring(each.value.permissions)
-      creationToken   = each.value.mountPath
+      creationToken   = each.value.path
       coolAccess      = each.value.capacityPoolCoolAccess.enable
       coolnessPeriod  = each.value.capacityPoolCoolAccess.period
       exportPolicy = {
@@ -208,9 +224,38 @@ resource azapi_resource volume {
 ############################################################################
 
 resource azurerm_private_dns_a_record netapp {
+  count               = var.netAppFiles.enable && length(azapi_resource.volume) > 0 ? 1 : 0
   name                = "${var.dnsRecord.name}-data"
   resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = data.azurerm_private_dns_zone.studio.name
   records             = distinct([for volume in azapi_resource.volume : volume.output.properties.mountTargets[0].ipAddress])
   ttl                 = var.dnsRecord.ttlSeconds
 }
+
+#################################################################################################
+# NetApp Files Backup (https://learn.microsoft.com/azure/azure-netapp-files/backup-introduction #
+#################################################################################################
+
+resource azurerm_netapp_backup_vault studio {
+  count               = var.netAppFiles.enable && var.netAppFiles.backup.enable ? 1 : 0
+  name                = var.netAppFiles.backup.name
+  resource_group_name = azurerm_netapp_account.studio[0].resource_group_name
+  location            = azurerm_netapp_account.studio[0].location
+  account_name        = azurerm_netapp_account.studio[0].name
+}
+
+resource azurerm_netapp_backup_policy studio {
+  count                   = var.netAppFiles.enable && var.netAppFiles.backup.enable ? 1 : 0
+  name                    = var.netAppFiles.backup.policy.name
+  resource_group_name     = azurerm_netapp_account.studio[0].resource_group_name
+  location                = azurerm_netapp_account.studio[0].location
+  account_name            = azurerm_netapp_account.studio[0].name
+  daily_backups_to_keep   = var.netAppFiles.backup.policy.retention.daily
+  weekly_backups_to_keep  = var.netAppFiles.backup.policy.retention.weekly
+  monthly_backups_to_keep = var.netAppFiles.backup.policy.retention.monthly
+  enabled                 = var.netAppFiles.backup.policy.enable
+}
+
+######################################################################################################
+# NetApp Files Snapshot (https://learn.microsoft.com/azure/azure-netapp-files/snapshots-introduction #
+######################################################################################################

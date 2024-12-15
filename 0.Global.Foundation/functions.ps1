@@ -108,7 +108,7 @@ function SetFileSystemMount ($fileSystemMount) {
   }
   $mountScript = Get-Content -Path $fileSystemsMountPath
   if ($mountScript -eq $null -or $mountScript -notlike "*$($fileSystemMount.path)*") {
-    $mount = "mount $($fileSystemMount.options) $($fileSystemMount.source) $($fileSystemMount.path)"
+    $mount = "mount $($fileSystemMount.options) $($fileSystemMount.target) $($fileSystemMount.path)"
     Add-Content -Path $fileSystemsMountPath -Value $mount
   }
 }

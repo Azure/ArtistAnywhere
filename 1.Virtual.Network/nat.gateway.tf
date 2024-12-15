@@ -2,9 +2,19 @@
 # Network Address Translation (NAT) Gateway (https://learn.microsoft.com/azure/virtual-network/nat-gateway/nat-overview) #
 ##########################################################################################################################
 
+variable natGateway {
+  type = object({
+    enable = bool
+    ipAddress = object({
+      type = string
+      tier = string
+    })
+  })
+}
+
 locals {
   natGatewayNetworks = [
-    for virtualNetwork in local.virtualNetworks : virtualNetwork if virtualNetwork.extendedZoneName == ""
+    for virtualNetwork in local.virtualNetworks : virtualNetwork if var.natGateway.enable && virtualNetwork.extendedZoneName == ""
   ]
   natGatewayNetworksSubnets = flatten([
     for virtualNetwork in local.natGatewayNetworks : [
@@ -51,6 +61,8 @@ resource azurerm_public_ip_prefix nat_gateway {
   name                = "Gateway-NAT"
   resource_group_name = each.value.resourceGroupName
   location            = each.value.regionName
+  sku                 = var.natGateway.ipAddress.type
+  sku_tier            = var.natGateway.ipAddress.tier
   prefix_length       = 31
   depends_on = [
     azurerm_resource_group.network_regions
