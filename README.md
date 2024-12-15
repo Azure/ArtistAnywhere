@@ -1,6 +1,6 @@
 # Azure Artist Anywhere (AAA) Deployment Framework
 
-Azure Artist Anywhere (AAA) is a *modular & flexible* [Infrastructure as Code (IaC)](https://learn.microsoft.com/devops/deliver/what-is-infrastructure-as-code) solution deployment framework for<br/>[Azure High-Performance Computing (HPC)](https://azure.microsoft.com/solutions/high-performance-computing) workloads. Enable remote artist productivity with [global Azure scale](https://azure.microsoft.com/global-infrastructure) via<br/>[Compute Fleet](https://learn.microsoft.com/azure/azure-compute-fleet/overview) AI-enabled deployments with up to 10,000 [Spot](https://learn.microsoft.com/azure/virtual-machines/spot-vms) / [Standard VMs](https://learn.microsoft.com/azure/virtual-machines/overview) and up to 15 [VM sizes](https://learn.microsoft.com/azure/virtual-machines/sizes/overview) per request.
+Azure Artist Anywhere (AAA) is a *modular & flexible* [Infrastructure as Code (IaC)](https://learn.microsoft.com/devops/deliver/what-is-infrastructure-as-code) solution deployment framework for<br/>[Azure High-Performance Computing (HPC)](https://azure.microsoft.com/solutions/high-performance-computing) workloads. Enable remote user productivity with [global Azure scale](https://azure.microsoft.com/global-infrastructure) via<br/>[Compute Fleet](https://learn.microsoft.com/azure/azure-compute-fleet/overview) AI-enabled deployments with up to 10,000 [Spot](https://learn.microsoft.com/azure/virtual-machines/spot-vms) / [Standard VMs](https://learn.microsoft.com/azure/virtual-machines/overview) and up to 15 [VM sizes](https://learn.microsoft.com/azure/virtual-machines/sizes/overview) per request.
 
 The following solution design principles and features are implemented throughout the AAA deployment framework.
 * Defense-in-depth layered security with integration of core services including [Managed Identity](https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview), [Key Vault](https://learn.microsoft.com/azure/key-vault/general/overview),</br>[Private Link](https://learn.microsoft.com/azure/private-link/private-link-overview) / [ Endpoints](https://learn.microsoft.com/azure/private-link/private-endpoint-overview), [Network Security Groups](https://learn.microsoft.com/azure/virtual-network/network-security-groups-overview), [NAT Gateway](https://learn.microsoft.com/azure/nat-gateway/nat-overview), [Firewall](https://learn.microsoft.com/azure/firewall/overview), [Bastion](https://learn.microsoft.com/azure/bastion/bastion-overview), [Defender for Cloud](https://learn.microsoft.com/azure/defender-for-cloud/defender-for-cloud-introduction), etc
@@ -15,9 +15,9 @@ The following solution design principles and features are implemented throughout
 | [2 Image Builder](https://github.com/Azure/ArtistAnywhere/tree/main/2.Image.Builder) | Deploys [Image Builder](https://learn.microsoft.com/azure/virtual-machines/image-builder-overview) and [Compute Gallery](https://learn.microsoft.com/azure/virtual-machines/shared-image-galleries) with image customize scripts | No, use your custom image config [here](https://github.com/Azure/ArtistAnywhere/tree/main/6.Compute.Farm/config.auto.tfvars#L15) | No, use your custom image config [here](https://github.com/Azure/ArtistAnywhere/tree/main/6.Compute.Farm/config.auto.tfvars#L15) |
 | [3 File Storage](https://github.com/Azure/ArtistAnywhere/tree/main/3.File.Storage) | Deploys [Blob NFS](https://learn.microsoft.com/azure/storage/blobs/network-file-system-protocol-support), [Files](https://learn.microsoft.com/azure/storage/files/storage-files-introduction), [NetApp Files](https://learn.microsoft.com/azure/azure-netapp-files/azure-netapp-files-introduction), [Hammerspace](https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) or [Lustre](https://learn.microsoft.com/azure/azure-managed-lustre/amlfs-overview) storage | No, use your current NAS via [4 File Cache](https://github.com/Azure/ArtistAnywhere/tree/main/4.File.Cache) | Yes |
 | [4 File Cache](https://github.com/Azure/ArtistAnywhere/tree/main/4.File.Cache) | Deploys [Hammerspace](https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol), [HPC Cache](https://learn.microsoft.com/azure/hpc-cache/hpc-cache-overview) or [Avere vFXT](https://learn.microsoft.com/azure/avere-vfxt/avere-vfxt-overview) for scalable caching | Yes | No |
-| [5 Job Scheduler](https://github.com/Azure/ArtistAnywhere/tree/main/5.Job.Scheduler) | Deploys [Virtual Machines](https://learn.microsoft.com/azure/virtual-machines) scheduler or [CycleCloud Workspace for Slurm](https://learn.microsoft.com/azure/cyclecloud/overview-ccws) | No | No |
+| [5 Job Scheduler](https://github.com/Azure/ArtistAnywhere/tree/main/5.Job.Scheduler) | Deploys scheduler [Virtual Machines](https://learn.microsoft.com/azure/virtual-machines) or [CycleCloud Workspace for Slurm](https://learn.microsoft.com/azure/cyclecloud/overview-ccws) | No | No |
 | [6 Compute Farm](https://github.com/Azure/ArtistAnywhere/tree/main/6.Compute.Farm) | Deploys [Compute Fleet](https://learn.microsoft.com/azure/azure-compute-fleet/overview) or [VM Scale Sets](https://learn.microsoft.com/azure/virtual-machine-scale-sets/overview) for scalable compute farms | Yes | Yes |
-| [7&#160;Artist&#160;Workstation](https://github.com/Azure/ArtistAnywhere/tree/main/7.Artist.Workstation) | Deploys [Virtual Machines](https://learn.microsoft.com/azure/virtual-machines/overview) for remote artist workstations with [HP Anyware](https://www.teradici.com/products/hp-anyware) | No | No |
+| [7&#160;Artist&#160;Workstation](https://github.com/Azure/ArtistAnywhere/tree/main/7.Artist.Workstation) | Deploys [Virtual Machines](https://learn.microsoft.com/azure/virtual-machines/overview) for remote user workstations with [HP Anyware](https://www.teradici.com/products/hp-anyware) | No | No |
 
 ## Local Installation Process
 
@@ -53,11 +53,11 @@ The following Disney Moana Island scene was rendered on Azure via the [Physicall
 
 ![moana-island](https://github.com/Azure/ArtistAnywhere/assets/22285652/7320acaf-061d-40a5-95e8-3a157a0a513c)
 
-To render the Disney Moana Island scene on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** or **Windows** artist workstation.
+To render the Disney Moana Island scene on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** or **Windows** user workstation.
 
 ```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt -arguments "--outfile /mnt/storage/moana-island.png /mnt/cache/moana/island/pbrt-v4/island.pbrt"```
 
-To render the Disney Moana Island scene on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** or **Windows** artist workstation.
+To render the Disney Moana Island scene on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** or **Windows** user workstation.
 
 ```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt.exe -arguments "--outfile X:\moana-island.png Y:\moana\island\pbrt-v4\island.pbrt"```
 
@@ -67,11 +67,11 @@ The following Blender 3.4 Splash screen was rendered on Azure via the [Blender](
 
 ![blender-splash](https://github.com/Azure/ArtistAnywhere/assets/22285652/07576415-ba75-454f-90b6-04f20cfecbe2)
 
-To render the Blender Splash screen on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** or **Windows** artist workstation.
+To render the Blender Splash screen on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** or **Windows** user workstation.
 
 ```deadlinecommand -SubmitCommandLineJob -name blender-splash -executable blender -arguments "--background /mnt/cache/blender/3.4/splash.blend --render-output /mnt/storage/blender/3.4/splash --enable-autoexec --render-frame 1"```
 
-To render the Blender Splash screen on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** or **Windows** artist workstation.
+To render the Blender Splash screen on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** or **Windows** user workstation.
 
 ```deadlinecommand -SubmitCommandLineJob -name blender-splash -executable blender.exe -arguments "--background Y:\blender\3.4\splash.blend --render-output X:\blender\3.4\splash --enable-autoexec --render-frame 1"```
 
