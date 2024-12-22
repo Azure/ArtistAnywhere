@@ -97,6 +97,19 @@ resource azurerm_netapp_account studio {
       data.azurerm_user_assigned_identity.studio.id
     ]
   }
+  dynamic active_directory {
+    for_each = var.activeDirectory.enable ? [1] : []
+    content {
+      domain              = var.activeDirectory.domainName
+      username            = var.activeDirectory.machine.adminLogin.userName
+      password            = var.activeDirectory.machine.adminLogin.userPassword
+      smb_server_name     = azurerm_windows_virtual_machine.active_directory[0].name
+      organizational_unit = var.activeDirectory.orgUnit != "" ? var.activeDirectory.orgUnit : null
+      dns_servers = [
+        azurerm_windows_virtual_machine.active_directory[0].private_ip_address
+      ]
+    }
+  }
 }
 
 resource azurerm_netapp_account_encryption studio {
@@ -228,8 +241,10 @@ resource azurerm_private_dns_a_record netapp {
   name                = "${var.dnsRecord.name}-data"
   resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = data.azurerm_private_dns_zone.studio.name
-  records             = distinct([for volume in azapi_resource.volume : volume.output.properties.mountTargets[0].ipAddress])
   ttl                 = var.dnsRecord.ttlSeconds
+  records = distinct([
+    for volume in azapi_resource.volume : volume.output.properties.mountTargets[0].ipAddress
+  ])
 }
 
 #################################################################################################

@@ -75,6 +75,7 @@ dnsRecord = {
 
 activeDirectory = {
   enable     = false
+  orgUnit    = "CN=Computers"
   domainName = "azure.studio"
   machine = {
     name = "xstudio"
@@ -87,7 +88,7 @@ activeDirectory = {
     }
     osDisk = {
       storageType = "Premium_LRS"
-      cachingType = "ReadOnly"
+      cachingType = "ReadWrite"
       sizeGB      = 0
     }
     adminLogin = {
@@ -99,7 +100,7 @@ activeDirectory = {
     acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
       enable = true
     }
-    staticAddress = "10.1.192.4"
+    staticAddress = "10.1.192.254"
   }
 }
 

@@ -2,63 +2,54 @@
 # CycleCloud Workspace for Slurm (CCWS) (https://learn.microsoft.com/azure/cyclecloud/how-to/ccws/deploy-with-cli) #
 ####################################################################################################################
 
-$imagePublisher = "AzureCycleCloud"
-$imageOffer     = "Azure-CycleCloud"
-$imagePlan      = "CycleCloud8-Gen2"
-
-az vm image terms show --publisher $imagePublisher --offer $imageOffer --plan $imagePlan
-az vm image terms accept --publisher $imagePublisher --offer $imageOffer --plan $imagePlan
-
-az vm image list --publisher $imagePublisher --offer $imageOffer --sku $imagePlan --all
+az account show
 
 git clone --branch release https://github.com/Azure/cyclecloud-slurm-workspace.git
 
 $regionName     = "SouthCentralUS"
-$deploymentName = "CycleCloud-Slurm-Workspace"
-$templateFile   = "../../cyclecloud-slurm-workspace-release/bicep/mainTemplate.bicep"
-$parameterFile  = "parameters.linux.json"
+$deploymentName = "CycleCloud.Workspace.Slurm"
+$templateFile   = "../../cyclecloud-slurm-workspace/bicep/mainTemplate.bicep"
+$parameterFile  = "parameters.mysql.anf.json"
 
-az account show
 az deployment sub create --name $deploymentName --location $regionName --template-file $templateFile --parameters $parameterFile
 
 cd cyclecloud-slurm-workspace
-./util/delete_roles.sh --resource-group ArtistAnywhere.CCWS --delete-resource-group
+resourceGroupName="AAA.CycleCloud.Workspace.Slurm"
+./util/delete_roles.sh --resource-group $resourceGroupName --delete-resource-group
 
 ##############################################################################################################################
 # CycleCloud Portal Bastion Tunnel (https://learn.microsoft.com/azure/cyclecloud/how-to/ccws/connect-to-portal-with-bastion) #
 ##############################################################################################################################
 
-$subscriptionId     = az account show --query id --output tsv
-$resourceGroupName  = "ArtistAnywhere.CCWS"
-$virtualMachineName = "ccw-cyclecloud-vm"
 $cycleCloud = @{
-  resourceId   = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Compute/virtualMachines/$virtualMachineName"
-  resourcePort = 443
-  tunnelPort   = 8443
+  machineName       = "ccw-cyclecloud-vm"
+  resourceGroupName = "AAA.CycleCloud.Workspace.Slurm"
+  resourcePort      = 443
+  tunnelPort        = 8443
 }
-$bastion = @{
+$bastionHost = @{
   name              = "Bastion-Studio"
   resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
 }
 
-az network bastion tunnel --name $bastion.name --resource-group $bastion.resourceGroupName --target-resource-id $cycleCloud.resourceId --resource-port $cycleCloud.resourcePort --port $cycleCloud.tunnelPort
+$ccMachine = az vm show --resource-group $cycleCloud.resourceGroupName --name $cycleCloud.machineName --query id --output tsv
+az network bastion tunnel --resource-group $bastionHost.resourceGroupName --name $bastionHost.name --target-resource-id $ccMachine --resource-port $cycleCloud.resourcePort --port $cycleCloud.tunnelPort
 
 ########################################################################################################################
 # Login Node Bastion SSH (https://learn.microsoft.com/azure/cyclecloud/how-to/ccws/connect-to-login-node-with-bastion) #
 ########################################################################################################################
 
-$subscriptionId     = az account show --query id --output tsv
-$resourceGroupName  = "ArtistAnywhere.CCWS"
-$virtualMachineName = "ccw-cyclecloud-vm"
-$cycleCloud = @{
-  resourceId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Compute/virtualMachines/$virtualMachineName"
-  authType   = "ssh-key"
-  userName   = "hpcadmin"
-  sshKeyFile = "~/.ssh/hpcadmin_id_rsa"
+$loginNode = @{
+  resourceGroupName = "AAA.CycleCloud.Workspace.Slurm"
+  authType          = "ssh-key"
+  userName          = "hpcadmin"
+  sshKeyFile        = "~/.ssh/id_rsa"
 }
-$bastion = @{
+$bastionHost = @{
   name              = "Bastion-Studio"
   resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
 }
 
-az network bastion ssh --name $bastion.name --resource-group $bastion.resourceGroupName --target-resource-id $cycleCloud.resourceId --auth-type $cycleCloud.authType --username $cycleCloud.userName --ssh-key $cycleCloud.sshKeyFile
+$loginVMSSName = az vmss list --resource-group $loginNode.resourceGroupName --query [0].name --output tsv
+$loginInstance = az vmss list-instances --resource-group $loginNode.resourceGroupName --name $loginVMSSName --query [0].id --output tsv
+az network bastion ssh --resource-group $bastionHost.resourceGroupName --name $bastionHost.name --target-resource-id $loginInstance --auth-type $loginNode.authType --username $loginNode.userName --ssh-key $loginNode.sshKeyFile

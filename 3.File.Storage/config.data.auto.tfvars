@@ -17,7 +17,7 @@ dataLoad = {
     }
     osDisk = {
       storageType = "Premium_LRS"
-      cachingType = "ReadOnly"
+      cachingType = "ReadWrite"
       sizeGB      = 0
     }
     adminLogin = {

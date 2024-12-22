@@ -152,8 +152,8 @@ imageBuilder = {
       }
       build = {
         machineType    = "Farm"
-        machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
+        machineSize    = "Standard_NV28adms_V710_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "AMD"                       # NVIDIA or AMD
         imageVersion   = "2.2.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
@@ -210,8 +210,8 @@ imageBuilder = {
       }
       build = {
         machineType    = "Workstation"
-        machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = "AMD"                      # NVIDIA or AMD
+        machineSize    = "Standard_NV28adms_V710_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "AMD"                       # NVIDIA or AMD
         imageVersion   = "3.1.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
@@ -350,8 +350,8 @@ imageBuilder = {
       }
       build = {
         machineType    = "Farm"
-        machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                        # NVIDIA or AMD
+        machineSize    = "Standard_NV28adms_V710_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "AMD"                       # NVIDIA or AMD
         imageVersion   = "2.2.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 360
@@ -408,8 +408,8 @@ imageBuilder = {
       }
       build = {
         machineType    = "Workstation"
-        machineSize    = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = "AMD"                      # NVIDIA or AMD
+        machineSize    = "Standard_NV28adms_V710_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "AMD"                       # NVIDIA or AMD
         imageVersion   = "3.1.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 360

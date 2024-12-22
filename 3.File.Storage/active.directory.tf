@@ -5,6 +5,7 @@
 variable activeDirectory {
   type = object({
     enable     = bool
+    orgUnit    = string
     domainName = string
     machine = object({
       name = string
@@ -110,6 +111,7 @@ resource azurerm_virtual_machine_extension active_directory {
     commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
       templatefile("active.directory.ps1", {
         activeDirectory = local.activeDirectory
+        dnsResolver     = data.terraform_remote_state.network.outputs.privateDns.resolver
       }), "UTF-16LE"
     )}"
   })

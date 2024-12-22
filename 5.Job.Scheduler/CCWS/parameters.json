@@ -12,26 +12,26 @@
     "value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDnnueUdcHeNOOB6iyC0MwBBrBPeD3wxz/1iOPYhe9Q8tyRG/AzSRmqOsrBWi6X0JGL0C2aUj9h4XjFm7dNbw/fpHPbFJvVmLv3bHn+Q/mhSfQ3WcVvVf/IKcDSmAmp2WOlZs7JzhfcMxXgy8giywWueTw3MkhjncC9madZnxbrSV7rhQ1IUhL5KJQtiwQBU6jw/8g1Q2kF+u/fdvld6ZCg0mJ2suRnXXzgnBV7PMipd8I8Gc5HHaq5DcguSuZDKosUt/07Vlj8q1CwK01pRPgG6a+dNcEgYq0jjLutTfqv6NqRrj37sFnLsTWZPGjMVPlkmmPwP1eagd9lZD9v998ho0WzuWp21AWblcfksFrDGg7GMY42BHcQ7Gu/xR6VMFySyiBLw0brsvHKZl03UwfZynqt4NczGvBMprHnGVyDyfCMTUC2F5TXExEBJleecMqnIMHFAy/mIY5hnF2ZbpoWMI+Vhh1WI2MG3jE75X/zWaxvg9dBRzOigroWShHfohxCNSJ5kOEmQ0ZHu8aajE9PdTcf2EwQJ/MrZjIQ3Y0Nxl3ucpi6JQNbe1rreJ6HG5Dq/OR+0f/I6OWu6kqa6LgIzKk1iNEPcaW1eUoeNEDq7MIsTSB7e1wiiHyX0AwDROd00gano71Mo1HJBXML19cyFOvNaz9qTSKqZC0N6ShZ3Q=="
   },
   "ccVMSize": {
-    "value": "Standard_D4as_v4"
+    "value": "Standard_D8as_v5"
   },
   "resourceGroup": {
-    "value": "ArtistAnywhere.CCWS"
+    "value": "AAA.CycleCloud.Workspace.Slurm"
   },
   "sharedFilesystem": {
     "value": {
       "type": "nfs-existing",
-      "ipAddress": "10.1.193.4",
+      "ipAddress": "10.1.194.4",
       "exportPath": "/shared",
-      "mountOptions": "rw,hard,rsize=262144,wsize=262144,vers=3,tcp,_netdev"
+      "mountOptions": "rw,hard,rsize=262144,wsize=262144,vers=3,tcp"
     }
   },
   "additionalFilesystem": {
     "value": {
       "type": "nfs-existing",
-      "ipAddress": "10.1.193.4",
-      "mountPath": "/data",
-      "exportPath": "/mnt/data",
-      "mountOptions": "rw,hard,rsize=262144,wsize=262144,vers=3,tcp,_netdev"
+      "ipAddress": "10.1.194.4",
+      "exportPath": "/data",
+      "mountPath": "/mnt/data",
+      "mountOptions": "rw,hard,rsize=262144,wsize=262144,vers=3,tcp"
     }
   },
   "network": {
@@ -49,7 +49,7 @@
   "databaseConfig": {
     "value": {
       "type": "fqdn",
-      "databaseUser": "hpcdbadmin",
+      "databaseUser": "xadmin",
       "fqdn": "xstudio.mysql.database.azure.com"
     }
   },
@@ -61,41 +61,42 @@
   },
   "schedulerNode": {
     "value": {
-      "sku": "Standard_D4as_v4",
-      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
+      "sku": "Standard_D8as_v5",
+      "osImage": "microsoft-dsvm:ubuntu-hpc:2204:latest"
     }
   },
   "loginNodes": {
     "value": {
       "sku": "Standard_F4s_v2",
-      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0",
+      "osImage": "microsoft-dsvm:ubuntu-hpc:2204:latest",
       "initialNodes": 1,
-      "maxNodes": 1
+      "maxNodes": 2
     }
   },
   "htc": {
     "value": {
-      "sku": "Standard_F2s_v2",
-      "maxNodes": 100,
-      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0",
+      "sku": "Standard_D96as_v5",
+      "maxNodes": 2,
+      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image.Gallery/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0",
       "useSpot": false
     }
   },
   "hpc": {
     "value": {
-      "sku": "Standard_HB120rs_v3",
-      "maxNodes": 16,
-      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
+      "sku": "Standard_HX176rs",
+      "maxNodes": 2,
+      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image.Gallery/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
     }
   },
   "gpu": {
     "value": {
-      "sku": "Standard_D4as_v4",
-      "maxNodes": 8,
-      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
+      "sku": "Standard_NV72ads_A10_v5",
+      "maxNodes": 2,
+      "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image.Gallery/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
     }
   },
   "tags": {
-    "value": {}
+    "value": {
+    }
   }
 }

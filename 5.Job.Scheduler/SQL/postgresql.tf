@@ -50,6 +50,7 @@ variable postgreSQL {
       mode   = string
     })
     maintenanceWindow = object({
+      enable    = bool
       dayOfWeek = number
       start = object({
         hour   = number
@@ -100,10 +101,13 @@ resource azurerm_postgresql_flexible_server studio {
     password_auth_enabled         = var.postgreSQL.authentication.password.enable
     active_directory_auth_enabled = var.postgreSQL.authentication.activeDirectory.enable
   }
-  maintenance_window {
-    day_of_week  = var.postgreSQL.maintenanceWindow.dayOfWeek
-    start_hour   = var.postgreSQL.maintenanceWindow.start.hour
-    start_minute = var.postgreSQL.maintenanceWindow.start.minute
+  dynamic maintenance_window {
+    for_each = var.postgreSQL.maintenanceWindow.enable ? [1] : []
+    content {
+      day_of_week  = var.postgreSQL.maintenanceWindow.dayOfWeek
+      start_hour   = var.postgreSQL.maintenanceWindow.start.hour
+      start_minute = var.postgreSQL.maintenanceWindow.start.minute
+    }
   }
   dynamic high_availability {
     for_each = var.postgreSQL.highAvailability.enable ? [1] : []
@@ -123,6 +127,12 @@ resource azurerm_postgresql_flexible_server studio {
   depends_on = [
     azurerm_private_dns_zone_virtual_network_link.postgresql
   ]
+  lifecycle {
+    ignore_changes = [
+      zone,
+      high_availability[0].standby_availability_zone
+    ]
+  }
 }
 
 resource azurerm_postgresql_flexible_server_firewall_rule studio {

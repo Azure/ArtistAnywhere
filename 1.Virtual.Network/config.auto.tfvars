@@ -35,12 +35,25 @@ virtualNetworks = [
         serviceDelegation = null
       },
       {
-        name = "Identity"
+        name = "DNS"
         addressSpace = [
-          "10.0.192.0/24"
+          "10.0.192.0/26"
         ]
         serviceEndpoints = [
-          "Microsoft.Storage"
+        ]
+        serviceDelegation = {
+          service = "Microsoft.Network/dnsResolvers"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
+      },
+      {
+        name = "Identity"
+        addressSpace = [
+          "10.0.192.64/26"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = null
       },
@@ -235,12 +248,25 @@ virtualNetworks = [
         serviceDelegation = null
       },
       {
-        name = "Identity"
+        name = "DNS"
         addressSpace = [
-          "10.1.192.0/24"
+          "10.1.192.0/26"
         ]
         serviceEndpoints = [
-          "Microsoft.Storage"
+        ]
+        serviceDelegation = {
+          service = "Microsoft.Network/dnsResolvers"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
+      },
+      {
+        name = "Identity"
+        addressSpace = [
+          "10.1.192.64/26"
+        ]
+        serviceEndpoints = [
         ]
         serviceDelegation = null
       },
@@ -443,6 +469,7 @@ bastion = {
   enableTunneling     = true
   enablePerRegion     = false
   enableShareableLink = false
+  enableSessionRecord = false
 }
 
 ##########################################################################################################################
@@ -450,7 +477,7 @@ bastion = {
 ##########################################################################################################################
 
 natGateway = {
-  enable = false
+  enable = true
   ipAddress = {
     type = "Standard"
     tier = "Regional"

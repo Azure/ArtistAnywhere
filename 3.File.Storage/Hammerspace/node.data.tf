@@ -164,8 +164,10 @@ resource azurerm_private_dns_a_record data {
   name                = "${var.privateDns.aRecord.name}-data"
   resource_group_name = var.privateDns.resourceGroupName
   zone_name           = var.privateDns.zoneName
-  records             = [for node in local.hsDataNodes : azurerm_linux_virtual_machine.data[node.machine.name].private_ip_address]
   ttl                 = var.privateDns.aRecord.ttlSeconds
+  records = [
+    for node in local.hsDataNodes : azurerm_linux_virtual_machine.data[node.machine.name].private_ip_address
+  ]
 }
 
 output dnsData {

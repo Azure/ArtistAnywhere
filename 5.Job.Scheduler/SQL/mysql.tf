@@ -50,6 +50,7 @@ variable mySQL {
       mode   = string
     })
     maintenanceWindow = object({
+      enable    = bool
       dayOfWeek = number
       start = object({
         hour   = number
@@ -84,7 +85,7 @@ resource azurerm_mysql_flexible_server studio {
   administrator_login          = var.mySQL.adminLogin.userName != "" ? var.mySQL.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
   administrator_password       = var.mySQL.adminLogin.userPassword != "" ? var.mySQL.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
   delegated_subnet_id          = var.mySQL.delegatedSubnet.enable ? data.azurerm_subnet.data_mysql[0].id : null
-  private_dns_zone_id          = azurerm_private_dns_zone.mysql[0].id
+  private_dns_zone_id          = var.mySQL.delegatedSubnet.enable ? azurerm_private_dns_zone.mysql[0].id : null
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -97,10 +98,13 @@ resource azurerm_mysql_flexible_server studio {
     auto_grow_enabled  = var.mySQL.storage.autoGrow.enabled
     io_scaling_enabled = var.mySQL.storage.ioScaling.enabled
   }
-  maintenance_window {
-    day_of_week  = var.mySQL.maintenanceWindow.dayOfWeek
-    start_hour   = var.mySQL.maintenanceWindow.start.hour
-    start_minute = var.mySQL.maintenanceWindow.start.minute
+  dynamic maintenance_window {
+    for_each = var.mySQL.maintenanceWindow.enable ? [1] : []
+    content {
+      day_of_week  = var.mySQL.maintenanceWindow.dayOfWeek
+      start_hour   = var.mySQL.maintenanceWindow.start.hour
+      start_minute = var.mySQL.maintenanceWindow.start.minute
+    }
   }
   dynamic high_availability {
     for_each = var.mySQL.highAvailability.enable ? [1] : []
@@ -120,6 +124,12 @@ resource azurerm_mysql_flexible_server studio {
   depends_on = [
     azurerm_private_dns_zone_virtual_network_link.mysql
   ]
+  lifecycle {
+    ignore_changes = [
+      zone,
+      high_availability[0].standby_availability_zone
+    ]
+  }
 }
 
 resource azurerm_mysql_flexible_server_firewall_rule studio {

@@ -24,7 +24,7 @@ virtualMachines = [
     osDisk = {
       type        = "Linux"
       storageType = "Premium_LRS"
-      cachingType = "ReadOnly"
+      cachingType = "ReadWrite"
       sizeGB      = 0
     }
     network = {
@@ -62,7 +62,7 @@ virtualMachines = [
   {
     enable = false
     name   = "LnxArtistGA"
-    size   = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_NV28adms_V710_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
@@ -78,7 +78,7 @@ virtualMachines = [
     osDisk = {
       type        = "Linux"
       storageType = "Premium_LRS"
-      cachingType = "ReadOnly"
+      cachingType = "ReadWrite"
       sizeGB      = 0
     }
     network = {
@@ -132,7 +132,7 @@ virtualMachines = [
     osDisk = {
       type        = "Windows"
       storageType = "Premium_LRS"
-      cachingType = "ReadOnly"
+      cachingType = "ReadWrite"
       sizeGB      = 0
     }
     network = {
@@ -170,7 +170,7 @@ virtualMachines = [
   {
     enable = false
     name   = "WinArtistGA"
-    size   = "Standard_NG32ads_V620_v1" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_NV28adms_V710_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
       resourceGroupName = "ArtistAnywhere.Image"
@@ -186,7 +186,7 @@ virtualMachines = [
     osDisk = {
       type        = "Windows"
       storageType = "Premium_LRS"
-      cachingType = "ReadOnly"
+      cachingType = "ReadWrite"
       sizeGB      = 0
     }
     network = {

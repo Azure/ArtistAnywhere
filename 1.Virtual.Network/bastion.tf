@@ -13,6 +13,7 @@ variable bastion {
     enableTunneling     = bool
     enablePerRegion     = bool
     enableShareableLink = bool
+    enableSessionRecord = bool
   })
 }
 
@@ -142,11 +143,12 @@ resource azurerm_subnet_network_security_group_association bastion {
 
 resource azurerm_public_ip bastion {
   for_each = {
-    for virtualNetwork in local.bastionNetworks : virtualNetwork.key => virtualNetwork
+    for virtualNetwork in local.bastionNetworks : virtualNetwork.key => virtualNetwork if var.bastion.type != "Developer"
   }
   name                = "Bastion-${each.value.name}"
   resource_group_name = each.value.resourceGroupName
   location            = each.value.regionName
+  # zones               = data.azurerm_location.studio[each.value.key].zone_mappings[*].logical_zone
   sku                 = "Standard"
   allocation_method   = "Static"
   depends_on = [
@@ -158,21 +160,26 @@ resource azurerm_bastion_host studio {
   for_each = {
     for virtualNetwork in local.bastionNetworks : virtualNetwork.key => virtualNetwork
   }
-  name                   = "Bastion-${each.value.name}"
-  resource_group_name    = each.value.resourceGroupName
-  location               = each.value.regionName
-  sku                    = var.bastion.type
-  scale_units            = var.bastion.scaleUnitCount
-  file_copy_enabled      = var.bastion.enableFileCopy
-  copy_paste_enabled     = var.bastion.enableCopyPaste
-  ip_connect_enabled     = var.bastion.enableIpConnect
-  tunneling_enabled      = var.bastion.enableTunneling
-  shareable_link_enabled = var.bastion.enableShareableLink
-  zones                  = data.azurerm_location.studio[each.value.key].zone_mappings[*].logical_zone
-  ip_configuration {
-    name                 = "ipConfig"
-    public_ip_address_id = azurerm_public_ip.bastion[each.value.key].id
-    subnet_id            = "${each.value.id}/subnets/AzureBastionSubnet"
+  name                      = "Bastion-${each.value.name}"
+  resource_group_name       = each.value.resourceGroupName
+  location                  = each.value.regionName
+  sku                       = var.bastion.type
+  scale_units               = var.bastion.scaleUnitCount
+  file_copy_enabled         = var.bastion.enableFileCopy
+  copy_paste_enabled        = var.bastion.enableCopyPaste
+  ip_connect_enabled        = var.bastion.enableIpConnect
+  tunneling_enabled         = var.bastion.enableTunneling
+  shareable_link_enabled    = var.bastion.enableShareableLink
+  session_recording_enabled = var.bastion.enableSessionRecord
+  virtual_network_id        = var.bastion.type == "Developer" ? each.value.id : null
+  # zones                     = data.azurerm_location.studio[each.value.key].zone_mappings[*].logical_zone
+  dynamic ip_configuration {
+    for_each = var.bastion.type != "Developer" ? [1] : []
+    content {
+      name                 = "ipConfig"
+      public_ip_address_id = azurerm_public_ip.bastion[each.value.key].id
+      subnet_id            = "${each.value.id}/subnets/AzureBastionSubnet"
+    }
   }
   depends_on = [
     azurerm_subnet.studio

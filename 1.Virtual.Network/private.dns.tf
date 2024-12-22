@@ -36,9 +36,38 @@ resource azurerm_private_dns_zone_virtual_network_link studio {
   ]
 }
 
+##############################################################################################
+# Private DNS Resolver (https://learn.microsoft.com/azure/dns/dns-private-resolver-overview) #
+##############################################################################################
+
+resource azurerm_private_dns_resolver studio {
+  name                = local.virtualNetwork.key
+  resource_group_name = local.virtualNetwork.resourceGroupName
+  location            = local.virtualNetwork.regionName
+  virtual_network_id  = local.virtualNetwork.id
+  depends_on = [
+    azurerm_virtual_network.studio
+  ]
+}
+
+resource azurerm_private_dns_resolver_inbound_endpoint studio {
+  name                    = local.virtualNetwork.key
+  location                = local.virtualNetwork.regionName
+  private_dns_resolver_id = azurerm_private_dns_resolver.studio.id
+  ip_configurations {
+    subnet_id = "${local.virtualNetwork.id}/subnets/DNS"
+  }
+  depends_on = [
+    azurerm_subnet.studio
+  ]
+}
+
 output privateDns {
   value = {
     zoneName          = azurerm_private_dns_zone.studio.name
     resourceGroupName = azurerm_private_dns_zone.studio.resource_group_name
+    resolver = {
+      ipAddresses = azurerm_private_dns_resolver_inbound_endpoint.studio[*].ip_configurations[0].private_ip_address
+    }
   }
 }
