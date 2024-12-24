@@ -15,7 +15,7 @@
     "value": "Standard_D8as_v5"
   },
   "resourceGroup": {
-    "value": "AAA.CycleCloud.Workspace.Slurm"
+    "value": "ArtistAnywhere.JobScheduler.CCWS"
   },
   "sharedFilesystem": {
     "value": {

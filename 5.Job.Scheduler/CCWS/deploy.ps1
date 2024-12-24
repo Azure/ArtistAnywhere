@@ -14,7 +14,7 @@ $parameterFile  = "parameters.mysql.anf.json"
 az deployment sub create --name $deploymentName --location $regionName --template-file $templateFile --parameters $parameterFile
 
 cd cyclecloud-slurm-workspace
-resourceGroupName="AAA.CycleCloud.Workspace.Slurm"
+resourceGroupName="ArtistAnywhere.JobScheduler.CCWS"
 ./util/delete_roles.sh --resource-group $resourceGroupName --delete-resource-group
 
 ##############################################################################################################################
@@ -23,7 +23,7 @@ resourceGroupName="AAA.CycleCloud.Workspace.Slurm"
 
 $cycleCloud = @{
   machineName       = "ccw-cyclecloud-vm"
-  resourceGroupName = "AAA.CycleCloud.Workspace.Slurm"
+  resourceGroupName = "ArtistAnywhere.JobScheduler.CCWS"
   resourcePort      = 443
   tunnelPort        = 8443
 }
@@ -40,7 +40,7 @@ az network bastion tunnel --resource-group $bastionHost.resourceGroupName --name
 ########################################################################################################################
 
 $loginNode = @{
-  resourceGroupName = "AAA.CycleCloud.Workspace.Slurm"
+  resourceGroupName = "ArtistAnywhere.JobScheduler.CCWS"
   authType          = "ssh-key"
   userName          = "hpcadmin"
   sshKeyFile        = "~/.ssh/id_rsa"

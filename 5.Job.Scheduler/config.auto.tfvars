@@ -133,46 +133,6 @@ virtualMachines = [
   }
 ]
 
-######################################################################
-# CycleCloud (https://learn.microsoft.com/azure/cyclecloud/overview) #
-######################################################################
-
-cycleCloud = {
-  enable = false
-  machine = {
-    name = "xstudio"
-    size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-    image = {
-      publisher = "AzureCycleCloud"
-      product   = "Azure-CycleCloud"
-      name      = "CycleCloud8-Gen2"
-      version   = "8.6.520241024"
-    }
-    osDisk = {
-      storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
-      sizeGB      = 0
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-      sshKeyPublic = ""
-      passwordAuth = {
-        disable = true
-      }
-    }
-  }
-  network = {
-    subnetName = "Farm"
-    acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-      enable = true
-    }
-    locationExtended = {
-      enable = false
-    }
-  }
-}
-
 ############################################################################
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
 ############################################################################
