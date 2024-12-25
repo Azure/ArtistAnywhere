@@ -75,7 +75,7 @@
   },
   "htc": {
     "value": {
-      "sku": "Standard_D96as_v5",
+      "sku": "Standard_HX176rs",
       "maxNodes": 2,
       "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image.Gallery/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0",
       "useSpot": false
@@ -90,7 +90,7 @@
   },
   "gpu": {
     "value": {
-      "sku": "Standard_NV72ads_A10_v5",
+      "sku": "Standard_ND96isr_MI300X_v5",
       "maxNodes": 2,
       "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image.Gallery/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.0.0"
     }
