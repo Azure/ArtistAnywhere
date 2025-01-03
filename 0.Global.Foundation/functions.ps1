@@ -145,29 +145,47 @@ function Retry ($delaySeconds, $maxCount, $scriptBlock) {
   }
 }
 
-function JoinActiveDirectory ($domainName, $domainServerName, $orgUnitPath, $userName, $userPassword) {
-  if ($userName -notlike "*@*") {
-    $userName = "$userName@$domainName"
-  }
-  $securePassword = ConvertTo-SecureString $userPassword -AsPlainText -Force
-  $userCredential = New-Object System.Management.Automation.PSCredential($userName, $securePassword)
+function JoinActiveDirectory {
+  param (
+    [Parameter(ParameterSetName="Default")]
+    [string] $domainName,
+    [string] $serverName,
+    [string] $orgUnitPath,
+    [string] $userName,
+    [string] $userPassword,
 
-  $adComputer = Get-ADComputer -Identity $(hostname) -Server $domainServerName -Credential $userCredential
-  if ($adComputer) {
-    Remove-ADObject -Identity $adComputer -Server $domainServerName -Recursive -Confirm:$false
-  }
+    [Parameter(ParameterSetName="Cluster")]
+    [object] $activeDirectory
+  )
+  process {
+    if ($PSCmdlet.ParameterSetName -eq "Cluster") {
+      if ($activeDirectory.enable) {
+        Retry 3 10 {
+          JoinActiveDirectory -domainName $activeDirectory.domainName -serverName $activeDirectory.serverName -orgUnitPath $activeDirectory.orgUnitPath -userName $activeDirectory.adminUsername -userPassword $activeDirectory.adminPassword
+        }
+      }
+    } else {
+      if ($userName -notlike "*@*") {
+        $userName = "$userName@$domainName"
+      }
+      $securePassword = ConvertTo-SecureString $userPassword -AsPlainText -Force
+      $userCredential = New-Object System.Management.Automation.PSCredential($userName, $securePassword)
 
-  if ($orgUnitPath -ne "") {
-    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $userCredential -OUPath $orgUnitPath -Force -PassThru -Verbose -Restart
-  } else {
-    Add-Computer -DomainName $domainName -Server $domainServerName -Credential $userCredential -Force -PassThru -Verbose -Restart
-  }
-}
+      $ErrorActionPreference = "Continue"
+      $adComputer = Get-ADComputer -Identity $(hostname) -Server $serverName -Credential $userCredential
+      $ErrorActionPreference = "Stop"
+      if ($adComputer) {
+        Remove-ADObject -Identity $adComputer -Server $serverName -Recursive -Confirm:$false
+      }
 
-function SetActiveDirectory ($activeDirectory) {
-  if ($activeDirectory.enable) {
-    Retry 3 10 {
-      JoinActiveDirectory $activeDirectory.domainName $activeDirectory.domainServerName $activeDirectory.orgUnitPath $activeDirectory.adminUsername $activeDirectory.adminPassword
+      if ($orgUnitPath -ne "") {
+        Add-Computer -DomainName $domainName -Server $serverName -Credential $userCredential -OUPath $orgUnitPath -Force -PassThru -Verbose
+      } else {
+        Add-Computer -DomainName $domainName -Server $serverName -Credential $userCredential -Force -PassThru -Verbose
+      }
+      if ($?) {
+        Restart-Computer
+      }
     }
   }
 }

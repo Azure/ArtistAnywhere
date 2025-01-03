@@ -50,12 +50,12 @@ variable resourceGroupName {
 
 variable activeDirectory {
   type = object({
-    enable           = bool
-    domainName       = string
-    domainServerName = string
-    orgUnitPath      = string
-    adminUsername    = string
-    adminPassword    = string
+    enable        = bool
+    domainName    = string
+    serverName    = string
+    orgUnitPath   = string
+    adminUsername = string
+    adminPassword = string
   })
 }
 

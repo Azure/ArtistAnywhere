@@ -37,7 +37,7 @@ virtualNetworks = [
       {
         name = "DNS"
         addressSpace = [
-          "10.0.192.0/26"
+          "10.0.192.0/25"
         ]
         serviceEndpoints = [
         ]
@@ -51,7 +51,7 @@ virtualNetworks = [
       {
         name = "Identity"
         addressSpace = [
-          "10.0.192.64/26"
+          "10.0.192.128/25"
         ]
         serviceEndpoints = [
         ]
@@ -183,7 +183,7 @@ virtualNetworks = [
       {
         name = "GatewaySubnet"
         addressSpace = [
-          "10.0.254.0/26"
+          "10.0.254.0/25"
         ]
         serviceEndpoints = [
         ]
@@ -192,7 +192,7 @@ virtualNetworks = [
       {
         name = "AzureBastionSubnet"
         addressSpace = [
-          "10.0.254.64/26"
+          "10.0.254.128/25"
         ]
         serviceEndpoints = [
         ]
@@ -201,7 +201,7 @@ virtualNetworks = [
       {
         name = "AzureFirewallSubnet"
         addressSpace = [
-          "10.0.255.0/26"
+          "10.0.255.0/25"
         ]
         serviceEndpoints = [
         ]
@@ -210,7 +210,7 @@ virtualNetworks = [
       {
         name = "AzureFirewallManagementSubnet"
         addressSpace = [
-          "10.0.255.64/26"
+          "10.0.255.128/25"
         ]
         serviceEndpoints = [
         ]
@@ -250,7 +250,7 @@ virtualNetworks = [
       {
         name = "DNS"
         addressSpace = [
-          "10.1.192.0/26"
+          "10.1.192.0/25"
         ]
         serviceEndpoints = [
         ]
@@ -264,7 +264,7 @@ virtualNetworks = [
       {
         name = "Identity"
         addressSpace = [
-          "10.1.192.64/26"
+          "10.1.192.128/25"
         ]
         serviceEndpoints = [
         ]
@@ -396,7 +396,7 @@ virtualNetworks = [
       {
         name = "GatewaySubnet"
         addressSpace = [
-          "10.1.254.0/26"
+          "10.1.254.0/25"
         ]
         serviceEndpoints = [
         ]
@@ -405,7 +405,7 @@ virtualNetworks = [
       {
         name = "AzureBastionSubnet"
         addressSpace = [
-          "10.1.254.64/26"
+          "10.1.254.128/25"
         ]
         serviceEndpoints = [
         ]
@@ -414,7 +414,7 @@ virtualNetworks = [
       {
         name = "AzureFirewallSubnet"
         addressSpace = [
-          "10.1.255.0/26"
+          "10.1.255.0/25"
         ]
         serviceEndpoints = [
         ]
@@ -423,7 +423,7 @@ virtualNetworks = [
       {
         name = "AzureFirewallManagementSubnet"
         addressSpace = [
-          "10.1.255.64/26"
+          "10.1.255.128/25"
         ]
         serviceEndpoints = [
         ]

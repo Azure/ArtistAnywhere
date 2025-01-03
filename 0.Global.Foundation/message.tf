@@ -81,5 +81,11 @@ output message {
         name = azurerm_eventgrid_namespace.studio.name
       }
     }
+    eventHub = {
+      namespace = {
+        id   = azurerm_eventhub_namespace.studio.id
+        name = azurerm_eventhub_namespace.studio.name
+      }
+    }
   }
 }

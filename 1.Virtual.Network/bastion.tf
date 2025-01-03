@@ -148,7 +148,6 @@ resource azurerm_public_ip bastion {
   name                = "Bastion-${each.value.name}"
   resource_group_name = each.value.resourceGroupName
   location            = each.value.regionName
-  # zones               = data.azurerm_location.studio[each.value.key].zone_mappings[*].logical_zone
   sku                 = "Standard"
   allocation_method   = "Static"
   depends_on = [
@@ -172,7 +171,6 @@ resource azurerm_bastion_host studio {
   shareable_link_enabled    = var.bastion.enableShareableLink
   session_recording_enabled = var.bastion.enableSessionRecord
   virtual_network_id        = var.bastion.type == "Developer" ? each.value.id : null
-  # zones                     = data.azurerm_location.studio[each.value.key].zone_mappings[*].logical_zone
   dynamic ip_configuration {
     for_each = var.bastion.type != "Developer" ? [1] : []
     content {

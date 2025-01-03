@@ -17,15 +17,15 @@ netAppFiles = {
       }
       volumes = [
         {
-          enable      = true
-          name        = "Shared"
-          path        = "shared"
-          sizeGiB     = 128
-          permissions = 7777
+          enable  = true
+          name    = "Shared"
+          path    = "shared"
+          sizeGiB = 128
           network = {
             features = "Standard"
             protocols = [
-              "NFSv3"
+              "NFSv3",
+              "CIFS"
             ]
           }
           exportPolicies = [
@@ -36,7 +36,8 @@ netAppFiles = {
               readWrite  = true
               rootAccess = true
               networkProtocols = [
-                "NFSv3"
+                "NFSv3",
+                "CIFS"
               ]
               allowedClients = [
                 "0.0.0.0/0"
@@ -45,15 +46,15 @@ netAppFiles = {
           ]
         },
         {
-          enable      = true
-          name        = "Scratch"
-          path        = "scratch"
-          sizeGiB     = 128
-          permissions = 7777
+          enable  = true
+          name    = "Scratch"
+          path    = "scratch"
+          sizeGiB = 128
           network = {
             features = "Standard"
             protocols = [
-              "NFSv3"
+              "NFSv3",
+              "CIFS"
             ]
           }
           exportPolicies = [
@@ -64,7 +65,8 @@ netAppFiles = {
               readWrite  = true
               rootAccess = true
               networkProtocols = [
-                "NFSv3"
+                "NFSv3",
+                "CIFS"
               ]
               allowedClients = [
                 "0.0.0.0/0"
@@ -73,15 +75,15 @@ netAppFiles = {
           ]
         },
         {
-          enable      = true
-          name        = "Tools"
-          path        = "tools"
-          sizeGiB     = 128
-          permissions = 7777
+          enable  = true
+          name    = "Tools"
+          path    = "tools"
+          sizeGiB = 128
           network = {
             features = "Standard"
             protocols = [
-              "NFSv3"
+              "NFSv3",
+              "CIFS"
             ]
           }
           exportPolicies = [
@@ -92,7 +94,8 @@ netAppFiles = {
               readWrite  = true
               rootAccess = true
               networkProtocols = [
-                "NFSv3"
+                "NFSv3",
+                "CIFS"
               ]
               allowedClients = [
                 "0.0.0.0/0"
@@ -101,15 +104,15 @@ netAppFiles = {
           ]
         },
         {
-          enable      = true
-          name        = "Data"
-          path        = "data"
-          sizeGiB     = 640
-          permissions = 7777
+          enable  = true
+          name    = "Data"
+          path    = "data"
+          sizeGiB = 640
           network = {
             features = "Standard"
             protocols = [
-              "NFSv3"
+              "NFSv3",
+              "CIFS"
             ]
           }
           exportPolicies = [
@@ -120,7 +123,8 @@ netAppFiles = {
               readWrite  = true
               rootAccess = true
               networkProtocols = [
-                "NFSv3"
+                "NFSv3",
+                "CIFS"
               ]
               allowedClients = [
                 "0.0.0.0/0"

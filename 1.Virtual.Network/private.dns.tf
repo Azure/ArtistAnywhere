@@ -67,7 +67,7 @@ output privateDns {
     zoneName          = azurerm_private_dns_zone.studio.name
     resourceGroupName = azurerm_private_dns_zone.studio.resource_group_name
     resolver = {
-      ipAddresses = azurerm_private_dns_resolver_inbound_endpoint.studio[*].ip_configurations[0].private_ip_address
+      ipAddress = azurerm_private_dns_resolver_inbound_endpoint.studio.ip_configurations[0].private_ip_address
     }
   }
 }

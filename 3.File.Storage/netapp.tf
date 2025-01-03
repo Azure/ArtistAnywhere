@@ -16,11 +16,10 @@ variable netAppFiles {
         period = number
       })
       volumes = list(object({
-        enable      = bool
-        name        = string
-        path        = string
-        sizeGiB     = number
-        permissions = number
+        enable  = bool
+        name    = string
+        path    = string
+        sizeGiB = number
         network = object({
           features  = string
           protocols = list(string)
@@ -100,16 +99,18 @@ resource azurerm_netapp_account studio {
   dynamic active_directory {
     for_each = var.activeDirectory.enable ? [1] : []
     content {
-      domain              = var.activeDirectory.domainName
-      username            = var.activeDirectory.machine.adminLogin.userName
-      password            = var.activeDirectory.machine.adminLogin.userPassword
-      smb_server_name     = azurerm_windows_virtual_machine.active_directory[0].name
-      organizational_unit = var.activeDirectory.orgUnit != "" ? var.activeDirectory.orgUnit : null
+      domain          = var.activeDirectory.domainName
+      username        = local.activeDirectory.machine.adminLogin.userName
+      password        = local.activeDirectory.machine.adminLogin.userPassword
+      smb_server_name = azurerm_windows_virtual_machine.active_directory[0].name
       dns_servers = [
         azurerm_windows_virtual_machine.active_directory[0].private_ip_address
       ]
     }
   }
+  depends_on = [
+    azurerm_virtual_machine_extension.active_directory
+  ]
 }
 
 resource azurerm_netapp_account_encryption studio {
@@ -200,7 +201,6 @@ resource azapi_resource volume {
       usageThreshold  = each.value.sizeGiB * 1073741824
       protocolTypes   = each.value.network.protocols
       networkFeatures = each.value.network.features
-      unixPermissions = tostring(each.value.permissions)
       creationToken   = each.value.path
       coolAccess      = each.value.capacityPoolCoolAccess.enable
       coolnessPeriod  = each.value.capacityPoolCoolAccess.period

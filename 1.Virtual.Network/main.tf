@@ -30,13 +30,6 @@ variable resourceGroupName {
   type = string
 }
 
-data azurerm_location studio {
-  for_each = {
-    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork
-  }
-  location = each.value.regionName
-}
-
 data azurerm_user_assigned_identity studio {
   name                = module.global.managedIdentity.name
   resource_group_name = module.global.resourceGroupName

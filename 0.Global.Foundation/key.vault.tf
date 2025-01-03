@@ -66,7 +66,7 @@ resource azurerm_key_vault studio {
     bypass         = var.keyVault.enableTrustedServices ? "AzureServices" : "None"
     default_action = "Deny"
     ip_rules = [
-      jsondecode(data.http.client_address.response_body).ip
+      "${jsondecode(data.http.client_address.response_body).ip}/32"
     ]
   }
 }

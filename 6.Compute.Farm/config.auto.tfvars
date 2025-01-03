@@ -540,12 +540,12 @@ virtualMachineScaleSets = [
 ########################
 
 activeDirectory = {
-  enable           = false
-  domainName       = "azure.studio"
-  domainServerName = "WinActiveDomain"
-  orgUnitPath      = ""
-  adminUsername    = ""
-  adminPassword    = ""
+  enable        = false
+  domainName    = "azure.studio"
+  serverName    = "WinADDC"
+  orgUnitPath   = ""
+  adminUsername = ""
+  adminPassword = ""
 }
 
 existingNetwork = {

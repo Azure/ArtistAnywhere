@@ -75,16 +75,15 @@ dnsRecord = {
 
 activeDirectory = {
   enable     = false
-  orgUnit    = "CN=Computers"
   domainName = "azure.studio"
   machine = {
-    name = "xstudio"
+    name = "WinADDC"
     size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
-      resourceGroupName = "ArtistAnywhere.Image"
-      galleryName       = "xstudio"
-      definitionName    = "WinServer"
-      versionId         = "0.0.0"
+      publisher = "MicrosoftWindowsServer"
+      product   = "WindowsServer"
+      name      = "2022-Datacenter-Azure-Edition"
+      version   = "Latest"
     }
     osDisk = {
       storageType = "Premium_LRS"
@@ -101,6 +100,37 @@ activeDirectory = {
       enable = true
     }
     staticAddress = "10.1.192.254"
+  }
+}
+
+activeDirectoryClient = {
+  enable      = false
+  domainName  = "azure.studio"
+  serverName  = "WinADDC"
+  orgUnitPath = ""
+  machine = {
+    name = "WinADClient"
+    size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    image = {
+      publisher = "MicrosoftWindowsDesktop"
+      product   = "Windows-10"
+      name      = "Win10-22H2-Ent-G2"
+      version   = "Latest"
+    }
+    osDisk = {
+      storageType = "Premium_LRS"
+      cachingType = "ReadWrite"
+      sizeGB      = 0
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+    }
+  }
+  network = {
+    acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+      enable = true
+    }
   }
 }
 

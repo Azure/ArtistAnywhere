@@ -9,4 +9,4 @@ if ("${remoteAgentKey}" -ne "") {
 
 SetFileSystem (ConvertFrom-Json -InputObject '${jsonencode(fileSystem)}')
 
-SetActiveDirectory (ConvertFrom-Json -InputObject '${jsonencode(activeDirectory)}')
+JoinActiveDirectory -activeDirectory (ConvertFrom-Json -InputObject '${jsonencode(activeDirectory)}')

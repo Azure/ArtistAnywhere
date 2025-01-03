@@ -231,7 +231,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinActiveDomain"
+      name   = "WinADDC"
       source = {
         imageDefinition = {
           name = "WinServer"
