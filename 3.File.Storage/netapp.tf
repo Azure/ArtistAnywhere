@@ -16,10 +16,11 @@ variable netAppFiles {
         period = number
       })
       volumes = list(object({
-        enable  = bool
-        name    = string
-        path    = string
-        sizeGiB = number
+        enable      = bool
+        name        = string
+        path        = string
+        sizeGiB     = number
+        permissions = number
         network = object({
           features  = string
           protocols = list(string)
@@ -204,6 +205,8 @@ resource azapi_resource volume {
       creationToken   = each.value.path
       coolAccess      = each.value.capacityPoolCoolAccess.enable
       coolnessPeriod  = each.value.capacityPoolCoolAccess.period
+      unixPermissions = tostring(each.value.permissions)
+      securityStyle   = "Unix"
       exportPolicy = {
         rules = [
           {

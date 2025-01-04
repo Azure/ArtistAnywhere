@@ -20,7 +20,7 @@
   "sharedFilesystem": {
     "value": {
       "type": "nfs-existing",
-      "ipAddress": "10.1.194.5",
+      "ipAddress": "10.1.194.4",
       "exportPath": "/shared",
       "mountOptions": "rw,hard,rsize=262144,wsize=262144,vers=3,tcp"
     }

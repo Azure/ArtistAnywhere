@@ -17,10 +17,11 @@ netAppFiles = {
       }
       volumes = [
         {
-          enable  = true
-          name    = "Shared"
-          path    = "shared"
-          sizeGiB = 128
+          enable      = true
+          name        = "Shared"
+          path        = "shared"
+          sizeGiB     = 128
+          permissions = 7777
           network = {
             features = "Standard"
             protocols = [
@@ -46,10 +47,11 @@ netAppFiles = {
           ]
         },
         {
-          enable  = true
-          name    = "Scratch"
-          path    = "scratch"
-          sizeGiB = 128
+          enable      = true
+          name        = "Scratch"
+          path        = "scratch"
+          sizeGiB     = 128
+          permissions = 7777
           network = {
             features = "Standard"
             protocols = [
@@ -75,10 +77,11 @@ netAppFiles = {
           ]
         },
         {
-          enable  = true
-          name    = "Tools"
-          path    = "tools"
-          sizeGiB = 128
+          enable      = true
+          name        = "Tools"
+          path        = "tools"
+          sizeGiB     = 128
+          permissions = 7777
           network = {
             features = "Standard"
             protocols = [
@@ -104,10 +107,11 @@ netAppFiles = {
           ]
         },
         {
-          enable  = true
-          name    = "Data"
-          path    = "data"
-          sizeGiB = 640
+          enable      = true
+          name        = "Data"
+          path        = "data"
+          sizeGiB     = 640
+          permissions = 7777
           network = {
             features = "Standard"
             protocols = [
