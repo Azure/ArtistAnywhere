@@ -4,6 +4,7 @@ WORKDIR /usr/local/bin
 
 RUN dnf -y install git gcc-c++ cmake &&\
     dnf -y install openssl-devel &&\
+    dnf -y install wayland-devel &&\
     dnf -y install mesa-libGL-devel &&\
     dnf -y install libXrandr-devel &&\
     dnf -y install libXinerama-devel &&\
