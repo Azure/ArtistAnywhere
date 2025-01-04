@@ -485,6 +485,12 @@ containerRegistry = {
   retentionPolicy = {
     days = 7
   }
+  firewallRules = [
+    {
+      action  = "Allow"
+      ipRange = "40.124.64.0/25"
+    }
+  ]
   replicationRegions = [
     {
       name = "WestUS"
@@ -497,3 +503,46 @@ containerRegistry = {
     }
   ]
 }
+
+####################################################################################################################
+# Container Registry Task (https://learn.microsoft.com/azure/container-registry/container-registry-tasks-overview) #
+####################################################################################################################
+
+containerRegistryTasks = [
+  {
+    enable = true
+    name   = "LnxFarmC"
+    type   = "Linux"
+    docker = {
+      context = {
+        hostUrl     = "https://github.com/Azure/ArtistAnywhere.git"
+        accessToken = " "
+      }
+      filePath    = "2.Image.Builder/Docker/LnxFarmC"
+      imageNames = [
+        "lnx-farm-c"
+      ]
+      cache = {
+        enable = false
+      }
+    }
+  },
+  {
+    enable = true
+    name   = "WinFarmC"
+    type   = "Windows"
+    docker = {
+      context = {
+        hostUrl     = "https://github.com/Azure/ArtistAnywhere.git"
+        accessToken = " "
+      }
+      filePath = "2.Image.Builder/Docker/WinFarmC"
+      imageNames = [
+        "win-farm-c"
+      ]
+      cache = {
+        enable = false
+      }
+    }
+  }
+]

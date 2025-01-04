@@ -34,6 +34,10 @@ variable containerRegistry {
     retentionPolicy = object({
       days = number
     })
+    firewallRules = list(object({
+      action  = string
+      ipRange = string
+    }))
     replicationRegions = list(object({
       name = string
       regionEndpoint = object({
@@ -72,6 +76,13 @@ resource azurerm_container_registry studio {
     ip_rule {
       action   = "Allow"
       ip_range = "${jsondecode(data.http.client_address.response_body).ip}/32"
+    }
+    dynamic ip_rule {
+      for_each = var.containerRegistry.firewallRules
+      content {
+        action   = ip_rule.value.action
+        ip_range = ip_rule.value.ipRange
+      }
     }
   }
   dynamic encryption {
