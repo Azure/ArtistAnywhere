@@ -101,7 +101,7 @@ hammerspace = {
       node = {
         name    = "node1"
         type    = "OTHER"
-        address = "10.1.193.4"
+        address = "10.1.194.4"
       }
       assimilation = {
         enable = true
@@ -122,7 +122,7 @@ hammerspace = {
       node = {
         name    = "node2"
         type    = "OTHER"
-        address = "10.1.193.4"
+        address = "10.1.194.4"
       }
       assimilation = {
         enable = true

@@ -26,11 +26,20 @@ resource azurerm_virtual_machine_extension node {
   ]
 }
 
-resource terraform_data cluster {
+resource terraform_data cluster_init {
   provisioner local-exec {
-    command = "az vm extension set --resource-group ${var.resourceGroup.name} --vm-name ${local.hsMetadataNodes[0].machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("${path.module}/cluster.sh", {storageAccounts = var.hammerspace.storageAccounts, shares = var.hammerspace.shares, volumes = var.hammerspace.volumes, volumeGroups = var.hammerspace.volumeGroups}))})}"
+    command = "az vm extension set --resource-group ${var.resourceGroup.name} --vm-name ${local.hsMetadataNodes[0].machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("${path.module}/cluster.init.sh", {}))})}"
   }
   depends_on = [
     azurerm_virtual_machine_extension.node
+  ]
+}
+
+resource terraform_data cluster_config {
+  provisioner local-exec {
+    command = "az vm extension set --resource-group ${var.resourceGroup.name} --vm-name ${local.hsMetadataNodes[0].machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("${path.module}/cluster.config.sh", {storageAccounts = var.hammerspace.storageAccounts, shares = var.hammerspace.shares, volumes = var.hammerspace.volumes, volumeGroups = var.hammerspace.volumeGroups}))})}"
+  }
+  depends_on = [
+    terraform_data.cluster_init
   ]
 }
