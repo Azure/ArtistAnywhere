@@ -9,6 +9,12 @@ hammerspace = {
   version    = "24.06.19"
   namePrefix = "xstudio"
   domainName = "azure.studio"
+  activeDirectory = {
+    enable       = false
+    servers      = "WinADDC"
+    userName     = ""
+    userPassword = ""
+  }
   metadata = { # Anvil
     machine = {
       namePrefix = "-anvil"

@@ -33,19 +33,12 @@ $fileType = "python"
 RunProcess "$binPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$binDirectory\$fileType"
 Write-Host "Customize (End): Python"
 
-if ($machineType -eq "Workstation") {
-  Write-Host "Customize (Start): Node.js"
-  $fileType = "nodejs"
-  RunProcess "$binPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$binDirectory\$fileType"
-  Write-Host "Customize (End): Node.js"
-}
-
 Write-Host "Customize (Start): Git"
 $fileType = "git"
 RunProcess "$binPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$binDirectory\$fileType"
 $binPathGit = "C:\Program Files\Git\bin"
 $binPaths += ";$binPathGit"
-$env:GIT_BIN_PATH = $binPathGit
+$Env:GIT_BIN_PATH = $binPathGit
 Write-Host "Customize (End): Git"
 
 Write-Host "Customize (Start): 7-Zip"
@@ -59,8 +52,8 @@ RunProcess "$binPathChoco\choco.exe" "install visualstudio2022buildtools --packa
 $binPathCMake = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
 $binPathMSBuild = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64"
 $binPaths += ";$binPathCMake;$binPathMSBuild"
-$env:CMAKE_BIN_PATH = $binPathCMake
-$env:MSBUILD_BIN_PATH = $binPathMSBuild
+$Env:CMAKE_BIN_PATH = $binPathCMake
+$Env:MSBUILD_BIN_PATH = $binPathMSBuild
 Write-Host "Customize (End): Visual Studio Build Tools"
 
 Write-Host "Customize (End): Image Build Platform"
@@ -168,7 +161,7 @@ if ($machineType -ne "JobScheduler") {
 
 if ($binPaths -ne "") {
   Write-Host "Customize (PATH): $($binPaths.substring(1))"
-  setx PATH "$env:PATH$binPaths" /m
+  [Environment]::SetEnvironmentVariable("PATH", "$Env:PATH$binPaths", EnvironmentVariableTarget.Machine)
 }
 
 Write-Host "Customize (End): Core"

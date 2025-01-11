@@ -28,7 +28,7 @@ resource azurerm_virtual_machine_extension node {
 
 resource terraform_data cluster_init {
   provisioner local-exec {
-    command = "az vm extension set --resource-group ${var.resourceGroup.name} --vm-name ${local.hsMetadataNodes[0].machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("${path.module}/cluster.init.sh", {}))})}"
+    command = "az vm extension set --resource-group ${var.resourceGroup.name} --vm-name ${local.hsMetadataNodes[0].machine.name} --name CustomScript --publisher Microsoft.Azure.Extensions --protected-settings ${jsonencode({script = base64encode(templatefile("${path.module}/cluster.init.sh", {activeDirectory = var.activeDirectory}))})}"
   }
   depends_on = [
     azurerm_virtual_machine_extension.node

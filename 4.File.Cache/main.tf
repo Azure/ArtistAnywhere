@@ -70,6 +70,13 @@ module hammerspace {
     userPassword = data.azurerm_key_vault_secret.admin_password.value
     sshKeyPublic = data.azurerm_key_vault_secret.ssh_key_public.value
   }
+  activeDirectory = {
+    enable       = var.activeDirectory.enable
+    domainName   = var.hammerspace.domainName
+    servers      = var.activeDirectory.servers
+    userName     = var.activeDirectory.userName != "" ? var.activeDirectory.userName : data.azurerm_key_vault_secret.admin_username.value
+    userPassword = var.activeDirectory.userPassword != "" ? var.activeDirectory.userPassword : data.azurerm_key_vault_secret.admin_password.value
+  }
   depends_on = [
     azurerm_resource_group.cache
   ]

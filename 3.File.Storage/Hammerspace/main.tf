@@ -36,6 +36,16 @@ variable adminLogin {
   })
 }
 
+variable activeDirectory {
+  type = object({
+    enable       = bool
+    domainName   = string
+    servers      = string
+    userName     = string
+    userPassword = string
+  })
+}
+
 variable hammerspace {
   type = object({
     version    = string

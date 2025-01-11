@@ -13,8 +13,6 @@ curl -L https://github.com/Azure/AZNFS-mount/releases/download/$version/aznfs_in
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): Image Build Platform (Workstation)"
   dnf -y group install workstation
-  dnf -y module enable nodejs:20
-  dnf -y module install nodejs
   echo "Customize (End): Image Build Platform (Workstation)"
 fi
 echo "Customize (End): Image Build Platform"

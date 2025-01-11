@@ -26,7 +26,7 @@ if ($machineType -eq "JobScheduler") {
   $fileType = "deadline-repository"
   $fileName = "DeadlineRepository-$version-windows-installer.exe"
   RunProcess .\$fileName "--mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$binDirectory\$fileType"
-  Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$fileType.log
+  Move-Item -Path $Env:TMP\installbuilder_installer.log -Destination $binDirectory\$fileType.log
   Copy-Item -Path $databasePath\certs\$deadlineCertificate -Destination $deadlinePath\$deadlineCertificate
   New-NfsShare -Name "Deadline" -Path $deadlinePath -Permission ReadWrite
   Write-Host "Customize (End): Deadline Server"
@@ -47,7 +47,7 @@ if ($machineType -eq "Farm") {
 }
 $fileArgs = "$fileArgs --launcherservice $workerService --slavestartup $workerStartup"
 RunProcess .\$fileName $fileArgs "$binDirectory\$fileType"
-Move-Item -Path $env:TMP\installbuilder_installer.log -Destination $binDirectory\$fileType.log
+Move-Item -Path $Env:TMP\installbuilder_installer.log -Destination $binDirectory\$fileType.log
 Set-Location -Path $binDirectory
 Write-Host "Customize (End): Deadline Client"
 
@@ -65,7 +65,7 @@ Register-ScheduledTask -TaskName $taskName -InputObject $task
 Write-Host "Customize (End): Deadline Repository"
 
 Write-Host "Customize (Start): Deadline Monitor"
-$shortcutPath = "$env:AllUsersProfile\Desktop\Deadline Monitor.lnk"
+$shortcutPath = "$Env:AllUsersProfile\Desktop\Deadline Monitor.lnk"
 $scriptShell = New-Object -ComObject WScript.Shell
 $shortcut = $scriptShell.CreateShortcut($shortcutPath)
 $shortcut.WorkingDirectory = $binPathJobScheduler
@@ -77,7 +77,7 @@ $binPaths += ";$binPathJobScheduler"
 
 if ($binPaths -ne "") {
   Write-Host "Customize (PATH): $($binPaths.substring(1))"
-  setx PATH "$env:PATH$binPaths" /m
+  [Environment]::SetEnvironmentVariable("PATH", "$Env:PATH$binPaths", EnvironmentVariableTarget.Machine)
 }
 
 Write-Host "Customize (End): Job Scheduler (Deadline)"
