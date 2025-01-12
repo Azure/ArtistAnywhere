@@ -17,7 +17,7 @@ Write-Host "Customize (End): LSF Download"
 
 if ($binPaths -ne "") {
   Write-Host "Customize (PATH): $($binPaths.substring(1))"
-  [Environment]::SetEnvironmentVariable("PATH", "$Env:PATH$binPaths", EnvironmentVariableTarget.Machine)
+  [Environment]::SetEnvironmentVariable("PATH", "$Env:PATH$binPaths", "Machine")
 }
 
 Write-Host "Customize (End): Job Scheduler (LSF)"
