@@ -66,6 +66,23 @@ if [ "$gpuProvider" == NVIDIA ]; then
   echo "Customize (End): NVIDIA OptiX"
 fi
 
+if [ $machineType == Cache ]; then
+  echo "Customize (Start): NFS Kernel Server Cache"
+  dnf -y install cachefilesd
+  diskDevices=""
+  diskCount=$(lsblk | grep -c nvme)
+  for ((i=0; i<$diskCount; i++)); do
+    if [ "$diskDevices" != "" ]; then
+      diskDevices="$diskDevices "
+    fi
+    diskDevices="$diskDevices/dev/nvme${i}n1"
+  done
+  cacheDevice=/dev/md/cache
+  mdadm --create $cacheDevice --level=0 --raid-devices=$diskCount $diskDevices
+  mkfs.ext4 $cacheDevice
+  echo "Customize (End): NFS Kernel Server Cache"
+fi
+
 echo "Customize (Start): Azure Managed Lustre (AMLFS) Client"
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
 repoName="amlfs"
