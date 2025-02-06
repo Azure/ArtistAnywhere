@@ -77,9 +77,12 @@ if [ $machineType == Cache ]; then
     fi
     diskDevices="$diskDevices/dev/nvme${i}n1"
   done
-  cacheDevice=/dev/md/cache
+  cacheDevice=/dev/md/cached
   mdadm --create $cacheDevice --level=0 --raid-devices=$diskCount $diskDevices
-  mkfs.ext4 $cacheDevice
+  mkfs.xfs $cacheDevice
+  cacheMount=/mnt/cached
+  mkdir -p $cacheMount
+  echo "$cacheDevice $cacheMount xfs defaults 0 2" >> /etc/fstab
   echo "Customize (End): NFS Kernel Server Cache"
 fi
 
