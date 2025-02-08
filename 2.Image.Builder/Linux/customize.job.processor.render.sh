@@ -17,9 +17,9 @@ if [[ $jobProcessors == *PBRT* ]]; then
   dnf -y install libXi-devel
   dnf -y install libxkbcommon-devel
   dnf -y install wayland-devel
-  RunProcess "git clone --recursive https://github.com/mmp/$fileType-$version.git" $binDirectory/$fileType-1
-  RunProcess "cmake -B $filePath -S $binDirectory/$fileType-$version" $binDirectory/$fileType-2
-  RunProcess "make -C $filePath" $binDirectory/$fileType-3
+  run_process "git clone --recursive https://github.com/mmp/$fileType-$version.git" $binDirectory/$fileType-1
+  run_process "cmake -B $filePath -S $binDirectory/$fileType-$version" $binDirectory/$fileType-2
+  run_process "make -C $filePath" $binDirectory/$fileType-3
   binPaths="$binPaths:$filePath"
   echo "Customize (End): PBRT"
 fi
@@ -32,7 +32,7 @@ if [[ $jobProcessors == *Blender* ]]; then
   filePath="/usr/local/$fileType"
   fileName="$fileType-$version-$hostType.tar.xz"
   fileLink="$binHostUrl/Blender/$version/$fileName"
-  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
+  download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   tar -xJf $fileName
   dnf -y install mesa-dri-drivers
   dnf -y install mesa-libGL

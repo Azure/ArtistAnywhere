@@ -22,7 +22,7 @@ if [ "$gpuProvider" != "" ]; then
   dnf -y install elfutils-libelf-devel openssl-devel bison flex
   fileName="kernel-devel-5.14.0-362.8.1.el9_3.x86_64.rpm"
   fileLink="https://download.rockylinux.org/vault/rocky/9.3/devel/x86_64/os/Packages/k/$fileName"
-  DownloadFile $fileName $fileLink
+  download_file $fileName $fileLink
   rpm -i $fileName
   echo "Customize (End): Linux Kernel Dev"
 fi
@@ -32,10 +32,10 @@ if [ "$gpuProvider" == NVIDIA ]; then
   fileType="nvidia-gpu-grid"
   fileName="$fileType.run"
   fileLink="https://go.microsoft.com/fwlink/?linkid=874272"
-  DownloadFile $fileName $fileLink
+  download_file $fileName $fileLink
   chmod +x $fileName
   dnf -y install libglvnd-devel mesa-vulkan-drivers xorg-x11-drivers pkg-config
-  RunProcess "./$fileName --silent" $binDirectory/$fileType
+  run_process "./$fileName --silent" $binDirectory/$fileType
   echo "Customize (End): NVIDIA GPU (GRID)"
 
   echo "Customize (Start): NVIDIA GPU (CUDA)"
@@ -48,11 +48,11 @@ if [ "$gpuProvider" == NVIDIA ]; then
   fileType="nvidia-optix"
   fileName="NVIDIA-OptiX-SDK-$version-linux64-x86_64.sh"
   fileLink="$binHostUrl/NVIDIA/OptiX/$version/$fileName"
-  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
+  download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   chmod +x $fileName
   filePath="$binDirectory/$fileType/$version"
   mkdir -p $filePath
-  RunProcess "./$fileName --skip-license --prefix=$filePath" $binDirectory/$fileType-1
+  run_process "./$fileName --skip-license --prefix=$filePath" $binDirectory/$fileType-1
   buildDirectory="$filePath/build"
   mkdir -p $buildDirectory
   dnf -y install libXrandr-devel
@@ -60,30 +60,10 @@ if [ "$gpuProvider" == NVIDIA ]; then
   dnf -y install libXinerama-devel
   dnf -y install mesa-libGL-devel
   dnf -y install mesa-libGL
-  RunProcess "cmake -B $buildDirectory -S $filePath/SDK" $binDirectory/$fileType-2
-  RunProcess "make -C $buildDirectory" $binDirectory/$fileType-3
+  run_process "cmake -B $buildDirectory -S $filePath/SDK" $binDirectory/$fileType-2
+  run_process "make -C $buildDirectory" $binDirectory/$fileType-3
   binPaths="$binPaths:$buildDirectory/bin"
   echo "Customize (End): NVIDIA OptiX"
-fi
-
-if [ $machineType == Cache ]; then
-  echo "Customize (Start): NFS Kernel Server Cache"
-  dnf -y install cachefilesd
-  diskDevices=""
-  diskCount=$(lsblk | grep -c nvme)
-  for ((i=0; i<$diskCount; i++)); do
-    if [ "$diskDevices" != "" ]; then
-      diskDevices="$diskDevices "
-    fi
-    diskDevices="$diskDevices/dev/nvme${i}n1"
-  done
-  cacheDevice=/dev/md/cached
-  mdadm --create $cacheDevice --level=0 --raid-devices=$diskCount $diskDevices
-  mkfs.xfs $cacheDevice
-  cacheMount=/mnt/cached
-  mkdir -p $cacheMount
-  echo "$cacheDevice $cacheMount xfs defaults 0 2" >> /etc/fstab
-  echo "Customize (End): NFS Kernel Server Cache"
 fi
 
 echo "Customize (Start): Azure Managed Lustre (AMLFS) Client"
@@ -113,11 +93,11 @@ if [ $machineType == Workstation ]; then
   [ "$gpuProvider" == "" ] && fileType="pcoip-agent-standard" || fileType="pcoip-agent-graphics"
   fileName="pcoip-agent-offline-rocky9.4_$version-1.el9.x86_64.tar.gz"
   fileLink="$binHostUrl/Teradici/$version/$fileName"
-  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
+  download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   mkdir -p $fileType
   tar -xzf $fileName -C $fileType
   cd $fileType
-  RunProcess "./install-pcoip-agent.sh $fileType usb-vhci" $binDirectory/$fileType
+  run_process "./install-pcoip-agent.sh $fileType usb-vhci" $binDirectory/$fileType
   cd $binDirectory
   echo "Customize (End): HP Anyware"
 fi

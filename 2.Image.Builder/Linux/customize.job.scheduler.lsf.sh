@@ -11,7 +11,7 @@ binPathJobScheduler="$installRoot/10.1/linux2.6-glibc2.3-x86_64/bin"
 echo "Customize (Start): LSF Download"
 fileName="lsfsce$version-x86_64.tar.gz"
 fileLink="$binHostUrl/LSF/$version/$fileName"
-DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
+download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
 tar -xzf $fileName
 tar -xf lsf*/lsf/lsf10.1_lsf*
 echo "Customize (End): LSF Download"

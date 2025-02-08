@@ -24,7 +24,7 @@ if [ "$buildConfigEncoded" != "" ]; then
   echo "Customize (End): Image Build Parameters"
 fi
 
-function DownloadFile {
+function download_file {
   local fileName=$1
   local fileLink=$2
   local tenantId=$3
@@ -40,7 +40,7 @@ function DownloadFile {
   fi
 }
 
-function RunProcess {
+function run_process {
   local exitStatus=-1
   local retryCount=0
   local command="$1"
@@ -57,37 +57,29 @@ function RunProcess {
   done
 }
 
-function GetEncodedValue {
+function get_encoded_value {
   echo $1 | base64 -d | jq -r $2
 }
 
-function SetFileSystem {
+function set_file_system {
   local fileSystemConfig="$1"
-  local firstMountOnly=$2
-  local continueMounts=true
-  if [ "$fileSystemConfig" != null ]; then
-    for fileSystem in $(echo $fileSystemConfig | jq -r '.[] | @base64'); do
-      if [[ $(GetEncodedValue $fileSystem .enable) == true && $continueMounts == true ]]; then
-        SetFileSystemMount "$(GetEncodedValue $fileSystem .mount)"
-        if [ $firstMountOnly == true ]; then
-          continueMounts=false
-          break
-        fi
-      fi
-    done
-    sudo systemctl daemon-reload
-    sudo mount -a
-  fi
+  for fileSystem in $(echo $fileSystemConfig | jq -r '.[] | @base64'); do
+    if [ $(get_encoded_value $fileSystem .enable) == true ]; then
+      set_file_system_mount "$(get_encoded_value $fileSystem .mount)"
+    fi
+  done
+  systemctl daemon-reload
+  mount -a
 }
 
-function SetFileSystemMount {
+function set_file_system_mount {
   local fileSystemMount="$1"
   local mountType=$(echo $fileSystemMount | jq -r .type)
   local mountPath=$(echo $fileSystemMount | jq -r .path)
   local mountTarget=$(echo $fileSystemMount | jq -r .target)
   local mountOptions=$(echo $fileSystemMount | jq -r .options)
   if [ $(grep -c $mountPath /etc/fstab) ]; then
-    sudo mkdir -p $mountPath
-    echo "$mountTarget $mountPath $mountType $mountOptions 0 0" | sudo tee -a /etc/fstab
+    mkdir -p $mountPath
+    echo "$mountTarget $mountPath $mountType $mountOptions 0 2" >> /etc/fstab
   fi
 }

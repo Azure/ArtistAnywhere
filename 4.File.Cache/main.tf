@@ -72,7 +72,7 @@ module hammerspace {
   }
   activeDirectory = {
     enable       = var.activeDirectory.enable
-    domainName   = var.hammerspace.domainName
+    domainName   = var.activeDirectory.domainName
     servers      = var.activeDirectory.servers
     userName     = var.activeDirectory.userName != "" ? var.activeDirectory.userName : data.azurerm_key_vault_secret.admin_username.value
     userPassword = var.activeDirectory.userPassword != "" ? var.activeDirectory.userPassword : data.azurerm_key_vault_secret.admin_password.value
@@ -225,6 +225,16 @@ variable dnsRecord {
   type = object({
     name       = string
     ttlSeconds = number
+  })
+}
+
+variable activeDirectory {
+  type = object({
+    enable       = bool
+    domainName   = string
+    servers      = string
+    userName     = string
+    userPassword = string
   })
 }
 

@@ -307,17 +307,6 @@ data terraform_remote_state network {
   }
 }
 
-data terraform_remote_state image {
-  backend = "azurerm"
-  config = {
-    resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.storage.accountName
-    container_name       = module.global.storage.containerName.terraformState
-    key                  = "2.Image.Builder"
-    use_azuread_auth     = true
-  }
-}
-
 data azurerm_resource_group dns {
   name = var.existingNetwork.enable ? var.existingNetwork.privateDns.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
 }

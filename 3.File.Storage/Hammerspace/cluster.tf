@@ -6,7 +6,7 @@ resource azurerm_virtual_machine_extension node {
   for_each = {
     for node in concat(local.hsMetadataNodes, local.hsDataNodes) : node.machine.name => node
   }
-  name                       = "Initialize"
+  name                       = "Custom"
   type                       = "CustomScript"
   publisher                  = "Microsoft.Azure.Extensions"
   type_handler_version       = "2.1"

@@ -8,6 +8,6 @@ if [ ${terminateNotification.enable} == true ]; then
   crontab $cronFilePath
 fi
 
-SetFileSystem '${jsonencode(fileSystem)}' false
+set_file_system '${jsonencode(fileSystem)}'
 
 source /etc/profile.d/aaa.sh

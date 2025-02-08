@@ -15,7 +15,7 @@ echo "Customize (Start): Deadline Download"
 fileName="Deadline-$version-linux-installers.tar"
 filePath=$(echo ${fileName%.tar})
 fileLink="$binHostUrl/Deadline/$version/$fileName"
-DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
+download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
 mkdir -p $filePath
 tar -xzf $fileName -C $filePath
 echo "Customize (End): Deadline Download"
@@ -53,7 +53,7 @@ if [ $machineType == JobScheduler ]; then
   echo "    { role: \"readWriteAnyDatabase\", db: \"admin\" }" >> $fileName
   echo "  ]" >> $fileName
   echo "})" >> $fileName
-  RunProcess "mongosh $fileName" $binDirectory/$fileType
+  run_process "mongosh $fileName" $binDirectory/$fileType
 
   fileType="mongo-create-database-user"
   fileName="$fileType.js"
@@ -65,14 +65,14 @@ if [ $machineType == JobScheduler ]; then
   echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $fileName
   echo "  ]" >> $fileName
   echo "})" >> $fileName
-  RunProcess "mongosh $fileName" $binDirectory/$fileType
+  run_process "mongosh $fileName" $binDirectory/$fileType
   echo "Customize (End): Mongo DB Users"
 
   echo "Customize (Start): Deadline Server"
   fileType="deadline-repository"
   fileName="DeadlineRepository-$version-linux-x64-installer.run"
   export DB_PASSWORD=$servicePassword
-  RunProcess "$filePath/$fileName --mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$fileType
+  run_process "$filePath/$fileName --mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$fileType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
   echo "$deadlinePath *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
   exportfs -r
@@ -86,7 +86,7 @@ fileArgs="--mode unattended --prefix $deadlinePath"
 [ $machineType == JobScheduler ] && workerService="false" || workerService="true"
 [ $machineType == Farm ] && workerStartup="true" || workerStartup="false"
 fileArgs="$fileArgs --launcherdaemon $workerService --slavestartup $workerStartup"
-RunProcess "$filePath/$fileName $fileArgs" $binDirectory/$fileType
+run_process "$filePath/$fileName $fileArgs" $binDirectory/$fileType
 mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
 echo "Customize (End): Deadline Client"
 

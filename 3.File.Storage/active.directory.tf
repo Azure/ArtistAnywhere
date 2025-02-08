@@ -104,7 +104,7 @@ resource azurerm_network_interface active_directory {
 
 resource azurerm_virtual_machine_extension active_directory {
   count                      = var.activeDirectory.enable ? 1 : 0
-  name                       = "Initialize"
+  name                       = "Custom"
   type                       = "CustomScriptExtension"
   publisher                  = "Microsoft.Compute"
   type_handler_version       = module.global.version.script_extension_windows

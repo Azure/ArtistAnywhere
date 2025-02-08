@@ -20,10 +20,10 @@ computeFleets = [
         }
       ]
       image = {
-        resourceGroupName = "ArtistAnywhere.Image"
+        versionId         = "2.0.0"
         galleryName       = "xstudio"
         definitionName    = "Linux"
-        versionId         = "2.0.0"
+        resourceGroupName = "ArtistAnywhere.Image"
         plan = {
           publisher = ""
           product   = ""
@@ -59,7 +59,7 @@ computeFleets = [
       extension = {
         custom = {
           enable   = true
-          name     = "Initialize"
+          name     = "Custom"
           fileName = "initialize.sh"
           parameters = {
             terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
@@ -113,10 +113,10 @@ computeFleets = [
         }
       ]
       image = {
-        resourceGroupName = "ArtistAnywhere.Image"
+        versionId         = "2.0.0"
         galleryName       = "xstudio"
         definitionName    = "WinFarm"
-        versionId         = "2.0.0"
+        resourceGroupName = "ArtistAnywhere.Image"
         plan = {
           publisher = ""
           product   = ""
@@ -152,7 +152,7 @@ computeFleets = [
       extension = {
         custom = {
           enable   = true
-          name     = "Initialize"
+          name     = "Custom"
           fileName = "initialize.ps1"
           parameters = {
             terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification

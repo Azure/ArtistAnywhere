@@ -1,5 +1,65 @@
 resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
+knfsd = {
+  enable = false
+  cluster = {
+    name = "xstudio"
+    size = 1
+    node = {
+      name = "cache"
+      size = "Standard_L80as_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
+      image = {
+        publisher = ""
+        product   = ""
+        name      = ""
+        version   = ""
+      }
+      osDisk = {
+        storageType = "Premium_LRS"
+        cachingType = "ReadOnly"
+        sizeGB      = 0
+        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+          enable    = true
+          placement = "ResourceDisk"
+        }
+      }
+      adminLogin = {
+        userName     = ""
+        userPassword = ""
+        sshKeyPublic = ""
+        passwordAuth = {
+          disable = true
+        }
+      }
+      extension = {
+        custom = {
+          enable   = true
+          name     = "Custom"
+          fileName = "knfsd.sh"
+          parameters = {
+            fileSystem = [
+              { # File Storage
+                enable = true
+                mount = {
+                  type    = "nfs"
+                  path    = "/mnt/storage"
+                  target  = "storage-data.azure.studio:/data"
+                  options = "vers=3,fsc"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+  network = {
+    acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+      enable = true
+    }
+  }
+}
+
 ###################################################
 # Hammerspace (https://www.hammerspace.com/azure) #
 ###################################################
@@ -9,12 +69,6 @@ hammerspace = {
   version    = "24.06.19"
   namePrefix = "xstudio"
   domainName = "azure.studio"
-  activeDirectory = {
-    enable       = false
-    servers      = "WinADDC"
-    userName     = ""
-    userPassword = ""
-  }
   metadata = { # Anvil
     machine = {
       namePrefix = "-anvil"
@@ -254,6 +308,14 @@ storageTargets = [
 ########################
 # Brownfield Resources #
 ########################
+
+activeDirectory = {
+  enable       = false
+  domainName   = "azure.studio"
+  servers      = "WinADDC"
+  userName     = ""
+  userPassword = ""
+}
 
 existingNetwork = {
   enable            = false

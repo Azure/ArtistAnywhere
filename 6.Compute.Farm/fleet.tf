@@ -12,10 +12,10 @@ variable computeFleets {
         name = string
       }))
       image = object({
-        resourceGroupName = string
+        versionId         = string
         galleryName       = string
         definitionName    = string
-        versionId         = string
+        resourceGroupName = string
         plan = object({
           publisher = string
           product   = string
@@ -100,9 +100,9 @@ locals {
       machine = merge(computeFleet.machine, {
         image = merge(computeFleet.machine.image, {
           plan = {
-            publisher = try(data.terraform_remote_state.image.outputs.linux.publisher, computeFleet.machine.image.plan.publisher)
-            product   = try(data.terraform_remote_state.image.outputs.linux.offer, computeFleet.machine.image.plan.product)
-            name      = try(data.terraform_remote_state.image.outputs.linux.sku, computeFleet.machine.image.plan.name)
+            publisher = lower(computeFleet.machine.image.plan.publisher != "" ? computeFleet.machine.image.plan.publisher : module.global.linux.publisher)
+            product   = lower(computeFleet.machine.image.plan.product != "" ? computeFleet.machine.image.plan.product : module.global.linux.offer)
+            name      = lower(computeFleet.machine.image.plan.name != "" ? computeFleet.machine.image.plan.name : module.global.linux.sku)
           }
         })
         adminLogin = merge(computeFleet.machine.adminLogin, {

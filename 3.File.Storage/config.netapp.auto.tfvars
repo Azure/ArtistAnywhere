@@ -26,7 +26,7 @@ netAppFiles = {
             features = "Standard"
             protocols = [
               "NFSv3",
-              "CIFS"
+              # "CIFS"
             ]
           }
           exportPolicies = [
@@ -38,7 +38,7 @@ netAppFiles = {
               rootAccess = true
               networkProtocols = [
                 "NFSv3",
-                "CIFS"
+                # "CIFS"
               ]
               allowedClients = [
                 "0.0.0.0/0"
@@ -56,7 +56,7 @@ netAppFiles = {
             features = "Standard"
             protocols = [
               "NFSv3",
-              "CIFS"
+              # "CIFS"
             ]
           }
           exportPolicies = [
@@ -68,7 +68,7 @@ netAppFiles = {
               rootAccess = true
               networkProtocols = [
                 "NFSv3",
-                "CIFS"
+                # "CIFS"
               ]
               allowedClients = [
                 "0.0.0.0/0"
@@ -86,7 +86,7 @@ netAppFiles = {
             features = "Standard"
             protocols = [
               "NFSv3",
-              "CIFS"
+              # "CIFS"
             ]
           }
           exportPolicies = [
@@ -98,7 +98,7 @@ netAppFiles = {
               rootAccess = true
               networkProtocols = [
                 "NFSv3",
-                "CIFS"
+                # "CIFS"
               ]
               allowedClients = [
                 "0.0.0.0/0"
@@ -116,7 +116,7 @@ netAppFiles = {
             features = "Standard"
             protocols = [
               "NFSv3",
-              "CIFS"
+              # "CIFS"
             ]
           }
           exportPolicies = [
@@ -128,7 +128,7 @@ netAppFiles = {
               rootAccess = true
               networkProtocols = [
                 "NFSv3",
-                "CIFS"
+                # "CIFS"
               ]
               allowedClients = [
                 "0.0.0.0/0"

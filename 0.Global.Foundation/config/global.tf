@@ -147,6 +147,15 @@ output defender {
   value = var.defender
 }
 
+output linux {
+  value = {
+    publisher = "RESF"
+    offer     = "RockyLinux-x86_64"
+    sku       = "9-Base"
+    version   = "9.3.20231113"
+  }
+}
+
 output version {
   value = {
     nvidia_cuda              = "12.6.3"

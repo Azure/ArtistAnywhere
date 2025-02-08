@@ -42,10 +42,10 @@ locals {
   dataLoad = merge(var.dataLoad, {
     machine = merge(var.dataLoad.machine, {
       image = merge(var.dataLoad.machine.image, {
-        publisher = try(data.terraform_remote_state.image.outputs.linux.publisher, var.dataLoad.machine.image.publisher)
-        product   = try(data.terraform_remote_state.image.outputs.linux.offer, var.dataLoad.machine.image.product)
-        name      = try(data.terraform_remote_state.image.outputs.linux.sku, var.dataLoad.machine.image.name)
-        version   = try(data.terraform_remote_state.image.outputs.linux.version, var.dataLoad.machine.image.version)
+        publisher = var.dataLoad.machine.image.publisher != "" ? var.dataLoad.machine.image.publisher : module.global.linux.publisher
+        product   = var.dataLoad.machine.image.product != "" ? var.dataLoad.machine.image.product : module.global.linux.offer
+        name      = var.dataLoad.machine.image.name != "" ? var.dataLoad.machine.image.name : module.global.linux.sku
+        version   = var.dataLoad.machine.image.version != "" ? var.dataLoad.machine.image.version : module.global.linux.version
       })
       adminLogin = merge(var.dataLoad.machine.adminLogin, {
         userName     = var.dataLoad.machine.adminLogin.userName != "" ? var.dataLoad.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value

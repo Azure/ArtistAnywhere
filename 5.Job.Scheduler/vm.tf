@@ -8,10 +8,10 @@ variable virtualMachines {
     name   = string
     size   = string
     image = object({
-      resourceGroupName = string
+      versionId         = string
       galleryName       = string
       definitionName    = string
-      versionId         = string
+      resourceGroupName = string
       plan = object({
         publisher = string
         product   = string
@@ -76,9 +76,9 @@ locals {
       }
       image = merge(virtualMachine.image, {
         plan = {
-          publisher = try(data.terraform_remote_state.image.outputs.linux.publisher, virtualMachine.image.plan.publisher)
-          product   = try(data.terraform_remote_state.image.outputs.linux.offer, virtualMachine.image.plan.product)
-          name      = try(data.terraform_remote_state.image.outputs.linux.sku, virtualMachine.image.plan.name)
+          publisher = lower(virtualMachine.image.plan.publisher != "" ? virtualMachine.image.plan.publisher : module.global.linux.publisher)
+          product   = lower(virtualMachine.image.plan.product != "" ? virtualMachine.image.plan.product : module.global.linux.offer)
+          name      = lower(virtualMachine.image.plan.name != "" ? virtualMachine.image.plan.name : module.global.linux.sku)
         }
       })
       network = merge(virtualMachine.network, {

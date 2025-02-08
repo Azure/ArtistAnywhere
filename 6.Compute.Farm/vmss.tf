@@ -11,10 +11,10 @@ variable virtualMachineScaleSets {
       size       = string
       count      = number
       image = object({
-        resourceGroupName = string
+        versionId         = string
         galleryName       = string
         definitionName    = string
-        versionId         = string
+        resourceGroupName = string
         plan = object({
           publisher = string
           product   = string
@@ -107,9 +107,9 @@ locals {
       machine = merge(virtualMachineScaleSet.machine, {
         image = merge(virtualMachineScaleSet.machine.image, {
           plan = {
-            publisher = try(data.terraform_remote_state.image.outputs.linux.publisher, virtualMachineScaleSet.machine.image.plan.publisher)
-            product   = try(data.terraform_remote_state.image.outputs.linux.offer, virtualMachineScaleSet.machine.image.plan.product)
-            name      = try(data.terraform_remote_state.image.outputs.linux.sku, virtualMachineScaleSet.machine.image.plan.name)
+            publisher = lower(virtualMachineScaleSet.machine.image.plan.publisher != "" ? virtualMachineScaleSet.machine.image.plan.publisher : module.global.linux.publisher)
+            product   = lower(virtualMachineScaleSet.machine.image.plan.product != "" ? virtualMachineScaleSet.machine.image.plan.product : module.global.linux.offer)
+            name      = lower(virtualMachineScaleSet.machine.image.plan.name != "" ? virtualMachineScaleSet.machine.image.plan.name : module.global.linux.sku)
           }
         })
       })
