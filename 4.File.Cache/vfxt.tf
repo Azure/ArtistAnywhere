@@ -142,10 +142,3 @@ output vfxtCacheControllerAddress {
 output vfxtCacheManagementAddress {
   value = var.vfxtCache.enable ? avere_vfxt.cache[0].vfxt_management_ip : null
 }
-
-output vfxtCacheDNS {
-  value = var.vfxtCache.enable ? {
-    fqdn    = azurerm_private_dns_a_record.cache_vfxt[0].fqdn
-    records = azurerm_private_dns_a_record.cache_vfxt[0].records
-  } : null
-}

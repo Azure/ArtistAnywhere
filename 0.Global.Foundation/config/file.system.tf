@@ -15,7 +15,7 @@ variable fileSystem {
         mount = {
           type    = "nfs"
           path    = "/mnt/cache"
-          target  = "cache-data.azure.studio:/cache"
+          target  = "cache.azure.studio:/mnt/storage"
           options = "vers=3"
         }
       },
@@ -24,7 +24,7 @@ variable fileSystem {
         mount = {
           type    = "lustre"
           path    = "/mnt/cache"
-          target  = "cache-data.azure.studio@tcp:/lustrefs"
+          target  = "cache.azure.studio@tcp:/lustrefs"
           options = "noatime,flock,_netdev,x-systemd.automount,x-systemd.requires=network.service"
         }
       },
@@ -53,7 +53,7 @@ variable fileSystem {
         mount = {
           type    = ""
           path    = "Y:"
-          target  = "\\\\cache-data.azure.studio\\cache"
+          target  = "\\\\cache.azure.studio\\mnt\\storage"
           options = "-o anon"
         }
       },

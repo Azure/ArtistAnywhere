@@ -1,6 +1,6 @@
 resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
-knfsd = {
+knfsdCache = {
   enable = false
   cluster = {
     name = "xstudio"

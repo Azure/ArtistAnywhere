@@ -1,4 +1,4 @@
-variable knfsd {
+variable knfsdCache {
   type = object({
     enable = bool
     cluster = object({
@@ -58,20 +58,26 @@ variable knfsd {
   })
 }
 
+data azurerm_virtual_machine_scale_set cache {
+  count               = var.knfsdCache.enable ? 1 : 0
+  name                = azurerm_linux_virtual_machine_scale_set.cache[0].name
+  resource_group_name = azurerm_linux_virtual_machine_scale_set.cache[0].resource_group_name
+}
+
 locals {
-  knfsd = merge(var.knfsd, {
-    cluster = merge(var.knfsd.cluster, {
-      node = merge(var.knfsd.cluster.node, {
-        image = merge(var.knfsd.cluster.node.image, {
-          publisher = var.knfsd.cluster.node.image.publisher != "" ? var.knfsd.cluster.node.image.publisher : module.global.linux.publisher
-          product   = var.knfsd.cluster.node.image.product != "" ? var.knfsd.cluster.node.image.product : module.global.linux.offer
-          name      = var.knfsd.cluster.node.image.name != "" ? var.knfsd.cluster.node.image.name : module.global.linux.sku
-          version   = var.knfsd.cluster.node.image.version != "" ? var.knfsd.cluster.node.image.version : module.global.linux.version
+  knfsdCache = merge(var.knfsdCache, {
+    cluster = merge(var.knfsdCache.cluster, {
+      node = merge(var.knfsdCache.cluster.node, {
+        image = merge(var.knfsdCache.cluster.node.image, {
+          publisher = var.knfsdCache.cluster.node.image.publisher != "" ? var.knfsdCache.cluster.node.image.publisher : module.global.linux.publisher
+          product   = var.knfsdCache.cluster.node.image.product != "" ? var.knfsdCache.cluster.node.image.product : module.global.linux.offer
+          name      = var.knfsdCache.cluster.node.image.name != "" ? var.knfsdCache.cluster.node.image.name : module.global.linux.sku
+          version   = var.knfsdCache.cluster.node.image.version != "" ? var.knfsdCache.cluster.node.image.version : module.global.linux.version
         })
-        adminLogin = merge(var.knfsd.cluster.node.adminLogin, {
-          userName     = var.knfsd.cluster.node.adminLogin.userName != "" ? var.knfsd.cluster.node.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-          userPassword = var.knfsd.cluster.node.adminLogin.userPassword != "" ? var.knfsd.cluster.node.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
-          sshKeyPublic = var.knfsd.cluster.node.adminLogin.sshKeyPublic != "" ? var.knfsd.cluster.node.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
+        adminLogin = merge(var.knfsdCache.cluster.node.adminLogin, {
+          userName     = var.knfsdCache.cluster.node.adminLogin.userName != "" ? var.knfsdCache.cluster.node.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+          userPassword = var.knfsdCache.cluster.node.adminLogin.userPassword != "" ? var.knfsdCache.cluster.node.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+          sshKeyPublic = var.knfsdCache.cluster.node.adminLogin.sshKeyPublic != "" ? var.knfsdCache.cluster.node.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
         })
       })
     })
@@ -83,16 +89,16 @@ locals {
 ######################################################################################################
 
 resource azurerm_linux_virtual_machine_scale_set cache {
-  count                           = var.knfsd.enable ? 1 : 0
-  name                            = var.knfsd.cluster.name
-  computer_name_prefix            = var.knfsd.cluster.node.name == "" ? null : var.knfsd.cluster.node.name
+  count                           = var.knfsdCache.enable ? 1 : 0
+  name                            = var.knfsdCache.cluster.name
+  computer_name_prefix            = var.knfsdCache.cluster.node.name == "" ? null : var.knfsdCache.cluster.node.name
   resource_group_name             = azurerm_resource_group.cache.name
   location                        = azurerm_resource_group.cache.location
-  sku                             = var.knfsd.cluster.node.size
-  instances                       = var.knfsd.cluster.size
-  admin_username                  = local.knfsd.cluster.node.adminLogin.userName
-  admin_password                  = local.knfsd.cluster.node.adminLogin.userPassword
-  disable_password_authentication = local.knfsd.cluster.node.adminLogin.passwordAuth.disable
+  sku                             = var.knfsdCache.cluster.node.size
+  instances                       = var.knfsdCache.cluster.size
+  admin_username                  = local.knfsdCache.cluster.node.adminLogin.userName
+  admin_password                  = local.knfsdCache.cluster.node.adminLogin.userPassword
+  disable_password_authentication = local.knfsdCache.cluster.node.adminLogin.passwordAuth.disable
   single_placement_group          = false
   overprovision                   = false
   identity {
@@ -109,35 +115,35 @@ resource azurerm_linux_virtual_machine_scale_set cache {
       primary   = true
       subnet_id = data.azurerm_subnet.cache.id
     }
-    enable_accelerated_networking = var.knfsd.network.acceleration.enable
+    enable_accelerated_networking = var.knfsdCache.network.acceleration.enable
   }
   os_disk {
-    storage_account_type = var.knfsd.cluster.node.osDisk.storageType
-    caching              = var.knfsd.cluster.node.osDisk.cachingType
-    disk_size_gb         = var.knfsd.cluster.node.osDisk.sizeGB > 0 ? var.knfsd.cluster.node.osDisk.sizeGB : null
+    storage_account_type = var.knfsdCache.cluster.node.osDisk.storageType
+    caching              = var.knfsdCache.cluster.node.osDisk.cachingType
+    disk_size_gb         = var.knfsdCache.cluster.node.osDisk.sizeGB > 0 ? var.knfsdCache.cluster.node.osDisk.sizeGB : null
     dynamic diff_disk_settings {
-      for_each = var.knfsd.cluster.node.osDisk.ephemeral.enable ? [1] : []
+      for_each = var.knfsdCache.cluster.node.osDisk.ephemeral.enable ? [1] : []
       content {
         option    = "Local"
-        placement = var.knfsd.cluster.node.osDisk.ephemeral.placement
+        placement = var.knfsdCache.cluster.node.osDisk.ephemeral.placement
       }
     }
   }
   source_image_reference {
-    publisher = local.knfsd.cluster.node.image.publisher
-    offer     = local.knfsd.cluster.node.image.product
-    sku       = local.knfsd.cluster.node.image.name
-    version   = local.knfsd.cluster.node.image.version
+    publisher = local.knfsdCache.cluster.node.image.publisher
+    offer     = local.knfsdCache.cluster.node.image.product
+    sku       = local.knfsdCache.cluster.node.image.name
+    version   = local.knfsdCache.cluster.node.image.version
   }
   plan {
-    publisher = lower(local.knfsd.cluster.node.image.publisher)
-    product   = lower(local.knfsd.cluster.node.image.product)
-    name      = lower(local.knfsd.cluster.node.image.name)
+    publisher = lower(local.knfsdCache.cluster.node.image.publisher)
+    product   = lower(local.knfsdCache.cluster.node.image.product)
+    name      = lower(local.knfsdCache.cluster.node.image.name)
   }
   dynamic extension {
-    for_each = var.knfsd.cluster.node.extension.custom.enable ? [1] : []
+    for_each = var.knfsdCache.cluster.node.extension.custom.enable ? [1] : []
     content {
-      name                       = var.knfsd.cluster.node.extension.custom.name
+      name                       = var.knfsdCache.cluster.node.extension.custom.name
       type                       = "CustomScript"
       publisher                  = "Microsoft.Azure.Extensions"
       type_handler_version       = module.global.version.script_extension_linux
@@ -145,16 +151,29 @@ resource azurerm_linux_virtual_machine_scale_set cache {
       auto_upgrade_minor_version = true
       protected_settings = jsonencode({
         script = base64encode(
-          templatefile(var.knfsd.cluster.node.extension.custom.fileName, var.knfsd.cluster.node.extension.custom.parameters)
+          templatefile(var.knfsdCache.cluster.node.extension.custom.fileName, var.knfsdCache.cluster.node.extension.custom.parameters)
         )
       })
     }
   }
   dynamic admin_ssh_key {
-    for_each = local.knfsd.cluster.node.adminLogin.sshKeyPublic != "" ? [1] : []
+    for_each = local.knfsdCache.cluster.node.adminLogin.sshKeyPublic != "" ? [1] : []
     content {
-      username   = local.knfsd.cluster.node.adminLogin.userName
-      public_key = local.knfsd.cluster.node.adminLogin.sshKeyPublic
+      username   = local.knfsdCache.cluster.node.adminLogin.userName
+      public_key = local.knfsdCache.cluster.node.adminLogin.sshKeyPublic
     }
   }
+}
+
+############################################################################
+# Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
+############################################################################
+
+resource azurerm_private_dns_a_record cache_knfsd {
+  count               = var.knfsdCache.enable ? 1 : 0
+  name                = var.dnsRecord.name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.azurerm_private_dns_zone.studio.resource_group_name
+  zone_name           = var.existingNetwork.enable ? var.existingNetwork.privateDns.zoneName : data.azurerm_private_dns_zone.studio.name
+  records             = data.azurerm_virtual_machine_scale_set.cache[0].instances[*].private_ip_address
+  ttl                 = var.dnsRecord.ttlSeconds
 }

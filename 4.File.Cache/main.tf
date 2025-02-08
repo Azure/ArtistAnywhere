@@ -346,3 +346,16 @@ output hammerspaceDNSMetadata {
 output hammerspaceDNSData {
   value = var.hammerspace.enable ? module.hammerspace[0].dnsData : null
 }
+
+output cacheDNS {
+  value = var.hpcCache.enable ? {
+    fqdn    = azurerm_private_dns_a_record.cache_hpc[0].fqdn
+    records = azurerm_private_dns_a_record.cache_hpc[0].records
+  } : var.vfxtCache.enable ? {
+    fqdn    = azurerm_private_dns_a_record.cache_vfxt[0].fqdn
+    records = azurerm_private_dns_a_record.cache_vfxt[0].records
+  } : var.knfsdCache.enable ? {
+    fqdn    = azurerm_private_dns_a_record.cache_knfsd[0].fqdn
+    records = azurerm_private_dns_a_record.cache_knfsd[0].records
+  } : null
+}

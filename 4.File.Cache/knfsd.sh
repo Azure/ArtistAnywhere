@@ -1,6 +1,8 @@
 #!/bin/bash -ex
 
 setenforce 0
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+
 dnf -y install jq nfs-utils cachefilesd
 
 function get_encoded_value {
@@ -14,8 +16,6 @@ function set_file_system {
       set_file_system_mount "$(get_encoded_value $fileSystem .mount)"
     fi
   done
-  systemctl daemon-reload
-  mount -a
 }
 
 function set_file_system_mount {
@@ -44,18 +44,21 @@ for ((i=0; i<$diskCount; i++)); do
 done
 cacheDevice=/dev/md/fscache
 mdadm --create $cacheDevice --level=0 --raid-devices=$diskCount $deviceIds
-
 mkfs.xfs $cacheDevice
 
 cacheMount=/mnt/fscache
 mkdir -p $cacheMount
 echo "$cacheDevice $cacheMount xfs defaults 0 2" >> /etc/fstab
-
 sed -i "/^dir/c\dir $cacheMount" /etc/cachefilesd.conf
 
-systemctl --now enable nfs-server
-systemctl --now enable cachefilesd
+cacheMount=$${cacheMount//\//-}
+cacheMount=$${cacheMount:1}.mount
+configFile=/usr/lib/systemd/system/cachefilesd.service
+sed -i "/^Description/a\After=$cacheMount" $configFile
+sed -i "/^After/a\Requires=$cacheMount" $configFile
+systemctl enable cachefilesd
 
 set_file_system '${jsonencode(fileSystem)}'
-
 exportfs -r
+
+reboot

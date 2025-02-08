@@ -130,10 +130,3 @@ resource azurerm_private_dns_a_record cache_hpc {
   records             = azurerm_hpc_cache.studio[0].mount_addresses
   ttl                 = var.dnsRecord.ttlSeconds
 }
-
-output hpcCacheDNS {
-  value = var.hpcCache.enable ? {
-    fqdn    = azurerm_private_dns_a_record.cache_hpc[0].fqdn
-    records = azurerm_private_dns_a_record.cache_hpc[0].records
-  } : null
-}
