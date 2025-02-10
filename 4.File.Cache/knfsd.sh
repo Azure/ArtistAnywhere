@@ -67,7 +67,7 @@ function set_mount_units {
         systemctl enable cachefilesd nfs-server
       else
         fsid=$(uuidgen -r)
-        echo "$mountPath *(ro,fsid=$fsid)" >> /etc/exports
+        echo "$mountPath *(ro,no_root_squash,fsid=$fsid)" >> /etc/exports
       fi
     fi
   done

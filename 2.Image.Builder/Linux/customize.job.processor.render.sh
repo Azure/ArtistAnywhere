@@ -17,6 +17,7 @@ if [[ $jobProcessors == *PBRT* ]]; then
   dnf -y install libXi-devel
   dnf -y install libxkbcommon-devel
   dnf -y install wayland-devel
+  dnf -y imath
   run_process "git clone --recursive https://github.com/mmp/$fileType-$version.git" $binDirectory/$fileType-1
   run_process "cmake -B $filePath -S $binDirectory/$fileType-$version" $binDirectory/$fileType-2
   run_process "make -C $filePath" $binDirectory/$fileType-3
