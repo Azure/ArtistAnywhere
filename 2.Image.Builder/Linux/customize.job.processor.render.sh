@@ -17,8 +17,9 @@ if [[ $jobProcessors == *PBRT* ]]; then
   dnf -y install libXi-devel
   dnf -y install libxkbcommon-devel
   dnf -y install wayland-devel
-  git clone --recursive https://github.com/mmp/$fileType-$version.git
-  cmake -B $filePath -S $binDirectory/$fileType-$version
+  fileSource=$fileType-$version
+  git clone --recursive https://github.com/mmp/$fileSource.git
+  cmake -B $filePath -S ./$fileSource
   make -C $filePath
   binPaths="$binPaths:$filePath"
   echo "Customize (End): PBRT"
