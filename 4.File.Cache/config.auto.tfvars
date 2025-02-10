@@ -37,15 +37,22 @@ knfsdCache = {
           name     = "Custom"
           fileName = "knfsd.sh"
           parameters = {
-            fileSystem = [
-              { # File Storage
-                enable = true
-                mount = {
-                  type    = "nfs"
-                  path    = "/mnt/storage"
-                  target  = "storage-data.azure.studio:/data"
-                  options = "vers=3,fsc"
-                }
+            storageMounts = [
+              {
+                enable      = true
+                description = "Local NVMe Disks"
+                type        = "xfs"
+                path        = "/mnt/fscache"
+                source      = "/dev/md/fscache"
+                options     = "defaults"
+              },
+              {
+                enable      = true
+                description = "Remote NFSv3 Storage"
+                type        = "nfs"
+                path        = "/mnt/storage"
+                source      = "storage-data.azure.studio:/data"
+                options     = "vers=3,fsc"
               }
             ]
           }

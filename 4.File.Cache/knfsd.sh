@@ -1,64 +1,80 @@
 #!/bin/bash -ex
 
-setenforce 0
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-
 dnf -y install jq nfs-utils cachefilesd
 
-function get_encoded_value {
-  echo $1 | base64 -d | jq -r $2
+function set_cache_disks {
+  devicePath=$1
+  deviceList=""
+  diskCount=$(lsblk | grep -c nvme)
+  for ((i=0; i<$diskCount; i++)); do
+    if [ "$deviceList" != "" ]; then
+      deviceList="$deviceList "
+    fi
+    deviceList="$deviceList/dev/nvme$${i}n1"
+  done
+  mdadm --create $devicePath --level=0 --raid-devices=$diskCount $deviceList
+  mkfs.xfs $devicePath
 }
 
-function set_file_system {
-  local fileSystemConfig="$1"
-  for fileSystem in $(echo $fileSystemConfig | jq -r '.[] | @base64'); do
-    if [ $(get_encoded_value $fileSystem .enable) == true ]; then
-      set_file_system_mount "$(get_encoded_value $fileSystem .mount)"
+function get_mount_name {
+  mountPath=$1
+  mountName=$${mountPath//\//-}
+  mountName=$${mountName:1}.mount
+  echo $mountName
+}
+
+function set_mount_unit {
+  storageMount="$1"
+  mountDescription="$(echo $storageMount | jq -r .description)"
+  mountType=$(echo $storageMount | jq -r .type)
+  mountPath=$(echo $storageMount | jq -r .path)
+  mountSource=$(echo $storageMount | jq -r .source)
+  mountOptions=$(echo $storageMount | jq -r .options)
+  mountName=$(get_mount_name $mountPath)
+  mountFile=/usr/lib/systemd/system/$mountName
+  echo "[Unit]" > $mountFile
+  echo "Description=$mountDescription" >> $mountFile
+  echo "DefaultDependencies=no" >> $mountFile
+  echo "" >> $mountFile
+  echo "[Mount]" >> $mountFile
+  echo "Type=$mountType" >> $mountFile
+  echo "Where=$mountPath" >> $mountFile
+  echo "What=$mountSource" >> $mountFile
+  echo "Options=$mountOptions" >> $mountFile
+  echo "" >> $mountFile
+  echo "[Install]" >> $mountFile
+  echo "WantedBy=multi-user.target" >> $mountFile
+  systemctl enable $mountName
+}
+
+function set_mount_units {
+  storageMounts="$(echo $1 | base64 -d)"
+  for storageMount in $(echo "$storageMounts" | jq -r ".[] | @base64"); do
+    mountConfig="$(echo "$storageMount" | base64 -d)"
+    enabled=$(echo "$mountConfig" | jq -r .enable)
+    if [ $enabled == true ]; then
+      set_mount_unit "$mountConfig"
+      mountType=$(echo "$mountConfig" | jq -r .type)
+      mountPath=$(echo "$mountConfig" | jq -r .path)
+      if [ $mountType == xfs ]; then
+        mountSource=$(echo "$mountConfig" | jq -r .source)
+        set_cache_disks $mountSource
+        sed -i "/^dir/c\dir $mountPath" /etc/cachefilesd.conf
+        mountName=$(get_mount_name $mountPath)
+        cacheFile=/usr/lib/systemd/system/cachefilesd.service
+        sed -i "/^Description/a\After=$mountName" $cacheFile
+        sed -i "/^After/a\Requires=$mountName" $cacheFile
+        systemctl enable cachefilesd nfs-server
+      else
+        fsid=$(uuidgen -r)
+        echo "$mountPath *(ro,fsid=$fsid)" >> /etc/exports
+      fi
     fi
   done
 }
 
-function set_file_system_mount {
-  local fileSystemMount="$1"
-  local mountType=$(echo $fileSystemMount | jq -r .type)
-  local mountPath=$(echo $fileSystemMount | jq -r .path)
-  local mountTarget=$(echo $fileSystemMount | jq -r .target)
-  local mountOptions=$(echo $fileSystemMount | jq -r .options)
-  if [ $(grep -c $mountPath /etc/fstab) ]; then
-    mkdir -p $mountPath
-    echo "$mountTarget $mountPath $mountType $mountOptions 0 2" >> /etc/fstab
-  fi
-  if [ $(grep -c $mountPath /etc/exports) ]; then
-    fsid=$(uuidgen -r)
-    echo "$mountPath *(ro,fsid=$fsid)" >> /etc/exports
-  fi
-}
+storageMounts=${base64encode(jsonencode(storageMounts))}
+set_mount_units $storageMounts
 
-deviceIds=""
-diskCount=$(lsblk | grep -c nvme)
-for ((i=0; i<$diskCount; i++)); do
-  if [ "$deviceIds" != "" ]; then
-    deviceIds="$deviceIds "
-  fi
-  deviceIds="$deviceIds/dev/nvme$${i}n1"
-done
-cacheDevice=/dev/md/fscache
-mdadm --create $cacheDevice --level=0 --raid-devices=$diskCount $deviceIds
-mkfs.xfs $cacheDevice
-
-cacheMount=/mnt/fscache
-mkdir -p $cacheMount
-echo "$cacheDevice $cacheMount xfs defaults 0 2" >> /etc/fstab
-sed -i "/^dir/c\dir $cacheMount" /etc/cachefilesd.conf
-
-cacheMount=$${cacheMount//\//-}
-cacheMount=$${cacheMount:1}.mount
-configFile=/usr/lib/systemd/system/cachefilesd.service
-sed -i "/^Description/a\After=$cacheMount" $configFile
-sed -i "/^After/a\Requires=$cacheMount" $configFile
-systemctl enable cachefilesd
-
-set_file_system '${jsonencode(fileSystem)}'
-exportfs -r
-
+sed -i "s/SELINUX=enforcing/SELINUX=disabled/" /etc/selinux/config
 reboot

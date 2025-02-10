@@ -36,14 +36,13 @@ variable knfsdCache {
             name     = string
             fileName = string
             parameters = object({
-              fileSystem = list(object({
-                enable = bool
-                mount = object({
-                  type    = string
-                  path    = string
-                  target  = string
-                  options = string
-                })
+              storageMounts = list(object({
+                enable      = bool
+                description = string
+                type        = string
+                path        = string
+                source      = string
+                options     = string
               }))
             })
           })
