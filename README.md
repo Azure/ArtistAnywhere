@@ -55,11 +55,11 @@ The following Disney Moana Island scene was rendered on Azure via the [Physicall
 
 To render the Disney Moana Island scene on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** or **Windows** user workstation.
 
-```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt -arguments "--outfile /mnt/storage/moana-island.png /mnt/cache/moana/island/pbrt-v4/island.pbrt"```
+```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt -arguments "--outfile /mnt/storage/cpu/moana-island.png /mnt/cache/cpu/island/pbrt-v4/island.pbrt"```
 
 To render the Disney Moana Island scene on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** or **Windows** user workstation.
 
-```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt.exe -arguments "--outfile X:\moana-island.png Y:\moana\island\pbrt-v4\island.pbrt"```
+```deadlinecommand -SubmitCommandLineJob -name moana-island -executable pbrt.exe -arguments "--outfile X:\cpu\moana-island.png Y:\cpu\island\pbrt-v4\island.pbrt"```
 
 ### [Blender Splash Screen](https://www.blender.org/download/demo-files/#splash)
 
@@ -69,11 +69,11 @@ The following Blender 3.4 Splash screen was rendered on Azure via the [Blender](
 
 To render the Blender Splash screen on an Azure **Linux** render farm, the following job submission command can be submitted from a **Linux** or **Windows** user workstation.
 
-```deadlinecommand -SubmitCommandLineJob -name blender-splash -executable blender -arguments "--background /mnt/cache/blender/3.4/splash.blend --render-output /mnt/storage/blender/3.4/splash --enable-autoexec --render-frame 1"```
+```deadlinecommand -SubmitCommandLineJob -name blender-splash -executable blender -arguments "--background /mnt/cache/gpu/3.4/splash.blend --render-output /mnt/storage/gpu/3.4/splash --enable-autoexec --render-frame 1"```
 
 To render the Blender Splash screen on an Azure **Windows** render farm, the following job submission command can be submitted from a **Linux** or **Windows** user workstation.
 
-```deadlinecommand -SubmitCommandLineJob -name blender-splash -executable blender.exe -arguments "--background Y:\blender\3.4\splash.blend --render-output X:\blender\3.4\splash --enable-autoexec --render-frame 1"```
+```deadlinecommand -SubmitCommandLineJob -name blender-splash -executable blender.exe -arguments "--background Y:\gpu\3.4\splash.blend --render-output X:\gpu\3.4\splash --enable-autoexec --render-frame 1"```
 
 ## Contributing
 
