@@ -12,8 +12,12 @@ function set_cache_disks {
     fi
     deviceList="$deviceList/dev/nvme$${i}n1"
   done
-  mdadm --create $devicePath --level=0 --raid-devices=$diskCount $deviceList
-  mkfs.xfs $devicePath
+  if (( $diskCount > 0 )); then
+    if (( $diskCount > 1 )); then
+      mdadm --create $devicePath --level=0 --raid-devices=$diskCount $deviceList
+    fi
+    mkfs.xfs $devicePath
+  fi
 }
 
 function get_mount_name {

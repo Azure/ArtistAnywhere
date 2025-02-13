@@ -2,60 +2,62 @@ resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens,
 
 knfsdCache = {
   enable = false
-  cluster = {
-    name = "xstudio"
-    size = 1
-    node = {
-      name = "cache"
-      size = "Standard_L80as_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
-      image = {
-        publisher = ""
-        product   = ""
-        name      = ""
-        version   = ""
+  name   = "xcache"
+  machine = {
+    size  = "Standard_L80as_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    image = {
+      publisher = ""
+      product   = ""
+      name      = ""
+      version   = ""
+    }
+    osDisk = {
+      storageType = "Premium_LRS"
+      cachingType = "ReadOnly"
+      sizeGB      = 0
+      ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+        enable    = true
+        placement = "ResourceDisk"
       }
-      osDisk = {
-        storageType = "Premium_LRS"
-        cachingType = "ReadOnly"
-        sizeGB      = 0
-        ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = true
-          placement = "ResourceDisk"
-        }
+    }
+    dataDisk = {
+      enable      = false
+      storageType = "UltraSSD_LRS"
+      cachingType = "None"
+      sizeGB      = 65536
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = true
       }
-      adminLogin = {
-        userName     = ""
-        userPassword = ""
-        sshKeyPublic = ""
-        passwordAuth = {
-          disable = true
-        }
-      }
-      extension = {
-        custom = {
-          enable   = true
-          name     = "Custom"
-          fileName = "knfsd.sh"
-          parameters = {
-            storageMounts = [
-              {
-                enable      = true
-                description = "Local NVMe Disks"
-                type        = "xfs"
-                path        = "/mnt/fscache"
-                source      = "/dev/md/fscache"
-                options     = "defaults"
-              },
-              {
-                enable      = true
-                description = "Remote NFSv3 Storage"
-                type        = "nfs"
-                path        = "/mnt/storage"
-                source      = "storage-data.azure.studio:/data"
-                options     = "vers=3,fsc"
-              }
-            ]
-          }
+    }
+    extension = {
+      custom = {
+        enable   = true
+        name     = "Custom"
+        fileName = "knfsd.sh"
+        parameters = {
+          storageMounts = [
+            {
+              enable      = true
+              description = "Local NVMe Disks"
+              type        = "xfs"
+              path        = "/mnt/fscache"
+              source      = "/dev/md/fscache"
+              options     = "defaults"
+            },
+            {
+              enable      = true
+              description = "Remote NFSv3 Storage"
+              type        = "nfs"
+              path        = "/mnt/storage"
+              source      = "storage-data.azure.studio:/data"
+              options     = "vers=3,fsc"
+            }
+          ]
         }
       }
     }
