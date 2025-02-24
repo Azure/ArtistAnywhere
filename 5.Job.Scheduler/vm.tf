@@ -74,13 +74,13 @@ locals {
         regionName       = virtualMachine.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
         extendedZoneName = virtualMachine.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.name : null
       }
-      image = merge(virtualMachine.image, {
-        plan = {
-          publisher = lower(virtualMachine.image.plan.publisher != "" ? virtualMachine.image.plan.publisher : module.global.linux.publisher)
-          product   = lower(virtualMachine.image.plan.product != "" ? virtualMachine.image.plan.product : module.global.linux.offer)
-          name      = lower(virtualMachine.image.plan.name != "" ? virtualMachine.image.plan.name : module.global.linux.sku)
-        }
-      })
+      # image = merge(virtualMachine.image, {
+      #   plan = {
+      #     publisher = lower(virtualMachine.image.plan.publisher != "" ? virtualMachine.image.plan.publisher : module.global.linux.publisher)
+      #     product   = lower(virtualMachine.image.plan.product != "" ? virtualMachine.image.plan.product : module.global.linux.offer)
+      #     name      = lower(virtualMachine.image.plan.name != "" ? virtualMachine.image.plan.name : module.global.linux.sku)
+      #   }
+      # })
       network = merge(virtualMachine.network, {
         subnetId = "${virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
       })

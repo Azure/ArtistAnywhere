@@ -104,15 +104,15 @@ locals {
         regionName       = virtualMachineScaleSet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
         extendedZoneName = virtualMachineScaleSet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.name : null
       }
-      machine = merge(virtualMachineScaleSet.machine, {
-        image = merge(virtualMachineScaleSet.machine.image, {
-          plan = {
-            publisher = lower(virtualMachineScaleSet.machine.image.plan.publisher != "" ? virtualMachineScaleSet.machine.image.plan.publisher : module.global.linux.publisher)
-            product   = lower(virtualMachineScaleSet.machine.image.plan.product != "" ? virtualMachineScaleSet.machine.image.plan.product : module.global.linux.offer)
-            name      = lower(virtualMachineScaleSet.machine.image.plan.name != "" ? virtualMachineScaleSet.machine.image.plan.name : module.global.linux.sku)
-          }
-        })
-      })
+      # machine = merge(virtualMachineScaleSet.machine, {
+      #   image = merge(virtualMachineScaleSet.machine.image, {
+      #     plan = {
+      #       publisher = lower(virtualMachineScaleSet.machine.image.plan.publisher != "" ? virtualMachineScaleSet.machine.image.plan.publisher : module.global.linux.publisher)
+      #       product   = lower(virtualMachineScaleSet.machine.image.plan.product != "" ? virtualMachineScaleSet.machine.image.plan.product : module.global.linux.offer)
+      #       name      = lower(virtualMachineScaleSet.machine.image.plan.name != "" ? virtualMachineScaleSet.machine.image.plan.name : module.global.linux.sku)
+      #     }
+      #   })
+      # })
       network = merge(virtualMachineScaleSet.network, {
         subnetId = "${virtualMachineScaleSet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
       })
