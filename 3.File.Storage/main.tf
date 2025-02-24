@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.18.0"
+      version = "~>4.20.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -117,12 +117,12 @@ variable hammerspace {
         count      = number
         osDisk = object({
           storageType = string
-          cachingType = string
+          cachingMode = string
           sizeGB      = number
         })
         dataDisk = object({
           storageType = string
-          cachingType = string
+          cachingMode = string
           sizeGB      = number
         })
         adminLogin = object({
@@ -147,12 +147,12 @@ variable hammerspace {
         count      = number
         osDisk = object({
           storageType = string
-          cachingType = string
+          cachingMode = string
           sizeGB      = number
         })
         dataDisk = object({
           storageType = string
-          cachingType = string
+          cachingMode = string
           sizeGB      = number
           count       = number
           raid0 = object({

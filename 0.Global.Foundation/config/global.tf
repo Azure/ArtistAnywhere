@@ -149,22 +149,21 @@ output defender {
 
 output linux {
   value = {
-    publisher = "RESF"
-    offer     = "RockyLinux-x86_64"
-    sku       = "9-Base"
-    version   = "9.3.20231113"
+    publisher = "AlmaLinux"
+    offer     = "AlmaLinux-x86_64"
+    sku       = "9-Gen2"
+    version   = "9.4.2024080501"
   }
 }
 
 output version {
   value = {
     nvidia_cuda              = "12.6.3"
-    nvidia_optix             = "8.1.0"
-    nvidia_optix_suffix      = "-35015278"
-    az_blob_nfs_mount        = "2.0.10"
+    nvidia_optix             = "8.0.0"
+    az_blob_nfs_mount        = "2.0.11"
     hp_anyware_agent         = "24.10.1"
     job_scheduler_deadline   = "10.4.0.13"
-    job_scheduler_lsf        = "10.2.0.12"
+    job_scheduler_slurm      = "24.11.1"
     job_processor_pbrt       = "v4"
     job_processor_blender    = "4.3.2"
     script_extension_linux   = "2.1"

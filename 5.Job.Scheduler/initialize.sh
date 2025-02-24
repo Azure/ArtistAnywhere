@@ -20,8 +20,8 @@ echo "[Service]" >> $servicePath
 echo "Environment=PATH=$PATH" >> $servicePath
 echo "Environment=resourceGroupName=${autoScale.resourceGroupName}" >> $servicePath
 echo "Environment=jobSchedulerName=${autoScale.jobSchedulerName}" >> $servicePath
-echo "Environment=computeFarmName=${autoScale.computeFarmName}" >> $servicePath
-echo "Environment=computeFarmNodeCountMax=${autoScale.computeFarmNodeCountMax}" >> $servicePath
+echo "Environment=computeClusterName=${autoScale.computeClusterName}" >> $servicePath
+echo "Environment=computeClusterNodeLimit=${autoScale.computeClusterNodeLimit}" >> $servicePath
 echo "Environment=workerIdleDeleteSeconds=${autoScale.workerIdleDeleteSeconds}" >> $servicePath
 echo "Environment=jobWaitThresholdSeconds=${autoScale.jobWaitThresholdSeconds}" >> $servicePath
 echo "ExecStart=/bin/bash $codeFilePath" >> $servicePath

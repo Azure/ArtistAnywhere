@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.18.0"
+      version = "~>4.20.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -95,8 +95,8 @@ data azurerm_virtual_network studio {
   resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
-data azurerm_subnet farm {
-  name                 = "Farm"
+data azurerm_subnet compute {
+  name                 = "Compute"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }

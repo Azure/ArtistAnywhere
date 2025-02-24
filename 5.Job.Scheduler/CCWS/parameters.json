@@ -40,7 +40,7 @@
       "name": "Studio",
       "id": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Network.SouthCentralUS/providers/Microsoft.Network/virtualNetworks/Studio",
       "cyclecloudSubnet": "Web",
-      "computeSubnet": "Farm"
+      "computeSubnet": "Compute"
     }
   },
   "databaseAdminPassword": {

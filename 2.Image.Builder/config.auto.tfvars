@@ -9,7 +9,7 @@ computeGallery = {
   platform = {
     linux = {
       enable  = true
-      version = "9.3.20231113"
+      version = "9.4.2024080501"
     }
     windows = {
       enable  = true
@@ -21,9 +21,9 @@ computeGallery = {
       name       = "Linux"
       type       = "Linux"
       generation = "V2"
-      publisher  = "RESF"
-      offer      = "RockyLinux-x86_64"
-      sku        = "9-Base"
+      publisher  = "AlmaLinux"
+      offer      = "AlmaLinux-x86_64"
+      sku        = "9-Gen2"
     },
     {
       name       = "WinServer"
@@ -34,7 +34,7 @@ computeGallery = {
       sku        = "2022-Datacenter-Azure-Edition"
     },
     {
-      name       = "WinFarm"
+      name       = "WinCluster"
       type       = "Windows"
       generation = "V2"
       publisher  = "MicrosoftWindowsDesktop"
@@ -87,14 +87,14 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "LnxFarmC"
+      name   = "LnxClusterC"
       source = {
         imageDefinition = {
           name = "Linux"
         }
       }
       build = {
-        machineType    = "Farm"
+        machineType    = "Cluster"
         machineSize    = "Standard_HX176rs" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "2.0.0"
@@ -115,16 +115,16 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "LnxFarmGN"
+      name   = "LnxClusterGN"
       source = {
         imageDefinition = {
           name = "Linux"
         }
       }
       build = {
-        machineType    = "Farm"
-        machineSize    = "Standard_NV72ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
+        machineType    = "Cluster"
+        machineSize    = "Standard_NC40ads_H100_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "NVIDIA"                   # NVIDIA or AMD
         imageVersion   = "2.1.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
@@ -143,17 +143,17 @@ imageBuilder = {
       }
     },
     {
-      enable = false
-      name   = "LnxFarmGA"
+      enable = true
+      name   = "LnxClusterGA"
       source = {
         imageDefinition = {
           name = "Linux"
         }
       }
       build = {
-        machineType    = "Farm"
-        machineSize    = "Standard_NV28adms_V710_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = "AMD"                       # NVIDIA or AMD
+        machineType    = "Cluster"
+        machineSize    = "Standard_ND96isr_MI300X_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "AMD"                        # NVIDIA or AMD
         imageVersion   = "2.2.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
@@ -182,7 +182,7 @@ imageBuilder = {
       build = {
         machineType    = "Workstation"
         machineSize    = "Standard_NV72ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
+        gpuProvider    = "NVIDIA.GRID"             # NVIDIA or AMD
         imageVersion   = "3.0.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
@@ -201,7 +201,7 @@ imageBuilder = {
       }
     },
     {
-      enable = false
+      enable = true
       name   = "LnxArtistGA"
       source = {
         imageDefinition = {
@@ -285,14 +285,14 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinFarmC"
+      name   = "WinClusterC"
       source = {
         imageDefinition = {
-          name = "WinFarm"
+          name = "WinCluster"
         }
       }
       build = {
-        machineType    = "Farm"
+        machineType    = "Cluster"
         machineSize    = "Standard_HX176rs" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "2.0.0"
@@ -313,16 +313,16 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinFarmGN"
+      name   = "WinClusterGN"
       source = {
         imageDefinition = {
-          name = "WinFarm"
+          name = "WinCluster"
         }
       }
       build = {
-        machineType    = "Farm"
-        machineSize    = "Standard_NV72ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                        # NVIDIA or AMD
+        machineType    = "Cluster"
+        machineSize    = "Standard_NC40ads_H100_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                         # NVIDIA or AMD
         imageVersion   = "2.1.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 360
@@ -341,17 +341,17 @@ imageBuilder = {
       }
     },
     {
-      enable = false
-      name   = "WinFarmGA"
+      enable = true
+      name   = "WinClusterGA"
       source = {
         imageDefinition = {
-          name = "WinFarm"
+          name = "WinCluster"
         }
       }
       build = {
-        machineType    = "Farm"
-        machineSize    = "Standard_NV28adms_V710_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = "AMD"                       # NVIDIA or AMD
+        machineType    = "Cluster"
+        machineSize    = "Standard_ND96isr_MI300X_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = "AMD"                        # NVIDIA or AMD
         imageVersion   = "2.2.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 360
@@ -380,7 +380,7 @@ imageBuilder = {
       build = {
         machineType    = "Workstation"
         machineSize    = "Standard_NV72ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = "NVIDIA"                  # NVIDIA or AMD
+        gpuProvider    = "NVIDIA.GRID"             # NVIDIA or AMD
         imageVersion   = "3.0.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 360
@@ -399,7 +399,7 @@ imageBuilder = {
       }
     },
     {
-      enable = false
+      enable = true
       name   = "WinArtistGA"
       source = {
         imageDefinition = {
@@ -441,7 +441,7 @@ imageCustomize = {
   script = { # Enables or disables image customization build scripts
     jobScheduler = {
       deadline = true
-      lsf      = false
+      slurm    = false
     }
     jobProcessor = {
       render = true
@@ -511,16 +511,16 @@ containerRegistry = {
 containerRegistryTasks = [
   {
     enable = true
-    name   = "LnxFarmC"
+    name   = "LnxClusterC"
     type   = "Linux"
     docker = {
       context = {
         hostUrl     = "https://github.com/Azure/ArtistAnywhere.git"
         accessToken = " "
       }
-      filePath    = "2.Image.Builder/Docker/LnxFarmC"
+      filePath    = "2.Image.Builder/Docker/LnxClusterC"
       imageNames = [
-        "lnx-farm-c"
+        "lnx-cluster-c"
       ]
       cache = {
         enable = false
@@ -529,16 +529,16 @@ containerRegistryTasks = [
   },
   {
     enable = true
-    name   = "WinFarmC"
+    name   = "WinClusterC"
     type   = "Windows"
     docker = {
       context = {
         hostUrl     = "https://github.com/Azure/ArtistAnywhere.git"
         accessToken = " "
       }
-      filePath = "2.Image.Builder/Docker/WinFarmC"
+      filePath = "2.Image.Builder/Docker/WinClusterC"
       imageNames = [
-        "win-farm-c"
+        "win-cluster-c"
       ]
       cache = {
         enable = false

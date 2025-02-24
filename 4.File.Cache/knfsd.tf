@@ -12,7 +12,7 @@ variable knfsdCache {
       })
       osDisk = object({
         storageType = string
-        cachingType = string
+        cachingMode = string
         sizeGB      = number
         ephemeral = object({
           enable    = bool
@@ -22,8 +22,9 @@ variable knfsdCache {
       dataDisk = object({
         enable      = bool
         storageType = string
-        cachingType = string
+        cachingMode = string
         sizeGB      = number
+        count       = number
       })
       adminLogin = object({
         userName     = string
@@ -114,7 +115,7 @@ resource azurerm_linux_virtual_machine cache {
   ]
   os_disk {
     storage_account_type = var.knfsdCache.machine.osDisk.storageType
-    caching              = var.knfsdCache.machine.osDisk.cachingType
+    caching              = var.knfsdCache.machine.osDisk.cachingMode
     disk_size_gb         = var.knfsdCache.machine.osDisk.sizeGB > 0 ? var.knfsdCache.machine.osDisk.sizeGB : null
     dynamic diff_disk_settings {
       for_each = var.knfsdCache.machine.osDisk.ephemeral.enable ? [1] : []
@@ -151,22 +152,22 @@ resource azurerm_linux_virtual_machine cache {
 }
 
 resource azurerm_managed_disk cache {
-  count                         = var.knfsdCache.enable && var.knfsdCache.machine.dataDisk.enable ? 1 : 0
-  name                          = "${var.knfsdCache.name}_DataDisk_1"
+  count                         = var.knfsdCache.enable && var.knfsdCache.machine.dataDisk.enable ? var.knfsdCache.machine.dataDisk.count : 0
+  name                          = "${var.knfsdCache.name}_DataDisk_${count.index + 1}"
   resource_group_name           = azurerm_resource_group.cache.name
   location                      = azurerm_resource_group.cache.location
   storage_account_type          = var.knfsdCache.machine.dataDisk.storageType
   disk_size_gb                  = var.knfsdCache.machine.dataDisk.sizeGB
-  public_network_access_enabled = false
   create_option                 = "Empty"
+  public_network_access_enabled = false
 }
 
 resource azurerm_virtual_machine_data_disk_attachment data {
-  count              = var.knfsdCache.enable && var.knfsdCache.machine.dataDisk.enable ? 1 : 0
+  count              = var.knfsdCache.enable && var.knfsdCache.machine.dataDisk.enable ? var.knfsdCache.machine.dataDisk.count : 0
   virtual_machine_id = azurerm_linux_virtual_machine.cache[0].id
   managed_disk_id    = azurerm_managed_disk.cache[0].id
-  caching            = var.knfsdCache.machine.dataDisk.cachingType
-  lun                = 0
+  caching            = var.knfsdCache.machine.dataDisk.cachingMode
+  lun                = count.index
 }
 
 resource azurerm_virtual_machine_extension cache {
@@ -180,7 +181,9 @@ resource azurerm_virtual_machine_extension cache {
   virtual_machine_id         = azurerm_linux_virtual_machine.cache[0].id
   protected_settings = jsonencode({
     script = base64encode(
-      templatefile(var.knfsdCache.machine.extension.custom.fileName, var.knfsdCache.machine.extension.custom.parameters)
+      templatefile(var.knfsdCache.machine.extension.custom.fileName, merge(var.knfsdCache.machine.extension.custom.parameters, {
+        dataDiskCount = var.knfsdCache.machine.dataDisk.count
+      }))
     )
   })
 }

@@ -25,7 +25,7 @@ variable computeFleets {
       osDisk = object({
         type        = string
         storageType = string
-        cachingType = string
+        cachingMode = string
         sizeGB      = number
         ephemeral = object({
           enable    = bool
@@ -134,8 +134,8 @@ resource azapi_resource fleet {
   }
   name      = each.value.name
   type      = "Microsoft.AzureFleet/fleets@2024-11-01"
-  parent_id = azurerm_resource_group.farm.id
-  location  = azurerm_resource_group.farm.location
+  parent_id = azurerm_resource_group.compute.id
+  location  = azurerm_resource_group.compute.location
   identity {
     type = "UserAssigned"
     identity_ids = [
@@ -167,7 +167,7 @@ resource azapi_resource fleet {
               managedDisk = {
                 storageAccountType = each.value.machine.osDisk.storageType
               }
-              caching    = each.value.machine.osDisk.cachingType
+              caching    = each.value.machine.osDisk.cachingMode
               diskSizeGB = each.value.machine.osDisk.sizeGB > 0 ? each.value.machine.osDisk.sizeGB : null
               # dynamic diff_disk_settings {
               #   for_each = each.value.machine.osDisk.ephemeral.enable ? [1] : []

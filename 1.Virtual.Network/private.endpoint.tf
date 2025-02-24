@@ -79,7 +79,7 @@ resource azurerm_private_endpoint event_grid {
   name                = "${lower(data.terraform_remote_state.global.outputs.message.eventGrid.namespace.name)}-${azurerm_private_dns_zone_virtual_network_link.event_grid.name}"
   resource_group_name = data.terraform_remote_state.global.outputs.message.resourceGroupName
   location            = data.terraform_remote_state.global.outputs.message.regionName
-  subnet_id           = "${local.virtualNetwork.id}/subnets/Farm"
+  subnet_id           = "${local.virtualNetwork.id}/subnets/Compute"
   private_service_connection {
     name                           = data.terraform_remote_state.global.outputs.message.eventGrid.namespace.name
     private_connection_resource_id = data.terraform_remote_state.global.outputs.message.eventGrid.namespace.id
@@ -103,7 +103,7 @@ resource azurerm_private_endpoint event_hub {
   name                = "${lower(data.azurerm_eventhub_namespace.studio.name)}-${azurerm_private_dns_zone_virtual_network_link.event_hub.name}"
   resource_group_name = data.azurerm_eventhub_namespace.studio.resource_group_name
   location            = data.azurerm_eventhub_namespace.studio.location
-  subnet_id           = "${local.virtualNetwork.id}/subnets/Farm"
+  subnet_id           = "${local.virtualNetwork.id}/subnets/Compute"
   private_service_connection {
     name                           = data.azurerm_eventhub_namespace.studio.name
     private_connection_resource_id = data.azurerm_eventhub_namespace.studio.id

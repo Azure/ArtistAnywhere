@@ -174,7 +174,7 @@ resource azapi_resource capacity_pool {
     for capacityPool in var.netAppFiles.capacityPools : capacityPool.name => capacityPool if var.netAppFiles.enable && capacityPool.enable
   }
   name      = each.value.name
-  type      = "Microsoft.NetApp/netAppAccounts/capacityPools@2024-07-01"
+  type      = "Microsoft.NetApp/netAppAccounts/capacityPools@2024-09-01"
   parent_id = azurerm_netapp_account.studio[0].id
   location  = azurerm_netapp_account.studio[0].location
   body = {
@@ -192,7 +192,7 @@ resource azapi_resource volume {
     for volume in local.netAppVolumes : "${volume.capacityPoolName}-${volume.name}" => volume
   }
   name      = each.value.name
-  type      = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes@2024-07-01"
+  type      = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes@2024-09-01"
   parent_id = azapi_resource.capacity_pool[each.value.capacityPoolName].id
   location  = azapi_resource.capacity_pool[each.value.capacityPoolName].location
   body = {

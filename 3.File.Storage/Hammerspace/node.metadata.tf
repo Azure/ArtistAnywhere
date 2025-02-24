@@ -1,6 +1,6 @@
-###################################################
-# Hammerspace (https://www.hammerspace.com/azure) #
-###################################################
+######################################################################################################
+# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) #
+######################################################################################################
 
 locals {
   hsHighAvailability = length(local.hsMetadataNodes) > 1 ? true : false
@@ -122,7 +122,7 @@ resource azurerm_linux_virtual_machine metadata {
   ])
   os_disk {
     storage_account_type = each.value.machine.osDisk.storageType
-    caching              = each.value.machine.osDisk.cachingType
+    caching              = each.value.machine.osDisk.cachingMode
     disk_size_gb         = each.value.machine.osDisk.sizeGB > 0 ? each.value.machine.osDisk.sizeGB : null
   }
   source_image_reference {
@@ -154,8 +154,8 @@ resource azurerm_managed_disk metadata {
   location                      = var.resourceGroup.location
   storage_account_type          = each.value.machine.dataDisk.storageType
   disk_size_gb                  = each.value.machine.dataDisk.sizeGB
-  public_network_access_enabled = false
   create_option                 = "Empty"
+  public_network_access_enabled = false
 }
 
 resource azurerm_virtual_machine_data_disk_attachment metadata {
@@ -164,7 +164,7 @@ resource azurerm_virtual_machine_data_disk_attachment metadata {
   }
   virtual_machine_id = "${data.azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/virtualMachines/${each.value.machine.name}"
   managed_disk_id    = "${data.azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/disks/${each.value.machine.name}"
-  caching            = each.value.machine.dataDisk.cachingType
+  caching            = each.value.machine.dataDisk.cachingMode
   lun                = 0
   depends_on = [
     azurerm_managed_disk.metadata,

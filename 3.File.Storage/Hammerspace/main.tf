@@ -1,6 +1,6 @@
-###################################################
-# Hammerspace (https://www.hammerspace.com/azure) #
-###################################################
+######################################################################################################
+# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) #
+######################################################################################################
 
 variable resourceGroup {
   type = object({
@@ -58,12 +58,12 @@ variable hammerspace {
         count      = number
         osDisk = object({
           storageType = string
-          cachingType = string
+          cachingMode = string
           sizeGB      = number
         })
         dataDisk = object({
           storageType = string
-          cachingType = string
+          cachingMode = string
           sizeGB      = number
         })
         adminLogin = object({
@@ -88,12 +88,12 @@ variable hammerspace {
         count      = number
         osDisk = object({
           storageType = string
-          cachingType = string
+          cachingMode = string
           sizeGB      = number
         })
         dataDisk = object({
           storageType = string
-          cachingType = string
+          cachingMode = string
           sizeGB      = number
           count       = number
           raid0 = object({

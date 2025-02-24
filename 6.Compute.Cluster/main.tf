@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.18.0"
+      version = "~>4.20.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -19,7 +19,7 @@ terraform {
     }
   }
   backend azurerm {
-    key              = "6.Compute.Farm"
+    key              = "6.Compute.Cluster"
     use_azuread_auth = true
   }
 }
@@ -131,7 +131,7 @@ data azurerm_virtual_network studio_extended {
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : reverse(data.terraform_remote_state.network.outputs.virtualNetworks)[0].resourceGroupName
 }
 
-resource azurerm_resource_group farm {
+resource azurerm_resource_group compute {
   name     = var.resourceGroupName
   location = module.global.resourceLocation.regionName
   tags = {

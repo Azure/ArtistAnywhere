@@ -16,7 +16,7 @@ virtualNetworks = [
     ]
     subnets = [
       {
-        name = "Farm"
+        name = "Compute"
         addressSpace = [
           "10.0.0.0/17"
         ]
@@ -229,7 +229,7 @@ virtualNetworks = [
     ]
     subnets = [
       {
-        name = "Farm"
+        name = "Compute"
         addressSpace = [
           "10.1.0.0/17"
         ]

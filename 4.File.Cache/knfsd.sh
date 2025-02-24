@@ -3,21 +3,18 @@
 dnf -y install jq nfs-utils cachefilesd
 
 function set_cache_disks {
-  devicePath=$1
-  deviceList=""
-  diskCount=$(lsblk | grep -c nvme)
-  for ((i=0; i<$diskCount; i++)); do
-    if [ "$deviceList" != "" ]; then
-      deviceList="$deviceList "
-    fi
-    deviceList="$deviceList/dev/nvme$${i}n1"
-  done
-  if (( $diskCount > 0 )); then
-    if (( $diskCount > 1 )); then
-      mdadm --create $devicePath --level=0 --raid-devices=$diskCount $deviceList
-    fi
-    mkfs.xfs $devicePath
+  cachePath=$1
+  diskPaths=$(lsblk -p -o NAME,TYPE | grep nvme)
+  if [ "$diskPaths" == "" ]; then
+    diskPaths=$(lsblk -p -o NAME,TYPE | grep disk)
+    diskPaths=$(echo ${diskPaths//disk/})
+    diskPaths=$(echo "$diskPaths" | awk -v x=${dataDiskCount} '{for(i=NF-x+1;i<=NF;i++) printf $i " "; print ""}')
   fi
+  ((diskCount=$(echo $diskPaths | grep -o " " | wc -l) + 1))
+  if (( $diskCount > 1 )); then
+    mdadm --create $cachePath --level=0 --raid-devices=$diskCount $diskPaths
+  fi
+  mkfs.xfs $cachePath
 }
 
 function get_mount_name {

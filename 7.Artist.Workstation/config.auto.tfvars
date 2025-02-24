@@ -24,8 +24,11 @@ virtualMachines = [
     osDisk = {
       type        = "Linux"
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadWrite"
       sizeGB      = 0
+      hibernation = {
+        enable = true
+      }
     }
     network = {
       subnetName = "Workstation"
@@ -78,8 +81,11 @@ virtualMachines = [
     osDisk = {
       type        = "Linux"
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadWrite"
       sizeGB      = 0
+      hibernation = {
+        enable = true
+      }
     }
     network = {
       subnetName = "Workstation"
@@ -132,8 +138,11 @@ virtualMachines = [
     osDisk = {
       type        = "Windows"
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadWrite"
       sizeGB      = 0
+      hibernation = {
+        enable = true
+      }
     }
     network = {
       subnetName = "Workstation"
@@ -186,8 +195,11 @@ virtualMachines = [
     osDisk = {
       type        = "Windows"
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadWrite"
       sizeGB      = 0
+      hibernation = {
+        enable = true
+      }
     }
     network = {
       subnetName = "Workstation"

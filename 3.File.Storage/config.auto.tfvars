@@ -87,7 +87,7 @@ activeDirectory = {
     }
     osDisk = {
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadWrite"
       sizeGB      = 0
     }
     adminLogin = {
@@ -119,7 +119,7 @@ activeDirectoryClient = {
     }
     osDisk = {
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadWrite"
       sizeGB      = 0
     }
     adminLogin = {

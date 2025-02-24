@@ -5,7 +5,7 @@
 computeFleets = [
   {
     enable = false
-    name   = "LnxFarmC"
+    name   = "LnxClusterC"
     machine = {
       namePrefix = ""
       sizes = [
@@ -33,10 +33,10 @@ computeFleets = [
       osDisk = {
         type        = "Linux"
         storageType = "Premium_LRS"
-        cachingType = "ReadWrite"
+        cachingMode = "ReadOnly"
         sizeGB      = 0
         ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = false
+          enable    = true
           placement = "ResourceDisk"
         }
       }
@@ -87,7 +87,7 @@ computeFleets = [
       }
     }
     network = {
-      subnetName = "Farm"
+      subnetName = "Compute"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -98,7 +98,7 @@ computeFleets = [
   },
   {
     enable = false
-    name   = "WinFarmC"
+    name   = "WinClusterC"
     machine = {
       namePrefix = ""
       sizes = [
@@ -115,7 +115,7 @@ computeFleets = [
       image = {
         versionId         = "2.0.0"
         galleryName       = "xstudio"
-        definitionName    = "WinFarm"
+        definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
         plan = {
           publisher = ""
@@ -126,10 +126,10 @@ computeFleets = [
       osDisk = {
         type        = "Windows"
         storageType = "Premium_LRS"
-        cachingType = "ReadWrite"
+        cachingMode = "ReadOnly"
         sizeGB      = 0
         ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-          enable    = false
+          enable    = true
           placement = "ResourceDisk"
         }
       }
@@ -180,7 +180,7 @@ computeFleets = [
       }
     }
     network = {
-      subnetName = "Farm"
+      subnetName = "Compute"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }

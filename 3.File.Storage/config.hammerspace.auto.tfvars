@@ -1,6 +1,6 @@
-###################################################
-# Hammerspace (https://www.hammerspace.com/azure) #
-###################################################
+######################################################################################################
+# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) #
+######################################################################################################
 
 hammerspace = {
   enable     = false
@@ -14,12 +14,12 @@ hammerspace = {
       count      = 1
       osDisk = {
         storageType = "Premium_LRS"
-        cachingType = "ReadWrite"
+        cachingMode = "ReadWrite"
         sizeGB      = 128
       }
       dataDisk = {
         storageType = "Premium_LRS"
-        cachingType = "None"
+        cachingMode = "None"
         sizeGB      = 1024
       }
       adminLogin = {
@@ -44,12 +44,12 @@ hammerspace = {
       count      = 2
       osDisk = {
         storageType = "Premium_LRS"
-        cachingType = "ReadWrite"
+        cachingMode = "ReadWrite"
         sizeGB      = 128
       }
       dataDisk = {
         storageType = "Premium_LRS"
-        cachingType = "None"
+        cachingMode = "None"
         sizeGB      = 1024
         count       = 4
         raid0 = {

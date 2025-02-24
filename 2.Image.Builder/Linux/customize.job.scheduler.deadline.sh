@@ -84,7 +84,7 @@ fileType="deadline-client"
 fileName="DeadlineClient-$version-linux-x64-installer.run"
 fileArgs="--mode unattended --prefix $deadlinePath"
 [ $machineType == JobScheduler ] && workerService="false" || workerService="true"
-[ $machineType == Farm ] && workerStartup="true" || workerStartup="false"
+[ $machineType == Compute ] && workerStartup="true" || workerStartup="false"
 fileArgs="$fileArgs --launcherdaemon $workerService --slavestartup $workerStartup"
 run_process "$filePath/$fileName $fileArgs" $binDirectory/$fileType
 mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log

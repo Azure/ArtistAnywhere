@@ -34,7 +34,7 @@ variable virtualMachineScaleSets {
     osDisk = object({
       type        = string
       storageType = string
-      cachingType = string
+      cachingMode = string
       sizeGB      = number
       ephemeral = object({
         enable    = bool
@@ -129,13 +129,13 @@ locals {
   ]
 }
 
-resource azurerm_linux_virtual_machine_scale_set farm {
+resource azurerm_linux_virtual_machine_scale_set compute {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "linux" && !virtualMachineScaleSet.flexMode.enable
   }
   name                            = each.value.name
   computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
-  resource_group_name             = azurerm_resource_group.farm.name
+  resource_group_name             = azurerm_resource_group.compute.name
   location                        = each.value.resourceLocation.regionName
   edge_zone                       = each.value.resourceLocation.extendedZoneName
   sku                             = each.value.machine.size
@@ -168,7 +168,7 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   }
   os_disk {
     storage_account_type = each.value.osDisk.storageType
-    caching              = each.value.osDisk.cachingType
+    caching              = each.value.osDisk.cachingMode
     disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
     dynamic diff_disk_settings {
       for_each = each.value.osDisk.ephemeral.enable ? [1] : []
@@ -262,21 +262,21 @@ resource azurerm_linux_virtual_machine_scale_set farm {
   }
 }
 
-resource azurerm_monitor_data_collection_rule_association farm_linux {
+resource azurerm_monitor_data_collection_rule_association compute_linux {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "linux" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
   }
-  target_resource_id          = azurerm_linux_virtual_machine_scale_set.farm[each.value.name].id
+  target_resource_id          = azurerm_linux_virtual_machine_scale_set.compute[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }
 
-resource azurerm_windows_virtual_machine_scale_set farm {
+resource azurerm_windows_virtual_machine_scale_set compute {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "windows" && !virtualMachineScaleSet.flexMode.enable
   }
   name                   = each.value.name
   computer_name_prefix   = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
-  resource_group_name    = azurerm_resource_group.farm.name
+  resource_group_name    = azurerm_resource_group.compute.name
   location               = each.value.resourceLocation.regionName
   edge_zone              = each.value.resourceLocation.extendedZoneName
   sku                    = each.value.machine.size
@@ -308,7 +308,7 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   }
   os_disk {
     storage_account_type = each.value.osDisk.storageType
-    caching              = each.value.osDisk.cachingType
+    caching              = each.value.osDisk.cachingMode
     disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
     dynamic diff_disk_settings {
       for_each = each.value.osDisk.ephemeral.enable ? [1] : []
@@ -388,20 +388,20 @@ resource azurerm_windows_virtual_machine_scale_set farm {
   }
 }
 
-resource azurerm_monitor_data_collection_rule_association farm_windows {
+resource azurerm_monitor_data_collection_rule_association compute_windows {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "windows" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
   }
-  target_resource_id          = azurerm_windows_virtual_machine_scale_set.farm[each.value.name].id
+  target_resource_id          = azurerm_windows_virtual_machine_scale_set.compute[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }
 
-resource azurerm_orchestrated_virtual_machine_scale_set farm {
+resource azurerm_orchestrated_virtual_machine_scale_set compute {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable
   }
   name                        = each.value.name
-  resource_group_name         = azurerm_resource_group.farm.name
+  resource_group_name         = azurerm_resource_group.compute.name
   location                    = each.value.resourceLocation.regionName
   # edge_zone                   = each.value.resourceLocation.extendedZoneName
   sku_name                    = each.value.machine.size
@@ -430,7 +430,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
   }
   os_disk {
     storage_account_type = each.value.osDisk.storageType
-    caching              = each.value.osDisk.cachingType
+    caching              = each.value.osDisk.cachingMode
     disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
     dynamic diff_disk_settings {
       for_each = each.value.osDisk.ephemeral.enable ? [1] : []
@@ -539,10 +539,10 @@ resource azurerm_orchestrated_virtual_machine_scale_set farm {
   }
 }
 
-resource azurerm_monitor_data_collection_rule_association farm {
+resource azurerm_monitor_data_collection_rule_association compute {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
   }
-  target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.farm[each.value.name].id
+  target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.compute[each.value.name].id
   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 }

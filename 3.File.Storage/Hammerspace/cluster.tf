@@ -1,6 +1,6 @@
-###################################################
-# Hammerspace (https://www.hammerspace.com/azure) #
-###################################################
+######################################################################################################
+# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) #
+######################################################################################################
 
 resource azurerm_virtual_machine_extension node {
   for_each = {

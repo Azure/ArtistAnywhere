@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Farm" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.Compute" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
 ######################################################################################################
 # Virtual Machine Scale Sets (https://learn.microsoft.com/azure/virtual-machine-scale-sets/overview) #
@@ -7,11 +7,11 @@ resourceGroupName = "ArtistAnywhere.Farm" # Alphanumeric, underscores, hyphens, 
 virtualMachineScaleSets = [
   {
     enable = false
-    name   = "LnxFarmC"
+    name   = "LnxClusterC"
     machine = {
       namePrefix = ""
       size       = "Standard_HX176rs"
-      count      = 0
+      count      = 3
       image = {
         versionId         = "2.0.0"
         galleryName       = "xstudio"
@@ -25,7 +25,7 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Farm"
+      subnetName = "Compute"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -36,15 +36,15 @@ virtualMachineScaleSets = [
     osDisk = {
       type        = "Linux"
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-        enable    = false
+        enable    = true
         placement = "ResourceDisk"
       }
     }
     spot = {
-      enable         = false    # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
+      enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
       tryRestore = {            # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
         enable  = false
@@ -95,11 +95,11 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "LnxFarmGN"
+    name   = "LnxClusterGN"
     machine = {
       namePrefix = ""
-      size       = "Standard_NV72ads_A10_v5"
-      count      = 0
+      size       = "Standard_NC80ads_H100_v5"
+      count      = 3
       image = {
         versionId         = "2.1.0"
         galleryName       = "xstudio"
@@ -113,7 +113,7 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Farm"
+      subnetName = "Compute"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -124,10 +124,10 @@ virtualMachineScaleSets = [
     osDisk = {
       type        = "Linux"
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-        enable    = false
+        enable    = true
         placement = "ResourceDisk"
       }
     }
@@ -183,11 +183,11 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "LnxFarmGA"
+    name   = "LnxClusterGA"
     machine = {
       namePrefix = ""
       size       = "Standard_NV28adms_V710_v5"
-      count      = 0
+      count      = 3
       image = {
         versionId         = "2.2.0"
         galleryName       = "xstudio"
@@ -201,7 +201,7 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Farm"
+      subnetName = "Compute"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -212,10 +212,10 @@ virtualMachineScaleSets = [
     osDisk = {
       type        = "Linux"
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-        enable    = false
+        enable    = true
         placement = "ResourceDisk"
       }
     }
@@ -271,15 +271,15 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "WinFarmC"
+    name   = "WinClusterC"
     machine = {
       namePrefix = ""
       size       = "Standard_HX176rs"
-      count      = 0
+      count      = 3
       image = {
         versionId         = "2.0.0"
         galleryName       = "xstudio"
-        definitionName    = "WinFarm"
+        definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
         plan = {
           publisher = ""
@@ -289,7 +289,7 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Farm"
+      subnetName = "Compute"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -300,15 +300,15 @@ virtualMachineScaleSets = [
     osDisk = {
       type        = "Windows"
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-        enable    = false
+        enable    = true
         placement = "ResourceDisk"
       }
     }
     spot = {
-      enable         = false    # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
+      enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
       evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
       tryRestore = {            # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
         enable  = false
@@ -359,15 +359,15 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "WinFarmGN"
+    name   = "WinClusterGN"
     machine = {
       namePrefix = ""
-      size       = "Standard_NV72ads_A10_v5"
-      count      = 0
+      size       = "Standard_NC80ads_H100_v5"
+      count      = 3
       image = {
         versionId         = "2.1.0"
         galleryName       = "xstudio"
-        definitionName    = "WinFarm"
+        definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
         plan = {
           publisher = ""
@@ -377,7 +377,7 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Farm"
+      subnetName = "Compute"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -388,10 +388,10 @@ virtualMachineScaleSets = [
     osDisk = {
       type        = "Windows"
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-        enable    = false
+        enable    = true
         placement = "ResourceDisk"
       }
     }
@@ -447,15 +447,15 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "WinFarmGA"
+    name   = "WinClusterGA"
     machine = {
       namePrefix = ""
       size       = "Standard_NV28adms_V710_v5"
-      count      = 0
+      count      = 3
       image = {
         versionId         = "2.1.0"
         galleryName       = "xstudio"
-        definitionName    = "WinFarm"
+        definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
         plan = {
           publisher = ""
@@ -465,7 +465,7 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Farm"
+      subnetName = "Compute"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -476,10 +476,10 @@ virtualMachineScaleSets = [
     osDisk = {
       type        = "Windows"
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
-        enable    = false
+        enable    = true
         placement = "ResourceDisk"
       }
     }

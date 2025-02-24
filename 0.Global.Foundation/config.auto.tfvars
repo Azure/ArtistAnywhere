@@ -93,6 +93,6 @@ monitor = {
 
 policy = {
   denyPasswordAuthLinux = {
-    enable = false
+    enable = true
   }
 }

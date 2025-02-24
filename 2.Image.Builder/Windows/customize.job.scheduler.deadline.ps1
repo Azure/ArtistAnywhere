@@ -38,7 +38,7 @@ $fileName = "DeadlineClient-$version-windows-installer.exe"
 $fileArgs = "--mode unattended --prefix $deadlinePath"
 $workerService = "false"
 $workerStartup = "false"
-if ($machineType -eq "Farm") {
+if ($machineType -eq "Cluster") {
   $workerService = "true"
   $workerStartup = "true"
   $securePassword = ConvertTo-SecureString $servicePassword -AsPlainText -Force

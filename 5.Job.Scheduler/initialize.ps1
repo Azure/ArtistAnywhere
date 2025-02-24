@@ -8,7 +8,7 @@ Copy-Item -Path "C:\AzureData\CustomData.bin" -Destination $scriptFile
 $taskName     = "AAA Auto Scaler"
 $taskStart    = Get-Date
 $taskInterval = New-TimeSpan -Seconds ${autoScale.detectionIntervalSeconds}
-$taskAction   = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-ExecutionPolicy Unrestricted -File $scriptFile -resourceGroupName ${autoScale.resourceGroupName} -jobSchedulerName ${autoScale.jobSchedulerName} -computeFarmName ${autoScale.computeFarmName} -computeFarmNodeCountMax ${autoScale.computeFarmNodeCountMax} -jobWaitThresholdSeconds ${autoScale.jobWaitThresholdSeconds} -workerIdleDeleteSeconds ${autoScale.workerIdleDeleteSeconds}"
+$taskAction   = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-ExecutionPolicy Unrestricted -File $scriptFile -resourceGroupName ${autoScale.resourceGroupName} -jobSchedulerName ${autoScale.jobSchedulerName} -computeClusterName ${autoScale.computeClusterName} -computeClusterNodeLimit ${autoScale.computeClusterNodeLimit} -jobWaitThresholdSeconds ${autoScale.jobWaitThresholdSeconds} -workerIdleDeleteSeconds ${autoScale.workerIdleDeleteSeconds}"
 $taskTrigger  = New-ScheduledTaskTrigger -RepetitionInterval $taskInterval -At $taskStart -Once
 if ("${autoScale.enable}" -ne $false) {
   $taskSettings = New-ScheduledTaskSettingsSet

@@ -19,7 +19,7 @@ variable activeDirectoryClient {
       })
       osDisk = object({
         storageType = string
-        cachingType = string
+        cachingMode = string
         sizeGB      = number
       })
       adminLogin = object({
@@ -83,7 +83,7 @@ resource azurerm_network_interface active_directory_client {
   ]
   os_disk {
     storage_account_type = var.activeDirectoryClient.machine.osDisk.storageType
-    caching              = var.activeDirectoryClient.machine.osDisk.cachingType
+    caching              = var.activeDirectoryClient.machine.osDisk.cachingMode
     disk_size_gb         = var.activeDirectoryClient.machine.osDisk.sizeGB > 0 ? var.activeDirectoryClient.machine.osDisk.sizeGB : null
   }
   source_image_reference {

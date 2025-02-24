@@ -22,8 +22,11 @@ variable virtualMachines {
     osDisk = object({
       type        = string
       storageType = string
-      cachingType = string
+      cachingMode = string
       sizeGB      = number
+      hibernation = object({
+        enable = bool
+      })
     })
     network = object({
       subnetName = string
@@ -132,8 +135,11 @@ resource azurerm_linux_virtual_machine workstation {
   ]
   os_disk {
     storage_account_type = each.value.osDisk.storageType
-    caching              = each.value.osDisk.cachingType
+    caching              = each.value.osDisk.cachingMode
     disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
+  }
+  additional_capabilities {
+    hibernation_enabled = each.value.hibernation.enable
   }
   dynamic plan {
     for_each = each.value.image.plan.publisher != "" ? [1] : []
@@ -233,8 +239,11 @@ resource azurerm_windows_virtual_machine workstation {
   ]
   os_disk {
     storage_account_type = each.value.osDisk.storageType
-    caching              = each.value.osDisk.cachingType
+    caching              = each.value.osDisk.cachingMode
     disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
+  }
+  additional_capabilities {
+    hibernation_enabled = each.value.hibernation.enable
   }
   depends_on = [
     azurerm_network_interface.workstation

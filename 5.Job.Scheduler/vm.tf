@@ -21,7 +21,7 @@ variable virtualMachines {
     osDisk = object({
       type        = string
       storageType = string
-      cachingType = string
+      cachingMode = string
       sizeGB      = number
     })
     network = object({
@@ -43,8 +43,8 @@ variable virtualMachines {
             enable = bool
             resourceGroupName        = string
             jobSchedulerName         = string
-            computeFarmName          = string
-            computeFarmNodeCountMax  = number
+            computeClusterName       = string
+            computeClusterNodeLimit  = number
             workerIdleDeleteSeconds  = number
             jobWaitThresholdSeconds  = number
             detectionIntervalSeconds = number
@@ -134,7 +134,7 @@ resource azurerm_linux_virtual_machine job_scheduler {
   ]
   os_disk {
     storage_account_type = each.value.osDisk.storageType
-    caching              = each.value.osDisk.cachingType
+    caching              = each.value.osDisk.cachingMode
     disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
   }
   dynamic plan {
@@ -234,7 +234,7 @@ resource azurerm_windows_virtual_machine job_scheduler {
   ]
   os_disk {
     storage_account_type = each.value.osDisk.storageType
-    caching              = each.value.osDisk.cachingType
+    caching              = each.value.osDisk.cachingMode
     disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
   }
   depends_on = [

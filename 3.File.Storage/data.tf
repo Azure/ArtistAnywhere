@@ -18,7 +18,7 @@ variable dataLoad {
       })
       osDisk = object({
         storageType = string
-        cachingType = string
+        cachingMode = string
         sizeGB      = number
       })
       adminLogin = object({
@@ -102,7 +102,7 @@ resource azurerm_network_interface storage_data_load {
   ]
   os_disk {
     storage_account_type = var.dataLoad.machine.osDisk.storageType
-    caching              = var.dataLoad.machine.osDisk.cachingType
+    caching              = var.dataLoad.machine.osDisk.cachingMode
     disk_size_gb         = var.dataLoad.machine.osDisk.sizeGB > 0 ? var.dataLoad.machine.osDisk.sizeGB : null
   }
   source_image_reference {

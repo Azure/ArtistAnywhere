@@ -26,13 +26,13 @@ if [ $jobSchedulerName == Deadline ]; then
     fi
   done
   if [ $queuedTasks -gt 0 ]; then # Scale Up
-    computeFarmNodeCount=$(az vmss show --resource-group $resourceGroupName --name $computeFarmName --query "sku.capacity")
-    if [[ $computeFarmNodeCountMax > 0 && $(($computeFarmNodeCount + $queuedTasks)) > $computeFarmNodeCountMax ]]; then
-      computeFarmNodeCount=$computeFarmNodeCountMax
+    computeClusterNodeCount=$(az vmss show --resource-group $resourceGroupName --name $computeClusterName --query "sku.capacity")
+    if [[ $computeClusterNodeLimit > 0 && $(($computeClusterNodeCount + $queuedTasks)) > $computeClusterNodeLimit ]]; then
+      computeClusterNodeCount=$computeClusterNodeLimit
     else
-      computeFarmNodeCount=$(($farmNodeCount + $queuedTasks))
+      computeClusterNodeCount=$(($computeClusterNodeCount + $queuedTasks))
     fi
-    az vmss scale --resource-group $resourceGroupName --name $computeFarmName --new-capacity $computeFarmNodeCount
+    az vmss scale --resource-group $resourceGroupName --name $computeClusterName --new-capacity $computeClusterNodeCount
   else # Scale Down
     workerNames=$(deadlinecommand -GetSlaveNames)
     for workerName in $(echo $workerNames); do
@@ -50,12 +50,12 @@ if [ $jobSchedulerName == Deadline ]; then
           workerIdleSeconds=$(deadlinecommand -GetSlaveInfo $workerName UpTimeSeconds)
         fi
         if [ $workerIdleSeconds -gt $workerIdleDeleteSeconds ]; then
-          instanceId=$(az vmss list-instances --resource-group $resourceGroupName --name $computeFarmName --query "[?osProfile.computerName=='$workerName'].instanceId" --output tsv)
-          az vmss delete-instances --resource-group $resourceGroupName --name $computeFarmName --instance-ids $instanceId
+          instanceId=$(az vmss list-instances --resource-group $resourceGroupName --name $computeClusterName --query "[?osProfile.computerName=='$workerName'].instanceId" --output tsv)
+          az vmss delete-instances --resource-group $resourceGroupName --name $computeClusterName --instance-ids $instanceId
         fi
       fi
     done
   fi
-elif [ $jobSchedulerName == LSF ]; then
+elif [ $jobSchedulerName == Slurm ]; then
   :
 fi

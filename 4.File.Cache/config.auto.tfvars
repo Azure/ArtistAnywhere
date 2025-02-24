@@ -4,7 +4,7 @@ knfsdCache = {
   enable = false
   name   = "xcache"
   machine = {
-    size  = "Standard_L80as_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size  = "Standard_L80s_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       publisher = ""
       product   = ""
@@ -13,7 +13,7 @@ knfsdCache = {
     }
     osDisk = {
       storageType = "Premium_LRS"
-      cachingType = "ReadOnly"
+      cachingMode = "ReadOnly"
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
         enable    = true
@@ -23,8 +23,9 @@ knfsdCache = {
     dataDisk = {
       enable      = false
       storageType = "UltraSSD_LRS"
-      cachingType = "None"
+      cachingMode = "None"
       sizeGB      = 65536
+      count       = 3
     }
     adminLogin = {
       userName     = ""
@@ -69,9 +70,9 @@ knfsdCache = {
   }
 }
 
-###################################################
-# Hammerspace (https://www.hammerspace.com/azure) #
-###################################################
+######################################################################################################
+# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) #
+######################################################################################################
 
 hammerspace = {
   enable     = false
@@ -85,12 +86,12 @@ hammerspace = {
       count      = 1
       osDisk = {
         storageType = "Premium_LRS"
-        cachingType = "ReadWrite"
+        cachingMode = "ReadWrite"
         sizeGB      = 128
       }
       dataDisk = {
         storageType = "Premium_LRS"
-        cachingType = "None"
+        cachingMode = "None"
         sizeGB      = 1024
       }
       adminLogin = {
@@ -115,12 +116,12 @@ hammerspace = {
       count      = 2
       osDisk = {
         storageType = "Premium_LRS"
-        cachingType = "ReadWrite"
+        cachingMode = "ReadWrite"
         sizeGB      = 128
       }
       dataDisk = {
         storageType = "Premium_LRS"
-        cachingType = "None"
+        cachingMode = "None"
         sizeGB      = 1024
         count       = 4
         raid0 = {

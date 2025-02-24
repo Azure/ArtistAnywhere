@@ -23,18 +23,17 @@ virtualMachines = [
     osDisk = {
       type        = "Linux"
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadWrite"
       sizeGB      = 0
     }
     network = {
-      subnetName = "Farm"
+      subnetName = "Compute"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
       locationExtended = {
         enable = false
       }
-      staticIpAddress = ""
     }
     extension = {
       custom = {
@@ -43,11 +42,11 @@ virtualMachines = [
         fileName = "initialize.sh"
         parameters = {
           autoScale = {
-            enable                   = true
-            resourceGroupName        = "ArtistAnywhere.Farm"
+            enable                   = false
+            resourceGroupName        = "ArtistAnywhere.Compute"
             jobSchedulerName         = "Deadline"
-            computeFarmName          = "LnxFarmC"
-            computeFarmNodeCountMax  = 100
+            computeClusterName       = "LnxClusterC"
+            computeClusterNodeLimit  = 100
             workerIdleDeleteSeconds  = 300
             jobWaitThresholdSeconds  = 60
             detectionIntervalSeconds = 60
@@ -86,18 +85,17 @@ virtualMachines = [
     osDisk = {
       type        = "Windows"
       storageType = "Premium_LRS"
-      cachingType = "ReadWrite"
+      cachingMode = "ReadWrite"
       sizeGB      = 0
     }
     network = {
-      subnetName = "Farm"
+      subnetName = "Compute"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
       locationExtended = {
         enable = false
       }
-      staticIpAddress = "10.0.127.0"
     }
     extension = {
       custom = {
@@ -106,11 +104,11 @@ virtualMachines = [
         fileName = "initialize.ps1"
         parameters = {
           autoScale = {
-            enable                   = true
-            resourceGroupName        = "ArtistAnywhere.Farm"
+            enable                   = false
+            resourceGroupName        = "ArtistAnywhere.Compute"
             jobSchedulerName         = "Deadline"
-            computeFarmName          = "WinFarmC"
-            computeFarmNodeCountMax  = 100
+            computeClusterName       = "WinClusterC"
+            computeClusterNodeLimit  = 100
             workerIdleDeleteSeconds  = 300
             jobWaitThresholdSeconds  = 60
             detectionIntervalSeconds = 60
