@@ -8,8 +8,8 @@ echo "Customize (Start): Image Build Platform"
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
 dnf -y install epel-release python3-devel gcc-c++ perl lsof cmake bzip2 git
 export AZNFS_NONINTERACTIVE_INSTALL=1
-version=$(echo $buildConfig | jq -r .version.az_blob_nfs_mount)
-curl -L https://github.com/Azure/AZNFS-mount/releases/download/$version/aznfs_install.sh | bash
+export AZNFS_FORCE_PACKAGE_MANAGER=dnf
+curl -L https://github.com/Azure/AZNFS-mount/releases/latest/download/aznfs_install.sh | /bin/bash
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): Image Build Platform (Workstation)"
   dnf -y group install workstation
@@ -27,7 +27,7 @@ echo "baseurl=https://packages.microsoft.com/yumrepos/amlfs-el9" >> $repoPath
 echo "enabled=1" >> $repoPath
 echo "gpgcheck=1" >> $repoPath
 echo "gpgkey=https://packages.microsoft.com/keys/microsoft.asc" >> $repoPath
-dnf -y install amlfs-lustre-client-2.15.5_41_gc010524-$(uname -r | sed -e "s/\.$(uname -p)$//" | sed -re 's/[-_]/\./g')-1
+dnf -y install amlfs-lustre-client-2.15.6_39_g3e00a10-$(uname -r | sed -e "s/\.$(uname -p)$//" | sed -re 's/[-_]/\./g')-1
 echo "Customize (End): Azure Managed Lustre (AMLFS) Client"
 
 if [ $machineType == JobScheduler ]; then
