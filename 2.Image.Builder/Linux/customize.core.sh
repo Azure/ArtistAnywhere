@@ -42,7 +42,7 @@ if [ $machineType == Workstation ]; then
   echo "Customize (Start): HP Anyware"
   version=$(echo $buildConfig | jq -r .version.hp_anyware_agent)
   [ "$gpuProvider" == "" ] && fileType="pcoip-agent-standard" || fileType="pcoip-agent-graphics"
-  fileName="pcoip-agent-offline-rocky9.4_$version-1.el9.x86_64.tar.gz"
+  fileName="pcoip-agent-offline-rhel9.5_$version-1.el9.x86_64.tar.gz"
   fileLink="$binHostUrl/Teradici/$version/$fileName"
   download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   mkdir -p $fileType
