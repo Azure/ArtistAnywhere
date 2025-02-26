@@ -48,7 +48,7 @@ if [ "$gpuProvider" == NVIDIA.GRID ]; then
   echo "Customize (End): NVIDIA OptiX"
 fi
 
-if [ "$gpuProvider" == *NVIDIA* ]; then
+if [[ "$gpuProvider" == NVIDIA* ]]; then
   echo "Customize (Start): NVIDIA GPU (CUDA)"
   dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo
   dnf -y install cuda
