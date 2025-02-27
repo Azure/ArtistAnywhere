@@ -7,9 +7,9 @@ echo "Customize (Start): Core (GPU)"
 if [ "$gpuProvider" != "" ]; then
   echo "Customize (Start): Linux Kernel Devel"
   dnf -y install elfutils-libelf-devel openssl-devel bison flex
-  fileName="kernel-devel-5.14.0-427.28.1.el9_4.x86_64.rpm"
-  fileLink="https://vault.almalinux.org/9.4/AppStream/x86_64/os/Packages/$fileName"
-  download_file $fileName $fileLink
+  fileName="kernel-devel-5.14.0-503.14.1.el9_5.x86_64.rpm"
+  fileLink="$binHostUrl/Linux/$fileName"
+  download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   rpm -i $fileName
   echo "Customize (End): Linux Kernel Devel"
 fi

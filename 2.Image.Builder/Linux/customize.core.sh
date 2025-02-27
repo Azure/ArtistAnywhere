@@ -5,10 +5,8 @@ source /tmp/functions.sh
 echo "Customize (Start): Core"
 
 echo "Customize (Start): Image Build Platform"
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-dnf -y install epel-release python3-devel gcc-c++ perl lsof cmake bzip2 git
-export AZNFS_NONINTERACTIVE_INSTALL=1
-export AZNFS_FORCE_PACKAGE_MANAGER=dnf
+dnf -y install epel-release python3-devel gcc-c++ perl lsof cmake bzip2 git jq nfs-utils
+export AZNFS_NONINTERACTIVE_INSTALL=1 AZNFS_FORCE_PACKAGE_MANAGER=dnf
 curl -L https://github.com/Azure/AZNFS-mount/releases/latest/download/aznfs_install.sh | /bin/bash
 if [ $machineType == Workstation ]; then
   echo "Customize (Start): Image Build Platform (Workstation)"
