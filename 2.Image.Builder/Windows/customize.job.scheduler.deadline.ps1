@@ -21,7 +21,7 @@ Expand-Archive -Path $fileName
 Write-Host "Customize (End): Deadline Download"
 
 Set-Location -Path Deadline*
-if ($machineType -eq "JobScheduler") {
+if ($machineType -eq "Scheduler") {
   Write-Host "Customize (Start): Deadline Server"
   $fileType = "deadline-repository"
   $fileName = "DeadlineRepository-$version-windows-installer.exe"
@@ -53,7 +53,7 @@ Write-Host "Customize (End): Deadline Client"
 
 Write-Host "Customize (Start): Deadline Repository"
 $taskName = "AAA Deadline Repository"
-if ($machineType -eq "JobScheduler") {
+if ($machineType -eq "Scheduler") {
   $taskAction = New-ScheduledTaskAction -Execute "$binPathJobScheduler\deadlinecommand.exe" -Argument "-ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate"
 } else {
   $taskAction = New-ScheduledTaskAction -Execute "$binPathJobScheduler\deadlinecommand.exe" -Argument "-ChangeRepository Direct S:\ S:\$deadlineCertificate"

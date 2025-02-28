@@ -4,7 +4,7 @@ param (
 
 . C:\AzureData\functions.ps1
 
-Write-Host "Customize (Start): Job Processor (Render)"
+Write-Host "Customize (Start): Job Processor"
 
 if ($jobProcessors -contains "PBRT") {
   Write-Host "Customize (Start): PBRT"
@@ -36,4 +36,4 @@ if ($binPaths -ne "") {
   [Environment]::SetEnvironmentVariable("PATH", "$Env:PATH$binPaths", "Machine")
 }
 
-Write-Host "Customize (End): Job Processor (Render)"
+Write-Host "Customize (End): Job Processor"

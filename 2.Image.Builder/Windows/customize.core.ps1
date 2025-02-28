@@ -58,7 +58,7 @@ Write-Host "Customize (End): Visual Studio Build Tools"
 
 Write-Host "Customize (End): Image Build Platform"
 
-if ($machineType -eq "JobScheduler") {
+if ($machineType -eq "Scheduler") {
   Write-Host "Customize (Start): Azure CLI (x64)"
   $fileType = "azure-cli"
   $fileName = "$fileType.msi"
@@ -97,7 +97,7 @@ if ($machineType -eq "Workstation") {
   Write-Host "Customize (End): HP Anyware"
 }
 
-if ($machineType -ne "JobScheduler") {
+if ($machineType -ne "Scheduler") {
   Write-Host "Customize (Start): Cinebench"
   $version = "2024"
   $fileName = "Cinebench${version}_win_x86_64.zip"

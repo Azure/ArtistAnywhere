@@ -5,7 +5,8 @@ source /tmp/functions.sh
 echo "Customize (Start): Core"
 
 echo "Customize (Start): Image Build Platform"
-dnf -y install epel-release python3-devel gcc-c++ perl lsof cmake bzip2 git jq nfs-utils
+
+dnf -y install epel-release python3-devel gcc-c++ git cmake bzip2 # perl lsof
 export AZNFS_NONINTERACTIVE_INSTALL=1 AZNFS_FORCE_PACKAGE_MANAGER=dnf
 curl -L https://github.com/Azure/AZNFS-mount/releases/latest/download/aznfs_install.sh | /bin/bash
 if [ $machineType == Workstation ]; then
@@ -28,7 +29,7 @@ echo "gpgkey=https://packages.microsoft.com/keys/microsoft.asc" >> $repoPath
 dnf -y install amlfs-lustre-client-2.15.6_39_g3e00a10-$(uname -r | sed -e "s/\.$(uname -p)$//" | sed -re 's/[-_]/\./g')-1
 echo "Customize (End): Azure Managed Lustre (AMLFS) Client"
 
-if [ $machineType == JobScheduler ]; then
+if [ $machineType == Scheduler ]; then
   echo "Customize (Start): Azure CLI"
   rpm --import https://packages.microsoft.com/keys/microsoft.asc
   dnf -y install https://packages.microsoft.com/config/rhel/9/packages-microsoft-prod.rpm

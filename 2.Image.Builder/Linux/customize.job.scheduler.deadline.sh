@@ -20,7 +20,7 @@ mkdir -p $filePath
 tar -xzf $fileName -C $filePath
 echo "Customize (End): Deadline Download"
 
-if [ $machineType == JobScheduler ]; then
+if [ $machineType == Scheduler ]; then
   echo "Customize (Start): Mongo DB Service"
   if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
     echo never > /sys/kernel/mm/transparent_hugepage/enabled
@@ -83,7 +83,7 @@ echo "Customize (Start): Deadline Client"
 fileType="deadline-client"
 fileName="DeadlineClient-$version-linux-x64-installer.run"
 fileArgs="--mode unattended --prefix $deadlinePath"
-[ $machineType == JobScheduler ] && workerService="false" || workerService="true"
+[ $machineType == Scheduler ] && workerService="false" || workerService="true"
 [ $machineType == Compute ] && workerStartup="true" || workerStartup="false"
 fileArgs="$fileArgs --launcherdaemon $workerService --slavestartup $workerStartup"
 run_process "$filePath/$fileName $fileArgs" $binDirectory/$fileType
@@ -91,7 +91,7 @@ mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
 echo "Customize (End): Deadline Client"
 
 echo "Customize (Start): Deadline Repository"
-[ $machineType == JobScheduler ] && repositoryPath=$deadlinePath || repositoryPath="/mnt/deadline"
+[ $machineType == Scheduler ] && repositoryPath=$deadlinePath || repositoryPath="/mnt/deadline"
 echo "$binPathJobScheduler/deadlinecommand -StoreDatabaseCredentials $serviceUsername $servicePassword" >> $aaaProfile
 echo "$binPathJobScheduler/deadlinecommand -ChangeRepository Direct $repositoryPath" >> $aaaProfile
 echo "Customize (End): Deadline Repository"
