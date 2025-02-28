@@ -5,7 +5,6 @@ source /tmp/functions.sh
 echo "Customize (Start): Core"
 
 echo "Customize (Start): Image Build Platform"
-
 dnf -y install epel-release python3-devel gcc-c++ git cmake bzip2 # perl lsof
 export AZNFS_NONINTERACTIVE_INSTALL=1 AZNFS_FORCE_PACKAGE_MANAGER=dnf
 curl -L https://github.com/Azure/AZNFS-mount/releases/latest/download/aznfs_install.sh | /bin/bash
@@ -15,19 +14,6 @@ if [ $machineType == Workstation ]; then
   echo "Customize (End): Image Build Platform (Workstation)"
 fi
 echo "Customize (End): Image Build Platform"
-
-echo "Customize (Start): Azure Managed Lustre (AMLFS) Client"
-rpm --import https://packages.microsoft.com/keys/microsoft.asc
-repoName="amlfs"
-repoPath="/etc/yum.repos.d/$repoName.repo"
-echo "[$repoName]" > $repoPath
-echo "name=Azure Lustre Packages" >> $repoPath
-echo "baseurl=https://packages.microsoft.com/yumrepos/amlfs-el9" >> $repoPath
-echo "enabled=1" >> $repoPath
-echo "gpgcheck=1" >> $repoPath
-echo "gpgkey=https://packages.microsoft.com/keys/microsoft.asc" >> $repoPath
-dnf -y install amlfs-lustre-client-2.15.6_39_g3e00a10-$(uname -r | sed -e "s/\.$(uname -p)$//" | sed -re 's/[-_]/\./g')-1
-echo "Customize (End): Azure Managed Lustre (AMLFS) Client"
 
 if [ $machineType == Scheduler ]; then
   echo "Customize (Start): Azure CLI"
@@ -51,6 +37,19 @@ if [ $machineType == Workstation ]; then
   cd $binDirectory
   echo "Customize (End): HP Anyware"
 fi
+
+echo "Customize (Start): Azure Managed Lustre (AMLFS) Client"
+rpm --import https://packages.microsoft.com/keys/microsoft.asc
+repoName="amlfs"
+repoPath="/etc/yum.repos.d/$repoName.repo"
+echo "[$repoName]" > $repoPath
+echo "name=Azure Lustre Packages" >> $repoPath
+echo "baseurl=https://packages.microsoft.com/yumrepos/amlfs-el9" >> $repoPath
+echo "enabled=1" >> $repoPath
+echo "gpgcheck=1" >> $repoPath
+echo "gpgkey=https://packages.microsoft.com/keys/microsoft.asc" >> $repoPath
+dnf -y install amlfs-lustre-client-2.15.6_39_g3e00a10-$(uname -r | sed -e "s/\.$(uname -p)$//" | sed -re 's/[-_]/\./g')-1
+echo "Customize (End): Azure Managed Lustre (AMLFS) Client"
 
 if [ "$binPaths" != "" ]; then
   echo "Customize (PATH): ${binPaths:1}"
