@@ -8,8 +8,8 @@ version=$(echo $buildConfig | jq -r .version.job_scheduler_slurm)
 
 echo "Customize (Start): Slurm Download"
 fileName="slurm-$version.tar.bz2"
-fileLink="$binHostUrl/Slurm/$version/$fileName"
-download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
+fileLink="https://download.schedmd.com/slurm/$fileName"
+download_file $fileName $fileLink
 bzip2 -d $fileName
 echo "Customize (End): Slurm Download"
 
