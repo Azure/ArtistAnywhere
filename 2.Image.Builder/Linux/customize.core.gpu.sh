@@ -55,6 +55,21 @@ if [[ "$gpuProvider" == NVIDIA* ]]; then
   echo "Customize (End): NVIDIA GPU (CUDA)"
 fi
 
+if [ $machineType == Workstation ]; then
+  echo "Customize (Start): HP Anyware"
+  version=$(echo $buildConfig | jq -r .version.hp_anyware_agent)
+  [ "$gpuProvider" == "" ] && fileType="pcoip-agent-standard" || fileType="pcoip-agent-graphics"
+  fileName="pcoip-agent-offline-rhel9.5_$version-1.el9.x86_64.tar.gz"
+  fileLink="$binHostUrl/Teradici/$version/$fileName"
+  download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
+  mkdir -p $fileType
+  tar -xzf $fileName -C $fileType
+  cd $fileType
+  run_process "./install-pcoip-agent.sh $fileType usb-vhci" $binDirectory/$fileType
+  cd $binDirectory
+  echo "Customize (End): HP Anyware"
+fi
+
 if [ "$binPaths" != "" ]; then
   echo "Customize (PATH): ${binPaths:1}"
   echo 'PATH=$PATH'$binPaths >> $aaaProfile

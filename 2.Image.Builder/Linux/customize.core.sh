@@ -5,7 +5,7 @@ source /tmp/functions.sh
 echo "Customize (Start): Core"
 
 echo "Customize (Start): Image Build Platform"
-dnf -y install epel-release python3-devel gcc-c++ git cmake bzip2 # perl lsof
+dnf -y install epel-release python3-devel gcc-c++ git cmake bzip2
 export AZNFS_NONINTERACTIVE_INSTALL=1 AZNFS_FORCE_PACKAGE_MANAGER=dnf
 curl -L https://github.com/Azure/AZNFS-mount/releases/latest/download/aznfs_install.sh | /bin/bash
 if [ $machineType == Workstation ]; then
@@ -21,21 +21,6 @@ if [ $machineType == Scheduler ]; then
   dnf -y install https://packages.microsoft.com/config/rhel/9/packages-microsoft-prod.rpm
   dnf -y install azure-cli
   echo "Customize (End): Azure CLI"
-fi
-
-if [ $machineType == Workstation ]; then
-  echo "Customize (Start): HP Anyware"
-  version=$(echo $buildConfig | jq -r .version.hp_anyware_agent)
-  [ "$gpuProvider" == "" ] && fileType="pcoip-agent-standard" || fileType="pcoip-agent-graphics"
-  fileName="pcoip-agent-offline-rhel9.5_$version-1.el9.x86_64.tar.gz"
-  fileLink="$binHostUrl/Teradici/$version/$fileName"
-  download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
-  mkdir -p $fileType
-  tar -xzf $fileName -C $fileType
-  cd $fileType
-  run_process "./install-pcoip-agent.sh $fileType usb-vhci" $binDirectory/$fileType
-  cd $binDirectory
-  echo "Customize (End): HP Anyware"
 fi
 
 echo "Customize (Start): Azure Managed Lustre (AMLFS) Client"
