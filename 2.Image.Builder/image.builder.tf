@@ -111,11 +111,6 @@ resource azapi_resource linux {
         offer     = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].offer
         sku       = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].sku
         version   = var.computeGallery.platform.linux.version
-        # planInfo = {
-        #   planPublisher = lower(var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].publisher)
-        #   planProduct   = lower(var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].offer)
-        #   planName      = lower(var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].sku)
-        # }
       }
       optimize = {
         vmBoot = {
@@ -299,8 +294,7 @@ resource azapi_resource windows {
                 "Write-Host 'Customize (Start): AD Domain Services'",
                 "Install-WindowsFeature -Name 'AD-Domain-Services' -IncludeManagementTools",
                 "Write-Host 'Customize (End): AD Domain Services'",
-              "}",
-              "if ('${each.value.build.machineType}' -eq 'JobScheduler') {",
+              "} elseif ('${each.value.build.machineType}' -eq 'Scheduler') {",
                 "Write-Host 'Customize (Start): NFS Server'",
                 "Install-WindowsFeature -Name 'FS-NFS-Service'",
                 "Write-Host 'Customize (End): NFS Server'",

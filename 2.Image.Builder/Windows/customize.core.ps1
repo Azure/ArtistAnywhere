@@ -16,7 +16,6 @@ if ($partitionSizeActive -lt $partitionSizeRange.SizeMax) {
 Write-Host "Customize (End): Resize Root Partition"
 
 Write-Host "Customize (Start): Image Build Platform"
-netsh advfirewall set allprofiles state off
 
 Write-Host "Customize (Start): Chocolatey"
 $fileType = "chocolatey"
