@@ -75,6 +75,14 @@ if ($machineType -eq "Scheduler") {
   $fileType = "ad-tools" # RSAT: Active Directory Domain Services and Lightweight Directory Services Tools
   dism /Online /NoRestart /LogPath:"$binDirectory\$fileType" /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
   Write-Host "Customize (End): AD Tools"
+
+  Write-Host "Customize (Start): Cinebench"
+  $version = "2024"
+  $fileName = "Cinebench${version}_win_x86_64.zip"
+  $fileLink = "$binHostUrl/Maxon/Cinebench/$version/$fileName"
+  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
+  Expand-Archive -Path $fileName
+  Write-Host "Customize (End): Cinebench"
 }
 
 if ($machineType -eq "Cluster") {
@@ -94,16 +102,6 @@ if ($machineType -eq "Workstation") {
   DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
   RunProcess .\$fileName "/S /NoPostReboot /Force" "$binDirectory\$fileType"
   Write-Host "Customize (End): HP Anyware"
-}
-
-if ($machineType -ne "Scheduler") {
-  Write-Host "Customize (Start): Cinebench"
-  $version = "2024"
-  $fileName = "Cinebench${version}_win_x86_64.zip"
-  $fileLink = "$binHostUrl/Maxon/Cinebench/$version/$fileName"
-  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
-  Expand-Archive -Path $fileName
-  Write-Host "Customize (End): Cinebench"
 }
 
 if ($binPaths -ne "") {
