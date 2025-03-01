@@ -24,28 +24,6 @@ if [ "$gpuProvider" == NVIDIA.GRID ]; then
   dnf -y install libglvnd-devel mesa-vulkan-drivers xorg-x11-drivers
   run_process "./$fileName --silent" $binDirectory/$fileType
   echo "Customize (End): NVIDIA GPU (GRID)"
-
-  echo "Customize (Start): NVIDIA OptiX"
-  version=$(echo $buildConfig | jq -r .version.nvidia_optix)
-  fileType="nvidia-optix"
-  fileName="NVIDIA-OptiX-SDK-$version-linux64-x86_64.sh"
-  fileLink="$binHostUrl/NVIDIA/OptiX/$version/$fileName"
-  download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
-  chmod +x $fileName
-  filePath="$binDirectory/$fileType/$version"
-  mkdir -p $filePath
-  run_process "./$fileName --skip-license --prefix=$filePath" $binDirectory/$fileType-1
-  buildDirectory="$filePath/build"
-  mkdir -p $buildDirectory
-  dnf -y install libXrandr-devel
-  dnf -y install libXcursor-devel
-  dnf -y install libXinerama-devel
-  dnf -y install mesa-libGL-devel
-  dnf -y install mesa-libGL
-  run_process "cmake -B $buildDirectory -S $filePath/SDK" $binDirectory/$fileType-2
-  run_process "make -C $buildDirectory" $binDirectory/$fileType-3
-  binPaths="$binPaths:$buildDirectory/bin"
-  echo "Customize (End): NVIDIA OptiX"
 fi
 
 if [[ "$gpuProvider" == NVIDIA* ]]; then

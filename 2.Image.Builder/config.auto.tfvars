@@ -67,12 +67,16 @@ imageBuilder = {
         }
       }
       build = {
-        machineType    = "JobScheduler"
+        machineType    = "Scheduler"
         machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "1.0.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
         ]
       }
@@ -100,6 +104,10 @@ imageBuilder = {
         imageVersion   = "2.0.0"
         osDiskSizeGB   = 480
         timeoutMinutes = 180
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
           "PBRT"
         ]
@@ -128,6 +136,10 @@ imageBuilder = {
         imageVersion   = "2.1.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -157,6 +169,10 @@ imageBuilder = {
         imageVersion   = "2.2.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -186,6 +202,10 @@ imageBuilder = {
         imageVersion   = "3.0.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -215,6 +235,10 @@ imageBuilder = {
         imageVersion   = "3.1.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -244,6 +268,10 @@ imageBuilder = {
         imageVersion   = "0.0.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
         ]
       }
@@ -265,12 +293,16 @@ imageBuilder = {
         }
       }
       build = {
-        machineType    = "JobScheduler"
+        machineType    = "Scheduler"
         machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "1.0.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 180
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
         ]
       }
@@ -298,6 +330,10 @@ imageBuilder = {
         imageVersion   = "2.0.0"
         osDiskSizeGB   = 480
         timeoutMinutes = 360
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
           "PBRT"
         ]
@@ -326,6 +362,10 @@ imageBuilder = {
         imageVersion   = "2.1.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 360
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -355,6 +395,10 @@ imageBuilder = {
         imageVersion   = "2.2.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 360
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -384,6 +428,10 @@ imageBuilder = {
         imageVersion   = "3.0.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 360
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -413,6 +461,10 @@ imageBuilder = {
         imageVersion   = "3.1.0"
         osDiskSizeGB   = 1024
         timeoutMinutes = 360
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
         jobProcessors = [
           "PBRT",
           "Blender"
@@ -431,21 +483,11 @@ imageBuilder = {
 }
 
 imageCustomize = {
-  storage = {
+  blobStorage = {
     binHostUrl = "https://xstudio.blob.core.windows.net/bin"
     authClient = { # Required for image customization build process
       id     = ""
       secret = ""
-    }
-  }
-  script = { # Enables or disables image customization build scripts
-    jobScheduler = {
-      deadline = true
-      slurm    = false
-    }
-    jobProcessor = {
-      render = true
-      eda    = false
     }
   }
 }

@@ -53,14 +53,6 @@ resource azurerm_shared_image studio {
     offer     = each.value.offer
     sku       = each.value.sku
   }
-  dynamic purchase_plan {
-    for_each = lower(each.value.type) == "linux" ? [1] : []
-    content {
-      publisher = lower(each.value.publisher)
-      product   = lower(each.value.offer)
-      name      = lower(each.value.sku)
-    }
-  }
 }
 
 output linux {

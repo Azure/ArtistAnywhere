@@ -33,22 +33,6 @@ if ($gpuProvider -eq "NVIDIA.GRID") {
   DownloadFile $fileName $fileLink
   RunProcess .\$fileName "-s -n -log:$binDirectory\$fileType" $null
   Write-Host "Customize (End): NVIDIA GPU (GRID)"
-
-  Write-Host "Customize (Start): NVIDIA OptiX"
-  $version = $buildConfig.version.nvidia_optix
-  $fileType = "nvidia-optix"
-  $fileName = "NVIDIA-OptiX-SDK-$version-win64.exe"
-  $fileLink = "$binHostUrl/NVIDIA/OptiX/$version/$fileName"
-  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
-  RunProcess .\$fileName "/S" $null
-  $sdkDirectory = "C:\ProgramData\NVIDIA Corporation\OptiX SDK $version\SDK"
-  $buildDirectory = "$sdkDirectory\build"
-  New-Item -ItemType Directory $buildDirectory
-  $version = ($buildConfig.version.nvidia_cuda -split '\.')[0..1] -join '.'
-  RunProcess "$binPathCMake\cmake.exe" "-B ""$buildDirectory"" -S ""$sdkDirectory"" -D CUDA_TOOLKIT_ROOT_DIR=""C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v$version""" "$binDirectory\$fileType-1"
-  RunProcess "$binPathMSBuild\MSBuild.exe" """$buildDirectory\OptiX-Samples.sln"" -p:Configuration=Release" "$binDirectory\$fileType-2"
-  $binPaths += ";$buildDirectory\bin\Release"
-  Write-Host "Customize (End): NVIDIA OptiX"
 }
 
 if ($gpuProvider.StartsWith("NVIDIA")) {
