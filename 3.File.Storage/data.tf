@@ -111,11 +111,6 @@ resource azurerm_network_interface storage_data_load {
     sku       = local.dataLoad.machine.image.name
     version   = local.dataLoad.machine.image.version
   }
-  plan {
-    publisher = lower(local.dataLoad.machine.image.publisher)
-    product   = lower(local.dataLoad.machine.image.product)
-    name      = lower(local.dataLoad.machine.image.name)
-  }
   dynamic admin_ssh_key {
     for_each = local.dataLoad.machine.adminLogin.sshKeyPublic != "" ? [1] : []
     content {

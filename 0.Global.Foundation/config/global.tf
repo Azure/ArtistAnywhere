@@ -152,23 +152,21 @@ output linux {
     publisher = "AlmaLinux"
     offer     = "AlmaLinux-x86_64"
     sku       = "9-Gen2"
-    version   = "9.4.2024080501"
+    version   = "9.5.202411260"
   }
 }
 
 output version {
   value = {
-    nvidia_cuda              = "12.6.3"
-    nvidia_optix             = "8.0.0"
-    az_blob_nfs_mount        = "2.0.11"
-    hp_anyware_agent         = "24.10.1"
+    nvidia_cuda_windows      = "12.8.0"
+    job_scheduler_slurm      = "24.11.2"
     job_scheduler_deadline   = "10.4.0.13"
-    job_scheduler_slurm      = "24.11.1"
     job_processor_pbrt       = "v4"
     job_processor_blender    = "4.3.2"
     script_extension_linux   = "2.1"
     script_extension_windows = "1.10"
     monitor_agent_linux      = "1.33"
-    monitor_agent_windows    = "1.31"
+    monitor_agent_windows    = "1.32"
+    hp_anyware_agent         = "24.10.2"
   }
 }

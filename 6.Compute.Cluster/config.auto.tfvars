@@ -17,11 +17,6 @@ virtualMachineScaleSets = [
         galleryName       = "xstudio"
         definitionName    = "Linux"
         resourceGroupName = "ArtistAnywhere.Image"
-        plan = {
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
       }
     }
     network = {
@@ -105,11 +100,6 @@ virtualMachineScaleSets = [
         galleryName       = "xstudio"
         definitionName    = "Linux"
         resourceGroupName = "ArtistAnywhere.Image"
-        plan = {
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
       }
     }
     network = {
@@ -193,11 +183,6 @@ virtualMachineScaleSets = [
         galleryName       = "xstudio"
         definitionName    = "Linux"
         resourceGroupName = "ArtistAnywhere.Image"
-        plan = {
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
       }
     }
     network = {
@@ -281,11 +266,6 @@ virtualMachineScaleSets = [
         galleryName       = "xstudio"
         definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
-        plan = {
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
       }
     }
     network = {
@@ -369,11 +349,6 @@ virtualMachineScaleSets = [
         galleryName       = "xstudio"
         definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
-        plan = {
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
       }
     }
     network = {
@@ -457,11 +432,6 @@ virtualMachineScaleSets = [
         galleryName       = "xstudio"
         definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
-        plan = {
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
       }
     }
     network = {

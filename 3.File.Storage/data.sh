@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-dnf -y install nfs-utils unzip
+dnf -y install unzip
 
 if [ ${managedLustre.enable} == true ]; then
   rpm --import https://packages.microsoft.com/keys/microsoft.asc
@@ -12,7 +12,7 @@ if [ ${managedLustre.enable} == true ]; then
   echo "enabled=1" >> $repoPath
   echo "gpgcheck=1" >> $repoPath
   echo "gpgkey=https://packages.microsoft.com/keys/microsoft.asc" >> $repoPath
-  dnf -y install amlfs-lustre-client-2.15.5_41_gc010524-$(uname -r | sed -e "s/\.$(uname -p)$//" | sed -re 's/[-_]/\./g')-1
+  dnf -y install amlfs-lustre-client-2.15.6_39_g3e00a10-5.14.0.503.14.1.el9.5-1
 fi
 
 mountPath=${dataLoadMount.path}

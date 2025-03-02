@@ -21,6 +21,7 @@ if [ $machineType == Scheduler ]; then
   dnf -y install https://packages.microsoft.com/config/rhel/9/packages-microsoft-prod.rpm
   dnf -y install azure-cli
   echo "Customize (End): Azure CLI"
+  systemctl --now enable nfs-server
 else
   echo "Customize (Start): Azure Managed Lustre (AMLFS) Client"
   repoName="amlfs"

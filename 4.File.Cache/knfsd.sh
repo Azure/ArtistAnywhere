@@ -1,20 +1,26 @@
 #!/bin/bash -ex
 
-dnf -y install jq nfs-utils cachefilesd
+dnf -y install mdadm policycoreutils-python-utils cachefilesd
 
 function set_cache_disks {
-  cachePath=$1
-  diskPaths=$(lsblk -p -o NAME,TYPE | grep nvme)
+  devicePath=$1
+  diskPaths=$(lsblk -p -o NAME | grep nvme)
   if [ "$diskPaths" == "" ]; then
     diskPaths=$(lsblk -p -o NAME,TYPE | grep disk)
-    diskPaths=$(echo ${diskPaths//disk/})
-    diskPaths=$(echo "$diskPaths" | awk -v x=${dataDiskCount} '{for(i=NF-x+1;i<=NF;i++) printf $i " "; print ""}')
+    diskPaths=$(echo $${diskPaths//disk/})
+    diskPaths=$(echo "$diskPaths" | tr ' ' '\n' | tail -${dataDiskCount} | tr '\n' ' ')
   fi
   ((diskCount=$(echo $diskPaths | grep -o " " | wc -l) + 1))
   if (( $diskCount > 1 )); then
-    mdadm --create $cachePath --level=0 --raid-devices=$diskCount $diskPaths
+    mdadm --create $devicePath --level=0 --raid-devices=$diskCount $diskPaths
   fi
-  mkfs.xfs $cachePath
+  mkfs.ext4 $devicePath
+}
+
+function set_cache_policy {
+  cachePath=$1
+  semanage fcontext -a -t cachefiles_var_t $cachePath
+  restorecon -Rv $cachePath
 }
 
 function get_mount_name {
@@ -32,6 +38,7 @@ function set_mount_unit {
   mountSource=$(echo $storageMount | jq -r .source)
   mountOptions=$(echo $storageMount | jq -r .options)
   mountName=$(get_mount_name $mountPath)
+  mkdir -p $mountPath
   mountFile=/usr/lib/systemd/system/$mountName
   echo "[Unit]" > $mountFile
   echo "Description=$mountDescription" >> $mountFile
@@ -57,15 +64,16 @@ function set_mount_units {
       set_mount_unit "$mountConfig"
       mountType=$(echo "$mountConfig" | jq -r .type)
       mountPath=$(echo "$mountConfig" | jq -r .path)
-      if [ $mountType == xfs ]; then
+      if [ $mountType == ext4 ]; then
         mountSource=$(echo "$mountConfig" | jq -r .source)
         set_cache_disks $mountSource
+        set_cache_policy $mountPath
         sed -i "/^dir/c\dir $mountPath" /etc/cachefilesd.conf
         mountName=$(get_mount_name $mountPath)
         cacheFile=/usr/lib/systemd/system/cachefilesd.service
         sed -i "/^Description/a\After=$mountName" $cacheFile
         sed -i "/^After/a\Requires=$mountName" $cacheFile
-        systemctl enable cachefilesd nfs-server
+        systemctl enable nfs-server cachefilesd
       else
         fsid=$(uuidgen -r)
         echo "$mountPath *(ro,fsid=$fsid)" >> /etc/exports
@@ -77,5 +85,4 @@ function set_mount_units {
 storageMounts=${base64encode(jsonencode(storageMounts))}
 set_mount_units $storageMounts
 
-sed -i "s/SELINUX=enforcing/SELINUX=disabled/" /etc/selinux/config
 reboot

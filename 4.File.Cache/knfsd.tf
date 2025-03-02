@@ -131,11 +131,6 @@ resource azurerm_linux_virtual_machine cache {
     sku       = local.knfsdCache.machine.image.name
     version   = local.knfsdCache.machine.image.version
   }
-  plan {
-    publisher = lower(local.knfsdCache.machine.image.publisher)
-    product   = lower(local.knfsdCache.machine.image.product)
-    name      = lower(local.knfsdCache.machine.image.name)
-  }
   dynamic additional_capabilities {
     for_each = var.knfsdCache.machine.dataDisk.enable ? [1] : []
     content {

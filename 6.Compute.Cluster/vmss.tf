@@ -15,11 +15,6 @@ variable virtualMachineScaleSets {
         galleryName       = string
         definitionName    = string
         resourceGroupName = string
-        plan = object({
-          publisher = string
-          product   = string
-          name      = string
-        })
       })
     })
     network = object({
@@ -104,15 +99,6 @@ locals {
         regionName       = virtualMachineScaleSet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
         extendedZoneName = virtualMachineScaleSet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.name : null
       }
-      # machine = merge(virtualMachineScaleSet.machine, {
-      #   image = merge(virtualMachineScaleSet.machine.image, {
-      #     plan = {
-      #       publisher = lower(virtualMachineScaleSet.machine.image.plan.publisher != "" ? virtualMachineScaleSet.machine.image.plan.publisher : module.global.linux.publisher)
-      #       product   = lower(virtualMachineScaleSet.machine.image.plan.product != "" ? virtualMachineScaleSet.machine.image.plan.product : module.global.linux.offer)
-      #       name      = lower(virtualMachineScaleSet.machine.image.plan.name != "" ? virtualMachineScaleSet.machine.image.plan.name : module.global.linux.sku)
-      #     }
-      #   })
-      # })
       network = merge(virtualMachineScaleSet.network, {
         subnetId = "${virtualMachineScaleSet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
       })
@@ -176,14 +162,6 @@ resource azurerm_linux_virtual_machine_scale_set compute {
         option    = "Local"
         placement = each.value.osDisk.ephemeral.placement
       }
-    }
-  }
-  dynamic plan {
-    for_each = each.value.machine.image.plan.publisher != "" ? [1] : []
-    content {
-      publisher = each.value.machine.image.plan.publisher
-      product   = each.value.machine.image.plan.product
-      name      = each.value.machine.image.plan.name
     }
   }
   dynamic extension {
@@ -464,14 +442,6 @@ resource azurerm_orchestrated_virtual_machine_scale_set compute {
         admin_username       = each.value.adminLogin.userName
         admin_password       = each.value.adminLogin.userPassword
       }
-    }
-  }
-  dynamic plan {
-    for_each = lower(each.value.osDisk.type) == "linux" && each.value.machine.image.plan.publisher != "" ? [1] : []
-    content {
-      publisher = each.value.machine.image.plan.publisher
-      product   = each.value.machine.image.plan.product
-      name      = each.value.machine.image.plan.name
     }
   }
   dynamic extension {

@@ -45,7 +45,7 @@ knfsdCache = {
             {
               enable      = true
               description = "Local NVMe Disks"
-              type        = "xfs"
+              type        = "ext4"
               path        = "/mnt/fscache"
               source      = "/dev/md/fscache"
               options     = "defaults"

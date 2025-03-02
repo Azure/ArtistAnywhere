@@ -13,11 +13,6 @@ variable virtualMachines {
       galleryName       = string
       definitionName    = string
       resourceGroupName = string
-      plan = object({
-        publisher = string
-        product   = string
-        name      = string
-      })
     })
     osDisk = object({
       type        = string
@@ -71,13 +66,6 @@ locals {
           extendedZoneName = virtualMachine.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.name : null
         }
         name = "${virtualMachine.name}${i}"
-        # image = merge(virtualMachine.image, {
-        #   plan = {
-        #     publisher = lower(virtualMachine.image.plan.publisher != "" ? virtualMachine.image.plan.publisher : module.global.linux.publisher)
-        #     product   = lower(virtualMachine.image.plan.product != "" ? virtualMachine.image.plan.product : module.global.linux.offer)
-        #     name      = lower(virtualMachine.image.plan.name != "" ? virtualMachine.image.plan.name : module.global.linux.sku)
-        #   }
-        # })
         network = merge(virtualMachine.network, {
           subnetId = "${virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
         })
@@ -140,14 +128,6 @@ resource azurerm_linux_virtual_machine workstation {
   }
   additional_capabilities {
     hibernation_enabled = each.value.hibernation.enable
-  }
-  dynamic plan {
-    for_each = each.value.image.plan.publisher != "" ? [1] : []
-    content {
-      publisher = each.value.image.plan.publisher
-      product   = each.value.image.plan.product
-      name      = each.value.image.plan.name
-    }
   }
   dynamic admin_ssh_key {
     for_each = each.value.adminLogin.sshKeyPublic != "" ? [1] : []

@@ -13,6 +13,7 @@ if ($buildConfigEncoded -ne "") {
   $machineType = $buildConfig.machineType
   $gpuProvider = $buildConfig.gpuProvider
   $binHostUrl = $buildConfig.binHostUrl
+  $jobSchedulers = $buildConfig.jobSchedulers
   $jobProcessors = $buildConfig.jobProcessors
   $tenantId = $buildConfig.authClient.tenantId
   $clientId = $buildConfig.authClient.clientId

@@ -24,11 +24,6 @@ computeFleets = [
         galleryName       = "xstudio"
         definitionName    = "Linux"
         resourceGroupName = "ArtistAnywhere.Image"
-        plan = {
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
       }
       osDisk = {
         type        = "Linux"
@@ -117,11 +112,6 @@ computeFleets = [
         galleryName       = "xstudio"
         definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
-        plan = {
-          publisher = ""
-          product   = ""
-          name      = ""
-        }
       }
       osDisk = {
         type        = "Windows"

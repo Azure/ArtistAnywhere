@@ -14,11 +14,6 @@ virtualMachines = [
       galleryName       = "xstudio"
       definitionName    = "Linux"
       resourceGroupName = "ArtistAnywhere.Image"
-      plan = {
-        publisher = ""
-        product   = ""
-        name      = ""
-      }
     }
     osDisk = {
       type        = "Linux"
@@ -76,11 +71,6 @@ virtualMachines = [
       galleryName       = "xstudio"
       definitionName    = "WinServer"
       resourceGroupName = "ArtistAnywhere.Image"
-      plan = {
-        publisher = ""
-        product   = ""
-        name      = ""
-      }
     }
     osDisk = {
       type        = "Windows"

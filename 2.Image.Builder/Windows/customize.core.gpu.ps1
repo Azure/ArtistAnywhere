@@ -37,7 +37,7 @@ if ($gpuProvider -eq "NVIDIA.GRID") {
 
 if ($gpuProvider.StartsWith("NVIDIA")) {
   Write-Host "Customize (Start): NVIDIA GPU (CUDA)"
-  $version = $buildConfig.version.nvidia_cuda
+  $version = $buildConfig.version.nvidia_cuda_windows
   $fileType = "nvidia-gpu-cuda"
   $fileName = "cuda_${version}_windows_network.exe"
   $fileLink = "$binHostUrl/NVIDIA/CUDA/$version/$fileName"

@@ -158,12 +158,6 @@ resource azapi_resource linux {
           {
             type = "Shell"
             inline = [
-              "dnf -y install nfs-utils",
-              "if [ ${each.value.build.machineType} == Scheduler ]; then",
-              "  echo 'Customize (Start): NFS Server'",
-              "  systemctl --now enable nfs-server",
-              "  echo 'Customize (End): NFS Server'",
-              "fi",
               "hostname ${each.value.name}"
             ]
           },

@@ -7,11 +7,11 @@ if [ "$buildConfigEncoded" != "" ]; then
   touch $aaaProfile
 
   echo "Customize (Start): Image Build Parameters"
-  dnf -y install jq
   buildConfig=$(echo $buildConfigEncoded | base64 -d)
   machineType=$(echo $buildConfig | jq -r .machineType)
   gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
   binHostUrl=$(echo $buildConfig | jq -r .binHostUrl)
+  jobSchedulers=$(echo $buildConfig | jq -c .jobSchedulers)
   jobProcessors=$(echo $buildConfig | jq -c .jobProcessors)
   tenantId=$(echo $buildConfig | jq -r .authClient.tenantId)
   clientId=$(echo $buildConfig | jq -r .authClient.clientId)

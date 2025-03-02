@@ -15,11 +15,6 @@ virtualMachines = [
       galleryName       = "xstudio"
       definitionName    = "Linux"
       resourceGroupName = "ArtistAnywhere.Image"
-      plan = {
-        publisher = ""
-        product   = ""
-        name      = ""
-      }
     }
     osDisk = {
       type        = "Linux"
@@ -72,11 +67,6 @@ virtualMachines = [
       galleryName       = "xstudio"
       definitionName    = "Linux"
       resourceGroupName = "ArtistAnywhere.Image"
-      plan = {
-        publisher = ""
-        product   = ""
-        name      = ""
-      }
     }
     osDisk = {
       type        = "Linux"
@@ -129,11 +119,6 @@ virtualMachines = [
       galleryName       = "xstudio"
       definitionName    = "WinArtist"
       resourceGroupName = "ArtistAnywhere.Image"
-      plan = {
-        publisher = ""
-        product   = ""
-        name      = ""
-      }
     }
     osDisk = {
       type        = "Windows"
@@ -186,11 +171,6 @@ virtualMachines = [
       galleryName       = "xstudio"
       definitionName    = "WinArtist"
       resourceGroupName = "ArtistAnywhere.Image"
-      plan = {
-        publisher = ""
-        product   = ""
-        name      = ""
-      }
     }
     osDisk = {
       type        = "Windows"

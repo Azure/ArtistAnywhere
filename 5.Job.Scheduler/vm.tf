@@ -12,11 +12,6 @@ variable virtualMachines {
       galleryName       = string
       definitionName    = string
       resourceGroupName = string
-      plan = object({
-        publisher = string
-        product   = string
-        name      = string
-      })
     })
     osDisk = object({
       type        = string
@@ -74,13 +69,6 @@ locals {
         regionName       = virtualMachine.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
         extendedZoneName = virtualMachine.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.name : null
       }
-      # image = merge(virtualMachine.image, {
-      #   plan = {
-      #     publisher = lower(virtualMachine.image.plan.publisher != "" ? virtualMachine.image.plan.publisher : module.global.linux.publisher)
-      #     product   = lower(virtualMachine.image.plan.product != "" ? virtualMachine.image.plan.product : module.global.linux.offer)
-      #     name      = lower(virtualMachine.image.plan.name != "" ? virtualMachine.image.plan.name : module.global.linux.sku)
-      #   }
-      # })
       network = merge(virtualMachine.network, {
         subnetId = "${virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachine.network.subnetName}"
       })
@@ -136,14 +124,6 @@ resource azurerm_linux_virtual_machine job_scheduler {
     storage_account_type = each.value.osDisk.storageType
     caching              = each.value.osDisk.cachingMode
     disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
-  }
-  dynamic plan {
-    for_each = each.value.image.plan.publisher != "" ? [1] : []
-    content {
-      publisher = each.value.image.plan.publisher
-      product   = each.value.image.plan.product
-      name      = each.value.image.plan.name
-    }
   }
   dynamic admin_ssh_key {
     for_each = each.value.adminLogin.sshKeyPublic != "" ? [1] : []

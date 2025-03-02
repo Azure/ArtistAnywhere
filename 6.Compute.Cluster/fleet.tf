@@ -16,11 +16,6 @@ variable computeFleets {
         galleryName       = string
         definitionName    = string
         resourceGroupName = string
-        plan = object({
-          publisher = string
-          product   = string
-          name      = string
-        })
       })
       osDisk = object({
         type        = string
@@ -98,13 +93,6 @@ locals {
         extendedZoneName = computeFleet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.name : null
       }
       machine = merge(computeFleet.machine, {
-        # image = merge(computeFleet.machine.image, {
-        #   plan = {
-        #     publisher = lower(computeFleet.machine.image.plan.publisher != "" ? computeFleet.machine.image.plan.publisher : module.global.linux.publisher)
-        #     product   = lower(computeFleet.machine.image.plan.product != "" ? computeFleet.machine.image.plan.product : module.global.linux.offer)
-        #     name      = lower(computeFleet.machine.image.plan.name != "" ? computeFleet.machine.image.plan.name : module.global.linux.sku)
-        #   }
-        # })
         adminLogin = merge(computeFleet.machine.adminLogin, {
           userName     = computeFleet.machine.adminLogin.userName != "" ? computeFleet.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
           userPassword = computeFleet.machine.adminLogin.userPassword != "" ? computeFleet.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
@@ -143,19 +131,6 @@ resource azapi_resource fleet {
     ]
   }
   body = {
-    # dynamic plan {
-    #   for_each = each.value.machine.image.plan.publisher != "" ? [1] : []
-    #   content {
-    #     publisher = each.value.machine.image.plan.publisher
-    #     product   = each.value.machine.image.plan.product
-    #     name      = each.value.machine.image.plan.name
-    #   }
-    # }
-    # plan = {
-    #   publisher = each.value.machine.image.plan.publisher
-    #   product   = each.value.machine.image.plan.product
-    #   name      = each.value.machine.image.plan.name
-    # }
     properties = {
       computeProfile = {
         baseVirtualMachineProfile = {
