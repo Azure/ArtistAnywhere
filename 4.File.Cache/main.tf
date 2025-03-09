@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">=1.10.0"
+  required_version = ">=1.11.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.20.0"
+      version = "~>4.22.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -15,7 +15,7 @@ terraform {
     }
     time = {
       source  = "hashicorp/time"
-      version = "~>0.12.0"
+      version = "~>0.13.0"
     }
   }
   backend azurerm {
@@ -26,25 +26,13 @@ terraform {
 
 provider azurerm {
   features {
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
-    managed_disk {
-      expand_without_downtime = true
-    }
-    virtual_machine {
-      delete_os_disk_on_deletion            = true
-      detach_implicit_data_disk_on_deletion = false
-      skip_shutdown_and_force_delete        = false
-      graceful_shutdown                     = false
-    }
   }
-  subscription_id     = module.global.subscriptionId
+  subscription_id     = data.terraform_remote_state.core.outputs.subscription.id
   storage_use_azuread = true
 }
 
-module global {
-  source = "../0.Global.Foundation/config"
+module core {
+  source = "../0.Core.Foundation/config"
 }
 
 module hammerspace {
@@ -76,9 +64,9 @@ module hammerspace {
   activeDirectory = {
     enable       = var.activeDirectory.enable
     domainName   = var.activeDirectory.domainName
-    servers      = var.activeDirectory.servers
-    userName     = var.activeDirectory.userName != "" ? var.activeDirectory.userName : data.azurerm_key_vault_secret.admin_username.value
-    userPassword = var.activeDirectory.userPassword != "" ? var.activeDirectory.userPassword : data.azurerm_key_vault_secret.admin_password.value
+    servers      = var.activeDirectory.machine.name
+    userName     = var.activeDirectory.machine.adminLogin.userName != "" ? var.activeDirectory.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+    userPassword = var.activeDirectory.machine.adminLogin.userPassword != "" ? var.activeDirectory.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
   }
   depends_on = [
     azurerm_resource_group.cache
@@ -231,16 +219,6 @@ variable dnsRecord {
   })
 }
 
-variable activeDirectory {
-  type = object({
-    enable       = bool
-    domainName   = string
-    servers      = string
-    userName     = string
-    userPassword = string
-  })
-}
-
 variable existingNetwork {
   type = object({
     enable            = bool
@@ -254,54 +232,73 @@ variable existingNetwork {
   })
 }
 
+variable activeDirectory {
+  type = object({
+    enable = bool
+    domain = object({
+      name = string
+    })
+    machine = object({
+      name = string
+      adminLogin = object({
+        userName     = string
+        userPassword = string
+      })
+    })
+  })
+}
+
+data azurerm_subscription current {}
+
 data azurerm_user_assigned_identity studio {
-  name                = module.global.managedIdentity.name
-  resource_group_name = module.global.resourceGroupName
+  name                = module.core.managedIdentity.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault studio {
-  name                = module.global.keyVault.name
-  resource_group_name = module.global.resourceGroupName
+  name                = module.core.keyVault.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault_secret admin_username {
-  name         = module.global.keyVault.secretName.adminUsername
+  name         = module.core.keyVault.secretName.adminUsername
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault_secret admin_password {
-  name         = module.global.keyVault.secretName.adminPassword
+  name         = module.core.keyVault.secretName.adminPassword
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault_secret ssh_key_public {
-  name         = module.global.keyVault.secretName.sshKeyPublic
+  name         = module.core.keyVault.secretName.sshKeyPublic
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault_key data_encryption {
-  name         = module.global.keyVault.keyName.dataEncryption
+  name         = module.core.keyVault.keyName.dataEncryption
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_log_analytics_workspace studio {
-  name                = module.global.monitor.name
-  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
+  name                = module.core.monitor.name
+  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
 }
 
-data terraform_remote_state global {
+data terraform_remote_state core {
   backend = "local"
   config = {
-    path = "../0.Global.Foundation/terraform.tfstate"
+    path = "../0.Core.Foundation/terraform.tfstate"
   }
 }
 
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
-    resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.storage.accountName
-    container_name       = module.global.storage.containerName.terraformState
+    subscription_id      = data.terraform_remote_state.core.outputs.subscription.id
+    resource_group_name  = data.terraform_remote_state.core.outputs.resourceGroup.name
+    storage_account_name = data.terraform_remote_state.core.outputs.storage.account.name
+    container_name       = data.terraform_remote_state.core.outputs.storage.containerName.terraformState
     key                  = "1.Virtual.Network"
     use_azuread_auth     = true
   }
@@ -310,9 +307,10 @@ data terraform_remote_state network {
 data terraform_remote_state storage {
   backend = "azurerm"
   config = {
-    resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.storage.accountName
-    container_name       = module.global.storage.containerName.terraformState
+    subscription_id      = data.terraform_remote_state.core.outputs.subscription.id
+    resource_group_name  = data.terraform_remote_state.core.outputs.resourceGroup.name
+    storage_account_name = data.terraform_remote_state.core.outputs.storage.account.name
+    container_name       = data.terraform_remote_state.core.outputs.storage.containerName.terraformState
     key                  = "3.File.Storage"
     use_azuread_auth     = true
   }
@@ -336,7 +334,7 @@ data azurerm_private_dns_zone studio {
 
 resource azurerm_resource_group cache {
   name     = var.resourceGroupName
-  location = var.existingNetwork.enable ? var.existingNetwork.regionName : module.global.resourceLocation.regionName
+  location = var.existingNetwork.enable ? var.existingNetwork.regionName : module.core.resourceLocation.regionName
   tags = {
     AAA = basename(path.cwd)
   }

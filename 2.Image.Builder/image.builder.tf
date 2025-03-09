@@ -4,6 +4,7 @@
 
 variable imageBuilder {
   type = object({
+    binHostUrl = string
     templates = list(object({
       enable = bool
       name   = string
@@ -34,29 +35,7 @@ variable imageBuilder {
   })
 }
 
-variable imageCustomize {
-  type = object({
-    blobStorage = object({
-      binHostUrl = string
-      authClient = object({
-        id     = string
-        secret = string
-      })
-    })
-  })
-  # validation {
-  #   condition     = var.imageCustomize.blobStorage.authClient.id != "" && var.imageCustomize.blobStorage.authClient.secret != ""
-  #   error_message = "Missing required image customize Azure Blob Storage auth client configuration."
-  # }
-}
-
 locals {
-  authClient = {
-    tenantId       = data.azurerm_client_config.current.tenant_id
-    clientId       = var.imageCustomize.blobStorage.authClient.id
-    clientSecret   = var.imageCustomize.blobStorage.authClient.secret
-    storageVersion = "2025-01-05"
-  }
   authCredential = {
     adminUsername   = data.azurerm_key_vault_secret.admin_username.value
     adminPassword   = data.azurerm_key_vault_secret.admin_password.value
@@ -164,10 +143,10 @@ resource azapi_resource linux {
           {
             type = "Shell"
             inline = [
-              "cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))} /bin/bash",
-              "cat /tmp/customize.core.gpu.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))} /bin/bash",
-              "cat /tmp/customize.job.scheduler.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))} /bin/bash",
-              "cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))} /bin/bash",
+              "cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {binHostUrl = var.imageBuilder.binHostUrl}, {authCredential = local.authCredential})))} /bin/bash",
+              "cat /tmp/customize.core.gpu.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {binHostUrl = var.imageBuilder.binHostUrl}, {authCredential = local.authCredential})))} /bin/bash",
+              "cat /tmp/customize.job.scheduler.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {binHostUrl = var.imageBuilder.binHostUrl}, {authCredential = local.authCredential})))} /bin/bash",
+              "cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {binHostUrl = var.imageBuilder.binHostUrl}, {authCredential = local.authCredential})))} /bin/bash"
             ]
           }
         ]
@@ -293,10 +272,10 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))}",
-              "C:\\AzureData\\customize.core.gpu.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))}",
-              "C:\\AzureData\\customize.job.scheduler.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))}",
-              "C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))}"
+              "C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {binHostUrl = var.imageBuilder.binHostUrl}, {authCredential = local.authCredential})))}",
+              "C:\\AzureData\\customize.core.gpu.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {binHostUrl = var.imageBuilder.binHostUrl}, {authCredential = local.authCredential})))}",
+              "C:\\AzureData\\customize.job.scheduler.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {binHostUrl = var.imageBuilder.binHostUrl}, {authCredential = local.authCredential})))}",
+              "C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {binHostUrl = var.imageBuilder.binHostUrl}, {authCredential = local.authCredential})))}"
             ]
             runElevated = true
             runAsSystem = true

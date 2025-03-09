@@ -34,9 +34,9 @@ locals {
   storageAccounts = [
     for storageAccount in var.storageAccounts : merge(storageAccount, {
       resourceGroupName     = var.resourceGroupName
-      resourceGroupLocation = storageAccount.extendedZone.enable ? module.global.resourceLocation.extendedZone.regionName : local.regionName
-      extendedZoneName      = storageAccount.extendedZone.enable ? module.global.resourceLocation.extendedZone.name : null
-      storageAccountId      = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
+      resourceGroupLocation = storageAccount.extendedZone.enable ? module.core.resourceLocation.extendedZone.regionName : local.regionName
+      extendedZoneName      = storageAccount.extendedZone.enable ? module.core.resourceLocation.extendedZone.name : null
+      storageAccountId      = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
     }) if storageAccount.enable
   ]
   privateEndpoints = flatten([
@@ -123,10 +123,10 @@ resource azurerm_storage_account studio {
       jsondecode(data.http.client_address.response_body).ip
     ]
     dynamic private_link_access {
-      for_each = module.global.defender.storage.malwareScanning.enable ? [1] : []
+      for_each = module.core.defender.storage.malwareScanning.enable ? [1] : []
       content {
         endpoint_tenant_id   = data.azurerm_client_config.current.tenant_id
-        endpoint_resource_id = "/subscriptions/${module.global.subscriptionId}/providers/Microsoft.Security/datascanners/storageDataScanner"
+        endpoint_resource_id = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/providers/Microsoft.Security/datascanners/storageDataScanner"
       }
     }
   }

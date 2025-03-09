@@ -5,7 +5,7 @@
 computeFleets = [
   {
     enable = false
-    name   = "LnxClusterC"
+    name   = "LnxClusterCPU"
     machine = {
       namePrefix = ""
       sizes = [
@@ -55,7 +55,7 @@ computeFleets = [
         custom = {
           enable   = true
           name     = "Custom"
-          fileName = "initialize.sh"
+          fileName = "cse.sh"
           parameters = {
             terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
               enable       = false
@@ -93,7 +93,7 @@ computeFleets = [
   },
   {
     enable = false
-    name   = "WinClusterC"
+    name   = "WinClusterCPU"
     machine = {
       namePrefix = ""
       sizes = [
@@ -143,7 +143,7 @@ computeFleets = [
         custom = {
           enable   = true
           name     = "Custom"
-          fileName = "initialize.ps1"
+          fileName = "cse.ps1"
           parameters = {
             terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
               enable       = false

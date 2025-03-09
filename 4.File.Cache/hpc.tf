@@ -32,14 +32,14 @@ resource azurerm_role_assignment storage_account_contributor {
   count                = var.hpcCache.enable && local.nfsBlobStorageAccount != null ? 1 : 0
   role_definition_name = "Storage Account Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-account-contributor
   principal_id         = data.azuread_service_principal.hpc_cache[0].object_id
-  scope                = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${local.nfsBlobStorageAccount.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.nfsBlobStorageAccount.name}"
+  scope                = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${local.nfsBlobStorageAccount.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.nfsBlobStorageAccount.name}"
 }
 
 resource azurerm_role_assignment storage_blob_data_contributor {
   count                = var.hpcCache.enable && local.nfsBlobStorageAccount != null ? 1 : 0
   role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
   principal_id         = data.azuread_service_principal.hpc_cache[0].object_id
-  scope                = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${local.nfsBlobStorageAccount.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.nfsBlobStorageAccount.name}"
+  scope                = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${local.nfsBlobStorageAccount.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${local.nfsBlobStorageAccount.name}"
 }
 
 resource time_sleep hpc_cache_storage_rbac {
@@ -111,7 +111,7 @@ resource azurerm_hpc_cache_blob_nfs_target storage {
   usage_model                   = each.value.usageModel
   verification_timer_in_seconds = each.value.fileIntervals.verificationSeconds
   write_back_timer_in_seconds   = each.value.fileIntervals.writeBackSeconds
-  storage_container_id          = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${each.value.hostName}/blobServices/default/containers/${each.value.containerName}"
+  storage_container_id          = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${each.value.hostName}/blobServices/default/containers/${each.value.containerName}"
   depends_on = [
     azurerm_hpc_cache.studio,
     time_sleep.hpc_cache_storage_rbac

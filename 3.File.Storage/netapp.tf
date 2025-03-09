@@ -81,9 +81,6 @@ resource azurerm_resource_group netapp {
   tags = {
     AAA = basename(path.cwd)
   }
-  depends_on = [
-    azurerm_virtual_machine_extension.active_directory
-  ]
 }
 
 resource azurerm_netapp_account studio {
@@ -103,15 +100,12 @@ resource azurerm_netapp_account studio {
       domain          = var.activeDirectory.domainName
       username        = local.activeDirectory.machine.adminLogin.userName
       password        = local.activeDirectory.machine.adminLogin.userPassword
-      smb_server_name = azurerm_windows_virtual_machine.active_directory[0].name
+      smb_server_name = var.activeDirectory.machine.name
       dns_servers = [
-        azurerm_windows_virtual_machine.active_directory[0].private_ip_address
+        var.activeDirectory.machine.ip
       ]
     }
   }
-  depends_on = [
-    azurerm_virtual_machine_extension.active_directory
-  ]
 }
 
 resource azurerm_netapp_account_encryption studio {
@@ -151,7 +145,7 @@ resource azurerm_netapp_account_encryption studio {
 #   protocols                     = each.value.network.protocols
 #   subnet_id                     = data.azurerm_subnet.storage_netapp[0].id
 #   encryption_key_source         = var.netAppFiles.encryption.enable ? "Microsoft.KeyVault" : null
-#   key_vault_private_endpoint_id = var.netAppFiles.encryption.enable ? data.terraform_remote_state.network.outputs.keyVaultPrivateEndpointId : null
+#   key_vault_private_endpoint_id = var.netAppFiles.encryption.enable ? data.terraform_remote_state.network.outputs.keyVault.privateEndpoint.id : null
 #   account_name                  = var.netAppFiles.name
 #   dynamic export_policy_rule {
 #     for_each = each.value.exportPolicies

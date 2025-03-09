@@ -84,7 +84,7 @@ if ($machineType -eq "Scheduler") {
   $version = "2024"
   $fileName = "Cinebench${version}_win_x86_64.zip"
   $fileLink = "$binHostUrl/Benchmark/Cinebench/$version/$fileName"
-  DownloadFile $fileName $fileLink # $tenantId $clientId $clientSecret $storageVersion
+  DownloadFile $fileName $fileLink
   Expand-Archive -Path $fileName
   Write-Host "Customize (End): Cinebench"
 }
@@ -103,7 +103,7 @@ if ($machineType -eq "Workstation") {
   $fileType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
   $fileName = "${fileType}_$version.exe"
   $fileLink = "$binHostUrl/Teradici/$version/$fileName"
-  DownloadFile $fileName $fileLink # $tenantId $clientId $clientSecret $storageVersion
+  DownloadFile $fileName $fileLink
   RunProcess .\$fileName "/S /NoPostReboot /Force" "$binDirectory\$fileType"
   Write-Host "Customize (End): HP Anyware"
 }

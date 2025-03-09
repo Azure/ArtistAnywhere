@@ -89,8 +89,9 @@ resource azurerm_virtual_machine_extension active_directory {
   virtual_machine_id         = azurerm_windows_virtual_machine.active_directory.id
   protected_settings = jsonencode({
     commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
-      templatefile("vm.ps1", {
+      templatefile("cse.ps1", {
         activeDirectory = local.activeDirectory
+        machineType     = "WinServer"
       }), "UTF-16LE"
     )}"
   })

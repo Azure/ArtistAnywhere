@@ -7,7 +7,7 @@ resourceGroupName = "ArtistAnywhere.Compute" # Alphanumeric, underscores, hyphen
 virtualMachineScaleSets = [
   {
     enable = false
-    name   = "LnxClusterC"
+    name   = "LnxClusterCPU"
     machine = {
       namePrefix = ""
       size       = "Standard_HX176rs"
@@ -50,7 +50,7 @@ virtualMachineScaleSets = [
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "initialize.sh"
+        fileName = "cse.sh"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
             enable       = false
@@ -90,7 +90,7 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "LnxClusterGN"
+    name   = "LnxClusterGPU-N"
     machine = {
       namePrefix = ""
       size       = "Standard_NC80ads_H100_v5"
@@ -133,7 +133,7 @@ virtualMachineScaleSets = [
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "initialize.sh"
+        fileName = "cse.sh"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
             enable       = false
@@ -173,7 +173,7 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "LnxClusterGA"
+    name   = "LnxClusterGPU-A"
     machine = {
       namePrefix = ""
       size       = "Standard_NV28adms_V710_v5"
@@ -216,7 +216,7 @@ virtualMachineScaleSets = [
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "initialize.sh"
+        fileName = "cse.sh"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
             enable       = false
@@ -256,7 +256,7 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "WinClusterC"
+    name   = "WinClusterCPU"
     machine = {
       namePrefix = ""
       size       = "Standard_HX176rs"
@@ -299,7 +299,7 @@ virtualMachineScaleSets = [
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "initialize.ps1"
+        fileName = "cse.ps1"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
             enable       = false
@@ -339,7 +339,7 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "WinClusterGN"
+    name   = "WinClusterGPU-N"
     machine = {
       namePrefix = ""
       size       = "Standard_NC80ads_H100_v5"
@@ -382,7 +382,7 @@ virtualMachineScaleSets = [
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "initialize.ps1"
+        fileName = "cse.ps1"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
             enable       = false
@@ -422,7 +422,7 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "WinClusterGA"
+    name   = "WinClusterGPU-A"
     machine = {
       namePrefix = ""
       size       = "Standard_NV28adms_V710_v5"
@@ -465,7 +465,7 @@ virtualMachineScaleSets = [
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "initialize.ps1"
+        fileName = "cse.ps1"
         parameters = {
           terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
             enable       = false
@@ -509,18 +509,23 @@ virtualMachineScaleSets = [
 # Brownfield Resources #
 ########################
 
-activeDirectory = {
-  enable        = false
-  domainName    = "azure.studio"
-  serverName    = "WinADDC"
-  orgUnitPath   = ""
-  adminUsername = ""
-  adminPassword = ""
-}
-
 existingNetwork = {
   enable            = false
   name              = ""
   subnetName        = ""
   resourceGroupName = ""
+}
+
+activeDirectory = {
+  enable = false
+  domain = {
+    name = "azure.studio"
+  }
+  machine = {
+    name = "WinADController"
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+    }
+  }
 }

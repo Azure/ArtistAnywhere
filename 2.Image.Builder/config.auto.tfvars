@@ -47,6 +47,7 @@ computeGallery = {
 #############################################################################################
 
 imageBuilder = {
+  binHostUrl = "https://xstudio.blob.core.windows.net/bin"
   templates = [
     {
       enable = true
@@ -439,14 +440,4 @@ imageBuilder = {
       }
     }
   ]
-}
-
-imageCustomize = {
-  blobStorage = {
-    binHostUrl = "https://xstudio.blob.core.windows.net/bin"
-    authClient = { # Required for image customization build process
-      id     = ""
-      secret = ""
-    }
-  }
 }

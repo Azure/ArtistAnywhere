@@ -1,3 +1,7 @@
+#########################################################################
+# Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
+#########################################################################
+
 variable dataLoad {
   type = object({
     enable = bool
@@ -42,10 +46,10 @@ locals {
   dataLoad = merge(var.dataLoad, {
     machine = merge(var.dataLoad.machine, {
       image = merge(var.dataLoad.machine.image, {
-        publisher = var.dataLoad.machine.image.publisher != "" ? var.dataLoad.machine.image.publisher : module.global.linux.publisher
-        product   = var.dataLoad.machine.image.product != "" ? var.dataLoad.machine.image.product : module.global.linux.offer
-        name      = var.dataLoad.machine.image.name != "" ? var.dataLoad.machine.image.name : module.global.linux.sku
-        version   = var.dataLoad.machine.image.version != "" ? var.dataLoad.machine.image.version : module.global.linux.version
+        publisher = var.dataLoad.machine.image.publisher != "" ? var.dataLoad.machine.image.publisher : module.core.image.linux.publisher
+        product   = var.dataLoad.machine.image.product != "" ? var.dataLoad.machine.image.product : module.core.image.linux.offer
+        name      = var.dataLoad.machine.image.name != "" ? var.dataLoad.machine.image.name : module.core.image.linux.sku
+        version   = var.dataLoad.machine.image.version != "" ? var.dataLoad.machine.image.version : module.core.image.linux.version
       })
       adminLogin = merge(var.dataLoad.machine.adminLogin, {
         userName     = var.dataLoad.machine.adminLogin.userName != "" ? var.dataLoad.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -55,19 +59,6 @@ locals {
     })
   })
 }
-
-resource azurerm_resource_group storage_data_load {
-  count    = var.dataLoad.enable ? 1 : 0
-  name     = "${var.resourceGroupName}.DataLoad"
-  location = local.regionName
-  tags = {
-    AAA = basename(path.cwd)
-  }
-}
-
-#########################################################################
-# Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
-#########################################################################
 
 resource azurerm_network_interface storage_data_load {
   count               = var.dataLoad.enable ? 1 : 0
@@ -125,14 +116,13 @@ resource azurerm_virtual_machine_extension storage_data_load {
   name                       = "DataLoad"
   type                       = "CustomScript"
   publisher                  = "Microsoft.Azure.Extensions"
-  type_handler_version       = module.global.version.script_extension_linux
+  type_handler_version       = module.core.version.script_extension_linux
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
   virtual_machine_id         = azurerm_linux_virtual_machine.storage_data_load[0].id
   protected_settings = jsonencode({
     script = base64encode(
-      templatefile("data.sh", {
-        managedLustre = var.managedLustre
+      templatefile("cse.sh", {
         dataLoadMount = var.dataLoad.mount
       })
     )

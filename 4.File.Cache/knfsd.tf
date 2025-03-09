@@ -64,10 +64,10 @@ locals {
   knfsdCache = merge(var.knfsdCache, {
     machine = merge(var.knfsdCache.machine, {
       image = merge(var.knfsdCache.machine.image, {
-        publisher = var.knfsdCache.machine.image.publisher != "" ? var.knfsdCache.machine.image.publisher : module.global.linux.publisher
-        product   = var.knfsdCache.machine.image.product != "" ? var.knfsdCache.machine.image.product : module.global.linux.offer
-        name      = var.knfsdCache.machine.image.name != "" ? var.knfsdCache.machine.image.name : module.global.linux.sku
-        version   = var.knfsdCache.machine.image.version != "" ? var.knfsdCache.machine.image.version : module.global.linux.version
+        publisher = var.knfsdCache.machine.image.publisher != "" ? var.knfsdCache.machine.image.publisher : module.core.image.linux.publisher
+        product   = var.knfsdCache.machine.image.product != "" ? var.knfsdCache.machine.image.product : module.core.image.linux.offer
+        name      = var.knfsdCache.machine.image.name != "" ? var.knfsdCache.machine.image.name : module.core.image.linux.sku
+        version   = var.knfsdCache.machine.image.version != "" ? var.knfsdCache.machine.image.version : module.core.image.linux.version
       })
       adminLogin = merge(var.knfsdCache.machine.adminLogin, {
         userName     = var.knfsdCache.machine.adminLogin.userName != "" ? var.knfsdCache.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -170,7 +170,7 @@ resource azurerm_virtual_machine_extension cache {
   name                       = var.knfsdCache.machine.extension.custom.name
   type                       = "CustomScript"
   publisher                  = "Microsoft.Azure.Extensions"
-  type_handler_version       = module.global.version.script_extension_linux
+  type_handler_version       = module.core.version.script_extension_linux
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
   virtual_machine_id         = azurerm_linux_virtual_machine.cache[0].id

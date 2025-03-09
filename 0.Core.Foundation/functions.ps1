@@ -10,15 +10,11 @@ if ($buildConfigEncoded -ne "") {
   Write-Host "Customize (Start): Image Build Parameters"
   $buildConfigBytes = [System.Convert]::FromBase64String($buildConfigEncoded)
   $buildConfig = [System.Text.Encoding]::UTF8.GetString($buildConfigBytes) | ConvertFrom-Json
+  $binHostUrl = $buildConfig.binHostUrl
   $machineType = $buildConfig.machineType
   $gpuProvider = $buildConfig.gpuProvider
-  $binHostUrl = $buildConfig.binHostUrl
   $jobSchedulers = $buildConfig.jobSchedulers
   $jobProcessors = $buildConfig.jobProcessors
-  $tenantId = $buildConfig.authClient.tenantId
-  $clientId = $buildConfig.authClient.clientId
-  $clientSecret = $buildConfig.authClient.clientSecret
-  $storageVersion = $buildConfig.authClient.storageVersion
   $adminUsername = $buildConfig.authCredential.adminUsername
   $adminPassword = $buildConfig.authCredential.adminPassword
   $serviceUsername = $buildConfig.authCredential.serviceUsername
@@ -26,22 +22,10 @@ if ($buildConfigEncoded -ne "") {
   Write-Host "Customize (End): Image Build Parameters"
 }
 
-function DownloadFile ($fileName, $fileLink, $tenantId, $clientId, $clientSecret, $storageVersion) {
+function DownloadFile ($fileName, $fileLink) {
   try {
     Add-Type -AssemblyName System.Net.Http
     $httpClient = New-Object System.Net.Http.HttpClient
-    if ($tenantId -ne $null) {
-      $body = @{
-        resource      = "https://storage.azure.com"
-        grant_type    = "client_credentials"
-        client_id     = $clientId
-        client_secret = $clientSecret
-      }
-      $authToken = (Invoke-WebRequest -UseBasicParsing -Uri "https://login.microsoftonline.com/$tenantId/oauth2/token" -Body $body -Method Post).Content
-      $accessToken = (ConvertFrom-Json -InputObject $authToken).access_token
-      $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
-      $httpClient.DefaultRequestHeaders.Add("x-ms-version", $storageVersion)
-    }
     $httpResponse = $httpClient.GetAsync($fileLink).Result
     if ($httpResponse.IsSuccessStatusCode) {
       $stream = $httpResponse.Content.ReadAsStreamAsync().Result
@@ -56,10 +40,6 @@ function DownloadFile ($fileName, $fileLink, $tenantId, $clientId, $clientSecret
     Write-Error "DownloadFile Error: $_.Exception.Message"
     Write-Error "FileName: $fileName"
     Write-Error "FileLink: $fileLink"
-    Write-Error "TenantId: $tenantId"
-    Write-Error "ClientId: $clientId"
-    Write-Error "ClientSecret: $clientSecret"
-    Write-Error "StorageVersion: $storageVersion"
     throw
   }
 }
@@ -149,16 +129,15 @@ function Retry ($delaySeconds, $maxCount, $scriptBlock) {
 function JoinActiveDirectory {
   param (
     [Parameter(ParameterSetName="Default")]
+    [object] $activeDirectory,
+    [Parameter(ParameterSetName="Retry")]
     [string] $domainName,
     [string] $serverName,
     [string] $userName,
-    [string] $userPassword,
-
-    [Parameter(ParameterSetName="Cluster")]
-    [object] $activeDirectory
+    [string] $userPassword
   )
   process {
-    if ($PSCmdlet.ParameterSetName -eq "Cluster") {
+    if ($PSCmdlet.ParameterSetName -eq "Retry") {
       if ($activeDirectory.enable) {
         Retry 3 10 {
           JoinActiveDirectory -domainName $activeDirectory.domainName -serverName $activeDirectory.serverName -userName $activeDirectory.adminUsername -userPassword $activeDirectory.adminPassword

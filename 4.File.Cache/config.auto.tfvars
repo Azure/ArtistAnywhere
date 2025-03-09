@@ -319,14 +319,6 @@ storageTargets = [
 # Brownfield Resources #
 ########################
 
-activeDirectory = {
-  enable       = false
-  domainName   = "azure.studio"
-  servers      = "WinADDC"
-  userName     = ""
-  userPassword = ""
-}
-
 existingNetwork = {
   enable            = false
   name              = ""
@@ -335,5 +327,19 @@ existingNetwork = {
   privateDns = {
     zoneName          = ""
     resourceGroupName = ""
+  }
+}
+
+activeDirectory = {
+  enable = false
+  domain = {
+    name = "azure.studio"
+  }
+  machine = {
+    name = "WinADController"
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+    }
   }
 }

@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">=1.10.0"
+  required_version = ">=1.11.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.20.0"
+      version = "~>4.22.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -22,16 +22,13 @@ terraform {
 
 provider azurerm {
   features {
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
   }
-  subscription_id     = module.global.subscriptionId
+  subscription_id     = data.terraform_remote_state.core.outputs.subscription.id
   storage_use_azuread = true
 }
 
-module global {
-  source = "../../0.Global.Foundation/config"
+module core {
+  source = "../../0.Core.Foundation/config"
 }
 
 variable resourceGroupName {
@@ -58,36 +55,37 @@ data azuread_user current {
 }
 
 data azurerm_user_assigned_identity studio {
-  name                = module.global.managedIdentity.name
-  resource_group_name = module.global.resourceGroupName
+  name                = module.core.managedIdentity.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault studio {
-  name                = module.global.keyVault.name
-  resource_group_name = module.global.resourceGroupName
+  name                = module.core.keyVault.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault_secret admin_username {
-  name         = module.global.keyVault.secretName.adminUsername
+  name         = module.core.keyVault.secretName.adminUsername
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault_secret admin_password {
-  name         = module.global.keyVault.secretName.adminPassword
+  name         = module.core.keyVault.secretName.adminPassword
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault_key data_encryption {
-  name         = module.global.keyVault.keyName.dataEncryption
+  name         = module.core.keyVault.keyName.dataEncryption
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
-    resource_group_name  = module.global.resourceGroupName
-    storage_account_name = module.global.storage.accountName
-    container_name       = module.global.storage.containerName.terraformState
+    subscription_id      = data.terraform_remote_state.core.outputs.subscription.id
+    resource_group_name  = data.terraform_remote_state.core.outputs.resourceGroup.name
+    storage_account_name = data.terraform_remote_state.core.outputs.storage.account.name
+    container_name       = data.terraform_remote_state.core.outputs.storage.containerName.terraformState
     key                  = "1.Virtual.Network"
     use_azuread_auth     = true
   }
@@ -121,7 +119,7 @@ data azurerm_subnet data_postgresql {
 resource azurerm_resource_group job_scheduler_mysql {
   count    = var.mySQL.enable ? 1 : 0
   name     = "${var.resourceGroupName}.MySQL"
-  location = module.global.resourceLocation.regionName
+  location = module.core.resourceLocation.regionName
   tags = {
     AAA = "${basename(dirname(path.cwd))}.${basename(path.cwd)}"
   }
@@ -130,7 +128,7 @@ resource azurerm_resource_group job_scheduler_mysql {
 resource azurerm_resource_group job_scheduler_postgresql {
   count    = var.postgreSQL.enable ? 1 : 0
   name     = "${var.resourceGroupName}.PostgreSQL"
-  location = module.global.resourceLocation.regionName
+  location = module.core.resourceLocation.regionName
   tags = {
     AAA = "${basename(dirname(path.cwd))}.${basename(path.cwd)}"
   }

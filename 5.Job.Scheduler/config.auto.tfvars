@@ -34,13 +34,13 @@ virtualMachines = [
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "initialize.sh"
+        fileName = "cse.sh"
         parameters = {
           autoScale = {
             enable                   = false
             resourceGroupName        = "ArtistAnywhere.Compute"
             jobSchedulerName         = "Deadline"
-            computeClusterName       = "LnxClusterC"
+            computeClusterName       = "LnxClusterCPU"
             computeClusterNodeLimit  = 100
             workerIdleDeleteSeconds  = 300
             jobWaitThresholdSeconds  = 60
@@ -91,13 +91,13 @@ virtualMachines = [
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "initialize.ps1"
+        fileName = "cse.ps1"
         parameters = {
           autoScale = {
             enable                   = false
             resourceGroupName        = "ArtistAnywhere.Compute"
             jobSchedulerName         = "Deadline"
-            computeClusterName       = "WinClusterC"
+            computeClusterName       = "WinClusterCPU"
             computeClusterNodeLimit  = 100
             workerIdleDeleteSeconds  = 300
             jobWaitThresholdSeconds  = 60
@@ -142,5 +142,19 @@ existingNetwork = {
   privateDns = {
     zoneName          = ""
     resourceGroupName = ""
+  }
+}
+
+activeDirectory = {
+  enable = false
+  domain = {
+    name = "azure.studio"
+  }
+  machine = {
+    name = "WinADController"
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+    }
   }
 }

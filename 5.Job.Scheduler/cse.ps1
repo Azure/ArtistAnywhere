@@ -16,3 +16,5 @@ if ("${autoScale.enable}" -ne $false) {
   $taskSettings = New-ScheduledTaskSettingsSet -Disable
 }
 Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -User System -Force
+
+JoinActiveDirectory -activeDirectory (ConvertFrom-Json -InputObject '${jsonencode(activeDirectory)}')

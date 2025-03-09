@@ -69,71 +69,6 @@ dnsRecord = {
   ttlSeconds = 300
 }
 
-#################################################################################################################################################
-# Active Directory (https://learn.microsoft.com/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview) #
-#################################################################################################################################################
-
-activeDirectory = {
-  enable     = false
-  domainName = "azure.studio"
-  machine = {
-    name = "WinADDC"
-    size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-    image = {
-      publisher = "MicrosoftWindowsServer"
-      product   = "WindowsServer"
-      name      = "2022-Datacenter-Azure-Edition"
-      version   = "Latest"
-    }
-    osDisk = {
-      storageType = "Premium_LRS"
-      cachingMode = "ReadWrite"
-      sizeGB      = 0
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-    }
-  }
-  network = {
-    acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-      enable = true
-    }
-    staticAddress = "10.1.192.254"
-  }
-}
-
-activeDirectoryClient = {
-  enable      = false
-  domainName  = "azure.studio"
-  serverName  = "WinADDC"
-  orgUnitPath = ""
-  machine = {
-    name = "WinADClient"
-    size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-    image = {
-      publisher = "MicrosoftWindowsDesktop"
-      product   = "Windows-10"
-      name      = "Win10-22H2-Ent-G2"
-      version   = "Latest"
-    }
-    osDisk = {
-      storageType = "Premium_LRS"
-      cachingMode = "ReadWrite"
-      sizeGB      = 0
-    }
-    adminLogin = {
-      userName     = ""
-      userPassword = ""
-    }
-  }
-  network = {
-    acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
-      enable = true
-    }
-  }
-}
-
 ##########################
 # Pre-Existing Resources #
 ##########################
@@ -147,5 +82,20 @@ existingNetwork = {
   privateDns = {
     zoneName          = ""
     resourceGroupName = ""
+  }
+}
+
+activeDirectory = {
+  enable = false
+  domain = {
+    name = "azure.studio"
+  }
+  machine = {
+    ip   = "10.0.192.254"
+    name = "WinADController"
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+    }
   }
 }

@@ -74,13 +74,15 @@ locals {
           userPassword = virtualMachine.adminLogin.userPassword != "" ? virtualMachine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
           sshKeyPublic = virtualMachine.adminLogin.sshKeyPublic != "" ? virtualMachine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
         })
-        activeDirectory = merge(var.activeDirectory, {
-          adminUsername = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value
-          adminPassword = var.activeDirectory.adminPassword != "" ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password.value
-        })
       })
     ]
   ])
+  activeDirectory = merge(var.activeDirectory, {
+    adminLogin = merge(var.activeDirectory.adminLogin, {
+      userName     = var.activeDirectory.adminLogin.userName != "" ? var.activeDirectory.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+      userPassword = var.activeDirectory.adminLogin.userPassword != "" ? var.activeDirectory.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+    })
+  })
 }
 
 resource azurerm_network_interface workstation {
@@ -108,7 +110,7 @@ resource azurerm_linux_virtual_machine workstation {
   location                        = each.value.resourceLocation.regionName
   edge_zone                       = each.value.resourceLocation.extendedZoneName
   size                            = each.value.size
-  source_image_id                 = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
+  source_image_id                 = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
@@ -205,7 +207,7 @@ resource azurerm_windows_virtual_machine workstation {
   location            = each.value.resourceLocation.regionName
   edge_zone           = each.value.resourceLocation.extendedZoneName
   size                = each.value.size
-  source_image_id     = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
+  source_image_id     = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   admin_username      = each.value.adminLogin.userName
   admin_password      = each.value.adminLogin.userPassword
   identity {
@@ -244,8 +246,8 @@ resource azurerm_virtual_machine_extension workstation_initialize_windows {
   protected_settings = jsonencode({
     commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
       templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
+        activeDirectory = local.activeDirectory
         fileSystem      = module.global.fileSystem.windows
-        activeDirectory = each.value.activeDirectory
       })), "UTF-16LE"
     )}"
   })

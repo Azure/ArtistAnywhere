@@ -38,7 +38,7 @@ virtualMachines = [
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "initialize.sh"
+        fileName = "cse.sh"
         parameters = {
           remoteAgentKey = ""
         }
@@ -90,7 +90,7 @@ virtualMachines = [
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "initialize.sh"
+        fileName = "cse.sh"
         parameters = {
           remoteAgentKey = ""
         }
@@ -142,7 +142,7 @@ virtualMachines = [
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "initialize.ps1"
+        fileName = "cse.ps1"
         parameters = {
           remoteAgentKey = ""
         }
@@ -194,7 +194,7 @@ virtualMachines = [
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "initialize.ps1"
+        fileName = "cse.ps1"
         parameters = {
           remoteAgentKey = ""
         }
@@ -219,18 +219,23 @@ virtualMachines = [
 # Brownfield Resources #
 ########################
 
-activeDirectory = {
-  enable        = false
-  domainName    = "azure.studio"
-  serverName    = "WinADDC"
-  orgUnitPath   = ""
-  adminUsername = ""
-  adminPassword = ""
-}
-
 existingNetwork = {
   enable            = false
   name              = ""
   subnetName        = ""
   resourceGroupName = ""
+}
+
+activeDirectory = {
+  enable = false
+  domain = {
+    name = "azure.studio"
+  }
+  machine = {
+    name = "WinADController"
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+    }
+  }
 }

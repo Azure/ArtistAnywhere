@@ -107,10 +107,6 @@ locals {
         userPassword = virtualMachineScaleSet.adminLogin.userPassword != "" ? virtualMachineScaleSet.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
         sshKeyPublic = virtualMachineScaleSet.adminLogin.sshKeyPublic != "" ? virtualMachineScaleSet.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
       })
-      activeDirectory = merge(var.activeDirectory, {
-        adminUsername = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value
-        adminPassword = var.activeDirectory.adminPassword != "" ? var.activeDirectory.adminPassword : data.azurerm_key_vault_secret.admin_password.value
-      })
     }) if virtualMachineScaleSet.enable
   ]
 }
@@ -126,7 +122,7 @@ resource azurerm_linux_virtual_machine_scale_set compute {
   edge_zone                       = each.value.resourceLocation.extendedZoneName
   sku                             = each.value.machine.size
   instances                       = each.value.machine.count
-  source_image_id                 = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+  source_image_id                 = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
@@ -259,7 +255,7 @@ resource azurerm_windows_virtual_machine_scale_set compute {
   edge_zone              = each.value.resourceLocation.extendedZoneName
   sku                    = each.value.machine.size
   instances              = each.value.machine.count
-  source_image_id        = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+  source_image_id        = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   admin_username         = each.value.adminLogin.userName
   admin_password         = each.value.adminLogin.userPassword
   priority               = each.value.spot.enable ? "Spot" : "Regular"
@@ -308,8 +304,8 @@ resource azurerm_windows_virtual_machine_scale_set compute {
       protected_settings = jsonencode({
         commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
+            activeDirectory = local.activeDirectory
             fileSystem      = module.global.fileSystem.windows
-            activeDirectory = each.value.activeDirectory
           })), "UTF-16LE"
         )}"
       })
@@ -384,7 +380,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set compute {
   # edge_zone                   = each.value.resourceLocation.extendedZoneName
   sku_name                    = each.value.machine.size
   instances                   = each.value.machine.count
-  source_image_id             = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
+  source_image_id             = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   priority                    = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy             = each.value.spot.enable ? each.value.spot.evictionPolicy : null
   zones                       = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? data.azurerm_location.studio.zone_mappings[*].logical_zone : null
@@ -460,8 +456,8 @@ resource azurerm_orchestrated_virtual_machine_scale_set compute {
         )
         commandToExecute = lower(each.value.osDisk.type) == "windows" ? "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
+            activeDirectory = local.activeDirectory
             fileSystem      = module.global.fileSystem.windows
-            activeDirectory = each.value.activeDirectory
           })), "UTF-16LE"
         )}" : null
       })

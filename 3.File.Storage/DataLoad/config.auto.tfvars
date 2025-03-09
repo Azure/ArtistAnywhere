@@ -1,3 +1,11 @@
+resourceGroupName = "ArtistAnywhere.Storage.DataLoad" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+
+regionName = "" # Optional default region override
+
+#########################################################################
+# Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
+#########################################################################
+
 dataLoad = {
   enable = false
   mount = {

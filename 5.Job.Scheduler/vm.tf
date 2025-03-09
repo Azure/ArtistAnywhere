@@ -79,6 +79,12 @@ locals {
       })
     })
   ]
+  activeDirectory = merge(var.activeDirectory, {
+    adminLogin = merge(var.activeDirectory.adminLogin, {
+      userName     = var.activeDirectory.adminLogin.userName != "" ? var.activeDirectory.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+      userPassword = var.activeDirectory.adminLogin.userPassword != "" ? var.activeDirectory.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+    })
+  })
 }
 
 resource azurerm_network_interface job_scheduler {
@@ -105,7 +111,7 @@ resource azurerm_linux_virtual_machine job_scheduler {
   resource_group_name             = azurerm_resource_group.job_scheduler.name
   location                        = each.value.resourceLocation.regionName
   edge_zone                       = each.value.resourceLocation.extendedZoneName
-  source_image_id                 = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
+  source_image_id                 = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                            = each.value.size
   admin_username                  = each.value.adminLogin.userName
   admin_password                  = each.value.adminLogin.userPassword
@@ -198,7 +204,7 @@ resource azurerm_windows_virtual_machine job_scheduler {
   resource_group_name = azurerm_resource_group.job_scheduler.name
   location            = each.value.resourceLocation.regionName
   edge_zone           = each.value.resourceLocation.extendedZoneName
-  source_image_id     = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
+  source_image_id     = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                = each.value.size
   admin_username      = each.value.adminLogin.userName
   admin_password      = each.value.adminLogin.userPassword
@@ -235,7 +241,9 @@ resource azurerm_virtual_machine_extension job_scheduler_initialize_windows {
   virtual_machine_id         = "${azurerm_resource_group.job_scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
   protected_settings = jsonencode({
     commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
-      templatefile(each.value.extension.custom.fileName, each.value.extension.custom.parameters), "UTF-16LE"
+      templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
+        activeDirectory = local.activeDirectory
+      })), "UTF-16LE"
     )}"
   })
   depends_on = [
