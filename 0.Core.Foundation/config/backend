@@ -1,0 +1,4 @@
+subscription_id      = ""
+resource_group_name  = "ArtistAnywhere"
+storage_account_name = "xstudio0"
+container_name       = "terraform-state"

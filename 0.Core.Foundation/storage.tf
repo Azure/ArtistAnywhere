@@ -37,12 +37,12 @@ resource azurerm_role_assignment studio_storage_blob_data_contributor {
 resource azurerm_storage_account_customer_managed_key studio {
   count              = var.storage.encryption.service.customKey.enable ? 1 : 0
   key_vault_id       = azurerm_key_vault.studio.id
-  key_name           = module.global.keyVault.keyName.dataEncryption
+  key_name           = module.core.keyVault.keyName.dataEncryption
   storage_account_id = azurerm_storage_account.studio.id
 }
 
 resource azurerm_storage_account studio {
-  name                              = module.global.storage.accountName
+  name                              = local.storage.account.name
   resource_group_name               = azurerm_resource_group.studio.name
   location                          = azurerm_resource_group.studio.location
   account_kind                      = var.storage.account.type
@@ -64,10 +64,10 @@ resource azurerm_storage_account studio {
       jsondecode(data.http.client_address.response_body).ip
     ]
     dynamic private_link_access {
-      for_each = module.global.defender.storage.malwareScanning.enable ? [1] : []
+      for_each = module.core.defender.storage.malwareScanning.enable ? [1] : []
       content {
         endpoint_tenant_id   = data.azurerm_client_config.current.tenant_id
-        endpoint_resource_id = "/subscriptions/${module.global.subscriptionId}/providers/Microsoft.Security/datascanners/storageDataScanner"
+        endpoint_resource_id = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/providers/Microsoft.Security/datascanners/storageDataScanner"
       }
     }
   }
@@ -75,7 +75,7 @@ resource azurerm_storage_account studio {
 
 resource azurerm_storage_container studio {
   for_each = {
-    for containerName in module.global.storage.containerName : containerName => containerName
+    for containerName in local.storage.containerName : containerName => containerName
   }
   name               = each.value
   storage_account_id = azurerm_storage_account.studio.id

@@ -9,13 +9,9 @@ terraform {
       source  = "hashicorp/http"
       version = "~>3.4.0"
     }
-    azapi = {
-      source = "azure/azapi"
-      version = "~>2.3.0"
-    }
   }
   backend azurerm {
-    key              = "2.Image.Builder"
+    key              = "2.Image.Builder.Registry"
     use_azuread_auth = true
   }
 }
@@ -28,49 +24,26 @@ provider azurerm {
 }
 
 module core {
-  source = "../0.Core.Foundation/config"
+  source = "../../0.Core.Foundation/config"
 }
 
 variable resourceGroupName {
   type = string
 }
 
-data azurerm_client_config current {}
+data http client_address {
+  url = "https://api.ipify.org?format=json"
+}
 
 data azurerm_user_assigned_identity studio {
   name                = module.core.managedIdentity.name
   resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
-data azurerm_key_vault studio {
-  name                = module.core.keyVault.name
-  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
-}
-
-data azurerm_key_vault_secret admin_username {
-  name         = module.core.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
-data azurerm_key_vault_secret admin_password {
-  name         = module.core.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
-data azurerm_key_vault_secret service_username {
-  name         = module.core.keyVault.secretName.serviceUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
-data azurerm_key_vault_secret service_password {
-  name         = module.core.keyVault.secretName.servicePassword
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
 data terraform_remote_state core {
   backend = "local"
   config = {
-    path = "../0.Core.Foundation/terraform.tfstate"
+    path = "../../0.Core.Foundation/terraform.tfstate"
   }
 }
 
@@ -97,22 +70,8 @@ data azurerm_subnet compute {
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
-locals {
-  regionNames = distinct([
-    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
-  ])
-}
-
-resource azurerm_resource_group image_builder {
-  name     = "${var.resourceGroupName}.Builder"
-  location = module.core.resourceLocation.regionName
-  tags = {
-    AAA = basename(path.cwd)
-  }
-}
-
-resource azurerm_resource_group image_gallery {
-  name     = "${var.resourceGroupName}.Gallery"
+resource azurerm_resource_group image_registry {
+  name     = var.resourceGroupName
   location = module.core.resourceLocation.regionName
   tags = {
     AAA = basename(path.cwd)

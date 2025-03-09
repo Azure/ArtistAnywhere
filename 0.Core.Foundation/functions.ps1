@@ -151,7 +151,6 @@ function JoinActiveDirectory {
     [Parameter(ParameterSetName="Default")]
     [string] $domainName,
     [string] $serverName,
-    [string] $orgUnitPath,
     [string] $userName,
     [string] $userPassword,
 
@@ -162,7 +161,7 @@ function JoinActiveDirectory {
     if ($PSCmdlet.ParameterSetName -eq "Cluster") {
       if ($activeDirectory.enable) {
         Retry 3 10 {
-          JoinActiveDirectory -domainName $activeDirectory.domainName -serverName $activeDirectory.serverName -orgUnitPath $activeDirectory.orgUnitPath -userName $activeDirectory.adminUsername -userPassword $activeDirectory.adminPassword
+          JoinActiveDirectory -domainName $activeDirectory.domainName -serverName $activeDirectory.serverName -userName $activeDirectory.adminUsername -userPassword $activeDirectory.adminPassword
         }
       }
     } else {
@@ -179,11 +178,7 @@ function JoinActiveDirectory {
         Remove-ADObject -Identity $adComputer -Server $serverName -Recursive -Confirm:$false
       }
 
-      if ($orgUnitPath -ne "") {
-        Add-Computer -DomainName $domainName -Server $serverName -Credential $userCredential -OUPath $orgUnitPath -Force -PassThru -Verbose
-      } else {
-        Add-Computer -DomainName $domainName -Server $serverName -Credential $userCredential -Force -PassThru -Verbose
-      }
+      Add-Computer -DomainName $domainName -Server $serverName -Credential $userCredential -Force -PassThru -Verbose
       if ($?) {
         Restart-Computer
       }

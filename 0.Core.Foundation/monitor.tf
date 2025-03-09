@@ -32,7 +32,7 @@ resource time_sleep monitor_diagnostics_rbac {
 }
 
 resource azurerm_log_analytics_workspace studio {
-  name                       = module.global.monitor.name
+  name                       = module.core.monitor.name
   resource_group_name        = azurerm_resource_group.studio_monitor.name
   location                   = azurerm_resource_group.studio_monitor.location
   sku                        = var.monitor.logWorkspace.type
@@ -48,7 +48,7 @@ resource azurerm_log_analytics_workspace studio {
 }
 
 resource azurerm_application_insights studio {
-  name                       = module.global.monitor.name
+  name                       = module.core.monitor.name
   resource_group_name        = azurerm_resource_group.studio_monitor.name
   location                   = azurerm_resource_group.studio_monitor.location
   workspace_id               = azurerm_log_analytics_workspace.studio.id
@@ -72,7 +72,7 @@ resource terraform_data monitor_storage {
 }
 
 resource azurerm_monitor_data_collection_endpoint studio {
-  name                          = module.global.monitor.name
+  name                          = module.core.monitor.name
   resource_group_name           = azurerm_resource_group.studio_monitor.name
   location                      = azurerm_resource_group.studio_monitor.location
   public_network_access_enabled = false
@@ -89,7 +89,7 @@ resource time_sleep monitor_data_collection_endpoint {
 }
 
 resource azurerm_monitor_data_collection_rule studio {
-  name                        = module.global.monitor.name
+  name                        = module.core.monitor.name
   resource_group_name         = azurerm_resource_group.studio_monitor.name
   location                    = azurerm_resource_group.studio_monitor.location
   data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.studio.id

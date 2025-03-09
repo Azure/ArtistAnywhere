@@ -24,27 +24,27 @@ variable virtualNetworks {
 locals {
   virtualNetworksConfig = flatten([
     for virtualNetwork in var.virtualNetworks : merge(virtualNetwork, {
-      regionName = virtualNetwork.regionName == "" ? module.global.resourceLocation.regionName : virtualNetwork.regionName
+      regionName = virtualNetwork.regionName == "" ? module.core.resourceLocation.regionName : virtualNetwork.regionName
     }) if virtualNetwork.enable
   ])
   virtualNetwork = local.virtualNetworks[0]
   virtualNetworks = flatten([
     for virtualNetwork in local.virtualNetworksConfig : merge(virtualNetwork, {
-      id                = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.regionName}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}"
+      id                = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.regionName}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}"
       key               = "${virtualNetwork.name}-${virtualNetwork.regionName}"
-      resourceGroupId   = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.regionName}"
+      resourceGroupId   = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.regionName}"
       resourceGroupName = "${var.resourceGroupName}.${virtualNetwork.regionName}"
       extendedZoneName  = ""
     })
   ])
-  virtualNetworksExtended = distinct(concat(local.virtualNetworks, !module.global.resourceLocation.extendedZone.enable ? [local.virtualNetwork] : [
+  virtualNetworksExtended = distinct(concat(local.virtualNetworks, !module.core.resourceLocation.extendedZone.enable ? [local.virtualNetwork] : [
     merge(local.virtualNetwork, {
-      id                = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}.${module.global.resourceLocation.extendedZone.name}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetwork.name}"
-      key               = "${local.virtualNetwork.name}-${module.global.resourceLocation.extendedZone.regionName}-${module.global.resourceLocation.extendedZone.name}"
-      resourceGroupId   = "/subscriptions/${module.global.subscriptionId}/resourceGroups/${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}.${module.global.resourceLocation.extendedZone.name}"
-      resourceGroupName = "${var.resourceGroupName}.${module.global.resourceLocation.extendedZone.regionName}.${module.global.resourceLocation.extendedZone.name}"
-      regionName        = module.global.resourceLocation.extendedZone.regionName
-      extendedZoneName  = module.global.resourceLocation.extendedZone.name
+      id                = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.core.resourceLocation.extendedZone.regionName}.${module.core.resourceLocation.extendedZone.name}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetwork.name}"
+      key               = "${local.virtualNetwork.name}-${module.core.resourceLocation.extendedZone.regionName}-${module.core.resourceLocation.extendedZone.name}"
+      resourceGroupId   = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.core.resourceLocation.extendedZone.regionName}.${module.core.resourceLocation.extendedZone.name}"
+      resourceGroupName = "${var.resourceGroupName}.${module.core.resourceLocation.extendedZone.regionName}.${module.core.resourceLocation.extendedZone.name}"
+      regionName        = module.core.resourceLocation.extendedZone.regionName
+      extendedZoneName  = module.core.resourceLocation.extendedZone.name
     })
   ]))
   virtualNetworksSubnets = flatten([

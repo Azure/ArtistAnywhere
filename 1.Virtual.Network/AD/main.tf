@@ -5,17 +5,9 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~>4.22.0"
     }
-    http = {
-      source  = "hashicorp/http"
-      version = "~>3.4.0"
-    }
-    azapi = {
-      source = "azure/azapi"
-      version = "~>2.3.0"
-    }
   }
   backend azurerm {
-    key              = "2.Image.Builder"
+    key              = "1.Virtual.Network.AD"
     use_azuread_auth = true
   }
 }
@@ -28,14 +20,12 @@ provider azurerm {
 }
 
 module core {
-  source = "../0.Core.Foundation/config"
+  source = "../../0.Core.Foundation/config"
 }
 
 variable resourceGroupName {
   type = string
 }
-
-data azurerm_client_config current {}
 
 data azurerm_user_assigned_identity studio {
   name                = module.core.managedIdentity.name
@@ -57,20 +47,15 @@ data azurerm_key_vault_secret admin_password {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
-data azurerm_key_vault_secret service_username {
-  name         = module.core.keyVault.secretName.serviceUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
-data azurerm_key_vault_secret service_password {
-  name         = module.core.keyVault.secretName.servicePassword
+data azurerm_key_vault_secret ssh_key_public {
+  name         = module.core.keyVault.secretName.sshKeyPublic
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data terraform_remote_state core {
   backend = "local"
   config = {
-    path = "../0.Core.Foundation/terraform.tfstate"
+    path = "../../0.Core.Foundation/terraform.tfstate"
   }
 }
 
@@ -91,29 +76,35 @@ data azurerm_virtual_network studio {
   resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
 }
 
-data azurerm_subnet compute {
-  name                 = "Compute"
+data azurerm_subnet identity {
+  name                 = "Identity"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
 locals {
-  regionNames = distinct([
-    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
-  ])
+  activeDirectory = merge(var.activeDirectory, {
+    machine = merge(var.activeDirectory.machine, {
+      adminLogin = merge(var.activeDirectory.machine.adminLogin, {
+        userName     = var.activeDirectory.machine.adminLogin.userName != "" ? var.activeDirectory.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+        userPassword = var.activeDirectory.machine.adminLogin.userPassword != "" ? var.activeDirectory.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+      })
+    })
+  })
 }
 
-resource azurerm_resource_group image_builder {
-  name     = "${var.resourceGroupName}.Builder"
+resource azurerm_resource_group active_directory {
+  name     = var.resourceGroupName
   location = module.core.resourceLocation.regionName
   tags = {
     AAA = basename(path.cwd)
   }
 }
 
-resource azurerm_resource_group image_gallery {
-  name     = "${var.resourceGroupName}.Gallery"
-  location = module.core.resourceLocation.regionName
+resource azurerm_resource_group active_directory_client {
+  count    = var.activeDirectoryClient.enable ? 1 : 0
+  name     = "${azurerm_resource_group.active_directory.name}.Client"
+  location = azurerm_resource_group.active_directory.location
   tags = {
     AAA = basename(path.cwd)
   }

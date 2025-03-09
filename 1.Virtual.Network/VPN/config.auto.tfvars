@@ -49,7 +49,7 @@ virtualNetwork = {
   gateway = {
     ipAddress1 = {
       name              = "xstudio"
-      resourceGroupName = "Shared"
+      resourceGroupName = "SharedServices"
     }
     ipAddress2 = {
       name              = ""

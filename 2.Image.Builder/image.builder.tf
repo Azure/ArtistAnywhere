@@ -44,10 +44,10 @@ variable imageCustomize {
       })
     })
   })
-  validation {
-    condition     = var.imageCustomize.blobStorage.authClient.id != "" && var.imageCustomize.blobStorage.authClient.secret != ""
-    error_message = "Missing required image customize Azure Blob Storage auth client configuration."
-  }
+  # validation {
+  #   condition     = var.imageCustomize.blobStorage.authClient.id != "" && var.imageCustomize.blobStorage.authClient.secret != ""
+  #   error_message = "Missing required image customize Azure Blob Storage auth client configuration."
+  # }
 }
 
 locals {
@@ -80,7 +80,7 @@ resource time_sleep image_builder_rbac {
 
 resource azapi_resource linux {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.platform.linux.enable && imageTemplate.enable && lower(imageTemplate.source.imageDefinition.name) == "linux"
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if module.core.image.linux.enable && imageTemplate.enable && lower(imageTemplate.source.imageDefinition.name) == "linux"
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2024-02-01"
@@ -110,7 +110,7 @@ resource azapi_resource linux {
         publisher = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].publisher
         offer     = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].offer
         sku       = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].sku
-        version   = var.computeGallery.platform.linux.version
+        version   = module.core.image.linux.version
       }
       optimize = {
         vmBoot = {
@@ -125,7 +125,7 @@ resource azapi_resource linux {
         [
           {
             type        = "File"
-            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.sh"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Core.Foundation/functions.sh"
             destination = "/tmp/functions.sh"
           },
           {
@@ -164,10 +164,10 @@ resource azapi_resource linux {
           {
             type = "Shell"
             inline = [
-              "cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))} /bin/bash",
-              "cat /tmp/customize.core.gpu.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))} /bin/bash",
-              "cat /tmp/customize.job.scheduler.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))} /bin/bash",
-              "cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))} /bin/bash",
+              "cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))} /bin/bash",
+              "cat /tmp/customize.core.gpu.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))} /bin/bash",
+              "cat /tmp/customize.job.scheduler.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))} /bin/bash",
+              "cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))} /bin/bash",
             ]
           }
         ]
@@ -206,7 +206,7 @@ resource azapi_resource linux {
 
 resource azapi_resource windows {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if var.computeGallery.platform.windows.enable && imageTemplate.enable && startswith(imageTemplate.source.imageDefinition.name, "Win")
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if module.core.image.windows.enable && imageTemplate.enable && startswith(imageTemplate.source.imageDefinition.name, "Win")
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2024-02-01"
@@ -236,7 +236,7 @@ resource azapi_resource windows {
         publisher = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].publisher
         offer     = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].offer
         sku       = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].sku
-        version   = var.computeGallery.platform.windows.version
+        version   = module.core.image.windows.version
       }
       optimize = {
         vmBoot = {
@@ -251,7 +251,7 @@ resource azapi_resource windows {
         [
           {
             type        = "File"
-            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Global.Foundation/functions.ps1"
+            sourceUri   = "https://raw.githubusercontent.com/Azure/ArtistAnywhere/main/0.Core.Foundation/functions.ps1"
             destination = "C:\\AzureData\\functions.ps1"
           },
           {
@@ -284,15 +284,6 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "if ('${each.value.build.machineType}' -eq 'DomainController') {",
-                "Write-Host 'Customize (Start): AD Domain Services'",
-                "Install-WindowsFeature -Name 'AD-Domain-Services' -IncludeManagementTools",
-                "Write-Host 'Customize (End): AD Domain Services'",
-              "} elseif ('${each.value.build.machineType}' -eq 'Scheduler') {",
-                "Write-Host 'Customize (Start): NFS Server'",
-                "Install-WindowsFeature -Name 'FS-NFS-Service'",
-                "Write-Host 'Customize (End): NFS Server'",
-              "}",
               "Rename-Computer -NewName ${each.value.name} -Force"
             ]
           },
@@ -302,12 +293,10 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "if ('${each.value.build.machineType}' -ne 'DomainController') {",
-              "  C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))}",
-              "  C:\\AzureData\\customize.core.gpu.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))}",
-              "  C:\\AzureData\\customize.job.scheduler.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))}",
-              "  C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.global.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))}",
-              "}"
+              "C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))}",
+              "C:\\AzureData\\customize.core.gpu.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))}",
+              "C:\\AzureData\\customize.job.scheduler.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))}",
+              "C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {version = module.core.version}, {authClient = local.authClient}, {authCredential = local.authCredential}, {binHostUrl = var.imageCustomize.blobStorage.binHostUrl})))}"
             ]
             runElevated = true
             runAsSystem = true

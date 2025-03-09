@@ -3,18 +3,18 @@
 ######################################################################
 
 data azurerm_log_analytics_workspace studio {
-  name                = module.global.monitor.name
-  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
+  name                = module.core.monitor.name
+  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
 }
 
 data azurerm_application_insights studio {
-  name                = module.global.monitor.name
-  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
+  name                = module.core.monitor.name
+  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
 }
 
 data azurerm_monitor_data_collection_endpoint studio {
-  name                = module.global.monitor.name
-  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
+  name                = module.core.monitor.name
+  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
 }
 
 locals {
@@ -100,7 +100,7 @@ resource azurerm_private_endpoint monitor {
     for subnet in local.virtualNetworksSubnetStorage : subnet.key => subnet
   }
   name                = "${azurerm_monitor_private_link_scope.monitor.name}-monitor-${lower(each.value.regionName)}"
-  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
+  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
   location            = each.value.regionName
   subnet_id           = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
   private_service_connection {
@@ -132,29 +132,29 @@ resource azurerm_private_endpoint monitor {
 }
 
 resource azurerm_monitor_private_link_scope monitor {
-  name                  = module.global.monitor.name
-  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
+  name                  = module.core.monitor.name
+  resource_group_name   = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
   ingestion_access_mode = "PrivateOnly"
   query_access_mode     = "PrivateOnly"
 }
 
 resource azurerm_monitor_private_link_scoped_service monitor_workspace {
-  name                = "${module.global.monitor.name}-workspace"
-  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
+  name                = "${module.core.monitor.name}-workspace"
+  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
   linked_resource_id  = data.azurerm_log_analytics_workspace.studio.id
   scope_name          = azurerm_monitor_private_link_scope.monitor.name
 }
 
 resource azurerm_monitor_private_link_scoped_service monitor_insight {
-  name                = "${module.global.monitor.name}-insight"
-  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
+  name                = "${module.core.monitor.name}-insight"
+  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
   linked_resource_id  = data.azurerm_application_insights.studio.id
   scope_name          = azurerm_monitor_private_link_scope.monitor.name
 }
 
 resource azurerm_monitor_private_link_scoped_service monitor_endpoint {
-  name                = "${module.global.monitor.name}-data"
-  resource_group_name = data.terraform_remote_state.global.outputs.monitor.resourceGroupName
+  name                = "${module.core.monitor.name}-data"
+  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
   linked_resource_id  = data.azurerm_monitor_data_collection_endpoint.studio.id
   scope_name          = azurerm_monitor_private_link_scope.monitor.name
 }

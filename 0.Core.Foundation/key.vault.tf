@@ -51,7 +51,7 @@ resource azurerm_role_assignment key_vault_crypto_service_encryption_user {
 }
 
 resource azurerm_key_vault studio {
-  name                            = module.global.keyVault.name
+  name                            = module.core.keyVault.name
   resource_group_name             = azurerm_resource_group.studio.name
   location                        = azurerm_resource_group.studio.location
   tenant_id                       = data.azurerm_client_config.current.tenant_id
@@ -128,13 +128,13 @@ resource tls_private_key ssh_key {
 }
 
 resource azurerm_key_vault_secret ssh_key_private {
-  name         = module.global.keyVault.secretName.sshKeyPrivate
+  name         = module.core.keyVault.secretName.sshKeyPrivate
   value        = tls_private_key.ssh_key.private_key_pem
   key_vault_id = azurerm_key_vault.studio.id
 }
 
 resource azurerm_key_vault_secret ssh_key_public {
-  name         = module.global.keyVault.secretName.sshKeyPublic
+  name         = module.core.keyVault.secretName.sshKeyPublic
   value        = trimspace(data.tls_public_key.ssh_key.public_key_openssh)
   key_vault_id = azurerm_key_vault.studio.id
 }

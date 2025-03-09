@@ -6,16 +6,6 @@ resourceGroupName = "ArtistAnywhere.Image" # Alphanumeric, underscores, hyphens,
 
 computeGallery = {
   name = "xstudio"
-  platform = {
-    linux = {
-      enable  = true
-      version = "9.5.202411260"
-    }
-    windows = {
-      enable  = true
-      version = "Latest"
-    }
-  }
   imageDefinitions = [
     {
       name       = "Linux"
@@ -91,7 +81,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "LnxClusterC"
+      name   = "LnxClusterCPU"
       source = {
         imageDefinition = {
           name = "Linux"
@@ -123,7 +113,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "LnxClusterGN"
+      name   = "LnxClusterGPU-N"
       source = {
         imageDefinition = {
           name = "Linux"
@@ -156,7 +146,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "LnxClusterGA"
+      name   = "LnxClusterGPU-A"
       source = {
         imageDefinition = {
           name = "Linux"
@@ -255,37 +245,6 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinADDC"
-      source = {
-        imageDefinition = {
-          name = "WinServer"
-        }
-      }
-      build = {
-        machineType    = "DomainController"
-        machineSize    = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
-        gpuProvider    = ""                 # NVIDIA or AMD
-        imageVersion   = "0.0.0"
-        osDiskSizeGB   = 1024
-        timeoutMinutes = 180
-        jobSchedulers = [
-          "Slurm",
-          "Deadline"
-        ]
-        jobProcessors = [
-        ]
-      }
-      distribute = {
-        replicaCount       = 1
-        storageAccountType = "Premium_LRS"
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
-      }
-    },
-    {
-      enable = true
       name   = "WinJobScheduler"
       source = {
         imageDefinition = {
@@ -317,7 +276,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinClusterC"
+      name   = "WinClusterCPU"
       source = {
         imageDefinition = {
           name = "WinCluster"
@@ -349,7 +308,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinClusterGN"
+      name   = "WinClusterGPU-N"
       source = {
         imageDefinition = {
           name = "WinCluster"
@@ -382,7 +341,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinClusterGA"
+      name   = "WinClusterGPU-A"
       source = {
         imageDefinition = {
           name = "WinCluster"
@@ -491,100 +450,3 @@ imageCustomize = {
     }
   }
 }
-
-######################################################################################################
-# Container Registry (https://learn.microsoft.com/azure/container-registry/container-registry-intro) #
-######################################################################################################
-
-containerRegistry = {
-  enable = true
-  name   = "xai00"
-  type   = "Premium"
-  adminUser = {
-    enable = true
-  }
-  dataEndpoint = {
-    enable = true
-  }
-  zoneRedundancy = {
-    enable = true
-  }
-  quarantinePolicy = {
-    enable = true
-  }
-  exportPolicy = {
-    enable = true
-  }
-  trustPolicy = {
-    enable = true
-  }
-  anonymousPull = {
-    enable = true
-  }
-  encryption = {
-    enable = false
-  }
-  retentionPolicy = {
-    days = 7
-  }
-  firewallRules = [
-    {
-      action  = "Allow"
-      ipRange = "40.124.64.0/25"
-    }
-  ]
-  replicationRegions = [
-    {
-      name = "WestUS"
-      regionEndpoint = {
-        enable = true
-      }
-      zoneRedundancy = {
-        enable = false
-      }
-    }
-  ]
-}
-
-####################################################################################################################
-# Container Registry Task (https://learn.microsoft.com/azure/container-registry/container-registry-tasks-overview) #
-####################################################################################################################
-
-containerRegistryTasks = [
-  {
-    enable = true
-    name   = "LnxClusterC"
-    type   = "Linux"
-    docker = {
-      context = {
-        hostUrl     = "https://github.com/Azure/ArtistAnywhere.git"
-        accessToken = " "
-      }
-      filePath    = "2.Image.Builder/Docker/LnxClusterC"
-      imageNames = [
-        "lnx-cluster-c"
-      ]
-      cache = {
-        enable = false
-      }
-    }
-  },
-  {
-    enable = true
-    name   = "WinClusterC"
-    type   = "Windows"
-    docker = {
-      context = {
-        hostUrl     = "https://github.com/Azure/ArtistAnywhere.git"
-        accessToken = " "
-      }
-      filePath = "2.Image.Builder/Docker/WinClusterC"
-      imageNames = [
-        "win-cluster-c"
-      ]
-      cache = {
-        enable = false
-      }
-    }
-  }
-]

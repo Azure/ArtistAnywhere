@@ -1,7 +1,3 @@
-variable subscriptionId {
-  default = "" # Set to your Azure subscription id
-}
-
 variable resourceLocation {
   default = {
     regionName = "SouthCentralUS" # Set from "az account list-locations --query [].name"
@@ -13,10 +9,6 @@ variable resourceLocation {
   }
 }
 
-variable resourceGroupName {
-  default = "ArtistAnywhere" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
-}
-
 #############################################################################################################
 # Managed Identity (https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview) #
 #############################################################################################################
@@ -24,19 +16,6 @@ variable resourceGroupName {
 variable managedIdentity {
   default = {
     name = "xstudio" # Alphanumeric, underscores and hyphens are allowed
-  }
-}
-
-###################################################################################
-# Storage (https://learn.microsoft.com/azure/storage/common/storage-introduction) #
-###################################################################################
-
-variable storage {
-  default = {
-    accountName = "xstudio0" # Set to a globally unique name (lowercase alphanumeric)
-    containerName = {
-      terraformState = "terraform-state"
-    }
   }
 }
 
@@ -60,25 +39,6 @@ variable keyVault {
       dataEncryption = "DataEncryption"
     }
     certificateName = {
-    }
-  }
-}
-
-##############################################################################
-# Event Grid (https://learn.microsoft.com/azure/event-grid/overview)         #
-# Event Hub  (https://learn.microsoft.com/azure/event-hubs/event-hubs-about) #
-##############################################################################
-
-variable message {
-  default = {
-    eventGrid = {
-      name     = "xstudio"
-      type     = "Standard"
-      capacity = 1
-    }
-    eventHub = {
-      name = "xstudio"
-      type = "Standard"
     }
   }
 }
@@ -111,32 +71,16 @@ variable defender {
   }
 }
 
-output subscriptionId {
-  value = var.subscriptionId
-}
-
 output resourceLocation {
   value = var.resourceLocation
-}
-
-output resourceGroupName {
-  value = var.resourceGroupName
 }
 
 output managedIdentity {
   value = var.managedIdentity
 }
 
-output storage {
-  value = var.storage
-}
-
 output keyVault {
   value = var.keyVault
-}
-
-output message {
-  value = var.message
 }
 
 output monitor {
@@ -147,26 +91,33 @@ output defender {
   value = var.defender
 }
 
-output linux {
+output image {
   value = {
-    publisher = "AlmaLinux"
-    offer     = "AlmaLinux-x86_64"
-    sku       = "9-Gen2"
-    version   = "9.5.202411260"
+    linux = {
+      enable    = true
+      publisher = "AlmaLinux"
+      offer     = "AlmaLinux-x86_64"
+      sku       = "9-Gen2"
+      version   = "9.5.202411260"
+    }
+    windows = {
+      enable  = true
+      version = "Latest"
+    }
   }
 }
 
 output version {
   value = {
-    nvidia_cuda_windows      = "12.8.0"
-    job_scheduler_slurm      = "24.11.2"
+    monitor_agent_linux      = "1.33"
+    monitor_agent_windows    = "1.32"
+    job_scheduler_slurm      = "24.11.3"
     job_scheduler_deadline   = "10.4.0.13"
     job_processor_pbrt       = "v4"
     job_processor_blender    = "4.3.2"
     script_extension_linux   = "2.1"
     script_extension_windows = "1.10"
-    monitor_agent_linux      = "1.33"
-    monitor_agent_windows    = "1.32"
+    nvidia_cuda_windows      = "12.8.1"
     hp_anyware_agent         = "24.10.2"
   }
 }

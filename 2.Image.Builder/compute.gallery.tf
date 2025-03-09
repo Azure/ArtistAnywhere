@@ -5,16 +5,6 @@
 variable computeGallery {
   type = object({
     name = string
-    platform = object({
-      linux = object({
-        enable  = bool
-        version = string
-      })
-      windows = object({
-        enable  = bool
-        version = string
-      })
-    })
     imageDefinitions = list(object({
       name       = string
       type       = string
@@ -40,7 +30,7 @@ resource azurerm_shared_image_gallery studio {
 
 resource azurerm_shared_image studio {
   for_each = {
-    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if (var.computeGallery.platform.linux.enable && lower(imageDefinition.type) == "linux") || (var.computeGallery.platform.windows.enable && lower(imageDefinition.type) == "windows")
+    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if (module.core.image.linux.enable && lower(imageDefinition.type) == "linux") || (module.core.image.windows.enable && lower(imageDefinition.type) == "windows")
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.image_gallery.name
@@ -56,10 +46,10 @@ resource azurerm_shared_image studio {
 }
 
 output linux {
-  value = !var.computeGallery.platform.linux.enable || length(local.imageDefinitionLinux) == 0 ? null : {
+  value = !module.core.image.linux.enable || length(local.imageDefinitionLinux) == 0 ? null : {
     publisher = lower(local.imageDefinitionLinux[0].publisher)
     offer     = lower(local.imageDefinitionLinux[0].offer)
     sku       = lower(local.imageDefinitionLinux[0].sku)
-    version   = var.computeGallery.platform.linux.version
+    version   = module.core.image.linux.version
   }
 }

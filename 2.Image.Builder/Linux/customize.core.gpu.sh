@@ -9,7 +9,7 @@ if [ "$gpuProvider" != "" ]; then
   dnf -y install elfutils-libelf-devel openssl-devel bison flex
   fileName="kernel-devel-5.14.0-503.14.1.el9_5.x86_64.rpm"
   fileLink="$binHostUrl/Linux/$fileName"
-  download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
+  download_file $fileName $fileLink # $tenantId $clientId $clientSecret $storageVersion
   rpm -i $fileName
   echo "Customize (End): Linux Kernel Devel"
 fi
@@ -49,7 +49,7 @@ if [ $machineType == Workstation ]; then
   [ "$gpuProvider" == "" ] && fileType="pcoip-agent-standard" || fileType="pcoip-agent-graphics"
   fileName="pcoip-agent-offline-rhel9.5_$version-1.el9.x86_64.tar.gz"
   fileLink="$binHostUrl/Teradici/$version/$fileName"
-  download_file $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
+  download_file $fileName $fileLink # $tenantId $clientId $clientSecret $storageVersion
   mkdir -p $fileType
   tar -xzf $fileName -C $fileType
   cd $fileType

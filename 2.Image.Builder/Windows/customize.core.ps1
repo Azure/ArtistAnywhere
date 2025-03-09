@@ -58,6 +58,10 @@ Write-Host "Customize (End): Visual Studio Build Tools"
 Write-Host "Customize (End): Image Build Platform"
 
 if ($machineType -eq "Scheduler") {
+  Write-Host "Customize (Start): NFS Server"
+  Install-WindowsFeature -Name "FS-NFS-Service"
+  Write-Host "Customize (End): NFS Server"
+
   Write-Host "Customize (Start): Azure CLI (x64)"
   $fileType = "azure-cli"
   $fileName = "$fileType.msi"
@@ -79,8 +83,8 @@ if ($machineType -eq "Scheduler") {
   Write-Host "Customize (Start): Cinebench"
   $version = "2024"
   $fileName = "Cinebench${version}_win_x86_64.zip"
-  $fileLink = "$binHostUrl/Maxon/Cinebench/$version/$fileName"
-  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
+  $fileLink = "$binHostUrl/Benchmark/Cinebench/$version/$fileName"
+  DownloadFile $fileName $fileLink # $tenantId $clientId $clientSecret $storageVersion
   Expand-Archive -Path $fileName
   Write-Host "Customize (End): Cinebench"
 }
@@ -99,7 +103,7 @@ if ($machineType -eq "Workstation") {
   $fileType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
   $fileName = "${fileType}_$version.exe"
   $fileLink = "$binHostUrl/Teradici/$version/$fileName"
-  DownloadFile $fileName $fileLink $tenantId $clientId $clientSecret $storageVersion
+  DownloadFile $fileName $fileLink # $tenantId $clientId $clientSecret $storageVersion
   RunProcess .\$fileName "/S /NoPostReboot /Force" "$binDirectory\$fileType"
   Write-Host "Customize (End): HP Anyware"
 }

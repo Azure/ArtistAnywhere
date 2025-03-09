@@ -23,10 +23,10 @@ variable containerRegistryTasks {
 
 resource azurerm_container_registry_task studio {
   for_each = {
-    for task in var.containerRegistryTasks : task.name => task if var.containerRegistry.enable && task.enable
+    for task in var.containerRegistryTasks : task.name => task if task.enable
   }
   name                  = each.value.name
-  container_registry_id = azurerm_container_registry.studio[0].id
+  container_registry_id = azurerm_container_registry.studio.id
   identity {
     type = "UserAssigned"
     identity_ids = [

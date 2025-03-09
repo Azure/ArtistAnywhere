@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">=1.10.0"
+  required_version = ">=1.11.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.20.0"
+      version = "~>4.22.0"
     }
   }
   backend azurerm {
@@ -14,56 +14,45 @@ terraform {
 
 provider azurerm {
   features {
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
   }
-  subscription_id     = module.global.subscriptionId
+  subscription_id     = data.terraform_remote_state.core.outputs.subscription.id
   storage_use_azuread = true
 }
 
-module global {
-  source = "../0.Global.Foundation/config"
+module core {
+  source = "../0.Core.Foundation/config"
 }
 
 variable resourceGroupName {
   type = string
 }
 
+data azurerm_subscription current {}
+
 data azurerm_user_assigned_identity studio {
-  name                = module.global.managedIdentity.name
-  resource_group_name = module.global.resourceGroupName
+  name                = module.core.managedIdentity.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
 data azurerm_storage_account studio {
-  name                = module.global.storage.accountName
-  resource_group_name = module.global.resourceGroupName
+  name                = data.terraform_remote_state.core.outputs.storage.account.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault studio {
-  name                = module.global.keyVault.name
-  resource_group_name = module.global.resourceGroupName
+  name                = module.core.keyVault.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault_secret gateway_connection {
-  name         = module.global.keyVault.secretName.gatewayConnection
+  name         = module.core.keyVault.secretName.gatewayConnection
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
-# data azurerm_eventgrid_namespace studio {
-#   name                = module.global.message.eventGrid.name
-#   resource_group_name = data.terraform_remote_state.global.outputs.message.resourceGroupName
-# }
-
-data azurerm_eventhub_namespace studio {
-  name                = module.global.message.eventHub.name
-  resource_group_name = data.terraform_remote_state.global.outputs.message.resourceGroupName
-}
-
-data terraform_remote_state global {
+data terraform_remote_state core {
   backend = "local"
   config = {
-    path = "../0.Global.Foundation/terraform.tfstate"
+    path = "../0.Core.Foundation/terraform.tfstate"
   }
 }
 
