@@ -60,8 +60,8 @@ data terraform_remote_state network {
 }
 
 data azurerm_virtual_network studio {
-  name                = data.terraform_remote_state.network.outputs.virtualNetworks[0].name
-  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
+  name                = data.terraform_remote_state.network.outputs.virtualNetwork.name
+  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroup.name
 }
 
 data azurerm_subnet compute {
@@ -72,7 +72,7 @@ data azurerm_subnet compute {
 
 resource azurerm_resource_group image_registry {
   name     = var.resourceGroupName
-  location = module.core.resourceLocation.regionName
+  location = module.core.resourceLocation.name
   tags = {
     AAA = basename(path.cwd)
   }

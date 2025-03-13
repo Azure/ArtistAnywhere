@@ -128,9 +128,9 @@ function Retry ($delaySeconds, $maxCount, $scriptBlock) {
 
 function JoinActiveDirectory {
   param (
-    [Parameter(ParameterSetName="Default")]
-    [object] $activeDirectory,
     [Parameter(ParameterSetName="Retry")]
+    [object] $activeDirectory,
+    [Parameter(ParameterSetName="Join")]
     [string] $domainName,
     [string] $serverName,
     [string] $userName,
@@ -140,7 +140,7 @@ function JoinActiveDirectory {
     if ($PSCmdlet.ParameterSetName -eq "Retry") {
       if ($activeDirectory.enable) {
         Retry 3 10 {
-          JoinActiveDirectory -domainName $activeDirectory.domainName -serverName $activeDirectory.serverName -userName $activeDirectory.adminUsername -userPassword $activeDirectory.adminPassword
+          JoinActiveDirectory -domainName $activeDirectory.domainName -serverName $activeDirectory.serverName -userName $activeDirectory.machine.adminLogin.userName -userPassword $activeDirectory.machine.adminLogin.userPassword
         }
       }
     } else {
@@ -150,11 +150,14 @@ function JoinActiveDirectory {
       $securePassword = ConvertTo-SecureString $userPassword -AsPlainText -Force
       $userCredential = New-Object System.Management.Automation.PSCredential($userName, $securePassword)
 
-      $ErrorActionPreference = "Continue"
-      $adComputer = Get-ADComputer -Identity $(hostname) -Server $serverName -Credential $userCredential
-      $ErrorActionPreference = "Stop"
-      if ($adComputer) {
-        Remove-ADObject -Identity $adComputer -Server $serverName -Recursive -Confirm:$false
+      try {
+        $adComputer = Get-ADComputer -Identity $(hostname) -Server $serverName -Credential $userCredential
+      }
+      catch {}
+      finally {
+        if ($adComputer) {
+          Remove-ADObject -Identity $adComputer -Server $serverName -Recursive -Confirm:$false
+        }
       }
 
       Add-Computer -DomainName $domainName -Server $serverName -Credential $userCredential -Force -PassThru -Verbose

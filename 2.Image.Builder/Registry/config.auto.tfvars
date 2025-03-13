@@ -35,10 +35,10 @@ containerRegistry = {
     days = 7
   }
   firewallRules = [
-    {
-      action  = "Allow"
-      ipRange = "40.124.64.0/25"
-    }
+    # {
+    #   action  = "Allow"
+    #   ipRange = "40.124.64.0/25"
+    # }
   ]
   replicationRegions = [
     {
@@ -69,7 +69,7 @@ containerRegistryTasks = [
       }
       filePath    = "2.Image.Builder/Registry/Docker/LnxClusterCPU"
       imageNames = [
-        "lnx-cluster-c"
+        "lnx-cluster-cpu"
       ]
       cache = {
         enable = false
@@ -87,7 +87,7 @@ containerRegistryTasks = [
       }
       filePath = "2.Image.Builder/Registry/Docker/WinClusterCPU"
       imageNames = [
-        "win-cluster-c"
+        "win-cluster-cpu"
       ]
       cache = {
         enable = false

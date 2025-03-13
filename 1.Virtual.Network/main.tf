@@ -58,7 +58,7 @@ data terraform_remote_state core {
 
 resource azurerm_resource_group network {
   name     = var.resourceGroupName
-  location = local.virtualNetwork.regionName
+  location = local.virtualNetwork.location
   tags = {
     AAA = basename(path.cwd)
   }
@@ -68,8 +68,8 @@ resource azurerm_resource_group network_regions {
   for_each = {
     for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.key => virtualNetwork
   }
-  name     = each.value.resourceGroupName
-  location = each.value.regionName
+  name     = each.value.resourceGroup.name
+  location = each.value.location
   tags = {
     AAA = basename(path.cwd)
   }

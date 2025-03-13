@@ -1,10 +1,10 @@
 variable resourceLocation {
   default = {
-    regionName = "SouthCentralUS" # Set from "az account list-locations --query [].name"
+    name = "SouthCentralUS" # Set from "az account list-locations --query [].name"
     extendedZone = {
-      enable     = false
-      name       = "LosAngeles"
-      regionName = "WestUS"
+      enable   = false
+      name     = "LosAngeles"
+      location = "WestUS"
     }
   }
 }

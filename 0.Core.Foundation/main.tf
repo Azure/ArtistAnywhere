@@ -13,10 +13,6 @@ terraform {
       source  = "hashicorp/http"
       version = "~>3.4.0"
     }
-    time = {
-      source  = "hashicorp/time"
-      version = "~>0.13.0"
-    }
     tls = {
       source  = "hashicorp/tls"
       version = "~>4.0.0"
@@ -41,7 +37,8 @@ module core {
 locals {
   patternSuffix = "\\s+=\\s+\"([^\"]+)"
   resourceGroup = {
-    name = regex("resource_group_name${local.patternSuffix}", file("./config/backend"))[0]
+    name     = regex("resource_group_name${local.patternSuffix}", file("./config/backend"))[0]
+    location = module.core.resourceLocation.name
   }
   storage = {
     account = {
@@ -63,7 +60,7 @@ data azurerm_client_config current {}
 
 resource azurerm_resource_group studio {
   name     = local.resourceGroup.name
-  location = module.core.resourceLocation.regionName
+  location = module.core.resourceLocation.name
   tags = {
     AAA = basename(path.cwd)
   }

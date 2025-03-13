@@ -16,8 +16,8 @@ resource azurerm_public_ip studio {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork if var.firewall.enable
   }
   name                = var.firewall.name
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
+  resource_group_name = each.value.resourceGroup.name
+  location            = each.value.location
   sku                 = "Standard"
   allocation_method   = "Static"
   depends_on = [
@@ -30,8 +30,8 @@ resource azurerm_firewall studio {
     for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork if var.firewall.enable
   }
   name                = var.firewall.name
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
+  resource_group_name = each.value.resourceGroup.name
+  location            = each.value.location
   sku_name            = var.firewall.type
   sku_tier            = var.firewall.tier
   ip_configuration {

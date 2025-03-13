@@ -6,9 +6,9 @@ resource azurerm_network_security_group studio {
   for_each = {
     for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet if subnet.name != "AzureBastionSubnet"
   }
-  name                = "${each.value.virtualNetworkName}-${each.value.name}"
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
+  name                = "${each.value.virtualNetwork.name}-${each.value.name}"
+  resource_group_name = each.value.resourceGroup.name
+  location            = each.value.location
   security_rule {
     name                       = "AllowOutARM"
     priority                   = 3100
@@ -70,9 +70,9 @@ resource azurerm_network_security_group studio {
 
 resource azurerm_subnet_network_security_group_association studio {
   for_each = {
-    for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet if subnet.name != "AzureBastionSubnet" && subnet.virtualNetworkExtendedZoneName == ""
+    for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet if subnet.name != "AzureBastionSubnet" && try(subnet.virtualNetwork.extendedZone.name, "") == ""
   }
-  subnet_id                 = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
+  subnet_id                 = "${each.value.virtualNetwork.id}/subnets/${each.value.name}"
   network_security_group_id = azurerm_network_security_group.studio[each.value.key].id
   depends_on = [
     azurerm_subnet.studio,

@@ -14,15 +14,14 @@ variable natGateway {
 
 locals {
   natGatewayNetworks = [
-    for virtualNetwork in local.virtualNetworks : virtualNetwork if var.natGateway.enable && virtualNetwork.extendedZoneName == ""
+    for virtualNetwork in local.virtualNetworks : virtualNetwork if var.natGateway.enable && try(virtualNetwork.extendedZone.name, "") == ""
   ]
   natGatewayNetworksSubnets = flatten([
     for virtualNetwork in local.natGatewayNetworks : [
       for subnet in virtualNetwork.subnets : merge(subnet, {
-        key               = "${virtualNetwork.key}-${subnet.name}"
-        virtualNetworkKey = virtualNetwork.key
-        virtualNetworkId  = virtualNetwork.id
-      }) if virtualNetwork.extendedZoneName == "" && subnet.name != "GatewaySubnet"
+        key            = "${virtualNetwork.key}-${subnet.name}"
+        virtualNetwork = virtualNetwork
+      }) if try(virtualNetwork.extendedZone.name, "") == "" && subnet.name != "GatewaySubnet"
     ]
   ])
 }
@@ -32,8 +31,8 @@ resource azurerm_nat_gateway studio {
     for virtualNetwork in local.natGatewayNetworks : virtualNetwork.key => virtualNetwork
   }
   name                = "Gateway-NAT"
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
+  resource_group_name = each.value.resourceGroup.name
+  location            = each.value.location
   depends_on = [
     azurerm_resource_group.network_regions
   ]
@@ -43,8 +42,8 @@ resource azurerm_subnet_nat_gateway_association studio {
   for_each = {
     for subnet in local.natGatewayNetworksSubnets : subnet.key => subnet
   }
-  nat_gateway_id = azurerm_nat_gateway.studio[each.value.virtualNetworkKey].id
-  subnet_id      = "${each.value.virtualNetworkId}/subnets/${each.value.name}"
+  nat_gateway_id = azurerm_nat_gateway.studio[each.value.virtualNetwork.key].id
+  subnet_id      = "${each.value.virtualNetwork.id}/subnets/${each.value.name}"
   depends_on = [
     azurerm_subnet.studio
   ]
@@ -59,8 +58,8 @@ resource azurerm_public_ip_prefix nat_gateway {
     for virtualNetwork in local.natGatewayNetworks : virtualNetwork.key => virtualNetwork
   }
   name                = "Gateway-NAT"
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
+  resource_group_name = each.value.resourceGroup.name
+  location            = each.value.location
   sku                 = var.natGateway.ipAddress.type
   sku_tier            = var.natGateway.ipAddress.tier
   prefix_length       = 31

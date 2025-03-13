@@ -78,13 +78,22 @@ keyVault = {
 ######################################################################
 
 monitor = {
-  logWorkspace = {
-    type = "PerGB2018"
+  grafanaDashboard = {
+    type    = "Standard"
+    version = 10
+    apiKey = {
+      enable = false
+    }
   }
-  appInsight = {
-    type = "other"
+  appInsights = {
+    type = "web"
   }
-  retentionDays = 365
+  logAnalytics = {
+    workspace = {
+      type = "PerGB2018"
+    }
+  }
+  retentionDays = 90
 }
 
 #########################################################################

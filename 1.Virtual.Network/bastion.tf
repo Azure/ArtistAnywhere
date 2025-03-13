@@ -25,9 +25,9 @@ resource azurerm_network_security_group bastion {
   for_each = {
     for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet if subnet.name == "AzureBastionSubnet"
   }
-  name                = "${each.value.virtualNetworkName}-${each.value.name}"
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
+  name                = "${each.value.virtualNetwork.name}-${each.value.name}"
+  resource_group_name = each.value.resourceGroup.name
+  location            = each.value.location
   security_rule {
     name                       = "AllowInHTTPS"
     priority                   = 2000
@@ -132,9 +132,9 @@ resource azurerm_network_security_group bastion {
 
 resource azurerm_subnet_network_security_group_association bastion {
   for_each = {
-    for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet if subnet.name == "AzureBastionSubnet" && subnet.virtualNetworkExtendedZoneName == ""
+    for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet if subnet.name == "AzureBastionSubnet" && try(subnet.virtualNetwork.extendedZone.name, "") == ""
   }
-  subnet_id                 = "${each.value.virtualNetworkId}/subnets/AzureBastionSubnet"
+  subnet_id                 = "${each.value.virtualNetwork.id}/subnets/AzureBastionSubnet"
   network_security_group_id = azurerm_network_security_group.bastion[each.value.key].id
   depends_on = [
     azurerm_subnet.studio
@@ -146,13 +146,13 @@ resource azurerm_public_ip bastion {
     for virtualNetwork in local.bastionNetworks : virtualNetwork.key => virtualNetwork if var.bastion.type != "Developer"
   }
   name                = "Bastion-${each.value.name}"
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.regionName
+  resource_group_name = each.value.resourceGroup.name
+  location            = each.value.location
   sku                 = "Standard"
   allocation_method   = "Static"
   depends_on = [
     azurerm_resource_group.network_regions
- ]
+  ]
 }
 
 resource azurerm_bastion_host studio {
@@ -160,8 +160,8 @@ resource azurerm_bastion_host studio {
     for virtualNetwork in local.bastionNetworks : virtualNetwork.key => virtualNetwork
   }
   name                      = "Bastion-${each.value.name}"
-  resource_group_name       = each.value.resourceGroupName
-  location                  = each.value.regionName
+  resource_group_name       = each.value.resourceGroup.name
+  location                  = each.value.location
   sku                       = var.bastion.type
   scale_units               = var.bastion.scaleUnitCount
   file_copy_enabled         = var.bastion.enableFileCopy

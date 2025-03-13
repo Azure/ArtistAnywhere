@@ -6,9 +6,9 @@ resourceGroupName = "ArtistAnywhere.Network" # Alphanumeric, underscores, hyphen
 
 virtualNetworks = [
   {
-    enable     = true
-    name       = "Studio"
-    regionName = ""
+    enable   = true
+    name     = "Studio"
+    location = ""
     addressSpace = [
       "10.0.0.0/16"
     ]
@@ -219,9 +219,9 @@ virtualNetworks = [
     ]
   },
   {
-    enable     = false
-    name       = "Studio"
-    regionName = "WestUS"
+    enable   = false
+    name     = "Studio"
+    location = "WestUS"
     addressSpace = [
       "10.1.0.0/16"
     ]

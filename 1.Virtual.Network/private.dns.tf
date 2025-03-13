@@ -42,8 +42,8 @@ resource azurerm_private_dns_zone_virtual_network_link studio {
 
 resource azurerm_private_dns_resolver studio {
   name                = local.virtualNetwork.key
-  resource_group_name = local.virtualNetwork.resourceGroupName
-  location            = local.virtualNetwork.regionName
+  resource_group_name = local.virtualNetwork.resourceGroup.name
+  location            = local.virtualNetwork.location
   virtual_network_id  = local.virtualNetwork.id
   depends_on = [
     azurerm_virtual_network.studio
@@ -52,7 +52,7 @@ resource azurerm_private_dns_resolver studio {
 
 resource azurerm_private_dns_resolver_inbound_endpoint studio {
   name                    = local.virtualNetwork.key
-  location                = local.virtualNetwork.regionName
+  location                = local.virtualNetwork.location
   private_dns_resolver_id = azurerm_private_dns_resolver.studio.id
   ip_configurations {
     subnet_id = "${local.virtualNetwork.id}/subnets/DNS"
