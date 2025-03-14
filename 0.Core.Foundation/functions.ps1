@@ -10,7 +10,7 @@ if ($buildConfigEncoded -ne "") {
   Write-Host "Customize (Start): Image Build Parameters"
   $buildConfigBytes = [System.Convert]::FromBase64String($buildConfigEncoded)
   $buildConfig = [System.Text.Encoding]::UTF8.GetString($buildConfigBytes) | ConvertFrom-Json
-  $binHostUrl = $buildConfig.binHostUrl
+  $blobStorage = $buildConfig.blobStorage
   $machineType = $buildConfig.machineType
   $gpuProvider = $buildConfig.gpuProvider
   $jobSchedulers = $buildConfig.jobSchedulers
@@ -25,7 +25,11 @@ if ($buildConfigEncoded -ne "") {
 function DownloadFile ($fileName, $fileLink) {
   try {
     Add-Type -AssemblyName System.Net.Http
+    $authToken = Invoke-WebRequest -UseBasicParsing -Headers @{Metadata=$true} -Uri $blobStorage.authTokenUrl
+    $accessToken = (ConvertFrom-Json -InputObject $authToken.Content).access_token
     $httpClient = New-Object System.Net.Http.HttpClient
+    $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
+    $httpClient.DefaultRequestHeaders.Add("x-ms-version", $blobStorage.apiVersion)
     $httpResponse = $httpClient.GetAsync($fileLink).Result
     if ($httpResponse.IsSuccessStatusCode) {
       $stream = $httpResponse.Content.ReadAsStreamAsync().Result

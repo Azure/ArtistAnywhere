@@ -11,11 +11,11 @@ if [[ $jobProcessors == *PBRT* ]]; then
   filePath="/usr/local/$fileType"
   mkdir -p $filePath
   dnf -y install mesa-libGL-devel
+  dnf -y install libxkbcommon-devel
   dnf -y install libXrandr-devel
   dnf -y install libXinerama-devel
   dnf -y install libXcursor-devel
   dnf -y install libXi-devel
-  dnf -y install libxkbcommon-devel
   dnf -y install wayland-devel
   fileSource=$fileType-$version
   git clone --recursive https://github.com/mmp/$fileSource.git
@@ -32,7 +32,7 @@ if [[ $jobProcessors == *Blender* ]]; then
   fileType="blender"
   filePath="/usr/local/$fileType"
   fileName="$fileType-$version-$hostType.tar.xz"
-  fileLink="$binHostUrl/Blender/$version/$fileName"
+  fileLink="${blobStorage.endpointUrl}/Blender/$version/$fileName"
   download_file $fileName $fileLink
   tar -xJf $fileName
   dnf -y install mesa-dri-drivers

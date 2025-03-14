@@ -29,7 +29,7 @@ if [[ $jobSchedulers == *Deadline* ]]; then
   echo "Customize (Start): Deadline Download"
   fileName="Deadline-$version-linux-installers.tar"
   filePath=$(echo ${fileName%.tar})
-  fileLink="$binHostUrl/Deadline/$version/$fileName"
+  fileLink="${blobStorage.endpointUrl}/Deadline/$version/$fileName"
   download_file $fileName $fileLink
   mkdir -p $filePath
   tar -xzf $fileName -C $filePath

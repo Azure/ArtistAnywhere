@@ -91,6 +91,14 @@ output defender {
   value = var.defender
 }
 
+output blobStorage {
+  value = {
+    apiVersion   = "2025-05-05"
+    endpointUrl  = "https://xstudio.blob.core.windows.net/bin"
+    authTokenUrl = "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2021-02-01&resource=https%3A%2F%2Fstorage.azure.com%2F"
+  }
+}
+
 output image {
   value = {
     linux = {

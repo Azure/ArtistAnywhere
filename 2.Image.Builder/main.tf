@@ -3,11 +3,15 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.22.0"
+      version = "~>4.23.0"
     }
     http = {
       source  = "hashicorp/http"
       version = "~>3.4.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~>0.13.0"
     }
     azapi = {
       source = "azure/azapi"
@@ -87,8 +91,8 @@ data terraform_remote_state network {
 }
 
 data azurerm_virtual_network studio {
-  name                = data.terraform_remote_state.network.outputs.virtualNetworks[0].name
-  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
+  name                = data.terraform_remote_state.network.outputs.virtualNetwork.name
+  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroup.name
 }
 
 data azurerm_subnet compute {
@@ -98,14 +102,12 @@ data azurerm_subnet compute {
 }
 
 locals {
-  regionNames = distinct([
-    for virtualNetwork in data.terraform_remote_state.network.outputs.virtualNetworks : virtualNetwork.regionName
-  ])
+  locations = data.terraform_remote_state.network.outputs.virtualNetwork.location.names
 }
 
 resource azurerm_resource_group image_builder {
   name     = "${var.resourceGroupName}.Builder"
-  location = module.core.resourceLocation.regionName
+  location = module.core.resourceLocation.name
   tags = {
     AAA = basename(path.cwd)
   }
@@ -113,7 +115,7 @@ resource azurerm_resource_group image_builder {
 
 resource azurerm_resource_group image_gallery {
   name     = "${var.resourceGroupName}.Gallery"
-  location = module.core.resourceLocation.regionName
+  location = module.core.resourceLocation.name
   tags = {
     AAA = basename(path.cwd)
   }

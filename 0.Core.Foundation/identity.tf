@@ -25,3 +25,10 @@ resource azurerm_role_assignment virtual_machine_contributor {
   principal_id         = azurerm_user_assigned_identity.studio.principal_id
   scope                = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
 }
+
+output managedIdentity {
+  value = {
+    id          = azurerm_user_assigned_identity.studio.id
+    principalId = azurerm_user_assigned_identity.studio.principal_id
+  }
+}

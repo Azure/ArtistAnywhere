@@ -40,7 +40,7 @@ if ($gpuProvider.StartsWith("NVIDIA")) {
   $version = $buildConfig.version.nvidia_cuda_windows
   $fileType = "nvidia-gpu-cuda"
   $fileName = "cuda_${version}_windows_network.exe"
-  $fileLink = "$binHostUrl/NVIDIA/CUDA/$version/$fileName"
+  $fileLink = "${blobStorage.endpointUrl}/NVIDIA/CUDA/$version/$fileName"
   DownloadFile $fileName $fileLink
   RunProcess .\$fileName "-s -n -log:$binDirectory\$fileType" $null
   Write-Host "Customize (End): NVIDIA GPU (CUDA)"

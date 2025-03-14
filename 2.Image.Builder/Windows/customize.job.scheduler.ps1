@@ -16,7 +16,7 @@ if ($jobSchedulers -contains "Deadline") {
 
   Write-Host "Customize (Start): Deadline Download"
   $fileName = "Deadline-$version-windows-installers.zip"
-  $fileLink = "$binHostUrl/Deadline/$version/$fileName"
+  $fileLink = "${blobStorage.endpointUrl}/Deadline/$version/$fileName"
   DownloadFile $fileName $fileLink
   Expand-Archive -Path $fileName
   Write-Host "Customize (End): Deadline Download"

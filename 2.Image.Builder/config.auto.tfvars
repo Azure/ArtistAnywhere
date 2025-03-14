@@ -47,7 +47,6 @@ computeGallery = {
 #############################################################################################
 
 imageBuilder = {
-  binHostUrl = "https://xstudio.blob.core.windows.net/bin"
   templates = [
     {
       enable = true
@@ -180,7 +179,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "LnxArtistGN"
+      name   = "LnxArtistGPU-N"
       source = {
         imageDefinition = {
           name = "Linux"
@@ -213,7 +212,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "LnxArtistGA"
+      name   = "LnxArtistGPU-A"
       source = {
         imageDefinition = {
           name = "Linux"
@@ -375,7 +374,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinArtistGN"
+      name   = "WinArtistGPU-N"
       source = {
         imageDefinition = {
           name = "WinArtist"
@@ -408,7 +407,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinArtistGA"
+      name   = "WinArtistGPU-A"
       source = {
         imageDefinition = {
           name = "WinArtist"

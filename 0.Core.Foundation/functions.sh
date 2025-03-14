@@ -8,7 +8,7 @@ if [ "$buildConfigEncoded" != "" ]; then
 
   echo "Customize (Start): Image Build Parameters"
   buildConfig=$(echo $buildConfigEncoded | base64 -d)
-  binHostUrl=$(echo $buildConfig | jq -r .binHostUrl)
+  blobStorage=$(echo $buildConfig | jq -c .blobStorage)
   machineType=$(echo $buildConfig | jq -r .machineType)
   gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
   jobSchedulers=$(echo $buildConfig | jq -c .jobSchedulers)
@@ -23,7 +23,10 @@ fi
 function download_file {
   local fileName=$1
   local fileLink=$2
-  curl -o $fileName -L $fileLink
+  local apiVersion=$(echo $blobStorage | jq -r .apiVersion)
+  local authTokenUrl=$(echo $blobStorage | jq -r .authTokenUrl)
+  accessToken=$(curl -H "Metadata: true" $authTokenUrl | jq -r .access_token)
+  curl -H "Authorization: Bearer $accessToken" -H "x-ms-version: $apiVersion" -o $fileName -L $fileLink
 }
 
 function run_process {

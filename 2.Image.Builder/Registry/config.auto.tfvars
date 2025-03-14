@@ -35,10 +35,10 @@ containerRegistry = {
     days = 7
   }
   firewallRules = [
-    # {
-    #   action  = "Allow"
-    #   ipRange = "40.124.64.0/25"
-    # }
+    {
+      action  = "Allow" # Task Agent
+      ipRange = "40.124.64.0/25"
+    }
   ]
   replicationRegions = [
     {

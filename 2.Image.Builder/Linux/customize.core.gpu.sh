@@ -8,7 +8,7 @@ if [ "$gpuProvider" != "" ]; then
   echo "Customize (Start): Linux Kernel Devel"
   dnf -y install elfutils-libelf-devel openssl-devel bison flex
   fileName="kernel-devel-5.14.0-503.14.1.el9_5.x86_64.rpm"
-  fileLink="$binHostUrl/Linux/$fileName"
+  fileLink="${blobStorage.endpointUrl}/Linux/$fileName"
   download_file $fileName $fileLink
   rpm -i $fileName
   echo "Customize (End): Linux Kernel Devel"
@@ -48,7 +48,7 @@ if [ $machineType == Workstation ]; then
   version=$(echo $buildConfig | jq -r .version.hp_anyware_agent)
   [ "$gpuProvider" == "" ] && fileType="pcoip-agent-standard" || fileType="pcoip-agent-graphics"
   fileName="pcoip-agent-offline-rhel9.5_$version-1.el9.x86_64.tar.gz"
-  fileLink="$binHostUrl/Teradici/$version/$fileName"
+  fileLink="${blobStorage.endpointUrl}/Teradici/$version/$fileName"
   download_file $fileName $fileLink
   mkdir -p $fileType
   tar -xzf $fileName -C $fileType
