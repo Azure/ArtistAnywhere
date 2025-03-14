@@ -7,7 +7,6 @@ regionName = "" # Optional default region override
 #########################################################################
 
 dataLoad = {
-  enable = false
   mount = {
     type    = "nfs" # "lustre"
     path    = "/mnt/data"

@@ -33,18 +33,26 @@ variable storageAccounts {
 locals {
   storageAccounts = [
     for storageAccount in var.storageAccounts : merge(storageAccount, {
-      resourceGroupName     = var.resourceGroupName
-      resourceGroupLocation = storageAccount.extendedZone.enable ? module.core.resourceLocation.extendedZone.regionName : local.regionName
-      extendedZoneName      = storageAccount.extendedZone.enable ? module.core.resourceLocation.extendedZone.name : null
-      storageAccountId      = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
+      resourceGroup = {
+        name     = var.resourceGroupName
+        location = storageAccount.extendedZone.enable ? module.core.resourceLocation.extendedZone.location : local.location
+      }
+      extendedZone = {
+        name = storageAccount.extendedZone.enable ? module.core.resourceLocation.extendedZone.name : null
+      }
+      storageAccount = {
+        id = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"
+      }
     }) if storageAccount.enable
   ]
   privateEndpoints = flatten([
     for storageAccount in local.storageAccounts : [
       for privateEndpointType in storageAccount.privateEndpointTypes : merge(storageAccount, {
-        key       = "${storageAccount.name}-${privateEndpointType}"
-        type      = privateEndpointType
-        dnsZoneId = "${data.azurerm_resource_group.dns.id}/providers/Microsoft.Network/privateDnsZones/privatelink.${privateEndpointType}.core.windows.net"
+        key  = "${storageAccount.name}-${privateEndpointType}"
+        type = privateEndpointType
+        dnsZone = {
+          id = "${data.azurerm_resource_group.dns.id}/providers/Microsoft.Network/privateDnsZones/privatelink.${privateEndpointType}.core.windows.net"
+        }
       })
     ]
   ])
@@ -70,7 +78,7 @@ resource azurerm_role_assignment storage_blob_data_owner {
   }
   role_definition_name = "Storage Blob Data Owner" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-owner
   principal_id         = data.azurerm_client_config.current.object_id
-  scope                = each.value.storageAccountId
+  scope                = each.value.storageAccount.id
   depends_on = [
     azurerm_storage_account.studio
   ]
@@ -82,7 +90,7 @@ resource azurerm_role_assignment storage_blob_data_contributor {
   }
   role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-  scope                = each.value.storageAccountId
+  scope                = each.value.storageAccount.id
   depends_on = [
     azurerm_storage_account.studio
   ]
@@ -104,9 +112,9 @@ resource azurerm_storage_account studio {
     for storageAccount in local.storageAccounts : storageAccount.name => storageAccount
   }
   name                            = each.value.name
-  resource_group_name             = each.value.resourceGroupName
-  location                        = each.value.resourceGroupLocation
-  edge_zone                       = each.value.extendedZoneName
+  resource_group_name             = each.value.resourceGroup.name
+  location                        = each.value.resourceGroup.location
+  edge_zone                       = each.value.extendedZone.name
   account_kind                    = each.value.type
   account_tier                    = each.value.tier
   account_replication_type        = each.value.redundancy
@@ -140,7 +148,7 @@ resource azurerm_storage_container core {
     for blobContainer in local.blobContainers : blobContainer.key => blobContainer
   }
   name               = each.value.name
-  storage_account_id = each.value.storageAccountId
+  storage_account_id = each.value.storageAccount.id
   depends_on = [
     time_sleep.storage_rbac
   ]
@@ -153,7 +161,7 @@ resource azurerm_storage_share core {
   name               = each.value.name
   access_tier        = each.value.accessTier
   enabled_protocol   = each.value.accessProtocol
-  storage_account_id = each.value.storageAccountId
+  storage_account_id = each.value.storageAccount.id
   quota              = each.value.sizeGB
   depends_on = [
     azurerm_private_endpoint.storage
@@ -162,25 +170,25 @@ resource azurerm_storage_share core {
 
 resource azurerm_private_endpoint storage {
   for_each = {
-    for privateEndpoint in local.privateEndpoints : privateEndpoint.key => privateEndpoint if privateEndpoint.extendedZoneName == null
+    for privateEndpoint in local.privateEndpoints : privateEndpoint.key => privateEndpoint if privateEndpoint.extendedZone.name == null
   }
   name                = each.value.key
-  resource_group_name = each.value.resourceGroupName
-  location            = each.value.resourceGroupLocation
-  # edge_zone           = each.value.extendedZoneName != "" ? each.value.extendedZoneName : null
+  resource_group_name = each.value.resourceGroup.name
+  location            = each.value.resourceGroup.location
+  # edge_zone           = each.value.extendedZone.name != "" ? each.value.extendedZone.name : null
   subnet_id           = data.azurerm_subnet.storage.id
   private_service_connection {
-    name                           = basename(each.value.storageAccountId)
-    private_connection_resource_id = each.value.storageAccountId
+    name                           = basename(each.value.storageAccount.id)
+    private_connection_resource_id = each.value.storageAccount.id
     is_manual_connection           = false
     subresource_names = [
       each.value.type
     ]
   }
   private_dns_zone_group {
-    name = basename(each.value.storageAccountId)
+    name = basename(each.value.storageAccount.id)
     private_dns_zone_ids = [
-      each.value.dnsZoneId
+      each.value.dnsZone.id
     ]
   }
   depends_on = [

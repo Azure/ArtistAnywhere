@@ -1,10 +1,12 @@
 resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
-knfsdCache = {
+nfsCache = {
   enable = false
   name   = "xcache"
   machine = {
-    size  = "Standard_L80s_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_L80s_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    count  = 1
+    prefix = ""
     image = {
       publisher = ""
       product   = ""
@@ -39,7 +41,7 @@ knfsdCache = {
       custom = {
         enable   = true
         name     = "Custom"
-        fileName = "knfsd.sh"
+        fileName = "nfs.sh"
         parameters = {
           storageMounts = [
             {

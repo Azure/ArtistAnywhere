@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.22.0"
+      version = "~>4.23.0"
     }
   }
   backend azurerm {
@@ -56,14 +56,47 @@ data azurerm_key_vault_secret ssh_key_public {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
+data terraform_remote_state core {
+  backend = "local"
+  config = {
+    path = "../../0.Core.Foundation/terraform.tfstate"
+  }
+}
+
+data terraform_remote_state network {
+  backend = "azurerm"
+  config = {
+    subscription_id      = data.terraform_remote_state.core.outputs.subscription.id
+    resource_group_name  = data.terraform_remote_state.core.outputs.resourceGroup.name
+    storage_account_name = data.terraform_remote_state.core.outputs.storage.account.name
+    container_name       = data.terraform_remote_state.core.outputs.storage.containerName.terraformState
+    key                  = "1.Virtual.Network"
+    use_azuread_auth     = true
+  }
+}
+
+data azurerm_resource_group dns {
+  name = data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
+}
+
+data azurerm_virtual_network studio {
+  name                = data.terraform_remote_state.network.outputs.virtualNetwork.name
+  resource_group_name = var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroup.name
+}
+
+data azurerm_subnet storage {
+  name                 = "Storage"
+  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.studio.name
+}
+
 locals {
-  regionName = var.regionName != "" ? var.regionName : module.core.resourceLocation.regionName
+  location = var.regionName != "" ? var.regionName : module.core.resourceLocation.name
 }
 
 resource azurerm_resource_group storage_data_load {
-  count    = var.dataLoad.enable ? 1 : 0
   name     = var.resourceGroupName
-  location = local.regionName
+  location = local.location
   tags = {
     AAA = basename(path.cwd)
   }

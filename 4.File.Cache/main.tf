@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.22.0"
+      version = "~>4.23.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -26,6 +26,9 @@ terraform {
 
 provider azurerm {
   features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
   }
   subscription_id     = data.terraform_remote_state.core.outputs.subscription.id
   storage_use_azuread = true
@@ -63,7 +66,7 @@ module hammerspace {
   }
   activeDirectory = {
     enable       = var.activeDirectory.enable
-    domainName   = var.activeDirectory.domainName
+    domainName   = var.activeDirectory.domain.name
     servers      = var.activeDirectory.machine.name
     userName     = var.activeDirectory.machine.adminLogin.userName != "" ? var.activeDirectory.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
     userPassword = var.activeDirectory.machine.adminLogin.userPassword != "" ? var.activeDirectory.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
@@ -280,11 +283,6 @@ data azurerm_key_vault_key data_encryption {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
-data azurerm_log_analytics_workspace studio {
-  name                = module.core.monitor.name
-  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
-}
-
 data terraform_remote_state core {
   backend = "local"
   config = {
@@ -317,8 +315,8 @@ data terraform_remote_state storage {
 }
 
 data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetworks[0].name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
+  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroup.name
 }
 
 data azurerm_subnet cache {
@@ -334,7 +332,7 @@ data azurerm_private_dns_zone studio {
 
 resource azurerm_resource_group cache {
   name     = var.resourceGroupName
-  location = var.existingNetwork.enable ? var.existingNetwork.regionName : module.core.resourceLocation.regionName
+  location = var.existingNetwork.enable ? var.existingNetwork.regionName : module.core.resourceLocation.name
   tags = {
     AAA = basename(path.cwd)
   }
@@ -355,8 +353,8 @@ output cacheDNS {
   } : var.vfxtCache.enable ? {
     fqdn    = azurerm_private_dns_a_record.cache_vfxt[0].fqdn
     records = azurerm_private_dns_a_record.cache_vfxt[0].records
-  } : var.knfsdCache.enable ? {
-    fqdn    = azurerm_private_dns_a_record.cache_knfsd[0].fqdn
-    records = azurerm_private_dns_a_record.cache_knfsd[0].records
+  } : var.nfsCache.enable ? {
+    fqdn    = azurerm_private_dns_a_record.cache_nfs[0].fqdn
+    records = azurerm_private_dns_a_record.cache_nfs[0].records
   } : null
 }

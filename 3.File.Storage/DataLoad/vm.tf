@@ -4,7 +4,6 @@
 
 variable dataLoad {
   type = object({
-    enable = bool
     mount = object({
       type    = string
       path    = string
@@ -61,10 +60,9 @@ locals {
 }
 
 resource azurerm_network_interface storage_data_load {
-  count               = var.dataLoad.enable ? 1 : 0
   name                = var.dataLoad.machine.name
-  resource_group_name = azurerm_resource_group.storage_data_load[0].name
-  location            = azurerm_resource_group.storage_data_load[0].location
+  resource_group_name = azurerm_resource_group.storage_data_load.name
+  location            = azurerm_resource_group.storage_data_load.location
   ip_configuration {
     name                          = "ipConfig"
     private_ip_address_allocation = "Dynamic"
@@ -74,10 +72,9 @@ resource azurerm_network_interface storage_data_load {
 }
 
  resource azurerm_linux_virtual_machine storage_data_load {
-  count                           = var.dataLoad.enable ? 1 : 0
   name                            = var.dataLoad.machine.name
-  resource_group_name             = azurerm_resource_group.storage_data_load[0].name
-  location                        = azurerm_resource_group.storage_data_load[0].location
+  resource_group_name             = azurerm_resource_group.storage_data_load.name
+  location                        = azurerm_resource_group.storage_data_load.location
   size                            = var.dataLoad.machine.size
   admin_username                  = local.dataLoad.machine.adminLogin.userName
   admin_password                  = local.dataLoad.machine.adminLogin.userPassword
@@ -89,7 +86,7 @@ resource azurerm_network_interface storage_data_load {
     ]
   }
   network_interface_ids = [
-    azurerm_network_interface.storage_data_load[0].id
+    azurerm_network_interface.storage_data_load.id
   ]
   os_disk {
     storage_account_type = var.dataLoad.machine.osDisk.storageType
@@ -112,14 +109,13 @@ resource azurerm_network_interface storage_data_load {
 }
 
 resource azurerm_virtual_machine_extension storage_data_load {
-  count                      = var.dataLoad.enable ? 1 : 0
   name                       = "DataLoad"
   type                       = "CustomScript"
   publisher                  = "Microsoft.Azure.Extensions"
   type_handler_version       = module.core.version.script_extension_linux
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
-  virtual_machine_id         = azurerm_linux_virtual_machine.storage_data_load[0].id
+  virtual_machine_id         = azurerm_linux_virtual_machine.storage_data_load.id
   protected_settings = jsonencode({
     script = base64encode(
       templatefile("cse.sh", {

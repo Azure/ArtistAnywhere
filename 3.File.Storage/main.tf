@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.22.0"
+      version = "~>4.23.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -12,6 +12,10 @@ terraform {
     http = {
       source  = "hashicorp/http"
       version = "~>3.4.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~>0.13.0"
     }
     azapi = {
       source = "azure/azapi"
@@ -239,7 +243,7 @@ data azurerm_subscription current {}
 data azurerm_client_config current {}
 
 data azurerm_location studio {
-  location = local.regionName
+  location = local.location
 }
 
 data azurerm_user_assigned_identity studio {
@@ -296,8 +300,8 @@ data azurerm_resource_group dns {
 }
 
 data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetworks[0].name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
+  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroup.name
 }
 
 data azurerm_private_dns_zone studio {
@@ -312,13 +316,13 @@ data azurerm_subnet storage {
 }
 
 locals {
-  regionName = var.regionName != "" ? var.regionName : module.core.resourceLocation.regionName
+  location = var.regionName != "" ? var.regionName : module.core.resourceLocation.name
 }
 
 resource azurerm_resource_group storage {
   count    = length(local.storageAccounts) > 0 ? 1 : 0
   name     = var.resourceGroupName
-  location = local.regionName
+  location = local.location
   tags = {
     AAA = basename(path.cwd)
   }
@@ -327,7 +331,7 @@ resource azurerm_resource_group storage {
 resource azurerm_resource_group hammerspace {
   count    = var.hammerspace.enable ? 1 : 0
   name     = "${var.resourceGroupName}.Hammerspace"
-  location = local.regionName
+  location = local.location
   tags = {
     AAA = basename(path.cwd)
   }
@@ -337,7 +341,7 @@ output storageAccounts {
   value = [
     for storageAccount in azurerm_storage_account.studio : {
       name         = storageAccount.name
-      regionName   = storageAccount.primary_location
+      location     = storageAccount.primary_location
       blobEndpoint = storageAccount.primary_blob_endpoint
       fileEndpoint = storageAccount.primary_file_endpoint
     }

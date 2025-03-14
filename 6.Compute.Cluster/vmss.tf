@@ -89,18 +89,21 @@ variable virtualMachineScaleSets {
 }
 
 data azurerm_location studio {
-  location = module.global.resourceLocation.regionName
+  location = module.core.resourceLocation.name
 }
 
 locals {
   virtualMachineScaleSets = [
     for virtualMachineScaleSet in var.virtualMachineScaleSets : merge(virtualMachineScaleSet, {
       resourceLocation = {
-        regionName       = virtualMachineScaleSet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
-        extendedZoneName = virtualMachineScaleSet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.name : null
+        name = virtualMachineScaleSet.network.locationExtended.enable && module.core.resourceLocation.extendedZone.enable ? module.core.resourceLocation.extendedZone.name : module.core.resourceLocation.name
+        extendedZone = {
+          name     = virtualMachineScaleSet.network.locationExtended.enable && module.core.resourceLocation.extendedZone.enable ? module.core.resourceLocation.extendedZone.name : null
+          location = virtualMachineScaleSet.network.locationExtended.enable && module.core.resourceLocation.extendedZone.enable ? module.core.resourceLocation.extendedZone.location : null
+        }
       }
       network = merge(virtualMachineScaleSet.network, {
-        subnetId = "${virtualMachineScaleSet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
+        subnetId = "${virtualMachineScaleSet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
       })
       adminLogin = merge(virtualMachineScaleSet.adminLogin, {
         userName     = virtualMachineScaleSet.adminLogin.userName != "" ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -118,8 +121,8 @@ resource azurerm_linux_virtual_machine_scale_set compute {
   name                            = each.value.name
   computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
   resource_group_name             = azurerm_resource_group.compute.name
-  location                        = each.value.resourceLocation.regionName
-  edge_zone                       = each.value.resourceLocation.extendedZoneName
+  location                        = each.value.resourceLocation.name
+  edge_zone                       = each.value.resourceLocation.extendedZone.name
   sku                             = each.value.machine.size
   instances                       = each.value.machine.count
   source_image_id                 = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
@@ -166,13 +169,13 @@ resource azurerm_linux_virtual_machine_scale_set compute {
       name                       = each.value.extension.custom.name
       type                       = "CustomScript"
       publisher                  = "Microsoft.Azure.Extensions"
-      type_handler_version       = module.global.version.script_extension_linux
+      type_handler_version       = module.core.version.script_extension_linux
       automatic_upgrade_enabled  = false
       auto_upgrade_minor_version = true
       protected_settings = jsonencode({
         script = base64encode(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
-            fileSystem = module.global.fileSystem.linux
+            fileSystem = module.core.fileSystem.linux
           }))
         )
       })
@@ -194,25 +197,25 @@ resource azurerm_linux_virtual_machine_scale_set compute {
       })
     }
   }
-  dynamic extension {
-    for_each = each.value.extension.monitor.enable ? [1] : []
-    content {
-      name                       = each.value.extension.monitor.name
-      type                       = "AzureMonitorLinuxAgent"
-      publisher                  = "Microsoft.Azure.Monitor"
-      type_handler_version       = module.global.version.monitor_agent_linux
-      automatic_upgrade_enabled  = true
-      auto_upgrade_minor_version = true
-      settings = jsonencode({
-        authentication = {
-          managedIdentity = {
-            identifier-name  = "mi_res_id"
-            identifier-value = data.azurerm_user_assigned_identity.studio.id
-          }
-        }
-      })
-    }
-  }
+  # dynamic extension {
+  #   for_each = each.value.extension.monitor.enable ? [1] : []
+  #   content {
+  #     name                       = each.value.extension.monitor.name
+  #     type                       = "AzureMonitorLinuxAgent"
+  #     publisher                  = "Microsoft.Azure.Monitor"
+  #     type_handler_version       = module.core.version.monitor_agent_linux
+  #     automatic_upgrade_enabled  = true
+  #     auto_upgrade_minor_version = true
+  #     settings = jsonencode({
+  #       authentication = {
+  #         managedIdentity = {
+  #           identifier-name  = "mi_res_id"
+  #           identifier-value = data.azurerm_user_assigned_identity.studio.id
+  #         }
+  #       }
+  #     })
+  #   }
+  # }
   dynamic admin_ssh_key {
     for_each = each.value.adminLogin.sshKeyPublic != "" ? [1] : []
     content {
@@ -236,13 +239,13 @@ resource azurerm_linux_virtual_machine_scale_set compute {
   }
 }
 
-resource azurerm_monitor_data_collection_rule_association compute_linux {
-  for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "linux" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
-  }
-  target_resource_id          = azurerm_linux_virtual_machine_scale_set.compute[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
-}
+# resource azurerm_monitor_data_collection_rule_association compute_linux {
+#   for_each = {
+#     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "linux" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
+#   }
+#   target_resource_id          = azurerm_linux_virtual_machine_scale_set.compute[each.value.name].id
+#   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+# }
 
 resource azurerm_windows_virtual_machine_scale_set compute {
   for_each = {
@@ -251,8 +254,8 @@ resource azurerm_windows_virtual_machine_scale_set compute {
   name                   = each.value.name
   computer_name_prefix   = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
   resource_group_name    = azurerm_resource_group.compute.name
-  location               = each.value.resourceLocation.regionName
-  edge_zone              = each.value.resourceLocation.extendedZoneName
+  location               = each.value.resourceLocation.name
+  edge_zone              = each.value.resourceLocation.extendedZone.name
   sku                    = each.value.machine.size
   instances              = each.value.machine.count
   source_image_id        = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
@@ -298,14 +301,14 @@ resource azurerm_windows_virtual_machine_scale_set compute {
       name                       = each.value.extension.custom.name
       type                       = "CustomScriptExtension"
       publisher                  = "Microsoft.Compute"
-      type_handler_version       = module.global.version.script_extension_windows
+      type_handler_version       = module.core.version.script_extension_windows
       automatic_upgrade_enabled  = false
       auto_upgrade_minor_version = true
       protected_settings = jsonencode({
         commandToExecute = "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
             activeDirectory = local.activeDirectory
-            fileSystem      = module.global.fileSystem.windows
+            fileSystem      = module.core.fileSystem.windows
           })), "UTF-16LE"
         )}"
       })
@@ -327,25 +330,25 @@ resource azurerm_windows_virtual_machine_scale_set compute {
       })
     }
   }
-  dynamic extension {
-    for_each = each.value.extension.monitor.enable ? [1] : []
-    content {
-      name                       = each.value.extension.monitor.name
-      type                       = "AzureMonitorWindowsAgent"
-      publisher                  = "Microsoft.Azure.Monitor"
-      type_handler_version       = module.global.version.monitor_agent_windows
-      automatic_upgrade_enabled  = true
-      auto_upgrade_minor_version = true
-      settings = jsonencode({
-        authentication = {
-          managedIdentity = {
-            identifier-name  = "mi_res_id"
-            identifier-value = data.azurerm_user_assigned_identity.studio.id
-          }
-        }
-      })
-    }
-  }
+  # dynamic extension {
+  #   for_each = each.value.extension.monitor.enable ? [1] : []
+  #   content {
+  #     name                       = each.value.extension.monitor.name
+  #     type                       = "AzureMonitorWindowsAgent"
+  #     publisher                  = "Microsoft.Azure.Monitor"
+  #     type_handler_version       = module.core.version.monitor_agent_windows
+  #     automatic_upgrade_enabled  = true
+  #     auto_upgrade_minor_version = true
+  #     settings = jsonencode({
+  #       authentication = {
+  #         managedIdentity = {
+  #           identifier-name  = "mi_res_id"
+  #           identifier-value = data.azurerm_user_assigned_identity.studio.id
+  #         }
+  #       }
+  #     })
+  #   }
+  # }
   dynamic termination_notification {
     for_each = each.value.extension.custom.parameters.terminateNotification.enable ? [1] : []
     content {
@@ -362,13 +365,13 @@ resource azurerm_windows_virtual_machine_scale_set compute {
   }
 }
 
-resource azurerm_monitor_data_collection_rule_association compute_windows {
-  for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "windows" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
-  }
-  target_resource_id          = azurerm_windows_virtual_machine_scale_set.compute[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
-}
+# resource azurerm_monitor_data_collection_rule_association compute_windows {
+#   for_each = {
+#     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "windows" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
+#   }
+#   target_resource_id          = azurerm_windows_virtual_machine_scale_set.compute[each.value.name].id
+#   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+# }
 
 resource azurerm_orchestrated_virtual_machine_scale_set compute {
   for_each = {
@@ -376,8 +379,8 @@ resource azurerm_orchestrated_virtual_machine_scale_set compute {
   }
   name                        = each.value.name
   resource_group_name         = azurerm_resource_group.compute.name
-  location                    = each.value.resourceLocation.regionName
-  # edge_zone                   = each.value.resourceLocation.extendedZoneName
+  location                    = each.value.resourceLocation.name
+  # edge_zone                   = each.value.resourceLocation.extendedZone.name
   sku_name                    = each.value.machine.size
   instances                   = each.value.machine.count
   source_image_id             = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
@@ -446,18 +449,18 @@ resource azurerm_orchestrated_virtual_machine_scale_set compute {
       name                               = each.value.extension.custom.name
       type                               = lower(each.value.osDisk.type) == "windows" ? "CustomScriptExtension" :"CustomScript"
       publisher                          = lower(each.value.osDisk.type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
-      type_handler_version               = lower(each.value.osDisk.type) == "windows" ? module.global.version.script_extension_windows : module.global.version.script_extension_linux
+      type_handler_version               = lower(each.value.osDisk.type) == "windows" ? module.core.version.script_extension_windows : module.core.version.script_extension_linux
       auto_upgrade_minor_version_enabled = true
       protected_settings = jsonencode({
         script = lower(each.value.osDisk.type) == "windows" ? null : base64encode(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
-            fileSystem = module.global.fileSystem.linux
+            fileSystem = module.core.fileSystem.linux
           }))
         )
         commandToExecute = lower(each.value.osDisk.type) == "windows" ? "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
           templatefile(each.value.extension.custom.fileName, merge(each.value.extension.custom.parameters, {
             activeDirectory = local.activeDirectory
-            fileSystem      = module.global.fileSystem.windows
+            fileSystem      = module.core.fileSystem.windows
           })), "UTF-16LE"
         )}" : null
       })
@@ -478,24 +481,24 @@ resource azurerm_orchestrated_virtual_machine_scale_set compute {
       })
     }
   }
-  dynamic extension {
-    for_each = each.value.extension.monitor.enable ? [1] : []
-    content {
-      name                               = each.value.extension.monitor.name
-      type                               = lower(each.value.osDisk.type) == "windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
-      publisher                          = "Microsoft.Azure.Monitor"
-      type_handler_version               = lower(each.value.osDisk.type) == "windows" ? module.global.version.monitor_agent_windows : module.global.version.monitor_agent_linux
-      auto_upgrade_minor_version_enabled = true
-      settings = jsonencode({
-        authentication = {
-          managedIdentity = {
-            identifier-name  = "mi_res_id"
-            identifier-value = data.azurerm_user_assigned_identity.studio.id
-          }
-        }
-      })
-    }
-  }
+  # dynamic extension {
+  #   for_each = each.value.extension.monitor.enable ? [1] : []
+  #   content {
+  #     name                               = each.value.extension.monitor.name
+  #     type                               = lower(each.value.osDisk.type) == "windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
+  #     publisher                          = "Microsoft.Azure.Monitor"
+  #     type_handler_version               = lower(each.value.osDisk.type) == "windows" ? module.core.version.monitor_agent_windows : module.core.version.monitor_agent_linux
+  #     auto_upgrade_minor_version_enabled = true
+  #     settings = jsonencode({
+  #       authentication = {
+  #         managedIdentity = {
+  #           identifier-name  = "mi_res_id"
+  #           identifier-value = data.azurerm_user_assigned_identity.studio.id
+  #         }
+  #       }
+  #     })
+  #   }
+  # }
   dynamic termination_notification {
     for_each = each.value.extension.custom.parameters.terminateNotification.enable ? [1] : []
     content {
@@ -505,10 +508,10 @@ resource azurerm_orchestrated_virtual_machine_scale_set compute {
   }
 }
 
-resource azurerm_monitor_data_collection_rule_association compute {
-  for_each = {
-    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
-  }
-  target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.compute[each.value.name].id
-  data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
-}
+# resource azurerm_monitor_data_collection_rule_association compute {
+#   for_each = {
+#     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
+#   }
+#   target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.compute[each.value.name].id
+#   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+# }

@@ -89,8 +89,11 @@ locals {
   computeFleets = [
     for computeFleet in var.computeFleets : merge(computeFleet, {
       resourceLocation = {
-        regionName       = computeFleet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.regionName : module.global.resourceLocation.regionName
-        extendedZoneName = computeFleet.network.locationExtended.enable ? module.global.resourceLocation.extendedZone.name : null
+        name = computeFleet.network.locationExtended.enable && module.core.resourceLocation.extendedZone.enable ? module.core.resourceLocation.extendedZone.name : module.core.resourceLocation.name
+        extendedZone = {
+          name     = computeFleet.network.locationExtended.enable && module.core.resourceLocation.extendedZone.enable ? module.core.resourceLocation.extendedZone.name : null
+          location = computeFleet.network.locationExtended.enable && module.core.resourceLocation.extendedZone.enable ? module.core.resourceLocation.extendedZone.location : null
+        }
       }
       machine = merge(computeFleet.machine, {
         adminLogin = merge(computeFleet.machine.adminLogin, {
@@ -100,7 +103,7 @@ locals {
         })
       })
       network = merge(computeFleet.network, {
-        subnetId = "${computeFleet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended.id : data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : computeFleet.network.subnetName}"
+        subnetId = "${computeFleet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.existingNetwork.enable ? var.existingNetwork.subnetName : computeFleet.network.subnetName}"
       })
       activeDirectory = merge(var.activeDirectory, {
         adminUsername = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value
@@ -187,17 +190,17 @@ resource azapi_resource fleet {
                 properties = {
                   type                    = lower(each.value.machine.osDisk.type) == "windows" ? "CustomScriptExtension" :"CustomScript"
                   publisher               = lower(each.value.machine.osDisk.type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
-                  typeHandlerVersion      = lower(each.value.machine.osDisk.type) == "windows" ? module.global.version.script_extension_windows : module.global.version.script_extension_linux
+                  typeHandlerVersion      = lower(each.value.machine.osDisk.type) == "windows" ? module.core.version.script_extension_windows : module.core.version.script_extension_linux
                   autoUpgradeMinorVersion = true
                   protectedSettings = jsonencode({
                     script = lower(each.value.machine.osDisk.type) == "windows" ? null : base64encode(
                       templatefile(each.value.machine.extension.custom.fileName, merge(each.value.machine.extension.custom.parameters, {
-                        fileSystem = module.global.fileSystem.linux
+                        fileSystem = module.core.fileSystem.linux
                       }))
                     )
                     commandToExecute = lower(each.value.machine.osDisk.type) == "windows" ? "PowerShell -ExecutionPolicy Unrestricted -EncodedCommand ${textencodebase64(
                       templatefile(each.value.machine.extension.custom.fileName, merge(each.value.machine.extension.custom.parameters, {
-                        fileSystem      = module.global.fileSystem.windows
+                        fileSystem      = module.core.fileSystem.windows
                         activeDirectory = each.value.activeDirectory
                       })), "UTF-16LE"
                     )}" : null

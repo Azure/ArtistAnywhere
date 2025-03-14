@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.22.0"
+      version = "~>4.23.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -71,17 +71,12 @@ data azurerm_subscription current {}
 
 data azurerm_user_assigned_identity studio {
   name                = module.core.managedIdentity.name
-  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
-}
-
-data azurerm_monitor_data_collection_endpoint studio {
-  name                = module.core.monitor.name
-  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault studio {
   name                = module.core.keyVault.name
-  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault_secret admin_username {
@@ -99,10 +94,10 @@ data azurerm_key_vault_secret ssh_key_public {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
-data azurerm_log_analytics_workspace studio {
-  name                = module.core.monitor.name
-  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroupName
-}
+# data azurerm_monitor_data_collection_endpoint studio {
+#   name                = module.core.monitor.name
+#   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
+# }
 
 data terraform_remote_state core {
   backend = "local"
@@ -124,13 +119,14 @@ data terraform_remote_state network {
 }
 
 data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetworks[0].name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
+  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroup.name
 }
 
 data azurerm_virtual_network studio_extended {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : reverse(data.terraform_remote_state.network.outputs.virtualNetworks)[0].name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : reverse(data.terraform_remote_state.network.outputs.virtualNetworks)[0].resourceGroupName
+  count               = module.core.resourceLocation.extendedZone.enable ? 1 : 0
+  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.location.extended.name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.location.extended.resourceGroup.name
 }
 
 data azurerm_private_dns_zone studio {
@@ -140,7 +136,7 @@ data azurerm_private_dns_zone studio {
 
 resource azurerm_resource_group job_scheduler {
   name     = var.resourceGroupName
-  location = module.core.resourceLocation.regionName
+  location = module.core.resourceLocation.name
   tags = {
     AAA = basename(path.cwd)
   }

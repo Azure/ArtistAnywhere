@@ -24,7 +24,7 @@ if ($jobProcessors -contains "Blender") {
   $version = $buildConfig.version.job_processor_blender
   $fileType = "blender"
   $fileName = "$fileType-$version-windows-x64.msi"
-  $fileLink = "${blobStorage.endpointUrl}/Blender/$version/$fileName"
+  $fileLink = "$($blobStorage.endpointUrl)/Blender/$version/$fileName"
   DownloadFile $fileName $fileLink
   RunProcess $fileName "/quiet /norestart /log $fileType.log" $null
   $binPaths += ";C:\Program Files\Blender Foundation\Blender $($version.substring(0, 3))"

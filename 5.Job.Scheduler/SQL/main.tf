@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.22.0"
+      version = "~>4.23.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -92,8 +92,8 @@ data terraform_remote_state network {
 }
 
 data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetworks[0].name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetworks[0].resourceGroupName
+  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroup.name
 }
 
 data azurerm_subnet data {
@@ -119,7 +119,7 @@ data azurerm_subnet data_postgresql {
 resource azurerm_resource_group job_scheduler_mysql {
   count    = var.mySQL.enable ? 1 : 0
   name     = "${var.resourceGroupName}.MySQL"
-  location = module.core.resourceLocation.regionName
+  location = module.core.resourceLocation.name
   tags = {
     AAA = "${basename(dirname(path.cwd))}.${basename(path.cwd)}"
   }
@@ -128,7 +128,7 @@ resource azurerm_resource_group job_scheduler_mysql {
 resource azurerm_resource_group job_scheduler_postgresql {
   count    = var.postgreSQL.enable ? 1 : 0
   name     = "${var.resourceGroupName}.PostgreSQL"
-  location = module.core.resourceLocation.regionName
+  location = module.core.resourceLocation.name
   tags = {
     AAA = "${basename(dirname(path.cwd))}.${basename(path.cwd)}"
   }
