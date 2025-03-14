@@ -114,13 +114,13 @@ locals {
   ]
 }
 
-resource azurerm_linux_virtual_machine_scale_set compute {
+resource azurerm_linux_virtual_machine_scale_set cluster {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "linux" && !virtualMachineScaleSet.flexMode.enable
   }
   name                            = each.value.name
   computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
-  resource_group_name             = azurerm_resource_group.compute.name
+  resource_group_name             = azurerm_resource_group.cluster.name
   location                        = each.value.resourceLocation.name
   edge_zone                       = each.value.resourceLocation.extendedZone.name
   sku                             = each.value.machine.size
@@ -239,21 +239,21 @@ resource azurerm_linux_virtual_machine_scale_set compute {
   }
 }
 
-# resource azurerm_monitor_data_collection_rule_association compute_linux {
+# resource azurerm_monitor_data_collection_rule_association cluster_linux {
 #   for_each = {
 #     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "linux" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
 #   }
-#   target_resource_id          = azurerm_linux_virtual_machine_scale_set.compute[each.value.name].id
+#   target_resource_id          = azurerm_linux_virtual_machine_scale_set.cluster[each.value.name].id
 #   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 # }
 
-resource azurerm_windows_virtual_machine_scale_set compute {
+resource azurerm_windows_virtual_machine_scale_set cluster {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "windows" && !virtualMachineScaleSet.flexMode.enable
   }
   name                   = each.value.name
   computer_name_prefix   = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
-  resource_group_name    = azurerm_resource_group.compute.name
+  resource_group_name    = azurerm_resource_group.cluster.name
   location               = each.value.resourceLocation.name
   edge_zone              = each.value.resourceLocation.extendedZone.name
   sku                    = each.value.machine.size
@@ -365,20 +365,20 @@ resource azurerm_windows_virtual_machine_scale_set compute {
   }
 }
 
-# resource azurerm_monitor_data_collection_rule_association compute_windows {
+# resource azurerm_monitor_data_collection_rule_association cluster_windows {
 #   for_each = {
 #     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "windows" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
 #   }
-#   target_resource_id          = azurerm_windows_virtual_machine_scale_set.compute[each.value.name].id
+#   target_resource_id          = azurerm_windows_virtual_machine_scale_set.cluster[each.value.name].id
 #   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 # }
 
-resource azurerm_orchestrated_virtual_machine_scale_set compute {
+resource azurerm_orchestrated_virtual_machine_scale_set cluster {
   for_each = {
     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable
   }
   name                        = each.value.name
-  resource_group_name         = azurerm_resource_group.compute.name
+  resource_group_name         = azurerm_resource_group.cluster.name
   location                    = each.value.resourceLocation.name
   # edge_zone                   = each.value.resourceLocation.extendedZone.name
   sku_name                    = each.value.machine.size
@@ -508,10 +508,10 @@ resource azurerm_orchestrated_virtual_machine_scale_set compute {
   }
 }
 
-# resource azurerm_monitor_data_collection_rule_association compute {
+# resource azurerm_monitor_data_collection_rule_association cluster {
 #   for_each = {
 #     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
 #   }
-#   target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.compute[each.value.name].id
+#   target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.cluster[each.value.name].id
 #   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
 # }

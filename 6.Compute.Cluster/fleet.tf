@@ -125,8 +125,8 @@ resource azapi_resource fleet {
   }
   name      = each.value.name
   type      = "Microsoft.AzureFleet/fleets@2024-11-01"
-  parent_id = azurerm_resource_group.compute.id
-  location  = azurerm_resource_group.compute.location
+  parent_id = azurerm_resource_group.cluster.id
+  location  = azurerm_resource_group.cluster.location
   identity {
     type = "UserAssigned"
     identity_ids = [

@@ -137,7 +137,7 @@ locals {
   })
 }
 
-resource azurerm_resource_group compute {
+resource azurerm_resource_group cluster {
   name     = var.resourceGroupName
   location = module.core.resourceLocation.name
   tags = {

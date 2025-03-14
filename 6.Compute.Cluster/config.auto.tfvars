@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Compute" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.Cluster" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
 ######################################################################################################
 # Virtual Machine Scale Sets (https://learn.microsoft.com/azure/virtual-machine-scale-sets/overview) #
