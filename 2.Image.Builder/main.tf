@@ -91,18 +91,18 @@ data terraform_remote_state network {
 }
 
 data azurerm_virtual_network studio {
-  name                = data.terraform_remote_state.network.outputs.virtualNetwork.name
-  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroup.name
+  name                = data.terraform_remote_state.network.outputs.virtualNetwork.core.name
+  resource_group_name = data.terraform_remote_state.network.outputs.virtualNetwork.core.resourceGroup.name
 }
 
-data azurerm_subnet compute {
-  name                 = "Compute"
+data azurerm_subnet cluster {
+  name                 = "Cluster"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
 locals {
-  locations = data.terraform_remote_state.network.outputs.virtualNetwork.location.names
+  locations = data.terraform_remote_state.network.outputs.virtualNetwork.locations
 }
 
 resource azurerm_resource_group image_builder {

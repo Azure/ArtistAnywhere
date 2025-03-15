@@ -76,12 +76,12 @@ data terraform_remote_state network {
 }
 
 data azurerm_resource_group dns {
-  name = data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
+  name = data.terraform_remote_state.network.outputs.dns.privateZone.resourceGroup.name
 }
 
 data azurerm_virtual_network studio {
-  name                = data.terraform_remote_state.network.outputs.virtualNetwork.name
-  resource_group_name = var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroup.name
+  name                = data.terraform_remote_state.network.outputs.virtualNetwork.core.name
+  resource_group_name = var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetwork.core.resourceGroup.name
 }
 
 data azurerm_subnet storage {

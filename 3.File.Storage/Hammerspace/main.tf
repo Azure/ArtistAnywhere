@@ -17,7 +17,7 @@ variable virtualNetwork {
   })
 }
 
-variable privateDns {
+variable privateDNS {
   type = object({
     zoneName          = string
     resourceGroupName = string

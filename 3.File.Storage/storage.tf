@@ -124,6 +124,7 @@ resource azurerm_storage_account studio {
   large_file_share_enabled        = each.value.enableLargeFileShare ? true : null
   local_user_enabled              = false
   shared_access_key_enabled       = false
+  public_network_access_enabled   = false
   allow_nested_items_to_be_public = false
   network_rules {
     default_action = "Deny"
@@ -193,5 +194,16 @@ resource azurerm_private_endpoint storage {
   }
   depends_on = [
     azurerm_storage_account.studio
+  ]
+}
+
+output storageAccounts {
+  value = [
+    for storageAccount in azurerm_storage_account.studio : {
+      name         = storageAccount.name
+      location     = storageAccount.primary_location
+      blobEndpoint = storageAccount.primary_blob_endpoint
+      fileEndpoint = storageAccount.primary_file_endpoint
+    }
   ]
 }

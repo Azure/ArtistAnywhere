@@ -9,6 +9,7 @@ if [ "$buildConfigEncoded" != "" ]; then
   echo "Customize (Start): Image Build Parameters"
   buildConfig=$(echo $buildConfigEncoded | base64 -d)
   blobStorage=$(echo $buildConfig | jq -c .blobStorage)
+  blobStorageEndpointUrl=$(echo $blobStorage | jq -r .endpointUrl)
   machineType=$(echo $buildConfig | jq -r .machineType)
   gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
   jobSchedulers=$(echo $buildConfig | jq -c .jobSchedulers)

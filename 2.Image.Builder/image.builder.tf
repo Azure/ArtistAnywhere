@@ -80,7 +80,7 @@ resource azapi_resource linux {
           data.azurerm_user_assigned_identity.studio.id
         ]
         vnetConfig = {
-          subnetId = data.azurerm_subnet.compute.id
+          subnetId = data.azurerm_subnet.cluster.id
         }
       }
       source = {
@@ -206,7 +206,7 @@ resource azapi_resource windows {
           data.azurerm_user_assigned_identity.studio.id
         ]
         vnetConfig = {
-          subnetId = data.azurerm_subnet.compute.id
+          subnetId = data.azurerm_subnet.cluster.id
         }
       }
       source = {

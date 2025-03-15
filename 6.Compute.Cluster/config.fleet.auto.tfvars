@@ -82,7 +82,7 @@ computeFleets = [
       }
     }
     network = {
-      subnetName = "Compute"
+      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -170,7 +170,7 @@ computeFleets = [
       }
     }
     network = {
-      subnetName = "Compute"
+      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }

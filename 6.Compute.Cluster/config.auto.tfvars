@@ -20,7 +20,7 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Compute"
+      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -103,7 +103,7 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Compute"
+      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -186,7 +186,7 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Compute"
+      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -269,7 +269,7 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Compute"
+      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -352,7 +352,7 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Compute"
+      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -435,7 +435,7 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Compute"
+      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }

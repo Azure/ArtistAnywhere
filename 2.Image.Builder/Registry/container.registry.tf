@@ -120,7 +120,7 @@ resource azurerm_private_endpoint container_registry {
   name                = "${lower(azurerm_container_registry.studio.name)}-${azurerm_private_dns_zone_virtual_network_link.container_registry.name}"
   resource_group_name = azurerm_container_registry.studio.resource_group_name
   location            = azurerm_container_registry.studio.location
-  subnet_id           = data.azurerm_subnet.compute.id
+  subnet_id           = data.azurerm_subnet.cluster.id
   private_service_connection {
     name                           = azurerm_container_registry.studio.name
     private_connection_resource_id = azurerm_container_registry.studio.id

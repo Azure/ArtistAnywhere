@@ -52,7 +52,7 @@ module hammerspace {
     subnetName        = data.azurerm_subnet.storage.name
     resourceGroupName = data.azurerm_subnet.storage.resource_group_name
   }
-  privateDns = {
+  privateDNS = {
     zoneName          = data.azurerm_private_dns_zone.studio.name
     resourceGroupName = data.azurerm_private_dns_zone.studio.resource_group_name
     aRecord = {
@@ -210,7 +210,7 @@ variable existingNetwork {
     subnetNameIdentity = string
     subnetNameStorage  = string
     resourceGroupName  = string
-    privateDns = object({
+    privateDNS = object({
       zoneName          = string
       resourceGroupName = string
     })
@@ -296,17 +296,17 @@ data terraform_remote_state network {
 }
 
 data azurerm_resource_group dns {
-  name = var.existingNetwork.enable ? var.existingNetwork.privateDns.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
+  name = var.existingNetwork.enable ? var.existingNetwork.privateDNS.resourceGroupName : data.terraform_remote_state.network.outputs.dns.privateZone.resourceGroup.name
 }
 
 data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetwork.resourceGroup.name
+  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.core.name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetwork.core.resourceGroup.name
 }
 
 data azurerm_private_dns_zone studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.privateDns.zoneName : data.terraform_remote_state.network.outputs.privateDns.zoneName
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.privateDns.resourceGroupName : data.terraform_remote_state.network.outputs.privateDns.resourceGroupName
+  name                = var.existingNetwork.enable ? var.existingNetwork.privateDNS.zoneName : data.terraform_remote_state.network.outputs.dns.privateZone.name
+  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.privateDNS.zone.resourceGroup.name : data.terraform_remote_state.network.outputs.dns.privateZone.resourceGroup.name
 }
 
 data azurerm_subnet storage {
@@ -335,39 +335,6 @@ resource azurerm_resource_group hammerspace {
   tags = {
     AAA = basename(path.cwd)
   }
-}
-
-output storageAccounts {
-  value = [
-    for storageAccount in azurerm_storage_account.studio : {
-      name         = storageAccount.name
-      location     = storageAccount.primary_location
-      blobEndpoint = storageAccount.primary_blob_endpoint
-      fileEndpoint = storageAccount.primary_file_endpoint
-    }
-  ]
-}
-
-output netAppFiles {
-  value = var.netAppFiles.enable ? {
-    volumes = [
-      for volume in azapi_resource.volume : {
-        name      = volume.name
-        ipAddress = volume.output.properties.mountTargets[0].ipAddress
-      }
-    ]
-    privateDNS = {
-      fqdn    = azurerm_private_dns_a_record.netapp[0].fqdn
-      records = azurerm_private_dns_a_record.netapp[0].records
-    }
-  } : null
-}
-
-output managedLustre {
-  value = var.managedLustre.enable ? {
-    name      = azurerm_managed_lustre_file_system.studio[0].name
-    ipAddress = azurerm_managed_lustre_file_system.studio[0].mgs_address
-  } : null
 }
 
 output hammerspace {

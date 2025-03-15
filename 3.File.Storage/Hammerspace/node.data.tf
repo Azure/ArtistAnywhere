@@ -161,10 +161,10 @@ resource azurerm_virtual_machine_data_disk_attachment data {
 ############################################################################
 
 resource azurerm_private_dns_a_record data {
-  name                = "${var.privateDns.aRecord.name}-data"
-  resource_group_name = var.privateDns.resourceGroupName
-  zone_name           = var.privateDns.zoneName
-  ttl                 = var.privateDns.aRecord.ttlSeconds
+  name                = "${var.privateDNS.aRecord.name}-data"
+  resource_group_name = var.privateDNS.resourceGroupName
+  zone_name           = var.privateDNS.zoneName
+  ttl                 = var.privateDNS.aRecord.ttlSeconds
   records = [
     for node in local.hsDataNodes : azurerm_linux_virtual_machine.data[node.machine.name].private_ip_address
   ]

@@ -326,7 +326,7 @@ existingNetwork = {
   name              = ""
   subnetName        = ""
   resourceGroupName = ""
-  privateDns = {
+  privateDNS = {
     zoneName          = ""
     resourceGroupName = ""
   }

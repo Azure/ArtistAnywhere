@@ -66,7 +66,7 @@ resource azurerm_resource_group network {
 
 resource azurerm_resource_group network_regions {
   for_each = {
-    for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.key => virtualNetwork
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork
   }
   name     = each.value.resourceGroup.name
   location = each.value.location

@@ -234,10 +234,10 @@ resource azurerm_lb_probe metadata {
 ############################################################################
 
 resource azurerm_private_dns_a_record metadata {
-  name                = "${var.privateDns.aRecord.name}-metadata"
-  resource_group_name = var.privateDns.resourceGroupName
-  zone_name           = var.privateDns.zoneName
-  ttl                 = var.privateDns.aRecord.ttlSeconds
+  name                = "${var.privateDNS.aRecord.name}-metadata"
+  resource_group_name = var.privateDNS.resourceGroupName
+  zone_name           = var.privateDNS.zoneName
+  ttl                 = var.privateDNS.aRecord.ttlSeconds
   records = local.hsHighAvailability ? [
     azurerm_lb.metadata[0].frontend_ip_configuration[0].private_ip_address
   ] : [

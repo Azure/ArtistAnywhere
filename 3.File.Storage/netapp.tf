@@ -268,6 +268,17 @@ resource azurerm_netapp_backup_policy studio {
   enabled                 = var.netAppFiles.backup.policy.enable
 }
 
-######################################################################################################
-# NetApp Files Snapshot (https://learn.microsoft.com/azure/azure-netapp-files/snapshots-introduction #
-######################################################################################################
+output netAppFiles {
+  value = var.netAppFiles.enable ? {
+    volumes = [
+      for volume in azapi_resource.volume : {
+        name      = volume.name
+        ipAddress = volume.output.properties.mountTargets[0].ipAddress
+      }
+    ]
+    dns = {
+      fqdn    = azurerm_private_dns_a_record.netapp[0].fqdn
+      records = azurerm_private_dns_a_record.netapp[0].records
+    }
+  } : null
+}

@@ -22,7 +22,7 @@ virtualMachines = [
       sizeGB      = 0
     }
     network = {
-      subnetName = "Compute"
+      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -79,7 +79,7 @@ virtualMachines = [
       sizeGB      = 0
     }
     network = {
-      subnetName = "Compute"
+      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -139,7 +139,7 @@ existingNetwork = {
   name              = ""
   subnetName        = ""
   resourceGroupName = ""
-  privateDns = {
+  privateDNS = {
     zoneName          = ""
     resourceGroupName = ""
   }

@@ -8,7 +8,7 @@ virtualNetworks = [
   {
     enable   = true
     name     = "Studio"
-    location = ""
+    location = "SouthCentralUS"
     addressSpace = [
       "10.0.0.0/16"
     ]
@@ -16,7 +16,7 @@ virtualNetworks = [
     ]
     subnets = [
       {
-        name = "Compute"
+        name = "Cluster"
         addressSpace = [
           "10.0.0.0/17"
         ]
@@ -35,23 +35,9 @@ virtualNetworks = [
         serviceDelegation = null
       },
       {
-        name = "DNS"
-        addressSpace = [
-          "10.0.192.0/25"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = {
-          service = "Microsoft.Network/dnsResolvers"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        }
-      },
-      {
         name = "Identity"
         addressSpace = [
-          "10.0.192.128/25"
+          "10.0.192.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -229,7 +215,7 @@ virtualNetworks = [
     ]
     subnets = [
       {
-        name = "Compute"
+        name = "Cluster"
         addressSpace = [
           "10.1.0.0/17"
         ]
@@ -248,23 +234,9 @@ virtualNetworks = [
         serviceDelegation = null
       },
       {
-        name = "DNS"
-        addressSpace = [
-          "10.1.192.0/25"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = {
-          service = "Microsoft.Network/dnsResolvers"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        }
-      },
-      {
         name = "Identity"
         addressSpace = [
-          "10.1.192.128/25"
+          "10.1.192.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -437,7 +409,7 @@ virtualNetworks = [
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
 ############################################################################
 
-privateDns = {
+privateDNS = {
   zoneName = "azure.studio"
   autoRegistration = {
     enable = true

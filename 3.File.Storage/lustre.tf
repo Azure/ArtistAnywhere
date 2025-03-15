@@ -122,3 +122,10 @@ resource azurerm_storage_container lustre_logging {
   name               = var.managedLustre.blobStorage.containerName.logging
   storage_account_id = data.azurerm_storage_account.lustre[0].id
 }
+
+output managedLustre {
+  value = var.managedLustre.enable ? {
+    name      = azurerm_managed_lustre_file_system.studio[0].name
+    ipAddress = azurerm_managed_lustre_file_system.studio[0].mgs_address
+  } : null
+}

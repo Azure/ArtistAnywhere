@@ -191,7 +191,7 @@ resource azurerm_private_dns_a_record cache_nfs {
   count               = var.nfsCache.enable ? 1 : 0
   name                = var.dnsRecord.name
   resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.azurerm_private_dns_zone.studio.resource_group_name
-  zone_name           = var.existingNetwork.enable ? var.existingNetwork.privateDns.zoneName : data.azurerm_private_dns_zone.studio.name
+  zone_name           = var.existingNetwork.enable ? var.existingNetwork.privateDNS.zoneName : data.azurerm_private_dns_zone.studio.name
   records             = data.azurerm_virtual_machine_scale_set.cache[0].instances[*].private_ip_address
   ttl                 = var.dnsRecord.ttlSeconds
 }

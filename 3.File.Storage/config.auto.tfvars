@@ -79,7 +79,7 @@ existingNetwork = {
   subnetNameIdentity = ""
   subnetNameStorage  = ""
   resourceGroupName  = ""
-  privateDns = {
+  privateDNS = {
     zoneName          = ""
     resourceGroupName = ""
   }

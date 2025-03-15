@@ -32,7 +32,7 @@ if [[ $jobProcessors == *Blender* ]]; then
   fileType="blender"
   filePath="/usr/local/$fileType"
   fileName="$fileType-$version-$hostType.tar.xz"
-  fileLink="${blobStorage.endpointUrl}/Blender/$version/$fileName"
+  fileLink="$blobStorageEndpointUrl/Blender/$version/$fileName"
   download_file $fileName $fileLink
   tar -xJf $fileName
   dnf -y install mesa-dri-drivers

@@ -22,57 +22,56 @@ variable virtualNetworks {
 }
 
 locals {
-  virtualNetworksConfig = flatten([
+  virtualNetwork  = local.virtualNetworks[0]
+  virtualNetworks = concat([
     for virtualNetwork in var.virtualNetworks : merge(virtualNetwork, {
-      location = virtualNetwork.location == "" ? module.core.resourceLocation.name : virtualNetwork.location
-    }) if virtualNetwork.enable
-  ])
-  virtualNetwork = local.virtualNetworks[0]
-  virtualNetworks = flatten([
-    for virtualNetwork in local.virtualNetworksConfig : merge(virtualNetwork, {
-      id  = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.location}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}"
-      key = "${virtualNetwork.name}-${virtualNetwork.location}"
+      key      = "${virtualNetwork.name}-${virtualNetwork.location}"
+      id       = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.location}/providers/Microsoft.Network/virtualNetworks/${virtualNetwork.name}"
+      location = virtualNetwork.location
       resourceGroup = {
-        id       = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.location}"
         name     = "${var.resourceGroupName}.${virtualNetwork.location}"
         location = virtualNetwork.location
       }
       extendedZone = null
-    })
-  ])
-  virtualNetworksExtended = distinct(concat(local.virtualNetworks, !module.core.resourceLocation.extendedZone.enable ? [local.virtualNetwork] : [
-    merge(local.virtualNetwork, {
-      id  = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.core.resourceLocation.extendedZone.location}.${module.core.resourceLocation.extendedZone.name}/providers/Microsoft.Network/virtualNetworks/${local.virtualNetwork.name}"
-      key = "${local.virtualNetwork.name}-${module.core.resourceLocation.extendedZone.location}-${module.core.resourceLocation.extendedZone.name}"
-      resourceGroup = {
-        id       = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${module.core.resourceLocation.extendedZone.location}.${module.core.resourceLocation.extendedZone.name}"
-        name     = "${var.resourceGroupName}.${module.core.resourceLocation.extendedZone.location}.${module.core.resourceLocation.extendedZone.name}"
-        location = local.virtualNetwork.location
-      }
-      extendedZone = module.core.resourceLocation.extendedZone
-    })
-  ]))
+    }) if virtualNetwork.enable
+  ], module.core.resourceLocation.extendedZone.enable ? [merge(reverse(var.virtualNetworks)[0], {
+    key      = "${reverse(var.virtualNetworks)[0].name}-${reverse(var.virtualNetworks)[0].location}-${module.core.resourceLocation.extendedZone.name}"
+    id       = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${reverse(var.virtualNetworks)[0].location}.${module.core.resourceLocation.extendedZone.name}/providers/Microsoft.Network/virtualNetworks/${reverse(var.virtualNetworks)[0].name}"
+    location = reverse(var.virtualNetworks)[0].location
+    resourceGroup = {
+      name     = "${var.resourceGroupName}.${reverse(var.virtualNetworks)[0].location}.${module.core.resourceLocation.extendedZone.name}"
+      location = reverse(var.virtualNetworks)[0].location
+    }
+    extendedZone = module.core.resourceLocation.extendedZone
+  })] : [])
   virtualNetworksSubnets = flatten([
-    for virtualNetwork in local.virtualNetworksExtended : [
+    for virtualNetwork in local.virtualNetworks : [
       for subnet in virtualNetwork.subnets : merge(subnet, {
         key            = "${virtualNetwork.key}-${subnet.name}"
         location       = virtualNetwork.location
         resourceGroup  = virtualNetwork.resourceGroup
         virtualNetwork = virtualNetwork
-      }) if try(virtualNetwork.extendedZone.name, "") == "" || (try(virtualNetwork.extendedZone.name, "") != "" && subnet.serviceDelegation == null)
+      })
     ]
   ])
   virtualNetworksSubnetStorage = [
-    for subnet in local.virtualNetworksSubnets : subnet if subnet.name == "Storage" && try(subnet.virtualNetwork.extendedZone.name, "") == ""
+    for subnet in local.virtualNetworksSubnets : subnet if subnet.name == "Storage"
   ]
   virtualNetworksSubnetsSecurity = [
     for subnet in local.virtualNetworksSubnets : subnet if subnet.name != "GatewaySubnet" && subnet.name != "AzureFirewallSubnet" && subnet.name != "AzureFirewallManagementSubnet"
+  ]
+  virtualNetworksOutput = [
+    for virtualNetwork in local.virtualNetworks : {
+      name          = virtualNetwork.name
+      resourceGroup = virtualNetwork.resourceGroup
+      location      = virtualNetwork.location
+    }
   ]
 }
 
 resource azurerm_virtual_network studio {
   for_each = {
-    for virtualNetwork in local.virtualNetworksExtended : virtualNetwork.key => virtualNetwork
+    for virtualNetwork in local.virtualNetworks : virtualNetwork.key => virtualNetwork
   }
   name                = each.value.name
   resource_group_name = each.value.resourceGroup.name
@@ -114,18 +113,8 @@ resource azurerm_subnet studio {
 
 output virtualNetwork {
   value = {
-    name          = local.virtualNetwork.name
-    resourceGroup = local.virtualNetwork.resourceGroup
-    location = {
-      names = distinct([
-        for virtualNetwork in local.virtualNetworks : virtualNetwork.location
-      ])
-      extended = module.core.resourceLocation.extendedZone.enable ? reverse([
-        for virtualNetwork in local.virtualNetworksExtended : {
-          name          = virtualNetwork.name
-          resourceGroup = virtualNetwork.resourceGroup
-        }
-      ])[0] : null
-    }
+    core      = local.virtualNetworksOutput[0]
+    extended  = module.core.resourceLocation.extendedZone.enable ? reverse(local.virtualNetworksOutput)[0] : null
+    locations = distinct(local.virtualNetworksOutput[*].location)
   }
 }
