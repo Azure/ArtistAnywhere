@@ -99,7 +99,7 @@ if [[ $jobSchedulers == *Deadline* ]]; then
   fileName="DeadlineClient-$version-linux-x64-installer.run"
   fileArgs="--mode unattended --prefix $deadlinePath"
   [ $machineType == Scheduler ] && workerService="false" || workerService="true"
-  [ $machineType == Compute ] && workerStartup="true" || workerStartup="false"
+  [ $machineType == Cluster ] && workerStartup="true" || workerStartup="false"
   fileArgs="$fileArgs --launcherdaemon $workerService --slavestartup $workerStartup"
   run_process "$filePath/$fileName $fileArgs" $binDirectory/$fileType
   mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log

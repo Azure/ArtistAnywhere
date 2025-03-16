@@ -26,12 +26,18 @@ provider azurerm {
       prevent_deletion_if_contains_resources = false
     }
   }
-  subscription_id     = regex("subscription_id${local.patternSuffix}", file("./config/backend"))[0]
+  subscription_id     = var.subscription.id
   storage_use_azuread = true
 }
 
 module core {
   source = "./config"
+}
+
+variable subscription {
+  type = object({
+    id = string
+  })
 }
 
 locals {

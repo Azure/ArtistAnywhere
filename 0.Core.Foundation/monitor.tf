@@ -82,15 +82,25 @@ output monitor {
       name     = azurerm_resource_group.studio_monitor.name
       location = azurerm_resource_group.studio_monitor.location
     }
-    workspace = {
-      dataCollection = {
-        endpointId = azurerm_monitor_workspace.studio.default_data_collection_endpoint_id
-        ruleId     = azurerm_monitor_workspace.studio.default_data_collection_rule_id
+    dataCollection = {
+      endpoint = {
+        id = azurerm_monitor_workspace.studio.default_data_collection_endpoint_id
       }
-      endpointUrl = azurerm_monitor_workspace.studio.query_endpoint
+      rule = {
+        id = azurerm_monitor_workspace.studio.default_data_collection_rule_id
+      }
+    }
+    workspace = {
+      url = azurerm_monitor_workspace.studio.query_endpoint
     }
     grafana = {
-      endpointUrl = azurerm_dashboard_grafana.studio.endpoint
+      url = azurerm_dashboard_grafana.studio.endpoint
+    }
+    logAnalytics = {
+      id = azurerm_log_analytics_workspace.studio.id
+    }
+    appInsights = {
+      id = azurerm_application_insights.studio.id
     }
   }
 }

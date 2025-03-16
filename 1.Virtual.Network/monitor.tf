@@ -2,21 +2,6 @@
 # Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
 ######################################################################
 
-data azurerm_log_analytics_workspace studio {
-  name                = module.core.monitor.name
-  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
-}
-
-data azurerm_application_insights studio {
-  name                = module.core.monitor.name
-  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
-}
-
-# data azurerm_monitor_data_collection_endpoint studio {
-#   name                = module.core.monitor.name
-#   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
-# }
-
 locals {
   monitorNetworks = [
     for virtualNetwork in local.virtualNetworks: virtualNetwork if try(virtualNetwork.extendedZone.name, "") == ""
@@ -141,20 +126,20 @@ resource azurerm_monitor_private_link_scope monitor {
 resource azurerm_monitor_private_link_scoped_service monitor_workspace {
   name                = "${module.core.monitor.name}-workspace"
   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
-  linked_resource_id  = data.azurerm_log_analytics_workspace.studio.id
+  linked_resource_id  = data.terraform_remote_state.core.outputs.monitor.logAnalytics.id
   scope_name          = azurerm_monitor_private_link_scope.monitor.name
 }
 
 resource azurerm_monitor_private_link_scoped_service monitor_insight {
   name                = "${module.core.monitor.name}-insight"
   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
-  linked_resource_id  = data.azurerm_application_insights.studio.id
+  linked_resource_id  = data.terraform_remote_state.core.outputs.monitor.appInsights.id
   scope_name          = azurerm_monitor_private_link_scope.monitor.name
 }
 
-# resource azurerm_monitor_private_link_scoped_service monitor_endpoint {
-#   name                = "${module.core.monitor.name}-data"
-#   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
-#   linked_resource_id  = data.azurerm_monitor_data_collection_endpoint.studio.id
-#   scope_name          = azurerm_monitor_private_link_scope.monitor.name
-# }
+resource azurerm_monitor_private_link_scoped_service monitor_endpoint {
+  name                = "${module.core.monitor.name}-data"
+  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
+  linked_resource_id  = data.terraform_remote_state.core.outputs.monitor.dataCollection.endpoint.id
+  scope_name          = azurerm_monitor_private_link_scope.monitor.name
+}

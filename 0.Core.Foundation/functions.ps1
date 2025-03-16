@@ -23,28 +23,21 @@ if ($buildConfigEncoded -ne "") {
 }
 
 function DownloadFile ($fileName, $fileLink) {
-  try {
-    Add-Type -AssemblyName System.Net.Http
-    $authToken = Invoke-WebRequest -UseBasicParsing -Headers @{Metadata=$true} -Uri $blobStorage.authTokenUrl
-    $accessToken = (ConvertFrom-Json -InputObject $authToken.Content).access_token
-    $httpClient = New-Object System.Net.Http.HttpClient
-    $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
-    $httpClient.DefaultRequestHeaders.Add("x-ms-version", $blobStorage.apiVersion)
-    $httpResponse = $httpClient.GetAsync($fileLink).Result
-    if ($httpResponse.IsSuccessStatusCode) {
-      $stream = $httpResponse.Content.ReadAsStreamAsync().Result
-      $filePath = Join-Path -Path $pwd.Path -ChildPath $fileName
-      $fileStream = [System.IO.File]::Create($filePath)
-      $stream.CopyTo($fileStream)
-      $fileStream.Close()
-    } else {
-      throw [Microsoft.PowerShell.Commands.HttpResponseException]::new($httpResponse.ReasonPhrase, $httpResponse)
-    }
-  } catch {
-    Write-Error "DownloadFile Error: $_.Exception.Message"
-    Write-Error "FileName: $fileName"
-    Write-Error "FileLink: $fileLink"
-    throw
+  Add-Type -AssemblyName System.Net.Http
+  $authToken = Invoke-WebRequest -UseBasicParsing -Headers @{Metadata=$true} -Uri $blobStorage.authTokenUrl
+  $accessToken = (ConvertFrom-Json -InputObject $authToken).access_token
+  $httpClient = New-Object System.Net.Http.HttpClient
+  $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
+  $httpClient.DefaultRequestHeaders.Add("x-ms-version", $blobStorage.apiVersion)
+  $httpResponse = $httpClient.GetAsync($fileLink).Result
+  if ($httpResponse.IsSuccessStatusCode) {
+    $stream = $httpResponse.Content.ReadAsStreamAsync().Result
+    $filePath = Join-Path -Path $pwd.Path -ChildPath $fileName
+    $fileStream = [System.IO.File]::Create($filePath)
+    $stream.CopyTo($fileStream)
+    $fileStream.Close()
+  } else {
+    throw [System.Web.HttpException]::new($httpResponse.StatusCode, $httpResponse.ReasonPhrase)
   }
 }
 
