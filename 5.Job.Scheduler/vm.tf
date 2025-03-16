@@ -198,7 +198,7 @@ resource azurerm_virtual_machine_extension job_scheduler_initialize_linux {
 #     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "linux" && virtualMachine.extension.monitor.enable
 #   }
 #   target_resource_id          = azurerm_linux_virtual_machine.job_scheduler[each.value.name].id
-#   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+#   data_collection_endpoint_id = data.terraform_remote_state.core.outputs.monitor.dataCollection.endpoint.id
 # }
 
 resource azurerm_windows_virtual_machine job_scheduler {
@@ -285,5 +285,5 @@ resource azurerm_virtual_machine_extension job_scheduler_initialize_windows {
 #     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "windows" && virtualMachine.extension.monitor.enable
 #   }
 #   target_resource_id          = azurerm_windows_virtual_machine.job_scheduler[each.value.name].id
-#   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+#   data_collection_endpoint_id = data.terraform_remote_state.core.outputs.monitor.dataCollection.endpoint.id
 # }

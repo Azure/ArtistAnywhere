@@ -244,7 +244,7 @@ resource azurerm_linux_virtual_machine_scale_set cluster {
 #     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "linux" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
 #   }
 #   target_resource_id          = azurerm_linux_virtual_machine_scale_set.cluster[each.value.name].id
-#   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+#   data_collection_endpoint_id = data.terraform_remote_state.core.outputs.monitor.dataCollection.endpoint.id
 # }
 
 resource azurerm_windows_virtual_machine_scale_set cluster {
@@ -370,7 +370,7 @@ resource azurerm_windows_virtual_machine_scale_set cluster {
 #     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "windows" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
 #   }
 #   target_resource_id          = azurerm_windows_virtual_machine_scale_set.cluster[each.value.name].id
-#   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+#   data_collection_endpoint_id = data.terraform_remote_state.core.outputs.monitor.dataCollection.endpoint.id
 # }
 
 resource azurerm_orchestrated_virtual_machine_scale_set cluster {
@@ -513,5 +513,5 @@ resource azurerm_orchestrated_virtual_machine_scale_set cluster {
 #     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
 #   }
 #   target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.cluster[each.value.name].id
-#   data_collection_endpoint_id = data.azurerm_monitor_data_collection_endpoint.studio.id
+#   data_collection_endpoint_id = data.terraform_remote_state.core.outputs.monitor.dataCollection.endpoint.id
 # }

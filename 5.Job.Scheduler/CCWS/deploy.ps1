@@ -4,17 +4,17 @@
 
 az account show
 
-git clone --branch release https://github.com/Azure/cyclecloud-slurm-workspace.git
+git clone --depth 1 --branch release https://github.com/Azure/cyclecloud-slurm-workspace.git
 
 $regionName     = "SouthCentralUS"
 $deploymentName = "CycleCloud.Workspace.Slurm"
 $templateFile   = "../../cyclecloud-slurm-workspace/bicep/mainTemplate.bicep"
-$parameterFile  = "parameters.mysql.anf.json"
-
+$parameterFile  = "parameters.json"
 az deployment sub create --name $deploymentName --location $regionName --template-file $templateFile --parameters $parameterFile
 
+# shell.azure.com
 cd cyclecloud-slurm-workspace
-resourceGroupName="ArtistAnywhere.JobScheduler.CCWS"
+resourceGroupName="ArtistAnywhere.Cluster.JobScheduler.CCWS"
 ./util/delete_roles.sh --resource-group $resourceGroupName --delete-resource-group
 
 ##############################################################################################################################
@@ -23,7 +23,7 @@ resourceGroupName="ArtistAnywhere.JobScheduler.CCWS"
 
 $cycleCloud = @{
   machineName       = "ccw-cyclecloud-vm"
-  resourceGroupName = "ArtistAnywhere.JobScheduler.CCWS"
+  resourceGroupName = "ArtistAnywhere.Cluster.JobScheduler.CCWS"
   resourcePort      = 443
   tunnelPort        = 8443
 }
@@ -40,9 +40,9 @@ az network bastion tunnel --resource-group $bastionHost.resourceGroupName --name
 ########################################################################################################################
 
 $loginNode = @{
-  resourceGroupName = "ArtistAnywhere.JobScheduler.CCWS"
+  resourceGroupName = "ArtistAnywhere.Cluster.JobScheduler.CCWS"
   authType          = "ssh-key"
-  userName          = "hpcadmin"
+  userName          = "xadmin"
   sshKeyFile        = "~/.ssh/id_rsa"
 }
 $bastionHost = @{

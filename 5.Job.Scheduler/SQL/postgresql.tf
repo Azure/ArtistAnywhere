@@ -76,8 +76,8 @@ variable postgreSQL {
 resource azurerm_postgresql_flexible_server studio {
   count                         = var.postgreSQL.enable ? 1 : 0
   name                          = var.postgreSQL.name
-  resource_group_name           = azurerm_resource_group.job_scheduler_postgresql[0].name
-  location                      = azurerm_resource_group.job_scheduler_postgresql[0].location
+  resource_group_name           = azurerm_resource_group.job_scheduler_sql.name
+  location                      = azurerm_resource_group.job_scheduler_sql.location
   sku_name                      = var.postgreSQL.type
   version                       = var.postgreSQL.version
   backup_retention_days         = var.postgreSQL.backup.retentionDays
@@ -156,7 +156,7 @@ resource azurerm_postgresql_flexible_server_active_directory_administrator studi
 resource azurerm_postgresql_database studio {
   count               = var.postgreSQL.enable && var.postgreSQL.database.enable ? 1 : 0
   name                = var.postgreSQL.database.name
-  resource_group_name = azurerm_resource_group.job_scheduler_postgresql[0].name
+  resource_group_name = azurerm_resource_group.job_scheduler_sql.name
   server_name         = azurerm_postgresql_flexible_server.studio[0].name
   charset             = var.postgreSQL.database.charset
   collation           = var.postgreSQL.database.collation
@@ -169,7 +169,7 @@ resource azurerm_postgresql_database studio {
 resource azurerm_private_dns_zone postgresql {
   count               = var.postgreSQL.enable ? 1 : 0
   name                = "privatelink.postgres.database.azure.com"
-  resource_group_name = azurerm_resource_group.job_scheduler_postgresql[0].name
+  resource_group_name = azurerm_resource_group.job_scheduler_sql.name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link postgresql {
@@ -183,8 +183,8 @@ resource azurerm_private_dns_zone_virtual_network_link postgresql {
 resource azurerm_private_endpoint postgresql {
   count               = var.postgreSQL.enable && !var.postgreSQL.delegatedSubnet.enable ? 1 : 0
   name                = "${lower(azurerm_postgresql_flexible_server.studio[0].name)}-${azurerm_private_dns_zone_virtual_network_link.postgresql[0].name}"
-  resource_group_name = azurerm_resource_group.job_scheduler_postgresql[0].name
-  location            = azurerm_resource_group.job_scheduler_postgresql[0].location
+  resource_group_name = azurerm_resource_group.job_scheduler_sql.name
+  location            = azurerm_resource_group.job_scheduler_sql.location
   subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azurerm_postgresql_flexible_server.studio[0].name

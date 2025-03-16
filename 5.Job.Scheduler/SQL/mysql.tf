@@ -76,8 +76,8 @@ variable mySQL {
 resource azurerm_mysql_flexible_server studio {
   count                        = var.mySQL.enable ? 1 : 0
   name                         = var.mySQL.name
-  resource_group_name          = azurerm_resource_group.job_scheduler_mysql[0].name
-  location                     = azurerm_resource_group.job_scheduler_mysql[0].location
+  resource_group_name          = azurerm_resource_group.job_scheduler_sql.name
+  location                     = azurerm_resource_group.job_scheduler_sql.location
   sku_name                     = var.mySQL.type
   version                      = var.mySQL.version
   backup_retention_days        = var.mySQL.backup.retentionDays
@@ -135,7 +135,7 @@ resource azurerm_mysql_flexible_server studio {
 resource azurerm_mysql_flexible_server_firewall_rule studio {
   count               = var.mySQL.enable && !var.mySQL.delegatedSubnet.enable ? 1 : 0
   name                = "AllowCurrentIP"
-  resource_group_name = azurerm_resource_group.job_scheduler_mysql[0].name
+  resource_group_name = azurerm_resource_group.job_scheduler_sql.name
   server_name         = azurerm_mysql_flexible_server.studio[0].name
   start_ip_address    = jsondecode(data.http.client_address.response_body).ip
   end_ip_address      = jsondecode(data.http.client_address.response_body).ip
@@ -153,7 +153,7 @@ resource azurerm_mysql_flexible_server_active_directory_administrator studio {
 resource azurerm_mysql_flexible_database studio {
   count               = var.mySQL.enable && var.mySQL.database.enable ? 1 : 0
   name                = var.mySQL.database.name
-  resource_group_name = azurerm_resource_group.job_scheduler_mysql[0].name
+  resource_group_name = azurerm_resource_group.job_scheduler_sql.name
   server_name         = azurerm_mysql_flexible_server.studio[0].name
   charset             = var.mySQL.database.charset
   collation           = var.mySQL.database.collation
@@ -166,7 +166,7 @@ resource azurerm_mysql_flexible_database studio {
 resource azurerm_private_dns_zone mysql {
   count               = var.mySQL.enable ? 1 : 0
   name                = "privatelink.mysql.database.azure.com"
-  resource_group_name = azurerm_resource_group.job_scheduler_mysql[0].name
+  resource_group_name = azurerm_resource_group.job_scheduler_sql.name
 }
 
 resource azurerm_private_dns_zone_virtual_network_link mysql {
@@ -180,8 +180,8 @@ resource azurerm_private_dns_zone_virtual_network_link mysql {
 resource azurerm_private_endpoint mysql {
   count               = var.mySQL.enable && !var.mySQL.delegatedSubnet.enable ? 1 : 0
   name                = "${lower(azurerm_mysql_flexible_server.studio[0].name)}-${azurerm_private_dns_zone_virtual_network_link.mysql[0].name}"
-  resource_group_name = azurerm_resource_group.job_scheduler_mysql[0].name
-  location            = azurerm_resource_group.job_scheduler_mysql[0].location
+  resource_group_name = azurerm_resource_group.job_scheduler_sql.name
+  location            = azurerm_resource_group.job_scheduler_sql.location
   subnet_id           = data.azurerm_subnet.data.id
   private_service_connection {
     name                           = azurerm_mysql_flexible_server.studio[0].name

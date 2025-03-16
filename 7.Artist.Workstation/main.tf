@@ -79,11 +79,6 @@ data azurerm_key_vault_secret ssh_key_public {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
-# data azurerm_monitor_data_collection_endpoint studio {
-#   name                = module.core.monitor.name
-#   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
-# }
-
 data terraform_remote_state core {
   backend = "local"
   config = {

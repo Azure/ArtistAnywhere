@@ -79,6 +79,13 @@ data azurerm_key_vault_key data_encryption {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
+data terraform_remote_state core {
+  backend = "local"
+  config = {
+    path = "../../0.Core.Foundation/terraform.tfstate"
+  }
+}
+
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
@@ -116,18 +123,8 @@ data azurerm_subnet data_postgresql {
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
-resource azurerm_resource_group job_scheduler_mysql {
-  count    = var.mySQL.enable ? 1 : 0
-  name     = "${var.resourceGroupName}.MySQL"
-  location = module.core.resourceLocation.name
-  tags = {
-    AAA = "${basename(dirname(path.cwd))}.${basename(path.cwd)}"
-  }
-}
-
-resource azurerm_resource_group job_scheduler_postgresql {
-  count    = var.postgreSQL.enable ? 1 : 0
-  name     = "${var.resourceGroupName}.PostgreSQL"
+resource azurerm_resource_group job_scheduler_sql {
+  name     = var.resourceGroupName
   location = module.core.resourceLocation.name
   tags = {
     AAA = "${basename(dirname(path.cwd))}.${basename(path.cwd)}"

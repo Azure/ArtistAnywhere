@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.JobScheduler" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.Cluster.JobScheduler.SQL" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
 ############################################################################################
 # MySQL Flexible Server (https://learn.microsoft.com/azure/mysql/flexible-server/overview) #
