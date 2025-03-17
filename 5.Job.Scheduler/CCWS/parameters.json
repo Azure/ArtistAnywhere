@@ -32,8 +32,8 @@
     "value": {
       "type": "nfs-existing",
       "ipAddress": "10.1.194.4",
-      "mountPath": "/data",
-      "exportPath": "/mnt/data",
+      "exportPath": "/data",
+      "mountPath": "/mnt/data",
       "mountOptions": "rw,hard,rsize=262144,wsize=262144,vers=3,tcp,_netdev"
     }
   },
