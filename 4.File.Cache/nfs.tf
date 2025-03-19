@@ -176,7 +176,6 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
           templatefile(var.nfsCache.machine.extension.custom.fileName, merge(var.nfsCache.machine.extension.custom.parameters, {
             dataDiskCount = var.nfsCache.machine.dataDisk.count
           }))
-
         )
       })
     }

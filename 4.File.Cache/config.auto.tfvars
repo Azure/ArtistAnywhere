@@ -46,14 +46,6 @@ nfsCache = {
           storageMounts = [
             {
               enable      = true
-              description = "Local NVMe Disks"
-              type        = "ext4"
-              path        = "/mnt/fscache"
-              source      = "/dev/md/fscache"
-              options     = "defaults"
-            },
-            {
-              enable      = true
               description = "Remote NFSv3 Storage"
               type        = "nfs"
               path        = "/mnt/storage"
