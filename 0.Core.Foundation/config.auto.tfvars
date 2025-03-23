@@ -87,8 +87,8 @@ keyVault = {
 
 monitor = {
   grafanaDashboard = {
-    type    = "Standard"
-    version = 10
+    tier    = "Standard"
+    version = 11
     apiKey = {
       enable = false
     }
@@ -98,7 +98,7 @@ monitor = {
   }
   logAnalytics = {
     workspace = {
-      type = "PerGB2018"
+      tier = "PerGB2018"
     }
   }
   retentionDays = 90

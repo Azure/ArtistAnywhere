@@ -5,7 +5,7 @@
 variable containerRegistry {
   type = object({
     name = string
-    type = string
+    tier = string
     adminUser = object({
       enable = bool
     })
@@ -53,7 +53,7 @@ resource azurerm_container_registry studio {
   name                          = var.containerRegistry.name
   resource_group_name           = azurerm_resource_group.image_registry.name
   location                      = azurerm_resource_group.image_registry.location
-  sku                           = var.containerRegistry.type
+  sku                           = var.containerRegistry.tier
   admin_enabled                 = var.containerRegistry.adminUser.enable
   data_endpoint_enabled         = var.containerRegistry.dataEndpoint.enable
   zone_redundancy_enabled       = var.containerRegistry.zoneRedundancy.enable

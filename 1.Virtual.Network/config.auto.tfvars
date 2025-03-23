@@ -451,8 +451,8 @@ bastion = {
 natGateway = {
   enable = true
   ipAddress = {
-    type = "Standard"
-    tier = "Regional"
+    tier = "Standard"
+    type = "Regional"
   }
 }
 

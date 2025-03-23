@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.23.0"
+      version = "~>4.24.0"
     }
   }
   backend azurerm {
@@ -47,6 +47,16 @@ data azurerm_key_vault studio {
 data azurerm_key_vault_secret gateway_connection {
   name         = module.core.keyVault.secretName.gatewayConnection
   key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_monitor_workspace studio {
+  name                = module.core.monitor.name
+  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
+}
+
+data azurerm_dashboard_grafana studio {
+  name                = module.core.monitor.name
+  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
 }
 
 data terraform_remote_state core {

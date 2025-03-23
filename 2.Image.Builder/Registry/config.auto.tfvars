@@ -5,8 +5,8 @@ resourceGroupName = "ArtistAnywhere.Image.Registry" # Alphanumeric, underscores,
 ######################################################################################################
 
 containerRegistry = {
-  name = "xstudio"
-  type = "Premium"
+  name = "iai00"
+  tier = "Premium"
   adminUser = {
     enable = true
   }

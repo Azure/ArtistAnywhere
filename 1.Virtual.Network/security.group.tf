@@ -70,7 +70,7 @@ resource azurerm_network_security_group studio {
 
 resource azurerm_subnet_network_security_group_association studio {
   for_each = {
-    for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet if subnet.name != "AzureBastionSubnet" && try(subnet.virtualNetwork.extendedZone.name, "") == ""
+    for subnet in local.virtualNetworksSubnetsSecurity : subnet.key => subnet if subnet.name != "AzureBastionSubnet"
   }
   subnet_id                 = "${each.value.virtualNetwork.id}/subnets/${each.value.name}"
   network_security_group_id = azurerm_network_security_group.studio[each.value.key].id

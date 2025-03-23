@@ -5,7 +5,7 @@
 variable monitor {
   type = object({
     grafanaDashboard = object({
-      type    = string
+      tier    = string
       version = number
       apiKey = object({
         enable = bool
@@ -16,7 +16,7 @@ variable monitor {
     })
     logAnalytics = object({
       workspace = object({
-        type = string
+        tier = string
       })
     })
     retentionDays = number
@@ -34,7 +34,7 @@ resource azurerm_dashboard_grafana studio {
   name                          = module.core.monitor.name
   resource_group_name           = azurerm_resource_group.studio_monitor.name
   location                      = azurerm_resource_group.studio_monitor.location
-  sku                           = var.monitor.grafanaDashboard.type
+  sku                           = var.monitor.grafanaDashboard.tier
   grafana_major_version         = var.monitor.grafanaDashboard.version
   api_key_enabled               = var.monitor.grafanaDashboard.apiKey.enable
   public_network_access_enabled = false
@@ -53,7 +53,7 @@ resource azurerm_log_analytics_workspace studio {
   name                       = module.core.monitor.name
   resource_group_name        = azurerm_resource_group.studio_monitor.name
   location                   = azurerm_resource_group.studio_monitor.location
-  sku                        = var.monitor.logAnalytics.workspace.type
+  sku                        = var.monitor.logAnalytics.workspace.tier
   retention_in_days          = var.monitor.retentionDays
   internet_ingestion_enabled = false
   internet_query_enabled     = false

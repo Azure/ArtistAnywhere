@@ -46,11 +46,11 @@ nfsCache = {
           storageMounts = [
             {
               enable      = true
-              description = "Remote NFSv3 Storage"
               type        = "nfs"
               path        = "/mnt/storage"
               source      = "storage-data.azure.studio:/data"
-              options     = "vers=3,fsc"
+              options     = "fsc,ro,nconnect=8,vers=3"
+              description = "Remote NFSv3 Storage"
             }
           ]
         }

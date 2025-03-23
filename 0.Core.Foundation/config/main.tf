@@ -122,7 +122,7 @@ output version {
     job_scheduler_slurm      = "24.11.3"
     job_scheduler_deadline   = "10.4.0.13"
     job_processor_pbrt       = "v4"
-    job_processor_blender    = "4.3.2"
+    job_processor_blender    = "4.4.0"
     script_extension_linux   = "2.1"
     script_extension_windows = "1.10"
     nvidia_cuda_windows      = "12.8.1"

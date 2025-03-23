@@ -48,11 +48,11 @@ variable nfsCache {
           parameters = object({
             storageMounts = list(object({
               enable      = bool
-              description = string
               type        = string
               path        = string
               source      = string
               options     = string
+              description = string
             }))
           })
         })

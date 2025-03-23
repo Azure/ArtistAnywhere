@@ -6,8 +6,8 @@ variable natGateway {
   type = object({
     enable = bool
     ipAddress = object({
-      type = string
       tier = string
+      type = string
     })
   })
 }
@@ -21,7 +21,7 @@ locals {
       for subnet in virtualNetwork.subnets : merge(subnet, {
         key            = "${virtualNetwork.key}-${subnet.name}"
         virtualNetwork = virtualNetwork
-      }) if try(virtualNetwork.extendedZone.name, "") == "" && subnet.name != "GatewaySubnet"
+      }) if subnet.name != "GatewaySubnet" && try(virtualNetwork.extendedZone.name, "") == ""
     ]
   ])
 }
@@ -60,8 +60,8 @@ resource azurerm_public_ip_prefix nat_gateway {
   name                = "Gateway-NAT"
   resource_group_name = each.value.resourceGroup.name
   location            = each.value.location
-  sku                 = var.natGateway.ipAddress.type
-  sku_tier            = var.natGateway.ipAddress.tier
+  sku                 = var.natGateway.ipAddress.tier
+  sku_tier            = var.natGateway.ipAddress.type
   prefix_length       = 31
   depends_on = [
     azurerm_resource_group.network_regions

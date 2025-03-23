@@ -2,12 +2,12 @@
 
 dnf -y install mdadm policycoreutils-python-utils cachefilesd
 
-function set_cache_disks {
+function set_local_cache_disks {
   diskPaths=$(lsblk -p -o name | grep nvme)
   if [ "$diskPaths" == "" ]; then
     diskPaths=$(lsblk -p -o name,type | grep disk)
     diskPaths=$(echo $${diskPaths//disk})
-    diskPaths=$(echo "$diskPaths" | rev | cut -d" " -f1-${dataDiskCount} | rev)
+    diskPaths=$(echo "$diskPaths" | rev | cut -d " " -f 1-${dataDiskCount} | rev)
   fi
   diskCount=$(echo "$diskPaths" | wc -w)
   if (( $diskCount > 1 )); then
@@ -21,44 +21,62 @@ function set_cache_disks {
   echo $cachePath
 }
 
-function set_cache_mount {
-  cachePath=$1
-  mountPath=$2
-  mountName=$3
+function set_mount_unit {
+  mountJSON=$1
+  mountName=$(echo "$mountJSON" | jq -r .name)
+  if [ "$mountName" == null ]; then
+    mountName=$(echo "$mountJSON" | jq -r .path)
+    mountName=$${mountName//\//-}
+    mountName=$${mountName:1}.mount
+  fi
+  mountType=$(echo "$mountJSON" | jq -r .type)
+  mountPath=$(echo "$mountJSON" | jq -r .path)
+  mountSource=$(echo "$mountJSON" | jq -r .source)
+  mountOptions=$(echo "$mountJSON" | jq -r .options)
+  mountDescription=$(echo "$mountJSON" | jq -r .description)
   mkdir -p $mountPath
-  mountFile=/usr/lib/systemd/system/$mountName
-  echo "[Unit]" > $mountFile
-  echo "Description=Local Cache Disks Mount" >> $mountFile
-  echo "DefaultDependencies=no" >> $mountFile
-  echo "" >> $mountFile
-  echo "[Mount]" >> $mountFile
-  echo "Type=ext4" >> $mountFile
-  echo "What=$cachePath" >> $mountFile
-  echo "Where=$mountPath" >> $mountFile
-  echo "Options=defaults" >> $mountFile
-  echo "" >> $mountFile
-  echo "[Install]" >> $mountFile
-  echo "WantedBy=multi-user.target" >> $mountFile
+  filePath=/usr/lib/systemd/system/$mountName
+  echo "[Unit]" > $filePath
+  echo "Description=$mountDescription" >> $filePath
+  echo "DefaultDependencies=no" >> $filePath
+  echo "" >> $filePath
+  echo "[Mount]" >> $filePath
+  echo "Type=$mountType" >> $filePath
+  echo "What=$mountSource" >> $filePath
+  echo "Where=$mountPath" >> $filePath
+  echo "Options=$mountOptions" >> $filePath
+  echo "" >> $filePath
+  echo "[Install]" >> $filePath
+  echo "WantedBy=multi-user.target" >> $filePath
   systemctl --now enable $mountName
+  echo $mountName
 }
 
-function set_storage_mounts {
+function set_local_cache_mount {
+  mountJSON='{"name":"'$1'","path":"'$2'","source":"'$3'","type":"ext4","options":"defaults","description":"Local Cache Disks Mount"}'
+  set_mount_unit "$mountJSON"
+}
+
+function set_remote_storage_mounts {
   storageMounts="$(echo $1 | base64 -d)"
   for storageMount in $(echo "$storageMounts" | jq -r ".[] | @base64"); do
-    mountConfig="$(echo "$storageMount" | base64 -d)"
-    enabled=$(echo "$mountConfig" | jq -r .enable)
+    mountJSON="$(echo "$storageMount" | base64 -d)"
+    enabled=$(echo "$mountJSON" | jq -r .enable)
     if [ $enabled == true ]; then
-      fsid=$(uuidgen -r)
-      mountPath=$(echo "$mountConfig" | jq -r .path)
-      echo "$mountPath *(ro,fsid=$fsid)" >> /etc/exports
+      set_mount_unit "$mountJSON"
+      mountPath=$(echo "$mountJSON" | jq -r .path)
+      mountSource=$(echo "$mountJSON" | jq -r .source)
+      mountSource=$(echo $mountSource | cut -d ":" -f 1)
+      echo "$mountPath $mountSource(ro,fsid=$(uuidgen -r))" >> /etc/exports
     fi
   done
+  exportfs -r
 }
 
-mountPath="/fscache"
 mountName="fscache.mount"
-cachePath=$(set_cache_disks)
-set_cache_mount $cachePath $mountPath $mountName
+mountPath="/fscache"
+cachePath=$(set_local_cache_disks)
+set_local_cache_mount $mountName $mountPath $cachePath
 
 sed -i "/^dir/c\dir $mountPath" /etc/cachefilesd.conf
 cacheFile=/usr/lib/systemd/system/cachefilesd.service
@@ -71,4 +89,4 @@ restorecon -R -v $mountPath
 systemctl restart cachefilesd
 
 storageMounts=${base64encode(jsonencode(storageMounts))}
-set_storage_mounts $storageMounts
+set_remote_storage_mounts $storageMounts
