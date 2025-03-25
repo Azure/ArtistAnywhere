@@ -17,10 +17,6 @@ terraform {
       source  = "hashicorp/time"
       version = "~>0.13.0"
     }
-    azapi = {
-      source = "azure/azapi"
-      version = "~>2.3.0"
-    }
   }
   backend azurerm {
     key              = "3.File.Storage"

@@ -11,10 +11,10 @@ netAppFiles = {
       name    = "Pool1"
       type    = "Premium"
       sizeTiB = 1
-      coolAccess = {
-        enable = true
-        period = 30
-      }
+      # coolAccess = {
+      #   enable = true
+      #   period = 30
+      # }
       volumes = [
         {
           enable      = true
