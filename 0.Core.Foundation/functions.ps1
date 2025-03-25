@@ -22,13 +22,15 @@ if ($buildConfigEncoded -ne "") {
   Write-Host "Customize (End): Image Build Parameters"
 }
 
-function DownloadFile ($fileName, $fileLink) {
+function DownloadFile ($fileName, $fileLink, $authRequired) {
   Add-Type -AssemblyName System.Net.Http
-  $authToken = Invoke-WebRequest -UseBasicParsing -Headers @{Metadata=$true} -Uri $blobStorage.authTokenUrl
-  $accessToken = (ConvertFrom-Json -InputObject $authToken).access_token
   $httpClient = New-Object System.Net.Http.HttpClient
-  $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
-  $httpClient.DefaultRequestHeaders.Add("x-ms-version", $blobStorage.apiVersion)
+  if ($authRequired) {
+    $authToken = Invoke-WebRequest -UseBasicParsing -Headers @{Metadata=$true} -Uri $blobStorage.authTokenUrl
+    $accessToken = (ConvertFrom-Json -InputObject $authToken).access_token
+    $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
+    $httpClient.DefaultRequestHeaders.Add("x-ms-version", $blobStorage.apiVersion)
+  }
   $httpResponse = $httpClient.GetAsync($fileLink).Result
   if ($httpResponse.IsSuccessStatusCode) {
     $stream = $httpResponse.Content.ReadAsStreamAsync().Result

@@ -12,14 +12,14 @@ if ($gpuProvider -eq "AMD") {
     Write-Host "Customize (Start): AMD GPU (NG v1)"
     $fileName = "$fileType.exe"
     $fileLink = "https://go.microsoft.com/fwlink/?linkid=2248541"
-    DownloadFile $fileName $fileLink
+    DownloadFile $fileName $fileLink $false
     RunProcess .\$fileName "-install -log $binDirectory\$fileType.log" $null
     Write-Host "Customize (End): AMD GPU (NG v1)"
   } elseif ($machineType -like "*NV*" -and $machineType -like "*v4*") {
     Write-Host "Customize (Start): AMD GPU (NV v4)"
     $fileName = "$fileType.exe"
     $fileLink = "https://go.microsoft.com/fwlink/?linkid=2175154"
-    DownloadFile $fileName $fileLink
+    DownloadFile $fileName $fileLink $false
     RunProcess .\$fileName "-install -log $binDirectory\$fileType.log" $null
     Write-Host "Customize (End): AMD GPU (NV v4)"
   }
@@ -30,7 +30,7 @@ if ($gpuProvider -eq "NVIDIA.GRID") {
   $fileType = "nvidia-gpu-grid"
   $fileName = "$fileType.exe"
   $fileLink = "https://go.microsoft.com/fwlink/?linkid=874181"
-  DownloadFile $fileName $fileLink
+  DownloadFile $fileName $fileLink $false
   RunProcess .\$fileName "-s -n -log:$binDirectory\$fileType" $null
   Write-Host "Customize (End): NVIDIA GPU (GRID)"
 }
@@ -41,7 +41,7 @@ if ($gpuProvider.StartsWith("NVIDIA")) {
   $fileType = "nvidia-gpu-cuda"
   $fileName = "cuda_${version}_windows_network.exe"
   $fileLink = "$($blobStorage.endpointUrl)/NVIDIA/CUDA/$version/$fileName"
-  DownloadFile $fileName $fileLink
+  DownloadFile $fileName $fileLink $true
   RunProcess .\$fileName "-s -n -log:$binDirectory\$fileType" $null
   Write-Host "Customize (End): NVIDIA GPU (CUDA)"
 }

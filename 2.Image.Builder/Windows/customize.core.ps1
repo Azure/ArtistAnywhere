@@ -21,7 +21,7 @@ Write-Host "Customize (Start): Chocolatey"
 $fileType = "chocolatey"
 $fileName = "$fileType.ps1"
 $fileLink = "https://community.chocolatey.org/install.ps1"
-DownloadFile $fileName $fileLink
+DownloadFile $fileName $fileLink $false
 RunProcess PowerShell.exe "-ExecutionPolicy Unrestricted -File .\$fileName" "$binDirectory\$fileType"
 $binPathChoco = "C:\ProgramData\chocolatey"
 $binPaths += ";$binPathChoco"
@@ -66,7 +66,7 @@ if ($machineType -eq "Scheduler") {
   $fileType = "azure-cli"
   $fileName = "$fileType.msi"
   $fileLink = "https://aka.ms/installazurecliwindowsx64"
-  DownloadFile $fileName $fileLink
+  DownloadFile $fileName $fileLink $false
   RunProcess $fileName "/quiet /norestart /log $fileType.log" $null
   Write-Host "Customize (End): Azure CLI (x64)"
 } else {
@@ -84,7 +84,7 @@ if ($machineType -eq "Scheduler") {
   $version = "2024"
   $fileName = "Cinebench${version}_win_x86_64.zip"
   $fileLink = "$($blobStorage.endpointUrl)/Benchmark/Cinebench/$version/$fileName"
-  DownloadFile $fileName $fileLink
+  DownloadFile $fileName $fileLink $true
   Expand-Archive -Path $fileName
   Write-Host "Customize (End): Cinebench"
 }
@@ -103,7 +103,7 @@ if ($machineType -eq "Workstation") {
   $fileType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
   $fileName = "${fileType}_$version.exe"
   $fileLink = "$($blobStorage.endpointUrl)/Teradici/$version/$fileName"
-  DownloadFile $fileName $fileLink
+  DownloadFile $fileName $fileLink $true
   RunProcess .\$fileName "/S /NoPostReboot /Force" "$binDirectory\$fileType"
   Write-Host "Customize (End): HP Anyware"
 }

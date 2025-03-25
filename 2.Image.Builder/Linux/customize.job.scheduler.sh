@@ -11,7 +11,7 @@ if [[ $jobSchedulers == *Slurm* ]]; then
   echo "Customize (Start): Slurm Download"
   fileName="slurm-$version.tar.bz2"
   fileLink="https://download.schedmd.com/slurm/$fileName"
-  download_file $fileName $fileLink
+  download_file $fileName $fileLink false
   bzip2 -d $fileName
   fileName=$(echo ${fileName%.bz2})
   tar -xf $fileName
@@ -30,7 +30,7 @@ if [[ $jobSchedulers == *Deadline* ]]; then
   fileName="Deadline-$version-linux-installers.tar"
   filePath=$(echo ${fileName%.tar})
   fileLink="$blobStorageEndpointUrl/Deadline/$version/$fileName"
-  download_file $fileName $fileLink
+  download_file $fileName $fileLink true
   mkdir -p $filePath
   tar -xzf $fileName -C $filePath
   echo "Customize (End): Deadline Download"

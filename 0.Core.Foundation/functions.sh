@@ -24,10 +24,15 @@ fi
 function download_file {
   local fileName=$1
   local fileLink=$2
-  local apiVersion=$(echo $blobStorage | jq -r .apiVersion)
-  local authTokenUrl=$(echo $blobStorage | jq -r .authTokenUrl)
-  accessToken=$(curl -H "Metadata: true" $authTokenUrl | jq -r .access_token)
-  curl -H "Authorization: Bearer $accessToken" -H "x-ms-version: $apiVersion" -o $fileName -L $fileLink
+  local authRequired=$3
+  if [ $authRequired == true ]; then
+    local apiVersion=$(echo $blobStorage | jq -r .apiVersion)
+    local authTokenUrl=$(echo $blobStorage | jq -r .authTokenUrl)
+    accessToken=$(curl -H "Metadata: true" $authTokenUrl | jq -r .access_token)
+    curl -H "Authorization: Bearer $accessToken" -H "x-ms-version: $apiVersion" -o $fileName -L $fileLink
+  else
+    curl -o $fileName -L $fileLink
+  fi
 }
 
 function run_process {

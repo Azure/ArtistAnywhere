@@ -9,7 +9,7 @@ if [ "$gpuProvider" != "" ]; then
   dnf -y install elfutils-libelf-devel openssl-devel bison flex
   fileName="kernel-devel-5.14.0-503.14.1.el9_5.x86_64.rpm"
   fileLink="$blobStorageEndpointUrl/Linux/$fileName"
-  download_file $fileName $fileLink
+  download_file $fileName $fileLink true
   rpm -i $fileName
   echo "Customize (End): Linux Kernel Devel"
 fi
@@ -20,7 +20,7 @@ if [ "$gpuProvider" == NVIDIA ]; then
     fileType="nvidia-gpu-grid"
     fileName="$fileType.run"
     fileLink="https://go.microsoft.com/fwlink/?linkid=874272"
-    download_file $fileName $fileLink
+    download_file $fileName $fileLink false
     chmod +x $fileName
     dnf -y install libglvnd-devel mesa-vulkan-drivers xorg-x11-drivers
     run_process "./$fileName --silent" $binDirectory/$fileType
@@ -49,7 +49,7 @@ if [ $machineType == Workstation ]; then
   [ "$gpuProvider" == "" ] && fileType="pcoip-agent-standard" || fileType="pcoip-agent-graphics"
   fileName="pcoip-agent-offline-rhel9.5_$version-1.el9.x86_64.tar.gz"
   fileLink="$blobStorageEndpointUrl/Teradici/$version/$fileName"
-  download_file $fileName $fileLink
+  download_file $fileName $fileLink true
   mkdir -p $fileType
   tar -xzf $fileName -C $fileType
   cd $fileType

@@ -1,7 +1,7 @@
 variable fileSystem {
   default = {
     linux = [
-      { # Job Scheduler
+      { # Job Scheduler (NFS)
         enable = true
         mount = {
           type    = "nfs"
@@ -10,12 +10,12 @@ variable fileSystem {
           options = "defaults"
         }
       },
-      { # File Storage
+      { # File Storage (NFSv3)
         enable = false
         mount = {
           type    = "nfs"
           path    = "/mnt/storage"
-          target  = "storage-data.azure.studio:/data"
+          target  = "storage.azure.studio:/data"
           options = "rw,nconnect=8,vers=3"
         }
       },
@@ -24,7 +24,7 @@ variable fileSystem {
         mount = {
           type    = "nfs"
           path    = "/mnt/cache"
-          target  = "cache.azure.studio:/mnt/storage"
+          target  = "cache.azure.studio:/storage"
           options = "ro,nconnect=8"
         }
       },
@@ -53,7 +53,7 @@ variable fileSystem {
         mount = {
           type    = ""
           path    = "X:"
-          target  = "\\\\storage-data.azure.studio\\data"
+          target  = "\\\\storage.azure.studio\\data"
           options = "-o anon -o nconnnect=8 -o vers=3"
         }
       },
@@ -62,7 +62,7 @@ variable fileSystem {
         mount = {
           type    = ""
           path    = "Y:"
-          target  = "\\\\cache.azure.studio\\mnt\\storage"
+          target  = "\\\\cache.azure.studio\\storage"
           options = "-o anon -o nconnnect=8"
         }
       }

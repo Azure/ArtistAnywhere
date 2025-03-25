@@ -235,7 +235,7 @@ resource azapi_resource volume {
 
 resource azurerm_private_dns_a_record netapp {
   count               = var.netAppFiles.enable && length(azapi_resource.volume) > 0 ? 1 : 0
-  name                = "${var.dnsRecord.name}-data"
+  name                = var.dnsRecord.name
   resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = data.azurerm_private_dns_zone.studio.name
   ttl                 = var.dnsRecord.ttlSeconds

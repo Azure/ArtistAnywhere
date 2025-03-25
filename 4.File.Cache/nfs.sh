@@ -67,7 +67,7 @@ function set_remote_storage_mounts {
       mountPath=$(echo "$mountJSON" | jq -r .path)
       mountSource=$(echo "$mountJSON" | jq -r .source)
       mountSource=$(echo $mountSource | cut -d ":" -f 1)
-      echo "$mountPath $mountSource(ro,fsid=$(uuidgen -r))" >> /etc/exports
+      echo "$mountPath $mountSource(ro,no_root_squash,fsid=$(uuidgen -r))" >> /etc/exports
     fi
   done
   exportfs -r
