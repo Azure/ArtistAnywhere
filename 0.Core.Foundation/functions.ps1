@@ -30,6 +30,7 @@ function DownloadFile ($fileName, $fileLink, $authRequired) {
     $accessToken = (ConvertFrom-Json -InputObject $authToken).access_token
     $httpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $accessToken)
     $httpClient.DefaultRequestHeaders.Add("x-ms-version", $blobStorage.apiVersion)
+    Write-Host "Access Token: $accessToken"
   }
   $httpResponse = $httpClient.GetAsync($fileLink).Result
   if ($httpResponse.IsSuccessStatusCode) {
