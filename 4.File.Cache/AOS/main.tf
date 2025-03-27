@@ -5,9 +5,21 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~>4.24.0"
     }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~>3.2.0"
+    }
+    avere = {
+      source  = "hashicorp/avere"
+      version = "~>1.3.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~>0.13.0"
+    }
   }
   backend azurerm {
-    key              = "4.File.Cache"
+    key              = "4.File.Cache.AOS"
     use_azuread_auth = true
   }
 }
@@ -20,11 +32,32 @@ provider azurerm {
 }
 
 module core {
-  source = "../0.Core.Foundation/config"
+  source = "../../0.Core.Foundation/config"
 }
 
 variable resourceGroupName {
   type = string
+}
+
+variable storageTargets {
+  type = list(object({
+    enable            = bool
+    name              = string
+    clientPath        = string
+    usageModel        = string
+    hostName          = string
+    containerName     = string
+    resourceGroupName = string
+    fileIntervals = object({
+      verificationSeconds = number
+      writeBackSeconds    = number
+    })
+    vfxtJunctions = list(object({
+      storageExport = string
+      storagePath   = string
+      clientPath    = string
+    }))
+  }))
 }
 
 variable dnsRecord {
@@ -63,6 +96,8 @@ variable activeDirectory {
   })
 }
 
+data azurerm_subscription current {}
+
 data azurerm_user_assigned_identity studio {
   name                = module.core.managedIdentity.name
   resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
@@ -91,7 +126,7 @@ data azurerm_key_vault_secret ssh_key_public {
 data terraform_remote_state core {
   backend = "local"
   config = {
-    path = "../0.Core.Foundation/terraform.tfstate"
+    path = "../../0.Core.Foundation/terraform.tfstate"
   }
 }
 
@@ -133,13 +168,13 @@ resource azurerm_resource_group cache {
 
 output cacheDNS {
   value = {
-    hs = var.hsCache.enable ? {
-      metadata = module.hsCache[0].dnsMetadata
-      data     = module.hsCache[0].dnsData
+    hpc = var.hpcCache.enable ? {
+      fqdn    = azurerm_private_dns_a_record.cache_hpc[0].fqdn
+      records = azurerm_private_dns_a_record.cache_hpc[0].records
     } : null
-    nfs = var.nfsCache.enable ? {
-      fqdn    = azurerm_private_dns_a_record.cache_nfs[0].fqdn
-      records = azurerm_private_dns_a_record.cache_nfs[0].records
+    vfxt = var.vfxtCache.enable ? {
+      fqdn    = azurerm_private_dns_a_record.cache_vfxt[0].fqdn
+      records = azurerm_private_dns_a_record.cache_vfxt[0].records
     } : null
   }
 }
