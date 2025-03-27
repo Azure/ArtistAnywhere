@@ -57,7 +57,7 @@ module vfxt_controller {
   location                       = azurerm_resource_group.cache.location
   admin_username                 = local.vfxtCache.cluster.adminUsername
   admin_password                 = local.vfxtCache.cluster.adminPassword
-  ssh_key_data                   = null # local.vfxtCache.cluster.sshKeyPublic
+  ssh_key_data                   = local.vfxtCache.cluster.sshKeyPublic != "" ? local.vfxtCache.cluster.sshKeyPublic : null
   virtual_network_name           = data.azurerm_virtual_network.studio.name
   virtual_network_resource_group = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_subnet_name    = data.azurerm_subnet.cache.name
@@ -83,7 +83,7 @@ resource avere_vfxt cache {
   controller_admin_username       = local.vfxtCache.cluster.adminUsername
   controller_admin_password       = local.vfxtCache.cluster.adminPassword
   vfxt_admin_password             = local.vfxtCache.cluster.adminPassword
-  vfxt_ssh_key_data               = null # local.vfxtCache.cluster.sshKeyPublic
+  vfxt_ssh_key_data               = local.vfxtCache.cluster.sshKeyPublic != "" ? local.vfxtCache.cluster.sshKeyPublic : null
   cifs_ad_domain                  = var.vfxtCache.activeDirectory.enable ? var.vfxtCache.activeDirectory.domainName : null
   cifs_netbios_domain_name        = var.vfxtCache.activeDirectory.enable ? var.vfxtCache.activeDirectory.domainNameNetBIOS : null
   cifs_dc_addreses                = var.vfxtCache.activeDirectory.enable ? var.vfxtCache.activeDirectory.domainControllers : null
