@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.24.0"
+      version = "~>4.25.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -38,7 +38,7 @@ variable dnsRecord {
   })
 }
 
-variable existingNetwork {
+variable virtualNetwork {
   type = object({
     enable            = bool
     name              = string
@@ -114,19 +114,19 @@ data terraform_remote_state network {
 }
 
 data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.core.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.core.resourceGroup.name
+  name                = var.virtualNetwork.enable ? var.virtualNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.default.name
+  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.default.resourceGroup.name
 }
 
 data azurerm_virtual_network studio_extended {
   count               = module.core.resourceLocation.extendedZone.enable ? 1 : 0
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.extended.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.extended.resourceGroup.name
+  name                = var.virtualNetwork.enable ? var.virtualNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.extended.name
+  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.extended.resourceGroup.name
 }
 
 data azurerm_private_dns_zone studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.privateDNS.zoneName : data.terraform_remote_state.network.outputs.dns.privateZone.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.privateDNS.resourceGroupName : data.terraform_remote_state.network.outputs.dns.privateZone.resourceGroup.name
+  name                = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.zoneName : data.terraform_remote_state.network.outputs.privateDNS.zone.name
+  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.resourceGroupName : data.terraform_remote_state.network.outputs.privateDNS.zone.resourceGroup.name
 }
 
 resource azurerm_resource_group job_scheduler {
@@ -141,7 +141,7 @@ resource azurerm_private_dns_a_record job_scheduler {
   for_each = {
     for virtualMachine in var.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable
   }
-  name                = var.dnsRecord.name
+  name                = lower(var.dnsRecord.name)
   resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
   zone_name           = data.azurerm_private_dns_zone.studio.name
   ttl                 = var.dnsRecord.ttlSeconds

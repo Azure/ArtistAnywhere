@@ -133,7 +133,7 @@ resource azurerm_monitor_private_link_scoped_service monitor_workspace {
 resource azurerm_monitor_private_link_scoped_service monitor_insight {
   name                = "${module.core.monitor.name}-insight"
   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
-  linked_resource_id  = data.terraform_remote_state.core.outputs.monitor.appInsights.id
+  linked_resource_id  = data.terraform_remote_state.core.outputs.monitor.applicationInsights.id
   scope_name          = azurerm_monitor_private_link_scope.monitor.name
 }
 

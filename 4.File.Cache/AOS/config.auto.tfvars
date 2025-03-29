@@ -101,7 +101,7 @@ dnsRecord = {
 # Brownfield Resources #
 ########################
 
-existingNetwork = {
+virtualNetwork = {
   enable            = false
   name              = ""
   subnetName        = ""

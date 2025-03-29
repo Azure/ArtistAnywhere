@@ -93,7 +93,7 @@ monitor = {
       enable = false
     }
   }
-  appInsights = {
+  applicationInsights = {
     type = "web"
   }
   logAnalytics = {

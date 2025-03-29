@@ -113,7 +113,7 @@ resource azurerm_subnet studio {
 
 output virtualNetwork {
   value = {
-    core      = local.virtualNetworksOutput[0]
+    default   = local.virtualNetworksOutput[0]
     extended  = module.core.resourceLocation.extendedZone.enable ? reverse(local.virtualNetworksOutput)[0] : null
     locations = distinct(local.virtualNetworksOutput[*].location)
   }

@@ -136,9 +136,3 @@ resource azurerm_private_endpoint container_registry {
     ]
   }
 }
-
-output containerRegistry {
-  value = {
-    id = azurerm_container_registry.studio.id
-  }
-}

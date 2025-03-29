@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.24.0"
+      version = "~>4.25.0"
     }
   }
   backend azurerm {
@@ -76,12 +76,12 @@ data terraform_remote_state network {
 }
 
 data azurerm_resource_group dns {
-  name = data.terraform_remote_state.network.outputs.dns.privateZone.resourceGroup.name
+  name = data.terraform_remote_state.network.outputs.privateDNS.zone.resourceGroup.name
 }
 
 data azurerm_virtual_network studio {
-  name                = data.terraform_remote_state.network.outputs.virtualNetwork.core.name
-  resource_group_name = var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetwork.core.resourceGroup.name
+  name                = data.terraform_remote_state.network.outputs.virtualNetwork.default.name
+  resource_group_name = var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetwork.default.resourceGroup.name
 }
 
 data azurerm_subnet storage {

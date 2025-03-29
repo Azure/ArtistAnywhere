@@ -9,9 +9,9 @@ locals {
         index = i
         name  = "${var.hammerspace.namePrefix}${var.hammerspace.data.machine.namePrefix}${i + 1}"
         adminLogin = merge(var.hammerspace.data.machine.adminLogin, {
-          userName     = var.hammerspace.data.machine.adminLogin.userName != "" ? var.hammerspace.data.machine.adminLogin.userName : var.adminLogin.userName
-          userPassword = var.hammerspace.data.machine.adminLogin.userPassword != "" ? var.hammerspace.data.machine.adminLogin.userPassword : var.adminLogin.userPassword
-          sshKeyPublic = var.hammerspace.data.machine.adminLogin.sshKeyPublic != "" ? var.hammerspace.data.machine.adminLogin.sshKeyPublic : var.adminLogin.sshKeyPublic
+          userName     = var.hammerspace.data.machine.adminLogin.userName != "" ? var.hammerspace.data.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+          userPassword = var.hammerspace.data.machine.adminLogin.userPassword != "" ? var.hammerspace.data.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+          sshKeyPublic = var.hammerspace.data.machine.adminLogin.sshKeyPublic != "" ? var.hammerspace.data.machine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
         })
       })
     })
@@ -57,8 +57,8 @@ locals {
 
 resource azurerm_availability_set data {
   name                         = "${var.hammerspace.namePrefix}${var.hammerspace.data.machine.namePrefix}"
-  resource_group_name          = var.resourceGroup.name
-  location                     = var.resourceGroup.location
+  resource_group_name          = azurerm_resource_group.hammerspace.name
+  location                     = azurerm_resource_group.hammerspace.location
   proximity_placement_group_id = var.hammerspace.proximityPlacementGroup.enable ? azurerm_proximity_placement_group.hammerspace[0].id : null
 }
 
@@ -71,8 +71,8 @@ resource azurerm_network_interface data {
     for node in local.hsDataNodes : node.machine.name => node
   }
   name                = each.value.machine.name
-  resource_group_name = var.resourceGroup.name
-  location            = var.resourceGroup.location
+  resource_group_name = azurerm_resource_group.hammerspace.name
+  location            = azurerm_resource_group.hammerspace.location
   ip_configuration {
     name                          = "ipConfig"
     private_ip_address_allocation = "Dynamic"
@@ -86,8 +86,8 @@ resource azurerm_linux_virtual_machine data {
     for node in local.hsDataNodes : node.machine.name => node
   }
   name                            = each.value.machine.name
-  resource_group_name             = var.resourceGroup.name
-  location                        = var.resourceGroup.location
+  resource_group_name             = azurerm_resource_group.hammerspace.name
+  location                        = azurerm_resource_group.hammerspace.location
   size                            = each.value.machine.size
   admin_username                  = each.value.machine.adminLogin.userName
   admin_password                  = each.value.machine.adminLogin.userPassword
@@ -134,8 +134,8 @@ resource azurerm_managed_disk data {
     for disk in local.hsDataNodeDisks : disk.machine.dataDisk.name => disk
   }
   name                          = each.value.machine.dataDisk.name
-  resource_group_name           = var.resourceGroup.name
-  location                      = var.resourceGroup.location
+  resource_group_name           = azurerm_resource_group.hammerspace.name
+  location                      = azurerm_resource_group.hammerspace.location
   storage_account_type          = each.value.machine.dataDisk.storageType
   disk_size_gb                  = each.value.machine.dataDisk.sizeGB
   create_option                 = "Empty"
@@ -146,33 +146,12 @@ resource azurerm_virtual_machine_data_disk_attachment data {
   for_each = {
     for disk in local.hsDataNodeDisks : disk.machine.dataDisk.name => disk
   }
-  virtual_machine_id = "${data.azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/virtualMachines/${each.value.machine.name}"
-  managed_disk_id    = "${data.azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/disks/${each.value.machine.dataDisk.name}"
+  virtual_machine_id = "${azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/virtualMachines/${each.value.machine.name}"
+  managed_disk_id    = "${azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/disks/${each.value.machine.dataDisk.name}"
   caching            = each.value.machine.dataDisk.cachingMode
   lun                = each.value.machine.dataDisk.index
   depends_on = [
     azurerm_managed_disk.data,
     azurerm_linux_virtual_machine.data
   ]
-}
-
-############################################################################
-# Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
-############################################################################
-
-resource azurerm_private_dns_a_record data {
-  name                = "${var.privateDNS.aRecord.name}-data"
-  resource_group_name = var.privateDNS.resourceGroupName
-  zone_name           = var.privateDNS.zoneName
-  ttl                 = var.privateDNS.aRecord.ttlSeconds
-  records = [
-    for node in local.hsDataNodes : azurerm_linux_virtual_machine.data[node.machine.name].private_ip_address
-  ]
-}
-
-output dnsData {
-  value = {
-    fqdn    = azurerm_private_dns_a_record.data.fqdn
-    records = azurerm_private_dns_a_record.data.records
-  }
 }

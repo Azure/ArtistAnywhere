@@ -69,16 +69,15 @@ dnsRecord = {
   ttlSeconds = 300
 }
 
-##########################
-# Pre-Existing Resources #
-##########################
+########################
+# Brownfield Resources #
+########################
 
-existingNetwork = {
-  enable             = false
-  name               = ""
-  subnetNameIdentity = ""
-  subnetNameStorage  = ""
-  resourceGroupName  = ""
+virtualNetwork = {
+  enable            = false
+  name              = ""
+  subnetName        = ""
+  resourceGroupName = ""
   privateDNS = {
     zoneName          = ""
     resourceGroupName = ""
@@ -91,7 +90,6 @@ activeDirectory = {
     name = "azure.studio"
   }
   machine = {
-    ip   = "10.0.192.254"
     name = "WinADController"
     adminLogin = {
       userName     = ""

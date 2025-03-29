@@ -10,9 +10,9 @@ locals {
         index = i
         name  = "${var.hammerspace.namePrefix}${var.hammerspace.metadata.machine.namePrefix}${i + 1}"
         adminLogin = merge(var.hammerspace.metadata.machine.adminLogin, {
-          userName     = var.hammerspace.metadata.machine.adminLogin.userName != "" ? var.hammerspace.metadata.machine.adminLogin.userName : var.adminLogin.userName
-          userPassword = var.hammerspace.metadata.machine.adminLogin.userPassword != "" ? var.hammerspace.metadata.machine.adminLogin.userPassword : var.adminLogin.userPassword
-          sshKeyPublic = var.hammerspace.metadata.machine.adminLogin.sshKeyPublic != "" ? var.hammerspace.metadata.machine.adminLogin.sshKeyPublic : var.adminLogin.sshKeyPublic
+          userName     = var.hammerspace.metadata.machine.adminLogin.userName != "" ? var.hammerspace.metadata.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+          userPassword = var.hammerspace.metadata.machine.adminLogin.userPassword != "" ? var.hammerspace.metadata.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+          sshKeyPublic = var.hammerspace.metadata.machine.adminLogin.sshKeyPublic != "" ? var.hammerspace.metadata.machine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
         })
       })
     })
@@ -48,8 +48,8 @@ locals {
 
 resource azurerm_availability_set metadata {
   name                         = "${var.hammerspace.namePrefix}${var.hammerspace.metadata.machine.namePrefix}"
-  resource_group_name          = var.resourceGroup.name
-  location                     = var.resourceGroup.location
+  resource_group_name          = azurerm_resource_group.hammerspace.name
+  location                     = azurerm_resource_group.hammerspace.location
   proximity_placement_group_id = var.hammerspace.proximityPlacementGroup.enable ? azurerm_proximity_placement_group.hammerspace[0].id : null
 }
 
@@ -62,8 +62,8 @@ resource azurerm_network_interface metadata {
     for node in local.hsMetadataNodes : node.machine.name => node
   }
   name                = each.value.machine.name
-  resource_group_name = var.resourceGroup.name
-  location            = var.resourceGroup.location
+  resource_group_name = azurerm_resource_group.hammerspace.name
+  location            = azurerm_resource_group.hammerspace.location
   ip_configuration {
     name                          = "ipConfig"
     private_ip_address_allocation = "Dynamic"
@@ -77,8 +77,8 @@ resource azurerm_network_interface metadata_ha {
     for node in local.hsMetadataNodes : node.machine.name => node if local.hsHighAvailability
   }
   name                = each.value.machine.name
-  resource_group_name = var.resourceGroup.name
-  location            = var.resourceGroup.location
+  resource_group_name = azurerm_resource_group.hammerspace.name
+  location            = azurerm_resource_group.hammerspace.location
   ip_configuration {
     name                          = "ipConfig"
     private_ip_address_allocation = "Dynamic"
@@ -92,8 +92,8 @@ resource azurerm_linux_virtual_machine metadata {
     for node in local.hsMetadataNodes : node.machine.name => node
   }
   name                            = each.value.machine.name
-  resource_group_name             = var.resourceGroup.name
-  location                        = var.resourceGroup.location
+  resource_group_name             = azurerm_resource_group.hammerspace.name
+  location                        = azurerm_resource_group.hammerspace.location
   size                            = each.value.machine.size
   admin_username                  = each.value.machine.adminLogin.userName
   admin_password                  = each.value.machine.adminLogin.userPassword
@@ -150,8 +150,8 @@ resource azurerm_managed_disk metadata {
     for node in local.hsMetadataNodes : node.machine.name => node
   }
   name                          = each.value.machine.name
-  resource_group_name           = var.resourceGroup.name
-  location                      = var.resourceGroup.location
+  resource_group_name           = azurerm_resource_group.hammerspace.name
+  location                      = azurerm_resource_group.hammerspace.location
   storage_account_type          = each.value.machine.dataDisk.storageType
   disk_size_gb                  = each.value.machine.dataDisk.sizeGB
   create_option                 = "Empty"
@@ -162,8 +162,8 @@ resource azurerm_virtual_machine_data_disk_attachment metadata {
   for_each = {
     for node in local.hsMetadataNodes : node.machine.name => node
   }
-  virtual_machine_id = "${data.azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/virtualMachines/${each.value.machine.name}"
-  managed_disk_id    = "${data.azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/disks/${each.value.machine.name}"
+  virtual_machine_id = "${azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/virtualMachines/${each.value.machine.name}"
+  managed_disk_id    = "${azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/disks/${each.value.machine.name}"
   caching            = each.value.machine.dataDisk.cachingMode
   lun                = 0
   depends_on = [
@@ -179,8 +179,8 @@ resource azurerm_virtual_machine_data_disk_attachment metadata {
 resource azurerm_lb metadata {
   count               = local.hsHighAvailability ? 1 : 0
   name                = "${var.hammerspace.namePrefix}${var.hammerspace.metadata.machine.namePrefix}"
-  resource_group_name = var.resourceGroup.name
-  location            = var.resourceGroup.location
+  resource_group_name = azurerm_resource_group.hammerspace.name
+  location            = azurerm_resource_group.hammerspace.location
   sku                 = "Standard"
   frontend_ip_configuration {
     name      = "ipConfig"
@@ -199,7 +199,7 @@ resource azurerm_network_interface_backend_address_pool_association metadata {
     for node in local.hsMetadataNodes : node.machine.name => node if local.hsHighAvailability
   }
   backend_address_pool_id = azurerm_lb_backend_address_pool.metadata[0].id
-  network_interface_id    = "${data.azurerm_resource_group.hammerspace.id}/providers/Microsoft.Network/networkInterfaces/${each.value.machine.name}"
+  network_interface_id    = "${azurerm_resource_group.hammerspace.id}/providers/Microsoft.Network/networkInterfaces/${each.value.machine.name}"
   ip_configuration_name   = "ipConfig"
   depends_on = [
     azurerm_network_interface.metadata
@@ -227,27 +227,4 @@ resource azurerm_lb_probe metadata {
   loadbalancer_id = azurerm_lb.metadata[0].id
   protocol        = "Tcp"
   port            = 4505
-}
-
-############################################################################
-# Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
-############################################################################
-
-resource azurerm_private_dns_a_record metadata {
-  name                = "${var.privateDNS.aRecord.name}-metadata"
-  resource_group_name = var.privateDNS.resourceGroupName
-  zone_name           = var.privateDNS.zoneName
-  ttl                 = var.privateDNS.aRecord.ttlSeconds
-  records = local.hsHighAvailability ? [
-    azurerm_lb.metadata[0].frontend_ip_configuration[0].private_ip_address
-  ] : [
-    for node in local.hsMetadataNodes : azurerm_linux_virtual_machine.metadata[node.machine.name].private_ip_address
-  ]
-}
-
-output dnsMetadata {
-  value = {
-    fqdn    = azurerm_private_dns_a_record.metadata.fqdn
-    records = azurerm_private_dns_a_record.metadata.records
-  }
 }

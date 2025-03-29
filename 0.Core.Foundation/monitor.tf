@@ -11,7 +11,7 @@ variable monitor {
         enable = bool
       })
     })
-    appInsights = object({
+    applicationInsights = object({
       type = string
     })
     logAnalytics = object({
@@ -70,7 +70,7 @@ resource azurerm_application_insights studio {
   resource_group_name        = azurerm_resource_group.studio_monitor.name
   location                   = azurerm_resource_group.studio_monitor.location
   workspace_id               = azurerm_log_analytics_workspace.studio.id
-  application_type           = var.monitor.appInsights.type
+  application_type           = var.monitor.applicationInsights.type
   retention_in_days          = var.monitor.retentionDays
   internet_ingestion_enabled = false
   internet_query_enabled     = false
@@ -99,7 +99,7 @@ output monitor {
     logAnalytics = {
       id = azurerm_log_analytics_workspace.studio.id
     }
-    appInsights = {
+    applicationInsights = {
       id = azurerm_application_insights.studio.id
     }
   }

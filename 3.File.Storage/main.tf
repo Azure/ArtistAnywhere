@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.24.0"
+      version = "~>4.25.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -36,38 +36,14 @@ module core {
 }
 
 module hammerspace {
-  count       = var.hammerspace.enable ? 1 : 0
-  source      = "./Hammerspace"
-  hammerspace = var.hammerspace
-  resourceGroup = {
-    name     = azurerm_resource_group.hammerspace[0].name
-    location = azurerm_resource_group.hammerspace[0].location
-  }
-  virtualNetwork = {
-    name              = data.azurerm_subnet.storage.virtual_network_name
-    subnetName        = data.azurerm_subnet.storage.name
-    resourceGroupName = data.azurerm_subnet.storage.resource_group_name
-  }
-  privateDNS = {
-    zoneName          = data.azurerm_private_dns_zone.studio.name
-    resourceGroupName = data.azurerm_private_dns_zone.studio.resource_group_name
-    aRecord = {
-      name       = var.dnsRecord.name
-      ttlSeconds = var.dnsRecord.ttlSeconds
-    }
-  }
-  adminLogin = {
-    userName     = data.azurerm_key_vault_secret.admin_username.value
-    userPassword = data.azurerm_key_vault_secret.admin_password.value
-    sshKeyPublic = data.azurerm_key_vault_secret.ssh_key_public.value
-  }
-  activeDirectory = {
-    enable       = var.activeDirectory.enable
-    domainName   = var.activeDirectory.domain.name
-    servers      = var.activeDirectory.machine.name
-    userName     = var.activeDirectory.machine.adminLogin.userName != "" ? var.activeDirectory.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-    userPassword = var.activeDirectory.machine.adminLogin.userPassword != "" ? var.activeDirectory.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
-  }
+  count             = module.core.hammerspace.enable ? 1 : 0
+  source            = "../3.File.Storage/Hammerspace"
+  resourceGroupName = "${var.resourceGroupName}.Hammerspace"
+  regionName        = local.location
+  dnsRecord         = merge(var.dnsRecord, {metadataTier={enable=false}})
+  virtualNetwork    = var.virtualNetwork
+  activeDirectory   = var.activeDirectory
+  hammerspace       = module.core.hammerspace
 }
 
 variable resourceGroupName {
@@ -78,120 +54,6 @@ variable regionName {
   type = string
 }
 
-variable hammerspace {
-  type = object({
-    enable     = bool
-    version    = string
-    namePrefix = string
-    domainName = string
-    metadata = object({
-      machine = object({
-        namePrefix = string
-        size       = string
-        count      = number
-        osDisk = object({
-          storageType = string
-          cachingMode = string
-          sizeGB      = number
-        })
-        dataDisk = object({
-          storageType = string
-          cachingMode = string
-          sizeGB      = number
-        })
-        adminLogin = object({
-          userName     = string
-          userPassword = string
-          sshKeyPublic = string
-          passwordAuth = object({
-            disable = bool
-          })
-        })
-      })
-      network = object({
-        acceleration = object({
-          enable = bool
-        })
-      })
-    })
-    data = object({
-      machine = object({
-        namePrefix = string
-        size       = string
-        count      = number
-        osDisk = object({
-          storageType = string
-          cachingMode = string
-          sizeGB      = number
-        })
-        dataDisk = object({
-          storageType = string
-          cachingMode = string
-          sizeGB      = number
-          count       = number
-          raid0 = object({
-            enable = bool
-          })
-        })
-        adminLogin = object({
-          userName     = string
-          userPassword = string
-          sshKeyPublic = string
-          passwordAuth = object({
-            disable = bool
-          })
-        })
-      })
-      network = object({
-        acceleration = object({
-          enable = bool
-        })
-      })
-    })
-    proximityPlacementGroup = object({
-      enable = bool
-    })
-    storageAccounts = list(object({
-      enable    = bool
-      name      = string
-      accessKey = string
-    }))
-    shares = list(object({
-      enable = bool
-      name   = string
-      path   = string
-      size   = number
-      export = string
-    }))
-    volumes = list(object({
-      enable = bool
-      name   = string
-      type   = string
-      path   = string
-      node = object({
-        name    = string
-        type    = string
-        address = string
-      })
-      assimilation = object({
-        enable = bool
-        share = object({
-          name = string
-          path = object({
-            source      = string
-            destination = string
-          })
-        })
-      })
-    }))
-    volumeGroups = list(object({
-      enable      = bool
-      name        = string
-      volumeNames = list(string)
-    }))
-  })
-}
-
 variable dnsRecord {
   type = object({
     name       = string
@@ -199,13 +61,12 @@ variable dnsRecord {
   })
 }
 
-variable existingNetwork {
+variable virtualNetwork {
   type = object({
-    enable             = bool
-    name               = string
-    subnetNameIdentity = string
-    subnetNameStorage  = string
-    resourceGroupName  = string
+    enable            = bool
+    name              = string
+    subnetName        = string
+    resourceGroupName = string
     privateDNS = object({
       zoneName          = string
       resourceGroupName = string
@@ -220,7 +81,6 @@ variable activeDirectory {
       name = string
     })
     machine = object({
-      ip   = string
       name = string
       adminLogin = object({
         userName     = string
@@ -252,21 +112,6 @@ data azurerm_key_vault studio {
   resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
-data azurerm_key_vault_secret admin_username {
-  name         = module.core.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
-data azurerm_key_vault_secret admin_password {
-  name         = module.core.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
-data azurerm_key_vault_secret ssh_key_public {
-  name         = module.core.keyVault.secretName.sshKeyPublic
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
 data azurerm_key_vault_key data_encryption {
   name         = module.core.keyVault.keyName.dataEncryption
   key_vault_id = data.azurerm_key_vault.studio.id
@@ -292,23 +137,23 @@ data terraform_remote_state network {
 }
 
 data azurerm_resource_group dns {
-  name = var.existingNetwork.enable ? var.existingNetwork.privateDNS.resourceGroupName : data.terraform_remote_state.network.outputs.dns.privateZone.resourceGroup.name
+  name = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.resourceGroupName : data.terraform_remote_state.network.outputs.privateDNS.zone.resourceGroup.name
 }
 
 data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.core.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetwork.core.resourceGroup.name
-}
-
-data azurerm_private_dns_zone studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.privateDNS.zoneName : data.terraform_remote_state.network.outputs.dns.privateZone.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.privateDNS.zone.resourceGroup.name : data.terraform_remote_state.network.outputs.dns.privateZone.resourceGroup.name
+  name                = var.virtualNetwork.enable ? var.virtualNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.default.name
+  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.resourceGroupName : var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetwork.default.resourceGroup.name
 }
 
 data azurerm_subnet storage {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetNameStorage : "Storage"
+  name                 = var.virtualNetwork.enable ? var.virtualNetwork.subnetName : "Storage"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
+}
+
+data azurerm_private_dns_zone studio {
+  name                = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.zoneName : data.terraform_remote_state.network.outputs.privateDNS.zone.name
+  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.zone.resourceGroup.name : data.terraform_remote_state.network.outputs.privateDNS.zone.resourceGroup.name
 }
 
 locals {
@@ -324,18 +169,45 @@ resource azurerm_resource_group storage {
   }
 }
 
-resource azurerm_resource_group hammerspace {
-  count    = var.hammerspace.enable ? 1 : 0
-  name     = "${var.resourceGroupName}.Hammerspace"
-  location = local.location
-  tags = {
-    AAA = basename(path.cwd)
-  }
+############################################################################
+# Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
+############################################################################
+
+resource azurerm_private_dns_a_record netapp {
+  count               = var.netAppFiles.enable && length(azurerm_netapp_volume.studio) > 0 ? 1 : 0
+  name                = "${lower(var.dnsRecord.name)}-netapp"
+  resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
+  zone_name           = data.azurerm_private_dns_zone.studio.name
+  ttl                 = var.dnsRecord.ttlSeconds
+  records = distinct([
+    for volume in azurerm_netapp_volume.studio : volume.mount_ip_addresses[0]
+  ])
 }
 
-output hammerspace {
-  value = var.hammerspace.enable ? {
-    metadata = module.hammerspace[0].dnsMetadata
-    data     = module.hammerspace[0].dnsData
-  } : null
+resource azurerm_private_dns_a_record lustre {
+  count               = var.managedLustre.enable ? 1 : 0
+  name                = "${lower(var.dnsRecord.name)}-lustre"
+  resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
+  zone_name           = data.azurerm_private_dns_zone.studio.name
+  ttl                 = var.dnsRecord.ttlSeconds
+  records = [
+    azurerm_managed_lustre_file_system.studio[0].mgs_address
+  ]
+}
+
+output privateDNS {
+  value = {
+    netAppFiles = var.netAppFiles.enable && length(azurerm_netapp_volume.studio) > 0 ? {
+      fqdn    = azurerm_private_dns_a_record.netapp[0].fqdn
+      records = azurerm_private_dns_a_record.netapp[0].records
+    } : null
+    managedLustre = var.managedLustre.enable ? {
+      fqdn    = azurerm_private_dns_a_record.lustre[0].fqdn
+      records = azurerm_private_dns_a_record.lustre[0].records
+    } : null
+    hammerspace = module.core.hammerspace.enable ? {
+      fqdn    = module.hammerspace[0].privateDNS.fqdn
+      records = module.hammerspace[0].privateDNS.records
+    } : null
+  }
 }

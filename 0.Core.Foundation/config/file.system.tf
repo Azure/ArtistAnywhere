@@ -15,7 +15,7 @@ variable fileSystem {
         mount = {
           type    = "nfs"
           path    = "/mnt/storage"
-          target  = "storage.azure.studio:/data"
+          target  = "storage-netapp.azure.studio:/data"
           options = "rw,nconnect=8,vers=3"
         }
       },
@@ -53,7 +53,7 @@ variable fileSystem {
         mount = {
           type    = ""
           path    = "X:"
-          target  = "\\\\storage.azure.studio\\data"
+          target  = "\\\\storage-netapp.azure.studio\\data"
           options = "-o anon -o nconnnect=8 -o vers=3"
         }
       },

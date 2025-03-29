@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.24.0"
+      version = "~>4.25.0"
     }
   }
   backend azurerm {
@@ -23,6 +23,81 @@ module core {
   source = "../0.Core.Foundation/config"
 }
 
+module hammerspace {
+  count             = module.core.hammerspace.enable ? 1 : 0
+  source            = "../3.File.Storage/Hammerspace"
+  resourceGroupName = "${var.resourceGroupName}.Hammerspace"
+  regionName        = module.core.resourceLocation.name
+  dnsRecord         = merge(var.dnsRecord, {metadataTier={enable=false}})
+  virtualNetwork    = var.virtualNetwork
+  activeDirectory   = var.activeDirectory
+  hammerspace = merge(module.core.hammerspace, {
+    shares = [
+      {
+        enable = false
+        name   = "cache"
+        path   = "/cache"
+        size   = 0
+        export = "*,ro,root-squash,insecure"
+      }
+    ]
+    volumes = [
+      {
+        enable = false
+        name   = "data-cpu"
+        type   = "READ_ONLY"
+        path   = "/data/cpu"
+        node = {
+          name    = "node1"
+          type    = "OTHER"
+          address = "10.1.194.4"
+        }
+        assimilation = {
+          enable = true
+          share = {
+            name = "cache"
+            path = {
+              source      = "/"
+              destination = "/moana"
+            }
+          }
+        }
+      },
+      {
+        enable = false
+        name   = "data-gpu"
+        type   = "READ_ONLY"
+        path   = "/data/gpu"
+        node = {
+          name    = "node2"
+          type    = "OTHER"
+          address = "10.1.194.4"
+        }
+        assimilation = {
+          enable = true
+          share = {
+            name = "cache"
+            path = {
+              source      = "/"
+              destination = "/blender"
+            }
+          }
+        }
+      }
+    ]
+    volumeGroups = [
+      {
+        enable = false
+        name   = "cache"
+        volumeNames = [
+          "data-cpu",
+          "data-gpu"
+        ]
+      }
+    ]
+  })
+}
+
 variable resourceGroupName {
   type = string
 }
@@ -34,7 +109,7 @@ variable dnsRecord {
   })
 }
 
-variable existingNetwork {
+variable virtualNetwork {
   type = object({
     enable            = bool
     name              = string
@@ -108,38 +183,38 @@ data terraform_remote_state network {
 }
 
 data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.core.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.core.resourceGroup.name
+  name                = var.virtualNetwork.enable ? var.virtualNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.default.name
+  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.default.resourceGroup.name
 }
 
 data azurerm_subnet cache {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Cache"
+  name                 = var.virtualNetwork.enable ? var.virtualNetwork.subnetName : "Cache"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
 data azurerm_private_dns_zone studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.privateDNS.zoneName : data.terraform_remote_state.network.outputs.dns.privateZone.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.privateDNS.resourceGroupName : data.terraform_remote_state.network.outputs.dns.privateZone.resourceGroup.name
+  name                = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.zoneName : data.terraform_remote_state.network.outputs.privateDNS.zone.name
+  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.resourceGroupName : data.terraform_remote_state.network.outputs.privateDNS.zone.resourceGroup.name
 }
 
 resource azurerm_resource_group cache {
   name     = var.resourceGroupName
-  location = var.existingNetwork.enable ? var.existingNetwork.regionName : module.core.resourceLocation.name
+  location = var.virtualNetwork.enable ? var.virtualNetwork.regionName : module.core.resourceLocation.name
   tags = {
     AAA = basename(path.cwd)
   }
 }
 
-output cacheDNS {
+output privateDNS {
   value = {
-    hs = var.hsCache.enable ? {
-      metadata = module.hsCache[0].dnsMetadata
-      data     = module.hsCache[0].dnsData
-    } : null
     nfs = var.nfsCache.enable ? {
       fqdn    = azurerm_private_dns_a_record.cache_nfs[0].fqdn
       records = azurerm_private_dns_a_record.cache_nfs[0].records
+    } : null
+    hs = module.core.hammerspace.enable ? {
+      fqdn    = module.hammerspace[0].privateDNS.fqdn
+      records = module.hammerspace[0].privateDNS.records
     } : null
   }
 }

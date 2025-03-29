@@ -163,21 +163,6 @@ resource azurerm_netapp_volume studio {
   ]
 }
 
-############################################################################
-# Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
-############################################################################
-
-resource azurerm_private_dns_a_record netapp {
-  count               = var.netAppFiles.enable && length(azurerm_netapp_volume.studio) > 0 ? 1 : 0
-  name                = var.dnsRecord.name
-  resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
-  zone_name           = data.azurerm_private_dns_zone.studio.name
-  ttl                 = var.dnsRecord.ttlSeconds
-  records = distinct([
-    for volume in azurerm_netapp_volume.studio : volume.mount_ip_addresses[0]
-  ])
-}
-
 #################################################################################################
 # NetApp Files Backup (https://learn.microsoft.com/azure/azure-netapp-files/backup-introduction #
 #################################################################################################
@@ -200,11 +185,4 @@ resource azurerm_netapp_backup_policy studio {
   weekly_backups_to_keep  = var.netAppFiles.backup.policy.retention.weekly
   monthly_backups_to_keep = var.netAppFiles.backup.policy.retention.monthly
   enabled                 = var.netAppFiles.backup.policy.enable
-}
-
-output netAppFiles {
-  value = var.netAppFiles.enable && length(azurerm_netapp_volume.studio) > 0 ? {
-    fqdn    = azurerm_private_dns_a_record.netapp[0].fqdn
-    records = azurerm_private_dns_a_record.netapp[0].records
-  } : null
 }

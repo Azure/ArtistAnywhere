@@ -8,5 +8,5 @@ while true; do
 done
 
 if [ ${activeDirectory.enable} == true ]; then
-  hscli ad-join --ad-servers ${activeDirectory.servers} --realm ${activeDirectory.domainName} --username ${activeDirectory.userName} --password ${activeDirectory.userPassword}
+  hscli ad-join --ad-servers ${activeDirectory.machine.name} --realm ${activeDirectory.domain.name} --username ${activeDirectory.machine.adminLogin.userName} --password ${activeDirectory.machine.adminLogin.userPassword}
 fi

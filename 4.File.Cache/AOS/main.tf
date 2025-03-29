@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.24.0"
+      version = "~>4.25.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -67,7 +67,7 @@ variable dnsRecord {
   })
 }
 
-variable existingNetwork {
+variable virtualNetwork {
   type = object({
     enable            = bool
     name              = string
@@ -143,30 +143,30 @@ data terraform_remote_state network {
 }
 
 data azurerm_virtual_network studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.core.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.core.resourceGroup.name
+  name                = var.virtualNetwork.enable ? var.virtualNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.default.name
+  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.default.resourceGroup.name
 }
 
 data azurerm_subnet cache {
-  name                 = var.existingNetwork.enable ? var.existingNetwork.subnetName : "Cache"
+  name                 = var.virtualNetwork.enable ? var.virtualNetwork.subnetName : "Cache"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
 data azurerm_private_dns_zone studio {
-  name                = var.existingNetwork.enable ? var.existingNetwork.privateDNS.zoneName : data.terraform_remote_state.network.outputs.dns.privateZone.name
-  resource_group_name = var.existingNetwork.enable ? var.existingNetwork.privateDNS.resourceGroupName : data.terraform_remote_state.network.outputs.dns.privateZone.resourceGroup.name
+  name                = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.zoneName : data.terraform_remote_state.network.outputs.privateDNS.zone.name
+  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.resourceGroupName : data.terraform_remote_state.network.outputs.privateDNS.zone.resourceGroup.name
 }
 
 resource azurerm_resource_group cache {
   name     = var.resourceGroupName
-  location = var.existingNetwork.enable ? var.existingNetwork.regionName : module.core.resourceLocation.name
+  location = var.virtualNetwork.enable ? var.virtualNetwork.regionName : module.core.resourceLocation.name
   tags = {
     AAA = basename(path.cwd)
   }
 }
 
-output cacheDNS {
+output privateDNS {
   value = {
     hpc = var.hpcCache.enable ? {
       fqdn    = azurerm_private_dns_a_record.cache_hpc[0].fqdn
