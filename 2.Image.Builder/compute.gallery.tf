@@ -17,9 +17,9 @@ variable computeGallery {
 }
 
 locals {
-  imageDefinitionLinux = [
+  imageDefinitionLinux = one([
     for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition if lower(imageDefinition.type) == "linux"
-  ]
+  ])
 }
 
 resource azurerm_shared_image_gallery studio {
@@ -46,10 +46,10 @@ resource azurerm_shared_image studio {
 }
 
 output linux {
-  value = !module.core.image.linux.enable || length(local.imageDefinitionLinux) == 0 ? null : {
-    publisher = lower(local.imageDefinitionLinux[0].publisher)
-    offer     = lower(local.imageDefinitionLinux[0].offer)
-    sku       = lower(local.imageDefinitionLinux[0].sku)
+  value = module.core.image.linux.enable && local.imageDefinitionLinux != null ? {
+    publisher = lower(local.imageDefinitionLinux.publisher)
+    offer     = lower(local.imageDefinitionLinux.offer)
+    sku       = lower(local.imageDefinitionLinux.sku)
     version   = module.core.image.linux.version
-  }
+  } : null
 }
