@@ -1,5 +1,9 @@
 resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
+##################################################################
+# Boost (https://learn.microsoft.com/azure/azure-boost/overview) #
+##################################################################
+
 nfsCache = {
   enable = false
   name   = "xcache"
@@ -19,7 +23,7 @@ nfsCache = {
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
         enable    = true
-        placement = "ResourceDisk"
+        placement = "CacheDisk"
       }
     }
     dataDisk = {

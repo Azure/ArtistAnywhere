@@ -12,6 +12,13 @@ variable computeGallery {
       publisher  = string
       offer      = string
       sku        = string
+      support = object({
+        networkAcceleration = bool
+        machineConfidential = bool
+        launchTrusted       = bool
+        hibernation         = bool
+        nvmeDisks           = bool
+      })
     }))
   })
 }
@@ -32,12 +39,17 @@ resource azurerm_shared_image studio {
   for_each = {
     for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if (module.core.image.linux.enable && lower(imageDefinition.type) == "linux") || (module.core.image.windows.enable && lower(imageDefinition.type) == "windows")
   }
-  name                = each.value.name
-  resource_group_name = azurerm_resource_group.image_gallery.name
-  location            = azurerm_resource_group.image_gallery.location
-  gallery_name        = azurerm_shared_image_gallery.studio.name
-  hyper_v_generation  = each.value.generation
-  os_type             = each.value.type
+  name                                = each.value.name
+  resource_group_name                 = azurerm_resource_group.image_gallery.name
+  location                            = azurerm_resource_group.image_gallery.location
+  gallery_name                        = azurerm_shared_image_gallery.studio.name
+  hyper_v_generation                  = each.value.generation
+  os_type                             = each.value.type
+  accelerated_network_support_enabled = each.value.support.networkAcceleration
+  confidential_vm_supported           = !each.value.support.launchTrusted ? each.value.support.machineConfidential : null
+  trusted_launch_supported            = !each.value.support.machineConfidential ? each.value.support.launchTrusted : null
+  hibernation_enabled                 = each.value.support.hibernation
+  disk_controller_type_nvme_enabled   = each.value.support.nvmeDisks
   identifier {
     publisher = each.value.publisher
     offer     = each.value.offer

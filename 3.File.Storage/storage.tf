@@ -35,10 +35,10 @@ locals {
     for storageAccount in var.storageAccounts : merge(storageAccount, {
       resourceGroup = {
         name     = var.resourceGroupName
-        location = storageAccount.extendedZone.enable ? module.core.resourceLocation.extendedZone.location : local.location
+        location = storageAccount.extendedZone.enable && var.extendedZone.enable ? var.extendedZone.location : local.location
       }
       extendedZone = {
-        name = storageAccount.extendedZone.enable ? module.core.resourceLocation.extendedZone.name : null
+        name = storageAccount.extendedZone.enable && var.extendedZone.enable ? var.extendedZone.name : null
       }
       storageAccount = {
         id = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}"

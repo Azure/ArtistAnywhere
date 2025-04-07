@@ -2,6 +2,12 @@ resourceGroupName = "ArtistAnywhere.Storage" # Alphanumeric, underscores, hyphen
 
 regionName = "" # Optional default region override
 
+extendedZone = {
+  enable   = false
+  name     = "LosAngeles"
+  location = "WestUS"
+}
+
 ###################################################################################
 # Storage (https://learn.microsoft.com/azure/storage/common/storage-introduction) #
 ###################################################################################
@@ -59,6 +65,34 @@ storageAccounts = [
     }
   }
 ]
+
+##########################################################################################
+# Managed Lustre (https://learn.microsoft.com/azure/azure-managed-lustre/amlfs-overview) #
+##########################################################################################
+
+managedLustre = {
+  enable  = false
+  name    = "xstudio"
+  type    = "AMLFS-Durable-Premium-40" # https://learn.microsoft.com/azure/azure-managed-lustre/create-file-system-resource-manager#file-system-type-and-size-options
+  sizeTiB = 48
+  blobStorage = {
+    enable            = true
+    accountName       = "xstudio1"
+    resourceGroupName = "ArtistAnywhere.Storage"
+    containerName = {
+      archive = "lustre"
+      logging = "lustre-logging"
+    }
+    importPrefix = "/"
+  }
+  maintenanceWindow = {
+    dayOfWeek    = "Sunday"
+    utcStartTime = "00:00"
+  }
+  encryption = {
+    enable = false
+  }
+}
 
 ############################################################################
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #

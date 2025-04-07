@@ -1,5 +1,11 @@
 resourceGroupName = "ArtistAnywhere.Workstation" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
 
+extendedZone = {
+  enable   = false
+  name     = "LosAngeles"
+  location = "WestUS"
+}
+
 #########################################################################
 # Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
 #########################################################################

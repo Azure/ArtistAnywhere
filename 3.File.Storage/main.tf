@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.25.0"
+      version = "~>4.26.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>3.2.0"
+      version = "~>3.3.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -52,6 +52,14 @@ variable resourceGroupName {
 
 variable regionName {
   type = string
+}
+
+variable extendedZone {
+  type = object({
+    enable   = bool
+    name     = string
+    location = string
+  })
 }
 
 variable dnsRecord {

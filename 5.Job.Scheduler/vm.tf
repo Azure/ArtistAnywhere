@@ -66,10 +66,10 @@ locals {
   virtualMachines = [
     for virtualMachine in var.virtualMachines : merge(virtualMachine, {
       resourceLocation = {
-        name = virtualMachine.network.locationExtended.enable && module.core.resourceLocation.extendedZone.enable ? module.core.resourceLocation.extendedZone.name : module.core.resourceLocation.name
+        name = virtualMachine.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : module.core.resourceLocation.name
         extendedZone = {
-          name     = virtualMachine.network.locationExtended.enable && module.core.resourceLocation.extendedZone.enable ? module.core.resourceLocation.extendedZone.name : null
-          location = virtualMachine.network.locationExtended.enable && module.core.resourceLocation.extendedZone.enable ? module.core.resourceLocation.extendedZone.location : null
+          name     = virtualMachine.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : null
+          location = virtualMachine.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.location : null
         }
       }
       network = merge(virtualMachine.network, {

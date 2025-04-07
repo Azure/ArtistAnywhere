@@ -5,7 +5,7 @@ resourceGroupName = "ArtistAnywhere.Image.Registry" # Alphanumeric, underscores,
 ######################################################################################################
 
 containerRegistry = {
-  name = "iai00"
+  name = "xstudio"
   tier = "Premium"
   adminUser = {
     enable = true
@@ -51,47 +51,66 @@ containerRegistry = {
       }
     }
   ]
+  tasks = [
+    {
+      enable = true
+      name   = "LnxClusterCPU"
+      type   = "Linux"
+      docker = {
+        context = {
+          hostUrl     = "https://github.com/Azure/ArtistAnywhere.git"
+          accessToken = " "
+        }
+        filePath    = "2.Image.Builder/Registry/Docker/LnxClusterCPU"
+        imageNames = [
+          "lnx-cluster-cpu"
+        ]
+        cache = {
+          enable = false
+        }
+      }
+      agentPool = {
+        enable   = true
+        name     = "xstudio"
+        cpuCores = 2
+      }
+      timeout = {
+        seconds = 3600
+      }
+    },
+    {
+      enable = true
+      name   = "WinClusterCPU"
+      type   = "Windows"
+      docker = {
+        context = {
+          hostUrl     = "https://github.com/Azure/ArtistAnywhere.git"
+          accessToken = " "
+        }
+        filePath = "2.Image.Builder/Registry/Docker/WinClusterCPU"
+        imageNames = [
+          "win-cluster-cpu"
+        ]
+        cache = {
+          enable = false
+        }
+      }
+      agentPool = {
+        enable   = true
+        name     = "xstudio"
+        cpuCores = 2
+      }
+      timeout = {
+        seconds = 3600
+      }
+    }
+  ]
+  agentPools =[
+    {
+      enable = true
+      name   = "xstudio"
+      type   = "S1"
+      count  = 2
+    }
+  ]
 }
-
-####################################################################################################################
-# Container Registry Task (https://learn.microsoft.com/azure/container-registry/container-registry-tasks-overview) #
-####################################################################################################################
-
-containerRegistryTasks = [
-  {
-    enable = true
-    name   = "LnxClusterCPU"
-    type   = "Linux"
-    docker = {
-      context = {
-        hostUrl     = "https://github.com/Azure/ArtistAnywhere.git"
-        accessToken = " "
-      }
-      filePath    = "2.Image.Builder/Registry/Docker/LnxClusterCPU"
-      imageNames = [
-        "lnx-cluster-cpu"
-      ]
-      cache = {
-        enable = false
-      }
-    }
-  },
-  {
-    enable = true
-    name   = "WinClusterCPU"
-    type   = "Windows"
-    docker = {
-      context = {
-        hostUrl     = "https://github.com/Azure/ArtistAnywhere.git"
-        accessToken = " "
-      }
-      filePath = "2.Image.Builder/Registry/Docker/WinClusterCPU"
-      imageNames = [
-        "win-cluster-cpu"
-      ]
-      cache = {
-        enable = false
-      }
-    }
-  }
-]

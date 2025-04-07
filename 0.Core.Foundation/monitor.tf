@@ -100,7 +100,8 @@ output monitor {
       id = azurerm_log_analytics_workspace.studio.id
     }
     applicationInsights = {
-      id = azurerm_application_insights.studio.id
+      id   = azurerm_application_insights.studio.id
+      name = azurerm_application_insights.studio.name
     }
   }
 }

@@ -6,7 +6,7 @@ resourceGroupName = "ArtistAnywhere.Network" # Alphanumeric, underscores, hyphen
 
 virtualNetworks = [
   {
-    enable   = true
+    enable   = false
     name     = "Studio"
     location = "SouthCentralUS"
     addressSpace = [
@@ -203,205 +203,48 @@ virtualNetworks = [
         serviceDelegation = null
       }
     ]
+  }
+]
+
+virtualNetworksAdded = [ # Optional additional virtual networks
+  {
+    enable   = false
+    location = "WestUS"
+    addressSpace = {
+      search  = "10.0"
+      replace = "10.1"
+    }
+    extendedZone = {
+      enable   = false
+      name     = ""
+      location = ""
+    }
   },
   {
     enable   = false
-    name     = "Studio"
     location = "WestUS"
-    addressSpace = [
-      "10.1.0.0/16"
-    ]
-    dnsAddresses = [
-    ]
-    subnets = [
-      {
-        name = "Cluster"
-        addressSpace = [
-          "10.1.0.0/17"
-        ]
-        serviceEndpoints = [
-          "Microsoft.Storage"
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "Workstation"
-        addressSpace = [
-          "10.1.128.0/18"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "Identity"
-        addressSpace = [
-          "10.1.192.0/24"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "Storage"
-        addressSpace = [
-          "10.1.193.0/24"
-        ]
-        serviceEndpoints = [
-          "Microsoft.Storage"
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "StorageNetApp"
-        addressSpace = [
-          "10.1.194.0/24"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = {
-          service = "Microsoft.Netapp/volumes"
-          actions = [
-            "Microsoft.Network/networkinterfaces/*",
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        }
-      },
-      {
-        name = "StorageQumulo"
-        addressSpace = [
-          "10.1.195.0/24"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = {
-          service = "Qumulo.Storage/fileSystems"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        }
-      },
-      {
-        name = "Data"
-        addressSpace = [
-          "10.1.196.0/24"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "DataMySQL"
-        addressSpace = [
-          "10.1.197.0/24"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = {
-          service = "Microsoft.DBforMySQL/flexibleServers"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        }
-      },
-      {
-        name = "DataPostgreSQL"
-        addressSpace = [
-          "10.1.198.0/24"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = {
-          service = "Microsoft.DBforPostgreSQL/flexibleServers"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        }
-      },
-      {
-        name = "DataCassandra"
-        addressSpace = [
-          "10.1.199.0/24"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = {
-          service = "Microsoft.DocumentDB/cassandraClusters"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        }
-      },
-      {
-        name = "Cache"
-        addressSpace = [
-          "10.1.200.0/24"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "App"
-        addressSpace = [
-          "10.1.201.0/24"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = {
-          service = "Microsoft.App/environments"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        }
-      },
-      {
-        name = "Web"
-        addressSpace = [
-          "10.1.202.0/24"
-        ]
-        serviceEndpoints = [
-          "Microsoft.Storage"
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "GatewaySubnet"
-        addressSpace = [
-          "10.1.254.0/25"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "AzureBastionSubnet"
-        addressSpace = [
-          "10.1.254.128/25"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "AzureFirewallSubnet"
-        addressSpace = [
-          "10.1.255.0/25"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "AzureFirewallManagementSubnet"
-        addressSpace = [
-          "10.1.255.128/25"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = null
-      }
-    ]
+    addressSpace = {
+      search  = "10.0"
+      replace = "10.2"
+    }
+    extendedZone = {
+      enable   = true
+      name     = "LosAngeles"
+      location = "WestUS"
+    }
+  },
+  {
+    enable   = false
+    location = "WestUS3"
+    addressSpace = {
+      search  = "10.0"
+      replace = "10.3"
+    }
+    extendedZone = {
+      enable   = false
+      name     = ""
+      location = ""
+    }
   }
 ]
 

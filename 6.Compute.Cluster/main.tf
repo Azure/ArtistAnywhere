@@ -3,15 +3,19 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.25.0"
+      version = "~>4.26.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>3.2.0"
+      version = "~>3.3.0"
     }
     http = {
       source  = "hashicorp/http"
       version = "~>3.4.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~>0.13.0"
     }
     azapi = {
       source = "azure/azapi"
@@ -42,6 +46,14 @@ variable resourceGroupName {
   type = string
 }
 
+variable extendedZone {
+  type = object({
+    enable   = bool
+    name     = string
+    location = string
+  })
+}
+
 variable virtualNetwork {
   type = object({
     enable            = bool
@@ -64,6 +76,14 @@ variable activeDirectory {
         userPassword = string
       })
     })
+  })
+}
+
+variable containerRegistry {
+  type = object({
+    enable            = bool
+    name              = string
+    resourceGroupName = string
   })
 }
 
@@ -119,7 +139,7 @@ data azurerm_virtual_network studio {
 }
 
 data azurerm_virtual_network studio_extended {
-  count               = module.core.resourceLocation.extendedZone.enable ? 1 : 0
+  count               = var.extendedZone.enable ? 1 : 0
   name                = var.virtualNetwork.enable ? var.virtualNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.extended.name
   resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.extended.resourceGroup.name
 }
@@ -137,6 +157,24 @@ locals {
 
 resource azurerm_resource_group cluster {
   name     = var.resourceGroupName
+  location = module.core.resourceLocation.name
+  tags = {
+    AAA = basename(path.cwd)
+  }
+}
+
+resource azurerm_resource_group cluster_container_app {
+  count    = length(local.containerAppEnvironments) > 0 ? 1 : 0
+  name     = "${var.resourceGroupName}.ContainerApp"
+  location = module.core.resourceLocation.name
+  tags = {
+    AAA = basename(path.cwd)
+  }
+}
+
+resource azurerm_resource_group cluster_container_aks {
+  count    = var.kubernetes.enable ? 1 : 0
+  name     = "${var.resourceGroupName}.Kubernetes"
   location = module.core.resourceLocation.name
   tags = {
     AAA = basename(path.cwd)

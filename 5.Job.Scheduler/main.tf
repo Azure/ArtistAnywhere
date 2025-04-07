@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.25.0"
+      version = "~>4.26.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>3.2.0"
+      version = "~>3.3.0"
     }
   }
   backend azurerm {
@@ -29,6 +29,14 @@ module core {
 
 variable resourceGroupName {
   type = string
+}
+
+variable extendedZone {
+  type = object({
+    enable   = bool
+    name     = string
+    location = string
+  })
 }
 
 variable dnsRecord {
@@ -119,7 +127,7 @@ data azurerm_virtual_network studio {
 }
 
 data azurerm_virtual_network studio_extended {
-  count               = module.core.resourceLocation.extendedZone.enable ? 1 : 0
+  count               = var.extendedZone.enable ? 1 : 0
   name                = var.virtualNetwork.enable ? var.virtualNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.extended.name
   resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.extended.resourceGroup.name
 }

@@ -100,7 +100,7 @@
   },
   "gpu": {
     "value": {
-      "sku": "Standard_NC80ads_H100_v5",
+      "sku": "Standard_NC40ads_H100_v5",
       "maxNodes": 3,
       "osImage": "/subscriptions/5cc0d8f1-3643-410c-8646-1a2961134bd3/resourceGroups/ArtistAnywhere.Image.Gallery/providers/Microsoft.Compute/galleries/xstudio/images/Linux/versions/2.1.0"
     }

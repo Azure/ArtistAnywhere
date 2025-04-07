@@ -2,28 +2,9 @@
 # Container Registry Task (https://learn.microsoft.com/azure/container-registry/container-registry-tasks-overview) #
 ####################################################################################################################
 
-variable containerRegistryTasks {
-  type = list(object({
-    enable = bool
-    name   = string
-    type   = string
-    docker = object({
-      context = object({
-        hostUrl     = string
-        accessToken = string
-      })
-      filePath    = string
-      imageNames  = list(string)
-      cache = object({
-        enable = bool
-      })
-    })
-  }))
-}
-
 resource azurerm_container_registry_task studio {
   for_each = {
-    for task in var.containerRegistryTasks : task.name => task if task.enable
+    for task in var.containerRegistry.tasks : task.name => task if task.enable
   }
   name                  = each.value.name
   container_registry_id = azurerm_container_registry.studio.id
@@ -43,4 +24,12 @@ resource azurerm_container_registry_task studio {
     image_names          = each.value.docker.imageNames
     cache_enabled        = each.value.docker.cache.enable
   }
+  dynamic agent_setting {
+    for_each = each.value.agentPool.enable ? [1] : []
+    content {
+      cpu = each.value.agentPool.cpuCores
+    }
+  }
+  agent_pool_name    = each.value.agentPool.enable ? each.value.agentPool.name : null
+  timeout_in_seconds = each.value.timeout.seconds
 }

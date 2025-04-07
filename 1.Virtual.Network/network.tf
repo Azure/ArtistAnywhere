@@ -21,6 +21,22 @@ variable virtualNetworks {
   }))
 }
 
+variable virtualNetworksAdded {
+  type = list(object({
+    enable   = bool
+    location = string
+    addressSpace = object({
+      search  = string
+      replace = string
+    })
+    extendedZone = object({
+      enable   = bool
+      name     = string
+      location = string
+    })
+  }))
+}
+
 locals {
   virtualNetwork  = local.virtualNetworks[0]
   virtualNetworks = concat([
@@ -34,16 +50,29 @@ locals {
       }
       extendedZone = null
     }) if virtualNetwork.enable
-  ], module.core.resourceLocation.extendedZone.enable ? [merge(reverse(var.virtualNetworks)[0], {
-    key      = "${reverse(var.virtualNetworks)[0].name}-${reverse(var.virtualNetworks)[0].location}-${module.core.resourceLocation.extendedZone.name}"
-    id       = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${reverse(var.virtualNetworks)[0].location}.${module.core.resourceLocation.extendedZone.name}/providers/Microsoft.Network/virtualNetworks/${reverse(var.virtualNetworks)[0].name}"
-    location = reverse(var.virtualNetworks)[0].location
-    resourceGroup = {
-      name     = "${var.resourceGroupName}.${reverse(var.virtualNetworks)[0].location}.${module.core.resourceLocation.extendedZone.name}"
-      location = reverse(var.virtualNetworks)[0].location
-    }
-    extendedZone = module.core.resourceLocation.extendedZone
-  })] : [])
+  ], local.virtualNetworksAdded)
+  virtualNetworksAdded = [
+    for virtualNetwork in var.virtualNetworksAdded : merge(var.virtualNetworks[0], {
+      key      = "${var.virtualNetworks[0].name}-${virtualNetwork.location}${virtualNetwork.extendedZone.enable ? "-${virtualNetwork.extendedZone.name}" : ""}"
+      id       = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.location}${virtualNetwork.extendedZone.enable ? ".${virtualNetwork.extendedZone.name}" : ""}/providers/Microsoft.Network/virtualNetworks/${var.virtualNetworks[0].name}"
+      location = virtualNetwork.location
+      addressSpace = [
+        replace(var.virtualNetworks[0].addressSpace[0], virtualNetwork.addressSpace.search, virtualNetwork.addressSpace.replace)
+      ]
+      subnets = [
+        for subnet in var.virtualNetworks[0].subnets : merge(subnet, {
+          addressSpace = [
+            replace(subnet.addressSpace[0], virtualNetwork.addressSpace.search, virtualNetwork.addressSpace.replace)
+          ]
+        })
+      ]
+      resourceGroup = {
+        name     = "${var.resourceGroupName}.${virtualNetwork.location}${virtualNetwork.extendedZone.enable ? ".${virtualNetwork.extendedZone.name}" : ""}"
+        location = virtualNetwork.location
+      }
+      extendedZone = virtualNetwork.extendedZone
+    }) if virtualNetwork.enable
+  ]
   virtualNetworksSubnets = flatten([
     for virtualNetwork in local.virtualNetworks : [
       for subnet in virtualNetwork.subnets : merge(subnet, {
@@ -65,6 +94,7 @@ locals {
       name          = virtualNetwork.name
       resourceGroup = virtualNetwork.resourceGroup
       location      = virtualNetwork.location
+      extendedZone  = virtualNetwork.extendedZone
     }
   ]
 }
@@ -76,7 +106,7 @@ resource azurerm_virtual_network studio {
   name                = each.value.name
   resource_group_name = each.value.resourceGroup.name
   location            = each.value.location
-  edge_zone           = try(each.value.extendedZone.name, null)
+  edge_zone           = each.value.extendedZone != null && try(each.value.extendedZone.name, "") != "" ? each.value.extendedZone.name : null
   address_space       = each.value.addressSpace
   dns_servers         = each.value.dnsAddresses
   depends_on = [
@@ -114,7 +144,9 @@ resource azurerm_subnet studio {
 output virtualNetwork {
   value = {
     default   = local.virtualNetworksOutput[0]
-    extended  = module.core.resourceLocation.extendedZone.enable ? reverse(local.virtualNetworksOutput)[0] : null
     locations = distinct(local.virtualNetworksOutput[*].location)
+    extended = one([
+      for virtualNetwork in local.virtualNetworksOutput : virtualNetwork if try(virtualNetwork.extendedZone.enable, false)
+    ])
   }
 }

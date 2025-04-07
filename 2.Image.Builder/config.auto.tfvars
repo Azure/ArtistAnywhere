@@ -14,6 +14,13 @@ computeGallery = {
       publisher  = "AlmaLinux"
       offer      = "AlmaLinux-x86_64"
       sku        = "9-Gen2"
+      support = {
+        networkAcceleration = true
+        machineConfidential = false
+        launchTrusted       = true
+        hibernation         = true
+        nvmeDisks           = true
+      }
     },
     {
       name       = "WinServer"
@@ -22,6 +29,13 @@ computeGallery = {
       publisher  = "MicrosoftWindowsServer"
       offer      = "WindowsServer"
       sku        = "2022-Datacenter-Azure-Edition"
+      support = {
+        networkAcceleration = true
+        machineConfidential = false
+        launchTrusted       = true
+        hibernation         = false
+        nvmeDisks           = false
+      }
     },
     {
       name       = "WinCluster"
@@ -30,6 +44,13 @@ computeGallery = {
       publisher  = "MicrosoftWindowsDesktop"
       offer      = "Windows-10"
       sku        = "Win10-22H2-Ent-G2"
+      support = {
+        networkAcceleration = true
+        machineConfidential = false
+        launchTrusted       = true
+        hibernation         = false
+        nvmeDisks           = false
+      }
     },
     {
       name       = "WinArtist"
@@ -38,6 +59,13 @@ computeGallery = {
       publisher  = "MicrosoftWindowsDesktop"
       offer      = "Windows-11"
       sku        = "Win11-23H2-Ent"
+      support = {
+        networkAcceleration = true
+        machineConfidential = false
+        launchTrusted       = true
+        hibernation         = true
+        nvmeDisks           = true
+      }
     }
   ]
 }
@@ -124,7 +152,7 @@ imageBuilder = {
         machineSize    = "Standard_NC40ads_H100_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "NVIDIA"                   # NVIDIA or AMD
         imageVersion   = "2.1.0"
-        osDiskSizeGB   = 1024
+        osDiskSizeGB   = 320
         timeoutMinutes = 180
         jobSchedulers = [
           "Slurm",
@@ -157,7 +185,7 @@ imageBuilder = {
         machineSize    = "Standard_ND96isr_MI300X_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "AMD"                        # NVIDIA or AMD
         imageVersion   = "2.2.0"
-        osDiskSizeGB   = 1024
+        osDiskSizeGB   = 1000
         timeoutMinutes = 180
         jobSchedulers = [
           "Slurm",
@@ -319,7 +347,7 @@ imageBuilder = {
         machineSize    = "Standard_NC40ads_H100_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "NVIDIA"                   # NVIDIA or AMD
         imageVersion   = "2.1.0"
-        osDiskSizeGB   = 1024
+        osDiskSizeGB   = 320
         timeoutMinutes = 360
         jobSchedulers = [
           "Slurm",
@@ -352,7 +380,7 @@ imageBuilder = {
         machineSize    = "Standard_ND96isr_MI300X_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "AMD"                        # NVIDIA or AMD
         imageVersion   = "2.2.0"
-        osDiskSizeGB   = 1024
+        osDiskSizeGB   = 1000
         timeoutMinutes = 360
         jobSchedulers = [
           "Slurm",

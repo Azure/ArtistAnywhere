@@ -46,6 +46,36 @@ variable containerRegistry {
         enable = bool
       })
     }))
+    tasks = list(object({
+      enable = bool
+      name   = string
+      type   = string
+      docker = object({
+        context = object({
+          hostUrl     = string
+          accessToken = string
+        })
+        filePath   = string
+        imageNames = list(string)
+        cache = object({
+          enable = bool
+        })
+      })
+      agentPool = object({
+        enable   = bool
+        name     = string
+        cpuCores = number
+      })
+      timeout = object({
+        seconds = number
+      })
+    }))
+    agentPools = list(object({
+      enable = bool
+      name   = string
+      type   = string
+      count  = number
+    }))
   })
 }
 
