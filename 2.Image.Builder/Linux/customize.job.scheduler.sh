@@ -4,22 +4,8 @@ source /tmp/functions.sh
 
 echo "Customize (Start): Job Scheduler"
 
-if [[ $jobSchedulers == *Slurm* ]]; then
-  dnf -y install slurm
-  version=$(echo $buildConfig | jq -r .version.job_scheduler_slurm)
-
-  echo "Customize (Start): Slurm Download"
-  fileName="slurm-$version.tar.bz2"
-  fileLink="https://download.schedmd.com/slurm/$fileName"
-  download_file $fileName $fileLink false
-  bzip2 -d $fileName
-  fileName=$(echo ${fileName%.bz2})
-  tar -xf $fileName
-  echo "Customize (End): Slurm Download"
-fi
-
 if [[ $jobSchedulers == *Deadline* ]]; then
-  version=$(echo $buildConfig | jq -r .version.job_scheduler_deadline)
+  appVersion=$(echo $buildConfig | jq -r .appVersion.jobSchedulerDeadline)
   deadlinePath="/deadline"
   databaseName="deadline10db"
   databaseHost=$(hostname)
@@ -27,9 +13,9 @@ if [[ $jobSchedulers == *Deadline* ]]; then
   binPathJobScheduler="$deadlinePath/bin"
 
   echo "Customize (Start): Deadline Download"
-  fileName="Deadline-$version-linux-installers.tar"
+  fileName="Deadline-$appVersion-linux-installers.tar"
   filePath=$(echo ${fileName%.tar})
-  fileLink="$blobStorageEndpointUrl/Deadline/$version/$fileName"
+  fileLink="$blobStorageEndpointUrl/Deadline/$appVersion/$fileName"
   download_file $fileName $fileLink true
   mkdir -p $filePath
   tar -xzf $fileName -C $filePath
@@ -85,7 +71,7 @@ if [[ $jobSchedulers == *Deadline* ]]; then
 
     echo "Customize (Start): Deadline Server"
     fileType="deadline-repository"
-    fileName="DeadlineRepository-$version-linux-x64-installer.run"
+    fileName="DeadlineRepository-$appVersion-linux-x64-installer.run"
     export DB_PASSWORD=$servicePassword
     run_process "$filePath/$fileName --mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$fileType
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
@@ -96,7 +82,7 @@ if [[ $jobSchedulers == *Deadline* ]]; then
 
   echo "Customize (Start): Deadline Client"
   fileType="deadline-client"
-  fileName="DeadlineClient-$version-linux-x64-installer.run"
+  fileName="DeadlineClient-$appVersion-linux-x64-installer.run"
   fileArgs="--mode unattended --prefix $deadlinePath"
   [ $machineType == Scheduler ] && workerService="false" || workerService="true"
   [ $machineType == Cluster ] && workerStartup="true" || workerStartup="false"
@@ -112,6 +98,20 @@ if [[ $jobSchedulers == *Deadline* ]]; then
   echo "Customize (End): Deadline Repository"
 
   binPaths="$binPaths:$binPathJobScheduler"
+fi
+
+if [[ $jobSchedulers == *Slurm* ]]; then
+  dnf -y install slurm
+  appVersion=$(echo $buildConfig | jq -r .appVersion.jobSchedulerSlurm)
+
+  echo "Customize (Start): Slurm Download"
+  fileName="slurm-$appVersion.tar.bz2"
+  fileLink="https://download.schedmd.com/slurm/$fileName"
+  download_file $fileName $fileLink false
+  bzip2 -d $fileName
+  fileName=$(echo ${fileName%.bz2})
+  tar -xf $fileName
+  echo "Customize (End): Slurm Download"
 fi
 
 if [ "$binPaths" != "" ]; then

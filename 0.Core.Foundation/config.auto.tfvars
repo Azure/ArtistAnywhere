@@ -1,10 +1,5 @@
-###################################################################################################################################################
-# Subscription (https://learn.microsoft.com/azure/cloud-adoption-framework/ready/considerations/fundamental-concepts#azure-subscription-purposes) #
-###################################################################################################################################################
-
-subscription = {
-  id = "" # REQUIRED
-}
+subscriptionId  = "" # REQUIRED
+defaultLocation = "SouthCentralUS" # Set from "az account list-locations --query [].name"
 
 #######################################################
 # Storage (https://learn.microsoft.com/azure/storage) #
@@ -28,11 +23,20 @@ storage = {
   }
 }
 
+#############################################################################################################
+# Managed Identity (https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview) #
+#############################################################################################################
+
+managedIdentity = {
+  name = "xstudio"
+}
+
 ############################################################################
 # Key Vault (https://learn.microsoft.com/azure/key-vault/general/overview) #
 ############################################################################
 
 keyVault = {
+  name                        = "xstudio"
   type                        = "standard"
   enableForDeployment         = true
   enableForDiskEncryption     = true
@@ -81,11 +85,28 @@ keyVault = {
   ]
 }
 
+###################################################################################################
+# Defender (https://learn.microsoft.com/azure/defender-for-cloud/defender-for-cloud-introduction) #
+###################################################################################################
+
+defender = {
+  storage = {
+    malwareScanning = {
+      enable        = true
+      maxPerMonthGB = 5000
+    }
+    sensitiveDataDiscovery = {
+      enable = true
+    }
+  }
+}
+
 ######################################################################
 # Monitor (https://learn.microsoft.com/azure/azure-monitor/overview) #
 ######################################################################
 
 monitor = {
+  name = "xstudio"
   grafanaDashboard = {
     tier    = "Standard"
     version = 11
@@ -112,4 +133,13 @@ policy = {
   denyPasswordAuthLinux = {
     enable = true
   }
+}
+
+#########################################################################################
+# App Configuration (https://learn.microsoft.com/azure/azure-app-configuration/overview #
+#########################################################################################
+
+appConfig = {
+  name = "xstudio"
+  type = "standard"
 }

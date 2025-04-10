@@ -99,6 +99,30 @@ resource azurerm_private_endpoint grafana {
   ]
 }
 
+# resource azurerm_private_endpoint app_config {
+#   name                = "${lower(data.azurerm_app_configuration.studio.name)}-${azurerm_private_dns_zone_virtual_network_link.app_config.name}"
+#   resource_group_name = data.azurerm_key_vault.studio.resource_group_name
+#   location            = data.azurerm_key_vault.studio.location
+#   subnet_id           = "${local.virtualNetwork.id}/subnets/Storage"
+#   private_service_connection {
+#     name                           = data.azurerm_app_configuration.studio.name
+#     private_connection_resource_id = data.azurerm_app_configuration.studio.id
+#     is_manual_connection           = false
+#     subresource_names = [
+#       "configurationStores"
+#     ]
+#   }
+#   private_dns_zone_group {
+#     name = azurerm_private_dns_zone_virtual_network_link.app_config.name
+#     private_dns_zone_ids = [
+#       azurerm_private_dns_zone.app_config.id
+#     ]
+#   }
+#   depends_on = [
+#     azurerm_private_endpoint.grafana
+#   ]
+# }
+
 output keyVault {
   value = {
     privateEndpoint = {

@@ -81,9 +81,9 @@ if ($machineType -eq "Scheduler") {
   Write-Host "Customize (End): AD Tools"
 
   Write-Host "Customize (Start): Cinebench"
-  $version = "2024"
-  $fileName = "Cinebench${version}_win_x86_64.zip"
-  $fileLink = "$($blobStorage.endpointUrl)/Benchmark/Cinebench/$version/$fileName"
+  $appVersion = "2024"
+  $fileName = "Cinebench${appVersion}_win_x86_64.zip"
+  $fileLink = "$($blobStorage.endpointUrl)/Benchmark/Cinebench/$appVersion/$fileName"
   DownloadFile $fileName $fileLink $true
   Expand-Archive -Path $fileName
   Write-Host "Customize (End): Cinebench"
@@ -99,10 +99,10 @@ if ($machineType -eq "Cluster") {
 
 if ($machineType -eq "Workstation") {
   Write-Host "Customize (Start): HP Anyware"
-  $version = $buildConfig.version.hp_anyware_agent
+  $appVersion = $buildConfig.appVersion.hpAnywareAgent
   $fileType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
-  $fileName = "${fileType}_$version.exe"
-  $fileLink = "$($blobStorage.endpointUrl)/Teradici/$version/$fileName"
+  $fileName = "${fileType}_$appVersion.exe"
+  $fileLink = "$($blobStorage.endpointUrl)/Teradici/$appVersion/$fileName"
   DownloadFile $fileName $fileLink $true
   RunProcess .\$fileName "/S /NoPostReboot /Force" "$binDirectory\$fileType"
   Write-Host "Customize (End): HP Anyware"

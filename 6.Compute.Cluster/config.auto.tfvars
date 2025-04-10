@@ -704,7 +704,7 @@ containerAppEnvironments = [
     name   = "xstudio"
     workloadProfile = {
       name = "Consumption"
-      type = "Consumption"
+      type = "D4"
       instanceCount = {
         minimum = 0
         maximum = 0
@@ -712,8 +712,8 @@ containerAppEnvironments = [
     }
     network = {
       subnetName = "App"
-      loadBalancer = {
-        enable = false
+      internalOnly = {
+        enable = true
       }
       locationExtended = {
         enable = false

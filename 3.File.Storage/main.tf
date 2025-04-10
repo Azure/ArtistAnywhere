@@ -27,7 +27,7 @@ terraform {
 provider azurerm {
   features {
   }
-  subscription_id     = data.terraform_remote_state.core.outputs.subscription.id
+  subscription_id     = data.terraform_remote_state.core.outputs.subscriptionId
   storage_use_azuread = true
 }
 
@@ -110,21 +110,6 @@ data azurerm_location studio {
   location = local.location
 }
 
-data azurerm_user_assigned_identity studio {
-  name                = module.core.managedIdentity.name
-  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
-}
-
-data azurerm_key_vault studio {
-  name                = module.core.keyVault.name
-  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
-}
-
-data azurerm_key_vault_key data_encryption {
-  name         = module.core.keyVault.keyName.dataEncryption
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
 data terraform_remote_state core {
   backend = "local"
   config = {
@@ -135,13 +120,28 @@ data terraform_remote_state core {
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
-    subscription_id      = data.terraform_remote_state.core.outputs.subscription.id
+    subscription_id      = data.terraform_remote_state.core.outputs.subscriptionId
     resource_group_name  = data.terraform_remote_state.core.outputs.resourceGroup.name
     storage_account_name = data.terraform_remote_state.core.outputs.storage.account.name
     container_name       = data.terraform_remote_state.core.outputs.storage.containerName.terraformState
     key                  = "1.Virtual.Network"
     use_azuread_auth     = true
   }
+}
+
+data azurerm_user_assigned_identity studio {
+  name                = data.terraform_remote_state.core.outputs.managedIdentity.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
+}
+
+data azurerm_key_vault studio {
+  name                = data.terraform_remote_state.core.outputs.keyVault.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
+}
+
+data azurerm_key_vault_key data_encryption {
+  name         = data.terraform_remote_state.core.outputs.keyVault.keyName.dataEncryption
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_resource_group dns {
@@ -165,7 +165,7 @@ data azurerm_private_dns_zone studio {
 }
 
 locals {
-  location = var.regionName != "" ? var.regionName : module.core.resourceLocation.name
+  location = var.regionName != "" ? var.regionName : data.terraform_remote_state.core.outputs.defaultLocation
 }
 
 resource azurerm_resource_group storage {

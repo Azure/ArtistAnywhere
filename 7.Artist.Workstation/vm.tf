@@ -62,7 +62,7 @@ locals {
     for virtualMachine in var.virtualMachines : [
       for i in range(virtualMachine.count) : merge(virtualMachine, {
         resourceLocation = {
-          name = virtualMachine.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : module.core.resourceLocation.name
+          name = virtualMachine.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : data.terraform_remote_state.core.outputs.defaultLocation
           extendedZone = {
             name     = virtualMachine.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : null
             location = virtualMachine.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.location : null
@@ -155,7 +155,7 @@ resource azurerm_virtual_machine_extension workstation_initialize_linux {
   name                       = each.value.extension.custom.name
   type                       = "CustomScript"
   publisher                  = "Microsoft.Azure.Extensions"
-  type_handler_version       = module.core.version.script_extension_linux
+  type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionLinux)].value
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
   virtual_machine_id         = "${azurerm_resource_group.workstation.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
@@ -178,7 +178,7 @@ resource azurerm_virtual_machine_extension workstation_initialize_linux {
 #   name                       = each.value.extension.monitor.name
 #   type                       = "AzureMonitorLinuxAgent"
 #   publisher                  = "Microsoft.Azure.Monitor"
-#   type_handler_version       = module.core.version.monitor_agent_linux
+#   type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.monitorAgentLinux)].value
 #   automatic_upgrade_enabled  = true
 #   auto_upgrade_minor_version = true
 #   virtual_machine_id         = "${azurerm_resource_group.workstation.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
@@ -244,7 +244,7 @@ resource azurerm_virtual_machine_extension workstation_initialize_windows {
   name                       = each.value.extension.custom.name
   type                       = "CustomScriptExtension"
   publisher                  = "Microsoft.Compute"
-  type_handler_version       = module.core.version.script_extension_windows
+  type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionWindows)].value
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
   virtual_machine_id         = "${azurerm_resource_group.workstation.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
@@ -268,7 +268,7 @@ resource azurerm_virtual_machine_extension workstation_initialize_windows {
 #   name                       = each.value.extension.monitor.name
 #   type                       = "AzureMonitorWindowsAgent"
 #   publisher                  = "Microsoft.Azure.Monitor"
-#   type_handler_version       = module.core.version.monitor_agent_windows
+#   type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.monitorAgentWindows)].value
 #   automatic_upgrade_enabled  = true
 #   auto_upgrade_minor_version = true
 #   virtual_machine_id         = "${azurerm_resource_group.workstation.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"

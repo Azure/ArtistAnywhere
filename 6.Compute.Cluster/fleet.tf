@@ -89,7 +89,7 @@ locals {
   computeFleets = [
     for computeFleet in var.computeFleets : merge(computeFleet, {
       resourceLocation = {
-        name = computeFleet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : module.core.resourceLocation.name
+        name = computeFleet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : data.terraform_remote_state.core.outputs.defaultLocation
         extendedZone = {
           name     = computeFleet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : null
           location = computeFleet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.location : null
@@ -190,7 +190,7 @@ resource azapi_resource fleet {
                 properties = {
                   type                    = lower(each.value.machine.osDisk.type) == "windows" ? "CustomScriptExtension" :"CustomScript"
                   publisher               = lower(each.value.machine.osDisk.type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
-                  typeHandlerVersion      = lower(each.value.machine.osDisk.type) == "windows" ? module.core.version.script_extension_windows : module.core.version.script_extension_linux
+                  typeHandlerVersion      = lower(each.value.machine.osDisk.type) == "windows" ? data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionWindows)].value : data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionLinux)].value
                   autoUpgradeMinorVersion = true
                   protectedSettings = jsonencode({
                     script = lower(each.value.machine.osDisk.type) == "windows" ? null : base64encode(

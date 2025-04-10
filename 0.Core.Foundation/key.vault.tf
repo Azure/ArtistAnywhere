@@ -4,6 +4,7 @@
 
 variable keyVault {
   type = object({
+    name                        = string
     type                        = string
     enableForDeployment         = bool
     enableForDiskEncryption     = bool
@@ -38,6 +39,23 @@ variable keyVault {
   })
 }
 
+locals {
+  keyVault = {
+    secretName = {
+      sshKeyPublic      = "SSHKeyPublic"
+      sshKeyPrivate     = "SSHKeyPrivate"
+      adminUsername     = "AdminUsername"
+      adminPassword     = "AdminPassword"
+      serviceUsername   = "ServiceUsername"
+      servicePassword   = "ServicePassword"
+      gatewayConnection = "GatewayConnection"
+    }
+    keyName = {
+      dataEncryption = "DataEncryption"
+    }
+  }
+}
+
 resource azurerm_role_assignment key_vault_reader {
   role_definition_name = "Key Vault Reader" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/security#key-vault-reader
   principal_id         = azurerm_user_assigned_identity.studio.principal_id
@@ -51,7 +69,7 @@ resource azurerm_role_assignment key_vault_crypto_service_encryption_user {
 }
 
 resource azurerm_key_vault studio {
-  name                            = module.core.keyVault.name
+  name                            = var.keyVault.name
   resource_group_name             = azurerm_resource_group.studio.name
   location                        = azurerm_resource_group.studio.location
   tenant_id                       = data.azurerm_client_config.current.tenant_id
@@ -128,13 +146,19 @@ resource tls_private_key ssh_key {
 }
 
 resource azurerm_key_vault_secret ssh_key_private {
-  name         = module.core.keyVault.secretName.sshKeyPrivate
+  name         = local.keyVault.secretName.sshKeyPrivate
   value        = tls_private_key.ssh_key.private_key_pem
   key_vault_id = azurerm_key_vault.studio.id
 }
 
 resource azurerm_key_vault_secret ssh_key_public {
-  name         = module.core.keyVault.secretName.sshKeyPublic
+  name         = local.keyVault.secretName.sshKeyPublic
   value        = trimspace(data.tls_public_key.ssh_key.public_key_openssh)
   key_vault_id = azurerm_key_vault.studio.id
+}
+
+output keyVault {
+  value = merge(local.keyVault, {
+    name = var.keyVault.name
+  })
 }

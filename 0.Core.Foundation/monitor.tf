@@ -4,6 +4,7 @@
 
 variable monitor {
   type = object({
+    name = string
     grafanaDashboard = object({
       tier    = string
       version = number
@@ -24,14 +25,14 @@ variable monitor {
 }
 
 resource azurerm_monitor_workspace studio {
-  name                          = module.core.monitor.name
+  name                          = var.monitor.name
   resource_group_name           = azurerm_resource_group.studio_monitor.name
   location                      = azurerm_resource_group.studio_monitor.location
   public_network_access_enabled = false
 }
 
 resource azurerm_dashboard_grafana studio {
-  name                          = module.core.monitor.name
+  name                          = var.monitor.name
   resource_group_name           = azurerm_resource_group.studio_monitor.name
   location                      = azurerm_resource_group.studio_monitor.location
   sku                           = var.monitor.grafanaDashboard.tier
@@ -50,7 +51,7 @@ resource azurerm_dashboard_grafana studio {
 }
 
 resource azurerm_log_analytics_workspace studio {
-  name                       = module.core.monitor.name
+  name                       = var.monitor.name
   resource_group_name        = azurerm_resource_group.studio_monitor.name
   location                   = azurerm_resource_group.studio_monitor.location
   sku                        = var.monitor.logAnalytics.workspace.tier
@@ -66,7 +67,7 @@ resource azurerm_log_analytics_workspace studio {
 }
 
 resource azurerm_application_insights studio {
-  name                       = module.core.monitor.name
+  name                       = var.monitor.name
   resource_group_name        = azurerm_resource_group.studio_monitor.name
   location                   = azurerm_resource_group.studio_monitor.location
   workspace_id               = azurerm_log_analytics_workspace.studio.id
@@ -78,6 +79,10 @@ resource azurerm_application_insights studio {
 
 output monitor {
   value = {
+    name = azurerm_monitor_workspace.studio.name
+    endpoint = {
+      query = azurerm_monitor_workspace.studio.query_endpoint
+    }
     resourceGroup = {
       name     = azurerm_resource_group.studio_monitor.name
       location = azurerm_resource_group.studio_monitor.location
@@ -90,11 +95,8 @@ output monitor {
         id = azurerm_monitor_workspace.studio.default_data_collection_rule_id
       }
     }
-    workspace = {
-      url = azurerm_monitor_workspace.studio.query_endpoint
-    }
     grafana = {
-      url = azurerm_dashboard_grafana.studio.endpoint
+      endpoint = azurerm_dashboard_grafana.studio.endpoint
     }
     logAnalytics = {
       id = azurerm_log_analytics_workspace.studio.id

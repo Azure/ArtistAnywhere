@@ -35,9 +35,17 @@ variable imageBuilder {
 }
 
 locals {
-  blobStorage = merge(module.core.blobStorage, {
-    authTokenUrl = "${module.core.blobStorage.authTokenUrl}&msi_res_id=${data.azurerm_user_assigned_identity.studio.id}"
+  blobStorage = merge(data.terraform_remote_state.core.outputs.storage.blob, {
+    authTokenUrl = "${data.terraform_remote_state.core.outputs.storage.blob.authTokenUrl}&msi_res_id=${data.azurerm_user_assigned_identity.studio.id}"
   })
+  appVersion = {
+    jobSchedulerDeadline = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.jobSchedulerDeadline)].value
+    jobSchedulerSlurm    = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.jobSchedulerSlurm)].value
+    jobProcessorPBRT     = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.jobProcessorPBRT)].value
+    jobProcessorBlender  = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.jobProcessorBlender)].value
+    nvidiaCUDAWindows    = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.nvidiaCUDAWindows)].value
+    hpAnywareAgent       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.hpAnywareAgent)].value
+  }
   authCredential = {
     adminUsername   = data.azurerm_key_vault_secret.admin_username.value
     adminPassword   = data.azurerm_key_vault_secret.admin_password.value
@@ -83,7 +91,7 @@ resource azapi_resource linux {
           data.azurerm_user_assigned_identity.studio.id
         ]
         vnetConfig = {
-          subnetId = data.azurerm_subnet.cluster.id
+          subnetId = data.azurerm_subnet.studio.id
         }
       }
       source = {
@@ -145,10 +153,10 @@ resource azapi_resource linux {
           {
             type = "Shell"
             inline = [
-              "cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {version = module.core.version}, {authCredential = local.authCredential})))} /bin/bash",
-              "cat /tmp/customize.core.gpu.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {version = module.core.version}, {authCredential = local.authCredential})))} /bin/bash",
-              "cat /tmp/customize.job.scheduler.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {version = module.core.version}, {authCredential = local.authCredential})))} /bin/bash",
-              "cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {version = module.core.version}, {authCredential = local.authCredential})))} /bin/bash"
+              "cat /tmp/customize.core.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))} /bin/bash",
+              "cat /tmp/customize.core.gpu.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))} /bin/bash",
+              "cat /tmp/customize.job.scheduler.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))} /bin/bash",
+              "cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))} /bin/bash"
             ]
           }
         ]
@@ -209,7 +217,7 @@ resource azapi_resource windows {
           data.azurerm_user_assigned_identity.studio.id
         ]
         vnetConfig = {
-          subnetId = data.azurerm_subnet.cluster.id
+          subnetId = data.azurerm_subnet.studio.id
         }
       }
       source = {
@@ -274,10 +282,10 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {version = module.core.version}, {authCredential = local.authCredential})))}",
-              "C:\\AzureData\\customize.core.gpu.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {version = module.core.version}, {authCredential = local.authCredential})))}",
-              "C:\\AzureData\\customize.job.scheduler.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {version = module.core.version}, {authCredential = local.authCredential})))}",
-              "C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {version = module.core.version}, {authCredential = local.authCredential})))}"
+              "C:\\AzureData\\customize.core.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))}",
+              "C:\\AzureData\\customize.core.gpu.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))}",
+              "C:\\AzureData\\customize.job.scheduler.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))}",
+              "C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))}"
             ]
             runElevated = true
             runAsSystem = true

@@ -27,7 +27,7 @@ terraform {
 provider azurerm {
   features {
   }
-  subscription_id     = data.terraform_remote_state.core.outputs.subscription.id
+  subscription_id     = data.terraform_remote_state.core.outputs.subscriptionId
   storage_use_azuread = true
 }
 
@@ -41,36 +41,6 @@ variable resourceGroupName {
 
 data azurerm_client_config current {}
 
-data azurerm_user_assigned_identity studio {
-  name                = module.core.managedIdentity.name
-  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
-}
-
-data azurerm_key_vault studio {
-  name                = module.core.keyVault.name
-  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
-}
-
-data azurerm_key_vault_secret admin_username {
-  name         = module.core.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
-data azurerm_key_vault_secret admin_password {
-  name         = module.core.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
-data azurerm_key_vault_secret service_username {
-  name         = module.core.keyVault.secretName.serviceUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
-data azurerm_key_vault_secret service_password {
-  name         = module.core.keyVault.secretName.servicePassword
-  key_vault_id = data.azurerm_key_vault.studio.id
-}
-
 data terraform_remote_state core {
   backend = "local"
   config = {
@@ -81,7 +51,7 @@ data terraform_remote_state core {
 data terraform_remote_state network {
   backend = "azurerm"
   config = {
-    subscription_id      = data.terraform_remote_state.core.outputs.subscription.id
+    subscription_id      = data.terraform_remote_state.core.outputs.subscriptionId
     resource_group_name  = data.terraform_remote_state.core.outputs.resourceGroup.name
     storage_account_name = data.terraform_remote_state.core.outputs.storage.account.name
     container_name       = data.terraform_remote_state.core.outputs.storage.containerName.terraformState
@@ -90,12 +60,46 @@ data terraform_remote_state network {
   }
 }
 
+data azurerm_user_assigned_identity studio {
+  name                = data.terraform_remote_state.core.outputs.managedIdentity.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
+}
+
+data azurerm_key_vault studio {
+  name                = data.terraform_remote_state.core.outputs.keyVault.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
+}
+
+data azurerm_key_vault_secret admin_username {
+  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.adminUsername
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret admin_password {
+  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.adminPassword
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret service_username {
+  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.serviceUsername
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_key_vault_secret service_password {
+  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.servicePassword
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_app_configuration_keys studio {
+  configuration_store_id = data.terraform_remote_state.core.outputs.appConfig.id
+}
+
 data azurerm_virtual_network studio {
   name                = data.terraform_remote_state.network.outputs.virtualNetwork.default.name
   resource_group_name = data.terraform_remote_state.network.outputs.virtualNetwork.default.resourceGroup.name
 }
 
-data azurerm_subnet cluster {
+data azurerm_subnet studio {
   name                 = "Cluster"
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
@@ -107,7 +111,7 @@ locals {
 
 resource azurerm_resource_group image_builder {
   name     = "${var.resourceGroupName}.Builder"
-  location = module.core.resourceLocation.name
+  location = data.terraform_remote_state.core.outputs.defaultLocation
   tags = {
     AAA = basename(path.cwd)
   }
@@ -115,7 +119,7 @@ resource azurerm_resource_group image_builder {
 
 resource azurerm_resource_group image_gallery {
   name     = "${var.resourceGroupName}.Gallery"
-  location = module.core.resourceLocation.name
+  location = data.terraform_remote_state.core.outputs.defaultLocation
   tags = {
     AAA = basename(path.cwd)
   }

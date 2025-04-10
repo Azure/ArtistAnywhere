@@ -89,14 +89,14 @@ variable virtualMachineScaleSets {
 }
 
 data azurerm_location studio {
-  location = module.core.resourceLocation.name
+  location = data.terraform_remote_state.core.outputs.defaultLocation
 }
 
 locals {
   virtualMachineScaleSets = [
     for virtualMachineScaleSet in var.virtualMachineScaleSets : merge(virtualMachineScaleSet, {
       resourceLocation = {
-        name = virtualMachineScaleSet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : module.core.resourceLocation.name
+        name = virtualMachineScaleSet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : data.terraform_remote_state.core.outputs.defaultLocation
         extendedZone = {
           name     = virtualMachineScaleSet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : null
           location = virtualMachineScaleSet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.location : null
@@ -169,7 +169,7 @@ resource azurerm_linux_virtual_machine_scale_set cluster {
       name                       = each.value.extension.custom.name
       type                       = "CustomScript"
       publisher                  = "Microsoft.Azure.Extensions"
-      type_handler_version       = module.core.version.script_extension_linux
+      type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionLinux)].value
       automatic_upgrade_enabled  = false
       auto_upgrade_minor_version = true
       protected_settings = jsonencode({
@@ -203,7 +203,7 @@ resource azurerm_linux_virtual_machine_scale_set cluster {
   #     name                       = each.value.extension.monitor.name
   #     type                       = "AzureMonitorLinuxAgent"
   #     publisher                  = "Microsoft.Azure.Monitor"
-  #     type_handler_version       = module.core.version.monitor_agent_linux
+  #     type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.monitorAgentLinux)].value
   #     automatic_upgrade_enabled  = true
   #     auto_upgrade_minor_version = true
   #     settings = jsonencode({
@@ -301,7 +301,7 @@ resource azurerm_windows_virtual_machine_scale_set cluster {
       name                       = each.value.extension.custom.name
       type                       = "CustomScriptExtension"
       publisher                  = "Microsoft.Compute"
-      type_handler_version       = module.core.version.script_extension_windows
+      type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionWindows)].value
       automatic_upgrade_enabled  = false
       auto_upgrade_minor_version = true
       protected_settings = jsonencode({
@@ -336,7 +336,7 @@ resource azurerm_windows_virtual_machine_scale_set cluster {
   #     name                       = each.value.extension.monitor.name
   #     type                       = "AzureMonitorWindowsAgent"
   #     publisher                  = "Microsoft.Azure.Monitor"
-  #     type_handler_version       = module.core.version.monitor_agent_windows
+  #     type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.monitorAgentWindows)].value
   #     automatic_upgrade_enabled  = true
   #     auto_upgrade_minor_version = true
   #     settings = jsonencode({
@@ -449,7 +449,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set cluster {
       name                               = each.value.extension.custom.name
       type                               = lower(each.value.osDisk.type) == "windows" ? "CustomScriptExtension" :"CustomScript"
       publisher                          = lower(each.value.osDisk.type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
-      type_handler_version               = lower(each.value.osDisk.type) == "windows" ? module.core.version.script_extension_windows : module.core.version.script_extension_linux
+      type_handler_version               = lower(each.value.osDisk.type) == "windows" ? data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionWindows)].value : data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionLinux)].value
       auto_upgrade_minor_version_enabled = true
       protected_settings = jsonencode({
         script = lower(each.value.osDisk.type) == "windows" ? null : base64encode(
@@ -487,7 +487,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set cluster {
   #     name                               = each.value.extension.monitor.name
   #     type                               = lower(each.value.osDisk.type) == "windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
   #     publisher                          = "Microsoft.Azure.Monitor"
-  #     type_handler_version               = lower(each.value.osDisk.type) == "windows" ? module.core.version.monitor_agent_windows : module.core.version.monitor_agent_linux
+  #     type_handler_version               = lower(each.value.osDisk.type) == "windows" ? data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.monitorAgentWindows)].value : data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.monitorAgentLinux)].value
   #     auto_upgrade_minor_version_enabled = true
   #     settings = jsonencode({
   #       authentication = {

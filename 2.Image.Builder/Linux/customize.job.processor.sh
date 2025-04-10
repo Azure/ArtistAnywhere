@@ -6,7 +6,7 @@ echo "Customize (Start): Job Processor"
 
 if [[ $jobProcessors == *PBRT* ]]; then
   echo "Customize (Start): PBRT"
-  version=$(echo $buildConfig | jq -r .version.job_processor_pbrt)
+  appVersion=$(echo $buildConfig | jq -r .appVersion.jobProcessorPBRT)
   fileType="pbrt"
   filePath="/usr/local/$fileType"
   mkdir -p $filePath
@@ -17,7 +17,7 @@ if [[ $jobProcessors == *PBRT* ]]; then
   dnf -y install libXcursor-devel
   dnf -y install libXi-devel
   dnf -y install wayland-devel
-  fileSource=$fileType-$version
+  fileSource=$fileType-$appVersion
   git clone --recursive https://github.com/mmp/$fileSource.git
   cmake -B $filePath -S ./$fileSource
   make -C $filePath
@@ -27,12 +27,12 @@ fi
 
 if [[ $jobProcessors == *Blender* ]]; then
   echo "Customize (Start): Blender"
-  version=$(echo $buildConfig | jq -r .version.job_processor_blender)
+  appVersion=$(echo $buildConfig | jq -r .appVersion.jobProcessorBlender)
   hostType="linux-x64"
   fileType="blender"
   filePath="/usr/local/$fileType"
-  fileName="$fileType-$version-$hostType.tar.xz"
-  fileLink="$blobStorageEndpointUrl/Blender/$version/$fileName"
+  fileName="$fileType-$appVersion-$hostType.tar.xz"
+  fileLink="$blobStorageEndpointUrl/Blender/$appVersion/$fileName"
   download_file $fileName $fileLink true
   tar -xJf $fileName
   dnf -y install mesa-dri-drivers
@@ -42,7 +42,7 @@ if [[ $jobProcessors == *Blender* ]]; then
   dnf -y install libXi
   dnf -y install libSM
   mkdir -p $filePath
-  mv $fileType-$version-$hostType/* $filePath
+  mv $fileType-$appVersion-$hostType/* $filePath
   binPaths="$binPaths:$filePath"
   echo "Customize (End): Blender"
 fi

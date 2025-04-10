@@ -112,7 +112,7 @@ resource azurerm_virtual_machine_extension storage_data_load {
   name                       = "DataLoad"
   type                       = "CustomScript"
   publisher                  = "Microsoft.Azure.Extensions"
-  type_handler_version       = module.core.version.script_extension_linux
+  type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionLinux)].value
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
   virtual_machine_id         = azurerm_linux_virtual_machine.storage_data_load.id

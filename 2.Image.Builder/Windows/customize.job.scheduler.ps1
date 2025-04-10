@@ -7,7 +7,7 @@ param (
 Write-Host "Customize (Start): Job Scheduler"
 
 if ($jobSchedulers -contains "Deadline") {
-  $version = $buildConfig.version.job_scheduler_deadline
+  $appVersion = $buildConfig.appVersion.jobSchedulerDeadline
   $databaseHost = $(hostname)
   $databasePath = "C:\DeadlineData"
   $deadlinePath = "C:\DeadlineServer"
@@ -15,8 +15,8 @@ if ($jobSchedulers -contains "Deadline") {
   $binPathJobScheduler = "$deadlinePath\bin"
 
   Write-Host "Customize (Start): Deadline Download"
-  $fileName = "Deadline-$version-windows-installers.zip"
-  $fileLink = "$($blobStorage.endpointUrl)/Deadline/$version/$fileName"
+  $fileName = "Deadline-$appVersion-windows-installers.zip"
+  $fileLink = "$($blobStorage.endpointUrl)/Deadline/$appVersion/$fileName"
   DownloadFile $fileName $fileLink $true
   Expand-Archive -Path $fileName
   Write-Host "Customize (End): Deadline Download"
@@ -25,7 +25,7 @@ if ($jobSchedulers -contains "Deadline") {
   if ($machineType -eq "Scheduler") {
     Write-Host "Customize (Start): Deadline Server"
     $fileType = "deadline-repository"
-    $fileName = "DeadlineRepository-$version-windows-installer.exe"
+    $fileName = "DeadlineRepository-$appVersion-windows-installer.exe"
     RunProcess .\$fileName "--mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$binDirectory\$fileType"
     Move-Item -Path $Env:TMP\installbuilder_installer.log -Destination $binDirectory\$fileType.log
     Copy-Item -Path $databasePath\certs\$deadlineCertificate -Destination $deadlinePath\$deadlineCertificate
@@ -35,7 +35,7 @@ if ($jobSchedulers -contains "Deadline") {
 
   Write-Host "Customize (Start): Deadline Client"
   $fileType = "deadline-client"
-  $fileName = "DeadlineClient-$version-windows-installer.exe"
+  $fileName = "DeadlineClient-$appVersion-windows-installer.exe"
   $fileArgs = "--mode unattended --prefix $deadlinePath"
   $workerService = "false"
   $workerStartup = "false"

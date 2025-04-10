@@ -70,9 +70,8 @@ containerRegistry = {
         }
       }
       agentPool = {
-        enable   = true
-        name     = "xstudio"
-        cpuCores = 2
+        enable = true
+        name   = "xstudio"
       }
       timeout = {
         seconds = 3600
@@ -96,9 +95,8 @@ containerRegistry = {
         }
       }
       agentPool = {
-        enable   = true
-        name     = "xstudio"
-        cpuCores = 2
+        enable = true
+        name   = "xstudio"
       }
       timeout = {
         seconds = 3600
@@ -110,7 +108,7 @@ containerRegistry = {
       enable = true
       name   = "xstudio"
       type   = "S1"
-      count  = 2
+      count  = 1
     }
   ]
 }

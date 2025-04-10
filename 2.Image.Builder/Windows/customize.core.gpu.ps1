@@ -37,10 +37,10 @@ if ($gpuProvider -eq "NVIDIA.GRID") {
 
 if ($gpuProvider.StartsWith("NVIDIA")) {
   Write-Host "Customize (Start): NVIDIA GPU (CUDA)"
-  $version = $buildConfig.version.nvidia_cuda_windows
+  $appVersion = $buildConfig.appVersion.nvidiaCUDAWindows
   $fileType = "nvidia-gpu-cuda"
-  $fileName = "cuda_${version}_windows_network.exe"
-  $fileLink = "$($blobStorage.endpointUrl)/NVIDIA/CUDA/$version/$fileName"
+  $fileName = "cuda_${appVersion}_windows_network.exe"
+  $fileLink = "$($blobStorage.endpointUrl)/NVIDIA/CUDA/$appVersion/$fileName"
   DownloadFile $fileName $fileLink $true
   RunProcess .\$fileName "-s -n -log:$binDirectory\$fileType" $null
   Write-Host "Customize (End): NVIDIA GPU (CUDA)"

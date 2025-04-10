@@ -62,9 +62,8 @@ variable containerRegistry {
         })
       })
       agentPool = object({
-        enable   = bool
-        name     = string
-        cpuCores = number
+        enable = bool
+        name   = string
       })
       timeout = object({
         seconds = number
@@ -116,7 +115,7 @@ resource azurerm_container_registry studio {
   dynamic encryption {
     for_each = var.containerRegistry.encryption.enable ? [1] : []
     content {
-      key_vault_key_id   = azurerm_key_vault_key.studio[module.core.keyVault.keyName.dataEncryption].id
+      key_vault_key_id   = azurerm_key_vault_key.studio[data.terraform_remote_state.core.outputs.keyVault.keyName.dataEncryption].id
       identity_client_id = azurerm_user_assigned_identity.studio.client_id
     }
   }
@@ -150,7 +149,7 @@ resource azurerm_private_endpoint container_registry {
   name                = "${lower(azurerm_container_registry.studio.name)}-${azurerm_private_dns_zone_virtual_network_link.container_registry.name}"
   resource_group_name = azurerm_container_registry.studio.resource_group_name
   location            = azurerm_container_registry.studio.location
-  subnet_id           = data.azurerm_subnet.cluster.id
+  subnet_id           = data.azurerm_subnet.studio.id
   private_service_connection {
     name                           = azurerm_container_registry.studio.name
     private_connection_resource_id = azurerm_container_registry.studio.id

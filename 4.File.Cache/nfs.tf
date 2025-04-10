@@ -169,7 +169,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
       name                               = var.nfsCache.machine.extension.custom.name
       type                               = "CustomScript"
       publisher                          = "Microsoft.Azure.Extensions"
-      type_handler_version               = module.core.version.script_extension_linux
+      type_handler_version               = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionLinux)].value
       auto_upgrade_minor_version_enabled = true
       protected_settings = jsonencode({
         script = base64encode(

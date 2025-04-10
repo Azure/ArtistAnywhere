@@ -132,7 +132,7 @@ resource azurerm_storage_account studio {
       jsondecode(data.http.client_address.response_body).ip
     ]
     dynamic private_link_access {
-      for_each = module.core.defender.storage.malwareScanning.enable ? [1] : []
+      for_each = data.terraform_remote_state.core.outputs.defender.storage.malwareScanning.enable ? [1] : []
       content {
         endpoint_tenant_id   = data.azurerm_client_config.current.tenant_id
         endpoint_resource_id = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/providers/Microsoft.Security/datascanners/storageDataScanner"

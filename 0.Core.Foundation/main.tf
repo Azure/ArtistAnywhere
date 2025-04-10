@@ -13,6 +13,10 @@ terraform {
       source  = "hashicorp/http"
       version = "~>3.4.0"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~>0.13.0"
+    }
     tls = {
       source  = "hashicorp/tls"
       version = "~>4.0.0"
@@ -26,33 +30,33 @@ provider azurerm {
       prevent_deletion_if_contains_resources = false
     }
   }
-  subscription_id     = var.subscription.id
+  subscription_id     = var.subscriptionId
   storage_use_azuread = true
 }
 
-module core {
-  source = "./config"
+variable subscriptionId {
+  type = string
+  validation {
+    condition     = var.subscriptionId != ""
+    error_message = "Azure subscriptionId is a required input parameter in the config.auto.tfvars file."
+  }
 }
 
-variable subscription {
-  type = object({
-    id = string
-  })
+variable defaultLocation {
+  type = string
+  validation {
+    condition     = var.defaultLocation != ""
+    error_message = "Azure defaultLocation is a required input parameter in the config.auto.tfvars file."
+  }
 }
 
 locals {
-  patternSuffix = "\\s+=\\s+\"([^\"]+)"
-  resourceGroup = {
-    name     = regex("resource_group_name${local.patternSuffix}", file("./config/backend"))[0]
-    location = module.core.resourceLocation.name
+  backendConfig = {
+    patternSuffix = "\\s+=\\s+\"([^\"]+)"
   }
-  storage = {
-    account = {
-      name = regex("storage_account_name${local.patternSuffix}", file("./config/backend"))[0]
-    }
-    containerName = {
-      terraformState = regex("container_name${local.patternSuffix}", file("./config/backend"))[0]
-    }
+  resourceGroup = {
+    name     = regex("resource_group_name${local.backendConfig.patternSuffix}", file("./config/backend"))[0]
+    location = var.defaultLocation
   }
 }
 
@@ -66,7 +70,7 @@ data azurerm_client_config current {}
 
 resource azurerm_resource_group studio {
   name     = local.resourceGroup.name
-  location = module.core.resourceLocation.name
+  location = var.defaultLocation
   tags = {
     AAA = basename(path.cwd)
   }
@@ -80,16 +84,14 @@ resource azurerm_resource_group studio_monitor {
   }
 }
 
-output subscription {
-  value = {
-    id = data.azurerm_subscription.current.subscription_id
-  }
+output subscriptionId {
+  value = data.azurerm_subscription.current.subscription_id
+}
+
+output defaultLocation {
+  value = var.defaultLocation
 }
 
 output resourceGroup {
   value = local.resourceGroup
-}
-
-output storage {
-  value = local.storage
 }

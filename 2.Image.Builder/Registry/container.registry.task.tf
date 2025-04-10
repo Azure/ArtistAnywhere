@@ -24,12 +24,9 @@ resource azurerm_container_registry_task studio {
     image_names          = each.value.docker.imageNames
     cache_enabled        = each.value.docker.cache.enable
   }
-  dynamic agent_setting {
-    for_each = each.value.agentPool.enable ? [1] : []
-    content {
-      cpu = each.value.agentPool.cpuCores
-    }
-  }
   agent_pool_name    = each.value.agentPool.enable ? each.value.agentPool.name : null
   timeout_in_seconds = each.value.timeout.seconds
+  depends_on = [
+    azurerm_container_registry_agent_pool.studio
+  ]
 }

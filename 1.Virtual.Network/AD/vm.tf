@@ -83,7 +83,7 @@ resource azurerm_virtual_machine_extension active_directory {
   name                       = "Custom"
   type                       = "CustomScriptExtension"
   publisher                  = "Microsoft.Compute"
-  type_handler_version       = module.core.version.script_extension_windows
+  type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionWindows)].value
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
   virtual_machine_id         = azurerm_windows_virtual_machine.active_directory.id

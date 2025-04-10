@@ -15,12 +15,8 @@ terraform {
 provider azurerm {
   features {
   }
-  subscription_id     = data.terraform_remote_state.core.outputs.subscription.id
+  subscription_id     = data.terraform_remote_state.core.outputs.subscriptionId
   storage_use_azuread = true
-}
-
-module core {
-  source = "../0.Core.Foundation/config"
 }
 
 variable resourceGroupName {
@@ -29,8 +25,15 @@ variable resourceGroupName {
 
 data azurerm_subscription current {}
 
+data terraform_remote_state core {
+  backend = "local"
+  config = {
+    path = "../0.Core.Foundation/terraform.tfstate"
+  }
+}
+
 data azurerm_user_assigned_identity studio {
-  name                = module.core.managedIdentity.name
+  name                = data.terraform_remote_state.core.outputs.managedIdentity.name
   resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
@@ -40,30 +43,28 @@ data azurerm_storage_account studio {
 }
 
 data azurerm_key_vault studio {
-  name                = module.core.keyVault.name
+  name                = data.terraform_remote_state.core.outputs.keyVault.name
   resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault_secret gateway_connection {
-  name         = module.core.keyVault.secretName.gatewayConnection
+  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.gatewayConnection
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
+data azurerm_app_configuration studio {
+  name                = data.terraform_remote_state.core.outputs.appConfig.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
+}
+
 data azurerm_monitor_workspace studio {
-  name                = module.core.monitor.name
+  name                = data.terraform_remote_state.core.outputs.monitor.name
   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
 }
 
 data azurerm_dashboard_grafana studio {
-  name                = module.core.monitor.name
+  name                = data.terraform_remote_state.core.outputs.monitor.name
   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
-}
-
-data terraform_remote_state core {
-  backend = "local"
-  config = {
-    path = "../0.Core.Foundation/terraform.tfstate"
-  }
 }
 
 resource azurerm_resource_group network {

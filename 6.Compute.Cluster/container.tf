@@ -18,7 +18,7 @@ variable containerAppEnvironments {
     })
     network = object({
       subnetName = string
-      loadBalancer = object({
+      internalOnly = object({
         enable = bool
       })
       locationExtended = object({
@@ -122,7 +122,7 @@ locals {
 
 resource azurerm_role_assignment container_registry_reader {
   count                = length(local.containerApps) > 0 || length(local.kubernetesUserNodePools) > 0 ? 1 : 0
-  role_definition_name = "AcrPull" # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/containers#acrpull
+  role_definition_name = "AcrPull" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/containers#acrpull
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_container_registry.studio[0].id
 }
@@ -149,7 +149,7 @@ resource azurerm_container_app_environment studio {
   infrastructure_resource_group_name          = "${azurerm_resource_group.cluster_container_app[0].name}.Managed"
   log_analytics_workspace_id                  = data.terraform_remote_state.core.outputs.monitor.logAnalytics.id
   dapr_application_insights_connection_string = data.azurerm_application_insights.studio.connection_string
-  internal_load_balancer_enabled              = each.value.network.loadBalancer.enable
+  internal_load_balancer_enabled              = each.value.network.internalOnly.enable
   infrastructure_subnet_id                    = each.value.network.subnetId
   zone_redundancy_enabled                     = each.value.zoneRedundancy.enable
   workload_profile {
