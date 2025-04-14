@@ -63,7 +63,7 @@ if ($machineType -eq "Scheduler") {
   Write-Host "Customize (End): NFS Server"
 
   Write-Host "Customize (Start): Azure CLI (x64)"
-  $fileType = "azure-cli"
+  $fileType = "az-cli"
   $fileName = "$fileType.msi"
   $fileLink = "https://aka.ms/installazurecliwindowsx64"
   DownloadFile $fileName $fileLink $false

@@ -145,7 +145,30 @@ virtualNetworks = [
       {
         name = "App"
         addressSpace = [
-          "10.0.201.0/24"
+          "10.0.202.0/23"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = null
+      },
+      {
+        name = "AppCPU"
+        addressSpace = [
+          "10.0.204.0/24"
+        ]
+        serviceEndpoints = [
+        ]
+        serviceDelegation = {
+          service = "Microsoft.App/environments"
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+          ]
+        }
+      },
+      {
+        name = "AppGPU"
+        addressSpace = [
+          "10.0.205.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -159,7 +182,7 @@ virtualNetworks = [
       {
         name = "Web"
         addressSpace = [
-          "10.0.202.0/24"
+          "10.0.206.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.Storage"

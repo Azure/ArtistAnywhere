@@ -8,14 +8,14 @@ variable containerAppEnvironments {
   type = list(object({
     enable = bool
     name   = string
-    workloadProfile = object({
-      name = string
-      type = string
+    workloadProfiles = list(object({
+      name   = string
+      type   = string
       instanceCount = object({
         minimum = number
         maximum = number
       })
-    })
+    }))
     network = object({
       subnetName = string
       internalOnly = object({
@@ -97,23 +97,25 @@ data azurerm_container_registry studio {
 
 locals {
   containerAppEnvironments = [
-    for containerAppEnvironment in var.containerAppEnvironments : merge(containerAppEnvironment, {
-      network = merge(containerAppEnvironment.network, {
-        subnetId = "${containerAppEnvironment.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.enable ? var.virtualNetwork.subnetName : containerAppEnvironment.network.subnetName}"
+    for appEnvironment in var.containerAppEnvironments : merge(appEnvironment, {
+      network = merge(appEnvironment.network, {
+        subnetId = "${appEnvironment.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.enable ? var.virtualNetwork.subnetName : appEnvironment.network.subnetName}"
       })
-    }) if containerAppEnvironment.enable
+    }) if appEnvironment.enable
   ]
   containerApps = flatten([
-    for containerAppEnvironment in local.containerAppEnvironments : [
-      for containerApp in containerAppEnvironment.apps : merge(containerApp, {
-        environmentName   = containerAppEnvironment.name
-        containerRegistry = containerAppEnvironment.registry
+    for appEnvironment in local.containerAppEnvironments : [
+      for containerApp in appEnvironment.apps : merge(containerApp, {
+        key               = "${appEnvironment.name}-${containerApp.name}"
+        environmentName   = appEnvironment.name
+        containerRegistry = appEnvironment.registry
       }) if containerApp.enable
     ]
   ])
   kubernetesUserNodePools = flatten([
     for kubernetesCluster in var.kubernetes.clusters : [
       for userNodePool in kubernetesCluster.userNodePools : merge(userNodePool, {
+        key         = "${kubernetesCluster.name}-${userNodePool.name}"
         clusterName = kubernetesCluster.name
       })
     ] if kubernetesCluster.enable
@@ -141,28 +143,31 @@ resource time_sleep container_registry_rbac {
 
 resource azurerm_container_app_environment studio {
   for_each = {
-    for containerAppEnvironment in local.containerAppEnvironments : containerAppEnvironment.name => containerAppEnvironment
+    for appEnvironment in local.containerAppEnvironments : appEnvironment.name => appEnvironment
   }
   name                                        = each.value.name
   resource_group_name                         = azurerm_resource_group.cluster_container_app[0].name
   location                                    = azurerm_resource_group.cluster_container_app[0].location
-  infrastructure_resource_group_name          = "${azurerm_resource_group.cluster_container_app[0].name}.Managed"
   log_analytics_workspace_id                  = data.terraform_remote_state.core.outputs.monitor.logAnalytics.id
   dapr_application_insights_connection_string = data.azurerm_application_insights.studio.connection_string
   internal_load_balancer_enabled              = each.value.network.internalOnly.enable
   infrastructure_subnet_id                    = each.value.network.subnetId
   zone_redundancy_enabled                     = each.value.zoneRedundancy.enable
-  workload_profile {
-    name                  = each.value.workloadProfile.name
-    workload_profile_type = each.value.workloadProfile.type
-    minimum_count         = each.value.workloadProfile.instanceCount.minimum > 0 ? each.value.workloadProfile.instanceCount.minimum : null
-    maximum_count         = each.value.workloadProfile.instanceCount.maximum > 0 ? each.value.workloadProfile.instanceCount.maximum : null
+  infrastructure_resource_group_name          = length(each.value.workloadProfiles) > 0 ? "${azurerm_resource_group.cluster_container_app[0].name}.${each.value.network.subnetName}" : null
+  dynamic workload_profile {
+    for_each = each.value.workloadProfiles
+    content {
+      name                  = workload_profile.value["name"]
+      workload_profile_type = workload_profile.value["type"]
+      minimum_count         = workload_profile.value["instanceCount"]["minimum"] > 0 ? workload_profile.value["instanceCount"]["minimum"] : null
+      maximum_count         = workload_profile.value["instanceCount"]["maximum"] > 0 ? workload_profile.value["instanceCount"]["maximum"] : null
+    }
   }
 }
 
 resource azurerm_container_app studio {
   for_each = {
-    for containerApp in local.containerApps : containerApp.name => containerApp
+    for containerApp in local.containerApps : containerApp.key => containerApp
   }
   name                         = each.value.name
   resource_group_name          = azurerm_resource_group.cluster_container_app[0].name
@@ -253,7 +258,7 @@ resource azurerm_kubernetes_cluster studio {
 
 resource azurerm_kubernetes_cluster_node_pool studio {
   for_each = {
-    for userNodePool in local.kubernetesUserNodePools : "${userNodePool.clusterName}-${userNodePool.name}" => userNodePool
+    for userNodePool in local.kubernetesUserNodePools : userNodePool.key => userNodePool
   }
   name                  = each.value.name
   kubernetes_cluster_id = "${azurerm_resource_group.cluster_container_aks[0].id}/providers/Microsoft.ContainerService/managedClusters/${each.value.clusterName}"
@@ -264,4 +269,30 @@ resource azurerm_kubernetes_cluster_node_pool studio {
   depends_on = [
     azurerm_kubernetes_cluster.studio
   ]
+}
+
+output container {
+  value = {
+    appEnvironments = [
+      for appEnvironment in azurerm_container_app_environment.studio: {
+        name              = appEnvironment.name
+        resourceGroupName = appEnvironment.resource_group_name
+        domain            = appEnvironment.default_domain
+        address = {
+          host   = appEnvironment.static_ip_address
+          docker = appEnvironment.docker_bridge_cidr
+          platform = {
+            host = appEnvironment.platform_reserved_cidr
+            dns  = appEnvironment.platform_reserved_dns_ip_address
+          }
+        }
+      }
+    ]
+    kubernetesClusters = [
+      for kubernetesCluster in azurerm_kubernetes_cluster.studio: {
+        name              = kubernetesCluster.name
+        resourceGroupName = kubernetesCluster.resource_group_name
+      }
+    ]
+  }
 }

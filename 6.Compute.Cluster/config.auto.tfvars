@@ -13,13 +13,96 @@ extendedZone = {
 virtualMachineScaleSets = [
   {
     enable = false
-    name   = "LnxClusterCPU"
+    name   = "LnxClusterCPU-A"
     machine = {
       namePrefix = ""
       size       = "Standard_HX176rs"
       count      = 3
       image = {
         versionId         = "2.0.0"
+        galleryName       = "xstudio"
+        definitionName    = "Linux"
+        resourceGroupName = "ArtistAnywhere.Image"
+      }
+    }
+    network = {
+      subnetName = "Cluster"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationExtended = {
+        enable = false
+      }
+    }
+    osDisk = {
+      type        = "Linux"
+      storageType = "Premium_LRS"
+      cachingMode = "ReadOnly"
+      sizeGB      = 0
+      ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+        enable    = true
+        placement = "ResourceDisk"
+      }
+    }
+    spot = {
+      enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
+      evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
+      tryRestore = {            # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        enable  = false
+        timeout = "PT1H"
+      }
+    }
+    extension = {
+      custom = {
+        enable   = true
+        name     = "Custom"
+        fileName = "cse.sh"
+        parameters = {
+          terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
+            enable       = false
+            delayTimeout = "PT5M"
+          }
+        }
+      }
+      health = {
+        enable      = true
+        name        = "Health"
+        protocol    = "tcp"
+        port        = 111
+        requestPath = ""
+      }
+      monitor = {
+        enable = false
+        name   = "Monitor"
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = true
+      }
+    }
+    availabilityZones = {
+      enable = false
+      evenDistribution = {
+        enable = true
+      }
+    }
+    flexMode = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+      enable = false
+    }
+  },
+  {
+    enable = false
+    name   = "LnxClusterCPU-I"
+    machine = {
+      namePrefix = ""
+      size       = "Standard_FX96ms_v2"
+      count      = 3
+      image = {
+        versionId         = "2.1.0"
         galleryName       = "xstudio"
         definitionName    = "Linux"
         resourceGroupName = "ArtistAnywhere.Image"
@@ -262,13 +345,96 @@ virtualMachineScaleSets = [
   },
   {
     enable = false
-    name   = "WinClusterCPU"
+    name   = "WinClusterCPU-A"
     machine = {
       namePrefix = ""
       size       = "Standard_HX176rs"
       count      = 3
       image = {
         versionId         = "2.0.0"
+        galleryName       = "xstudio"
+        definitionName    = "WinCluster"
+        resourceGroupName = "ArtistAnywhere.Image"
+      }
+    }
+    network = {
+      subnetName = "Cluster"
+      acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
+        enable = true
+      }
+      locationExtended = {
+        enable = false
+      }
+    }
+    osDisk = {
+      type        = "Windows"
+      storageType = "Premium_LRS"
+      cachingMode = "ReadOnly"
+      sizeGB      = 0
+      ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
+        enable    = true
+        placement = "ResourceDisk"
+      }
+    }
+    spot = {
+      enable         = true     # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot
+      evictionPolicy = "Delete" # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#eviction-policy
+      tryRestore = {            # https://learn.microsoft.com/azure/virtual-machine-scale-sets/use-spot#try--restore
+        enable  = false
+        timeout = "PT1H"
+      }
+    }
+    extension = {
+      custom = {
+        enable   = true
+        name     = "Custom"
+        fileName = "cse.ps1"
+        parameters = {
+          terminateNotification = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification
+            enable       = false
+            delayTimeout = "PT5M"
+          }
+        }
+      }
+      health = {
+        enable      = true
+        name        = "Health"
+        protocol    = "tcp"
+        port        = 445
+        requestPath = ""
+      }
+      monitor = {
+        enable = false
+        name   = "Monitor"
+      }
+    }
+    adminLogin = {
+      userName     = ""
+      userPassword = ""
+      sshKeyPublic = ""
+      passwordAuth = {
+        disable = false
+      }
+    }
+    availabilityZones = {
+      enable = false
+      evenDistribution = {
+        enable = true
+      }
+    }
+    flexMode = { # https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes
+      enable = false
+    }
+  },
+  {
+    enable = false
+    name   = "WinClusterCPU-I"
+    machine = {
+      namePrefix = ""
+      size       = "Standard_FX96ms_v2"
+      count      = 3
+      image = {
+        versionId         = "2.1.0"
         galleryName       = "xstudio"
         definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
@@ -518,7 +684,7 @@ virtualMachineScaleSets = [
 computeFleets = [
   {
     enable = false
-    name   = "LnxClusterCPU"
+    name   = "LnxClusterCPU-A"
     machine = {
       namePrefix = ""
       sizes = [
@@ -606,7 +772,7 @@ computeFleets = [
   },
   {
     enable = false
-    name   = "WinClusterCPU"
+    name   = "WinClusterCPU-A"
     machine = {
       namePrefix = ""
       sizes = [
@@ -702,14 +868,8 @@ containerAppEnvironments = [
   {
     enable = false
     name   = "xstudio"
-    workloadProfile = {
-      name = "Consumption"
-      type = "D4"
-      instanceCount = {
-        minimum = 0
-        maximum = 0
-      }
-    }
+    workloadProfiles = [
+    ]
     network = {
       subnetName = "App"
       internalOnly = {
@@ -728,7 +888,7 @@ containerAppEnvironments = [
     }
     apps = [
       {
-        enable = true
+        enable = false
         name   = "lnx-cluster-cpu"
         container = {
           name   = "lnx-cluster-cpu"
@@ -741,11 +901,135 @@ containerAppEnvironments = [
         }
       },
       {
-        enable = true
+        enable = false
         name   = "win-cluster-cpu"
         container = {
           name   = "win-cluster-cpu"
           image  = "xstudio.azurecr.io/win-cluster-cpu:latest"
+          memory = "0.5Gi"
+          cpu    = 0.25
+        }
+        revisionMode = {
+          type = "Single"
+        }
+      }
+    ]
+    zoneRedundancy = {
+      enable = false
+    }
+  },
+  {
+    enable = false
+    name   = "xstudio-cpu"
+    workloadProfiles = [
+      {
+        enable = true
+        name   = "Consumption"
+        type   = "Consumption"
+        instanceCount = {
+          minimum = 0
+          maximum = 0
+        }
+      }
+    ]
+    network = {
+      subnetName = "AppCPU"
+      internalOnly = {
+        enable = true
+      }
+      locationExtended = {
+        enable = false
+      }
+    }
+    registry = {
+      host = "xstudio.azurecr.io"
+      login = {
+        userName     = ""
+        userPassword = ""
+      }
+    }
+    apps = [
+      {
+        enable = false
+        name   = "lnx-cluster-cpu"
+        container = {
+          name   = "lnx-cluster-cpu"
+          image  = "xstudio.azurecr.io/lnx-cluster-cpu:latest"
+          memory = "0.5Gi"
+          cpu    = 0.25
+        }
+        revisionMode = {
+          type = "Single"
+        }
+      },
+      {
+        enable = false
+        name   = "win-cluster-cpu"
+        container = {
+          name   = "win-cluster-cpu"
+          image  = "xstudio.azurecr.io/win-cluster-cpu:latest"
+          memory = "0.5Gi"
+          cpu    = 0.25
+        }
+        revisionMode = {
+          type = "Single"
+        }
+      }
+    ]
+    zoneRedundancy = {
+      enable = false
+    }
+  },
+  {
+    enable = false
+    name   = "xstudio-gpu"
+    workloadProfiles = [
+      {
+        enable = true
+        name   = "Dedicated"
+        type   = "D4"
+        instanceCount = {
+          minimum = 0
+          maximum = 1
+        }
+      }
+    ]
+    network = {
+      subnetName = "AppGPU"
+      internalOnly = {
+        enable = true
+      }
+      locationExtended = {
+        enable = false
+      }
+    }
+    registry = {
+      host = "xstudio.azurecr.io"
+      login = {
+        userName     = ""
+        userPassword = ""
+      }
+    }
+    apps = [
+      {
+        enable = false
+        name   = "lnx-cluster-gpu"
+        container = {
+          name   = "lnx-cluster-gpu"
+          image  = "xstudio.azurecr.io/lnx-cluster-gpu:latest"
+          memory = "0.5Gi"
+          cpu    = 0.25
+        }
+        revisionMode = {
+          type = "Single"
+        }
+      },
+      {
+        enable = false
+        name   = "win-cluster-gpu"
+        container = {
+          name   = "win-cluster-gpu"
+          image  = "xstudio.azurecr.io/win-cluster-gpu:latest"
           memory = "0.5Gi"
           cpu    = 0.25
         }

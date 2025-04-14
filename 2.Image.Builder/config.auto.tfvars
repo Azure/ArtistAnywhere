@@ -109,7 +109,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "LnxClusterCPU"
+      name   = "LnxClusterCPU-A"
       source = {
         imageDefinition = {
           name = "Linux"
@@ -120,6 +120,38 @@ imageBuilder = {
         machineSize    = "Standard_HX176rs" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "2.0.0"
+        osDiskSizeGB   = 480
+        timeoutMinutes = 180
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
+        jobProcessors = [
+          "PBRT"
+        ]
+      }
+      distribute = {
+        replicaCount       = 1
+        storageAccountType = "Premium_LRS"
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
+      }
+    },
+    {
+      enable = true
+      name   = "LnxClusterCPU-I"
+      source = {
+        imageDefinition = {
+          name = "Linux"
+        }
+      }
+      build = {
+        machineType    = "Cluster"
+        machineSize    = "Standard_FX96ms_v2" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                   # NVIDIA or AMD
+        imageVersion   = "2.1.0"
         osDiskSizeGB   = 480
         timeoutMinutes = 180
         jobSchedulers = [
@@ -304,7 +336,7 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinClusterCPU"
+      name   = "WinClusterCPU-A"
       source = {
         imageDefinition = {
           name = "WinCluster"
@@ -315,6 +347,38 @@ imageBuilder = {
         machineSize    = "Standard_HX176rs" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "2.0.0"
+        osDiskSizeGB   = 480
+        timeoutMinutes = 360
+        jobSchedulers = [
+          "Slurm",
+          "Deadline"
+        ]
+        jobProcessors = [
+          "PBRT"
+        ]
+      }
+      distribute = {
+        storageAccountType = "Premium_LRS"
+        replicaCount       = 1
+      }
+      errorHandling = {
+        validationMode    = "cleanup"
+        customizationMode = "cleanup"
+      }
+    },
+    {
+      enable = true
+      name   = "WinClusterCPU-I"
+      source = {
+        imageDefinition = {
+          name = "WinCluster"
+        }
+      }
+      build = {
+        machineType    = "Cluster"
+        machineSize    = "Standard_FX96ms_v2" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                   # NVIDIA or AMD
+        imageVersion   = "2.1.0"
         osDiskSizeGB   = 480
         timeoutMinutes = 360
         jobSchedulers = [
