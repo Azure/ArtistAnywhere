@@ -133,6 +133,11 @@ data azurerm_key_vault_secret ssh_key_public {
   key_vault_id = data.azurerm_key_vault.studio.id
 }
 
+data azurerm_application_insights studio {
+  name                = data.terraform_remote_state.core.outputs.monitor.applicationInsights.name
+  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
+}
+
 data azurerm_app_configuration_keys studio {
   configuration_store_id = data.terraform_remote_state.core.outputs.appConfig.id
 }
@@ -148,6 +153,12 @@ data azurerm_virtual_network studio_extended {
   resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.resourceGroupName : data.terraform_remote_state.network.outputs.virtualNetwork.extended.resourceGroup.name
 }
 
+data azurerm_container_registry studio {
+  count               = var.containerRegistry.enable ? 1 : 0
+  name                = var.containerRegistry.name
+  resource_group_name = var.containerRegistry.resourceGroupName
+}
+
 locals {
   activeDirectory = merge(var.activeDirectory, {
     machine = merge(var.activeDirectory.machine, {
@@ -157,6 +168,21 @@ locals {
       })
     })
   })
+}
+
+resource azurerm_role_assignment container_registry_reader {
+  count                = length(local.containerApps) > 0 || length(local.kubernetesUserNodePools) > 0 ? 1 : 0
+  role_definition_name = "AcrPull" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/containers#acrpull
+  principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
+  scope                = data.azurerm_container_registry.studio[0].id
+}
+
+resource time_sleep container_registry_rbac {
+  count           = length(local.containerApps) > 0 || length(local.kubernetesUserNodePools) > 0 ? 1 : 0
+  create_duration = "30s"
+  depends_on = [
+    azurerm_role_assignment.container_registry_reader
+  ]
 }
 
 resource azurerm_resource_group cluster {
@@ -182,5 +208,31 @@ resource azurerm_resource_group cluster_container_aks {
   location = data.terraform_remote_state.core.outputs.defaultLocation
   tags = {
     AAA = basename(path.cwd)
+  }
+}
+
+output container {
+  value = {
+    appEnvironments = [
+      for appEnvironment in azurerm_container_app_environment.studio: {
+        name              = appEnvironment.name
+        resourceGroupName = appEnvironment.resource_group_name
+        domain            = appEnvironment.default_domain
+        address = {
+          host   = appEnvironment.static_ip_address
+          docker = appEnvironment.docker_bridge_cidr
+          platform = {
+            host = appEnvironment.platform_reserved_cidr
+            dns  = appEnvironment.platform_reserved_dns_ip_address
+          }
+        }
+      }
+    ]
+    kubernetesClusters = [
+      for kubernetesCluster in azurerm_kubernetes_cluster.studio: {
+        name              = kubernetesCluster.name
+        resourceGroupName = kubernetesCluster.resource_group_name
+      }
+    ]
   }
 }
