@@ -70,23 +70,9 @@ virtualNetworks = [
         }
       },
       {
-        name = "StorageQumulo"
-        addressSpace = [
-          "10.0.195.0/24"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = {
-          service = "Qumulo.Storage/fileSystems"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        }
-      },
-      {
         name = "Data"
         addressSpace = [
-          "10.0.196.0/24"
+          "10.0.195.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -95,7 +81,7 @@ virtualNetworks = [
       {
         name = "DataMySQL"
         addressSpace = [
-          "10.0.197.0/24"
+          "10.0.196.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -109,7 +95,7 @@ virtualNetworks = [
       {
         name = "DataPostgreSQL"
         addressSpace = [
-          "10.0.198.0/24"
+          "10.0.197.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -123,7 +109,7 @@ virtualNetworks = [
       {
         name = "DataCassandra"
         addressSpace = [
-          "10.0.199.0/24"
+          "10.0.198.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -137,7 +123,7 @@ virtualNetworks = [
       {
         name = "Cache"
         addressSpace = [
-          "10.0.200.0/24"
+          "10.0.199.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -146,7 +132,7 @@ virtualNetworks = [
       {
         name = "App"
         addressSpace = [
-          "10.0.202.0/23"
+          "10.0.200.0/23"
         ]
         serviceEndpoints = [
         ]
@@ -155,7 +141,7 @@ virtualNetworks = [
       {
         name = "AppCPU"
         addressSpace = [
-          "10.0.204.0/24"
+          "10.0.202.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -169,7 +155,7 @@ virtualNetworks = [
       {
         name = "AppGPU"
         addressSpace = [
-          "10.0.205.0/24"
+          "10.0.203.0/24"
         ]
         serviceEndpoints = [
         ]
@@ -183,7 +169,7 @@ virtualNetworks = [
       {
         name = "Web"
         addressSpace = [
-          "10.0.206.0/24"
+          "10.0.204.0/24"
         ]
         serviceEndpoints = [
           "Microsoft.Storage"
