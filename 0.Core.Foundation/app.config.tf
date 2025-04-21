@@ -134,7 +134,7 @@ resource azurerm_app_configuration_key job_processor_blender {
   configuration_store_id = azurerm_app_configuration.studio.id
   key                    = local.appConfigKey.jobProcessorBlender
   label                  = "Job Processor Blender"
-  value                  = "4.4.0"
+  value                  = "4.4.1"
   content_type           = "kv"
   depends_on = [
     time_sleep.app_config_rbac

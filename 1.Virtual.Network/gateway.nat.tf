@@ -5,6 +5,7 @@
 variable natGateway {
   type = object({
     enable = bool
+    name   = string
     ipAddress = object({
       tier = string
       type = string
@@ -30,7 +31,7 @@ resource azurerm_nat_gateway studio {
   for_each = {
     for virtualNetwork in local.natGatewayNetworks : virtualNetwork.key => virtualNetwork
   }
-  name                = "Gateway-NAT"
+  name                = var.natGateway.name
   resource_group_name = each.value.resourceGroup.name
   location            = each.value.location
   depends_on = [
@@ -57,7 +58,7 @@ resource azurerm_public_ip_prefix nat_gateway {
   for_each = {
     for virtualNetwork in local.natGatewayNetworks : virtualNetwork.key => virtualNetwork
   }
-  name                = "Gateway-NAT"
+  name                = var.natGateway.name
   resource_group_name = each.value.resourceGroup.name
   location            = each.value.location
   sku                 = var.natGateway.ipAddress.tier

@@ -6,6 +6,7 @@ variable virtualNetworks {
   type = list(object({
     enable       = bool
     name         = string
+    hubName      = string
     location     = string
     addressSpace = list(string)
     dnsAddresses = list(string)
@@ -21,9 +22,10 @@ variable virtualNetworks {
   }))
 }
 
-variable virtualNetworksAdded {
+variable virtualNetworksExtended {
   type = list(object({
     enable   = bool
+    hubName  = string
     location = string
     addressSpace = object({
       search  = string
@@ -50,11 +52,12 @@ locals {
       }
       extendedZone = null
     }) if virtualNetwork.enable
-  ], local.virtualNetworksAdded)
-  virtualNetworksAdded = [
-    for virtualNetwork in var.virtualNetworksAdded : merge(var.virtualNetworks[0], {
+  ], local.virtualNetworksExtended)
+  virtualNetworksExtended = [
+    for virtualNetwork in var.virtualNetworksExtended : merge(var.virtualNetworks[0], {
       key      = "${var.virtualNetworks[0].name}-${virtualNetwork.location}${virtualNetwork.extendedZone.enable ? "-${virtualNetwork.extendedZone.name}" : ""}"
       id       = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resourceGroupName}.${virtualNetwork.location}${virtualNetwork.extendedZone.enable ? ".${virtualNetwork.extendedZone.name}" : ""}/providers/Microsoft.Network/virtualNetworks/${var.virtualNetworks[0].name}"
+      hubName  = virtualNetwork.hubName
       location = virtualNetwork.location
       addressSpace = [
         replace(var.virtualNetworks[0].addressSpace[0], virtualNetwork.addressSpace.search, virtualNetwork.addressSpace.replace)

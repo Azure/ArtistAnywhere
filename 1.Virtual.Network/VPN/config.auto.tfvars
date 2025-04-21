@@ -1,4 +1,4 @@
-subscriptionId = "" # Set to your Azure subscription id
+subscriptionId = "" # REQUIRED
 
 ###############################################################################################################
 # Virtual Network Gateway (VPN) (https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-about-vpngateways) #

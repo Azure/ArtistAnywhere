@@ -8,6 +8,7 @@ virtualNetworks = [
   {
     enable   = true
     name     = "Studio"
+    hubName  = "USCentral"
     location = "SouthCentralUS"
     addressSpace = [
       "10.0.0.0/16"
@@ -229,9 +230,10 @@ virtualNetworks = [
   }
 ]
 
-virtualNetworksAdded = [ # Optional additional virtual networks
+virtualNetworksExtended = [
   {
-    enable   = false
+    enable   = true
+    hubName  = "USWest"
     location = "WestUS"
     addressSpace = {
       search  = "10.0"
@@ -244,7 +246,8 @@ virtualNetworksAdded = [ # Optional additional virtual networks
     }
   },
   {
-    enable   = false
+    enable   = true
+    hubName  = "USWest"
     location = "WestUS"
     addressSpace = {
       search  = "10.0"
@@ -257,8 +260,9 @@ virtualNetworksAdded = [ # Optional additional virtual networks
     }
   },
   {
-    enable   = false
-    location = "WestUS3"
+    enable   = true
+    hubName  = "USWest"
+    location = "WestUS2"
     addressSpace = {
       search  = "10.0"
       replace = "10.3"
@@ -268,8 +272,139 @@ virtualNetworksAdded = [ # Optional additional virtual networks
       name     = ""
       location = ""
     }
+  },
+  {
+    enable   = true
+    hubName  = "USWest"
+    location = "WestUS3"
+    addressSpace = {
+      search  = "10.0"
+      replace = "10.4"
+    }
+    extendedZone = {
+      enable   = false
+      name     = ""
+      location = ""
+    }
+  },
+  {
+    enable   = true
+    hubName  = "USEast"
+    location = "EastUS"
+    addressSpace = {
+      search  = "10.0"
+      replace = "10.5"
+    }
+    extendedZone = {
+      enable   = false
+      name     = ""
+      location = ""
+    }
+  },
+  {
+    enable   = true
+    hubName  = "USEast"
+    location = "EastUS2"
+    addressSpace = {
+      search  = "10.0"
+      replace = "10.6"
+    }
+    extendedZone = {
+      enable   = false
+      name     = ""
+      location = ""
+    }
+  },
+  {
+    enable   = false
+    hubName  = "USEast"
+    location = "EastUS3"
+    addressSpace = {
+      search  = "10.0"
+      replace = "10.7"
+    }
+    extendedZone = {
+      enable   = false
+      name     = ""
+      location = ""
+    }
   }
 ]
+
+#################################################################################
+# Virtual WAN (https://learn.microsoft.com/azure/virtual-wan/virtual-wan-about) #
+#################################################################################
+
+virtualWAN = {
+  enable = true
+  name   = "xstudio"
+  type   = "Standard"
+  hubs = [
+    {
+      enable       = true
+      name         = "USWest"
+      type         = "Standard"
+      location     = "WestUS"
+      addressSpace = "10.10.0.0/24"
+      router = {
+        preferenceMode = "ExpressRoute"
+        instanceCount = {
+          minimum = 2
+        }
+      }
+      routes = [
+        {
+          enable      = false
+          nextAddress = ""
+          addressSpace = [
+          ]
+        }
+      ]
+    },
+    {
+      enable       = true
+      name         = "USCentral"
+      type         = "Standard"
+      location     = "SouthCentralUS"
+      addressSpace = "10.11.0.0/24"
+      router = {
+        preferenceMode = "ExpressRoute"
+        instanceCount = {
+          minimum = 2
+        }
+      }
+      routes = [
+        {
+          enable      = false
+          nextAddress = ""
+          addressSpace = [
+          ]
+        }
+      ]
+    },
+    {
+      enable       = true
+      name         = "USEast"
+      type         = "Standard"
+      location     = "EastUS"
+      addressSpace = "10.12.0.0/24"
+      router = {
+        preferenceMode = "ExpressRoute"
+        instanceCount = {
+          minimum = 2
+        }
+      }
+      routes = [
+        {
+          enable      = false
+          nextAddress = ""
+          addressSpace = [
+          ]
+        }
+      ]
+    }
+  ]
+}
 
 ############################################################################
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
@@ -316,6 +451,7 @@ bastion = {
 
 natGateway = {
   enable = true
+  name   = "Gateway-NAT"
   ipAddress = {
     tier = "Standard"
     type = "Regional"
@@ -335,4 +471,17 @@ networkPeering = {
     computeNetwork = false
     storageNetwork = false
   }
+}
+
+######################################################################################################################
+# Application Gateway                (https://learn.microsoft.com/azure/application-gateway/overview-v2)             #
+# Application Gateway for Containers (https://learn.microsoft.com/azure/application-gateway/for-containers/overview) #
+######################################################################################################################
+
+appGateway = {
+  enable   = false
+  name     = "Gateway-App"
+  type     = "Standard_v2"
+  tier     = "Standard_v2"
+  capacity = 1
 }
