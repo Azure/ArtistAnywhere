@@ -64,9 +64,9 @@ containerAppEnvironments = [
         enable = true
         name   = "Consumption"
         type   = "Consumption"
-        instanceCount = {
-          minimum = 0
-          maximum = 0
+        scaleUnit = {
+          minCount = 0
+          maxCount = 0
         }
       }
     ]
@@ -126,9 +126,9 @@ containerAppEnvironments = [
         enable = true
         name   = "Dedicated"
         type   = "D4"
-        instanceCount = {
-          minimum = 0
-          maximum = 1
+        scaleUnit = {
+          minCount = 0
+          maxCount = 1
         }
       }
     ]

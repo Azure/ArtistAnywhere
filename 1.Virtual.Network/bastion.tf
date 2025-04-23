@@ -6,7 +6,7 @@ variable bastion {
   type = object({
     enable              = bool
     type                = string
-    scaleUnitCount      = number
+    scaleUnits          = number
     enableFileCopy      = bool
     enableCopyPaste     = bool
     enableIpConnect     = bool
@@ -163,7 +163,7 @@ resource azurerm_bastion_host studio {
   resource_group_name       = each.value.resourceGroup.name
   location                  = each.value.location
   sku                       = var.bastion.type
-  scale_units               = var.bastion.scaleUnitCount
+  scale_units               = var.bastion.scaleUnits
   file_copy_enabled         = var.bastion.enableFileCopy
   copy_paste_enabled        = var.bastion.enableCopyPaste
   ip_connect_enabled        = var.bastion.enableIpConnect

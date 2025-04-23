@@ -7,11 +7,11 @@ variable containerAppEnvironments {
     enable = bool
     name   = string
     workloadProfiles = list(object({
-      name   = string
-      type   = string
-      instanceCount = object({
-        minimum = number
-        maximum = number
+      name = string
+      type = string
+      scaleUnit = object({
+        minCount = number
+        maxCount = number
       })
     }))
     network = object({
@@ -86,8 +86,8 @@ resource azurerm_container_app_environment studio {
     content {
       name                  = workload_profile.value["name"]
       workload_profile_type = workload_profile.value["type"]
-      minimum_count         = workload_profile.value["instanceCount"]["minimum"] > 0 ? workload_profile.value["instanceCount"]["minimum"] : null
-      maximum_count         = workload_profile.value["instanceCount"]["maximum"] > 0 ? workload_profile.value["instanceCount"]["maximum"] : null
+      minimum_count         = workload_profile.value["scaleUnit"]["minCount"] > 0 ? workload_profile.value["scaleUnit"]["minCount"] : null
+      maximum_count         = workload_profile.value["scaleUnit"]["maxCount"] > 0 ? workload_profile.value["scaleUnit"]["maxCount"] : null
     }
   }
 }

@@ -334,8 +334,8 @@ virtualWAN = {
       addressSpace = "10.10.0.0/24"
       router = {
         preferenceMode = "ExpressRoute"
-        instanceCount = {
-          minimum = 2
+        scaleUnit = {
+          minCount = 2
         }
       }
       routes = [
@@ -346,6 +346,20 @@ virtualWAN = {
           ]
         }
       ]
+      vpnGateway = {
+        enable     = false
+        name       = "xstudio"
+        scaleUnits = 1
+        siteToSite = false
+        client = {
+          addressSpace = [
+          ]
+          rootCertificate = {
+            name = ""
+            data = ""
+          }
+        }
+      }
     },
     {
       enable       = true
@@ -355,8 +369,8 @@ virtualWAN = {
       addressSpace = "10.11.0.0/24"
       router = {
         preferenceMode = "ExpressRoute"
-        instanceCount = {
-          minimum = 2
+        scaleUnit = {
+          minCount = 2
         }
       }
       routes = [
@@ -367,6 +381,20 @@ virtualWAN = {
           ]
         }
       ]
+      vpnGateway = {
+        enable     = false
+        name       = "xstudio"
+        scaleUnits = 1
+        siteToSite = false
+        client = {
+          addressSpace = [
+          ]
+          rootCertificate = {
+            name = ""
+            data = ""
+          }
+        }
+      }
     },
     {
       enable       = true
@@ -376,8 +404,8 @@ virtualWAN = {
       addressSpace = "10.12.0.0/24"
       router = {
         preferenceMode = "ExpressRoute"
-        instanceCount = {
-          minimum = 2
+        scaleUnit = {
+          minCount = 2
         }
       }
       routes = [
@@ -388,6 +416,20 @@ virtualWAN = {
           ]
         }
       ]
+      vpnGateway = {
+        enable     = false
+        name       = "xstudio"
+        scaleUnits = 1
+        siteToSite = false
+        client = {
+          addressSpace = [
+          ]
+          rootCertificate = {
+            name = ""
+            data = ""
+          }
+        }
+      }
     }
   ]
 }
@@ -421,7 +463,7 @@ firewall = {
 bastion = {
   enable              = true
   type                = "Standard"
-  scaleUnitCount      = 2
+  scaleUnits          = 2
   enableFileCopy      = true
   enableCopyPaste     = true
   enableIpConnect     = true

@@ -15,8 +15,8 @@ variable virtualWAN {
       addressSpace = string
       router = object({
         preferenceMode = string
-        instanceCount = object({
-          minimum = number
+        scaleUnit = object({
+          minCount = number
         })
       })
       routes = list(object({
@@ -24,6 +24,19 @@ variable virtualWAN {
         nextAddress  = string
         addressSpace = list(string)
       }))
+      vpnGateway = object({
+        enable     = bool
+        name       = string
+        scaleUnits = number
+        siteToSite = bool
+        client = object({
+          addressSpace = list(string)
+          rootCertificate = object({
+            name = string
+            data = string
+          })
+        })
+      })
     }))
   })
 }
@@ -47,7 +60,7 @@ resource azurerm_virtual_hub studio {
   sku                                    = each.value.type
   address_prefix                         = each.value.addressSpace
   hub_routing_preference                 = each.value.router.preferenceMode
-  virtual_router_auto_scale_min_capacity = each.value.router.instanceCount.minimum
+  virtual_router_auto_scale_min_capacity = each.value.router.scaleUnit.minCount
   dynamic route {
     for_each = {
       for route in each.value.routes : route.addressSpace => route if route.enable
@@ -66,4 +79,55 @@ resource azurerm_virtual_hub_connection studio {
   name                      = each.value.key
   remote_virtual_network_id = each.value.id
   virtual_hub_id            = azurerm_virtual_hub.studio[each.value.hubName].id
+}
+
+####################################################################################################
+# Point-to-Site VPN Gateway (https://learn.microsoft.com/azure/virtual-wan/point-to-site-concepts) #
+####################################################################################################
+
+resource azurerm_vpn_server_configuration studio {
+  for_each = {
+    for hub in var.virtualWAN.hubs : hub.name => hub if var.virtualWAN.enable && hub.enable && hub.vpnGateway.enable && !hub.vpnGateway.siteToSite
+  }
+  name                     = each.value.vpnGateway.name
+  resource_group_name      = azurerm_virtual_hub.studio[each.value.name].resource_group_name
+  location                 = azurerm_virtual_hub.studio[each.value.name].location
+  vpn_authentication_types = ["Certificate"]
+  client_root_certificate {
+    name             = each.value.vpnGateway.client.rootCertificate.name
+    public_cert_data = each.value.vpnGateway.client.rootCertificate.data
+  }
+}
+
+resource azurerm_point_to_site_vpn_gateway studio {
+  for_each = {
+    for hub in var.virtualWAN.hubs : hub.name => hub if var.virtualWAN.enable && hub.enable && hub.vpnGateway.enable && !hub.vpnGateway.siteToSite
+  }
+  name                        = each.value.vpnGateway.name
+  resource_group_name         = azurerm_virtual_hub.studio[each.value.name].resource_group_name
+  location                    = azurerm_virtual_hub.studio[each.value.name].location
+  virtual_hub_id              = azurerm_virtual_hub.studio[each.value.name].id
+  vpn_server_configuration_id = azurerm_vpn_server_configuration.studio[each.value.name].id
+  scale_unit                  = each.value.vpnGateway.scaleUnits
+  connection_configuration {
+    name = each.value.vpnGateway.client.rootCertificate.name
+    vpn_client_address_pool {
+      address_prefixes = each.value.vpnGateway.client.addressSpace
+    }
+  }
+}
+
+#################################################################################################################
+# Site-to-Site VPN Gateway (https://learn.microsoft.com/azure/virtual-wan/connect-virtual-network-gateway-vwan) #
+#################################################################################################################
+
+resource azurerm_vpn_gateway studio {
+  for_each = {
+    for hub in var.virtualWAN.hubs : hub.name => hub if var.virtualWAN.enable && hub.enable && hub.vpnGateway.enable && hub.vpnGateway.siteToSite
+  }
+  name                = each.value.vpnGateway.name
+  resource_group_name = azurerm_virtual_hub.studio[each.value.name].resource_group_name
+  location            = azurerm_virtual_hub.studio[each.value.name].location
+  virtual_hub_id      = azurerm_virtual_hub.studio[each.value.name].id
+  scale_unit          = each.value.vpnGateway.scaleUnits
 }
