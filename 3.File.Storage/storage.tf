@@ -35,7 +35,7 @@ locals {
     for storageAccount in var.storageAccounts : merge(storageAccount, {
       resourceGroup = {
         name     = var.resourceGroupName
-        location = storageAccount.extendedZone.enable && var.extendedZone.enable ? var.extendedZone.location : local.location
+        location = storageAccount.extendedZone.enable && var.extendedZone.enable ? var.extendedZone.location : data.azurerm_virtual_network.studio.location
       }
       extendedZone = {
         name = storageAccount.extendedZone.enable && var.extendedZone.enable ? var.extendedZone.name : null

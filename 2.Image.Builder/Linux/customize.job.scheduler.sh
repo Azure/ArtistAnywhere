@@ -76,7 +76,7 @@ if [[ $jobSchedulers == *Deadline* ]]; then
     run_process "$filePath/$fileName --mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$fileType
     mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
     echo "$deadlinePath *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
-    exportfs -r
+    exportfs -a
     echo "Customize (End): Deadline Server"
   fi
 

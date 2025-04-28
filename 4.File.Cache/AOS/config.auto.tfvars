@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Cache.AOS" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.Cache.AOS"
 
 ##############################################################################
 # HPC Cache (https://learn.microsoft.com/azure/hpc-cache/hpc-cache-overview) #
@@ -102,13 +102,12 @@ dnsRecord = {
 ########################
 
 virtualNetwork = {
-  enable            = false
-  name              = ""
-  subnetName        = ""
-  resourceGroupName = ""
+  name              = "Studio"
+  subnetName        = "Cache"
+  resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
   privateDNS = {
-    zoneName          = ""
-    resourceGroupName = ""
+    zoneName          = "azure.studio"
+    resourceGroupName = "ArtistAnywhere.Network"
   }
 }
 

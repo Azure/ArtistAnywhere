@@ -1,6 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Storage" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
-
-regionName = "" # Optional default region override
+resourceGroupName = "ArtistAnywhere.Storage"
 
 extendedZone = {
   enable   = false
@@ -108,13 +106,12 @@ dnsRecord = {
 ########################
 
 virtualNetwork = {
-  enable            = false
-  name              = ""
-  subnetName        = ""
-  resourceGroupName = ""
+  name              = "Studio"
+  subnetName        = "Storage"
+  resourceGroupName = "ArtistAnywhere.Network.WestUS"
   privateDNS = {
-    zoneName          = ""
-    resourceGroupName = ""
+    zoneName          = "azure.studio"
+    resourceGroupName = "ArtistAnywhere.Network"
   }
 }
 

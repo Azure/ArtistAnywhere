@@ -4,6 +4,7 @@
 
 variable imageBuilder {
   type = object({
+    replicaRegions = list(string)
     templates = list(object({
       enable = bool
       name   = string
@@ -167,7 +168,7 @@ resource azapi_resource linux {
           runOutputName  = "${each.value.name}-${each.value.build.imageVersion}"
           galleryImageId = "${azurerm_shared_image.studio[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
           targetRegions = [
-            for location in local.locations : merge(each.value.distribute, {
+            for location in var.imageBuilder.replicaRegions : merge(each.value.distribute, {
               name = location
             })
           ]
@@ -301,7 +302,7 @@ resource azapi_resource windows {
           runOutputName  = "${each.value.name}-${each.value.build.imageVersion}"
           galleryImageId = "${azurerm_shared_image.studio[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
           targetRegions = [
-            for location in local.locations : merge(each.value.distribute, {
+            for location in var.imageBuilder.replicaRegions : merge(each.value.distribute, {
               name = location
             })
           ]

@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.26.0"
+      version = "~>4.27.0"
     }
   }
   backend azurerm {
@@ -27,26 +27,22 @@ variable resourceGroupName {
   type = string
 }
 
-variable regionName {
-  type = string
+variable virtualNetwork {
+  type = object({
+    name              = string
+    subnetName        = string
+    resourceGroupName = string
+    privateDNS = object({
+      zoneName          = string
+      resourceGroupName = string
+    })
+  })
 }
 
 data terraform_remote_state core {
   backend = "local"
   config = {
     path = "../../0.Core.Foundation/terraform.tfstate"
-  }
-}
-
-data terraform_remote_state network {
-  backend = "azurerm"
-  config = {
-    subscription_id      = data.terraform_remote_state.core.outputs.subscriptionId
-    resource_group_name  = data.terraform_remote_state.core.outputs.resourceGroup.name
-    storage_account_name = data.terraform_remote_state.core.outputs.storage.account.name
-    container_name       = data.terraform_remote_state.core.outputs.storage.containerName.terraformState
-    key                  = "1.Virtual.Network"
-    use_azuread_auth     = true
   }
 }
 
@@ -79,28 +75,20 @@ data azurerm_app_configuration_keys studio {
   configuration_store_id = data.terraform_remote_state.core.outputs.appConfig.id
 }
 
-data azurerm_resource_group dns {
-  name = data.terraform_remote_state.network.outputs.privateDNS.zone.resourceGroup.name
-}
-
 data azurerm_virtual_network studio {
-  name                = data.terraform_remote_state.network.outputs.virtualNetwork.default.name
-  resource_group_name = var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetwork.default.resourceGroup.name
+  name                = var.virtualNetwork.name
+  resource_group_name = var.virtualNetwork.resourceGroupName
 }
 
 data azurerm_subnet storage {
-  name                 = "Storage"
+  name                 = var.virtualNetwork.subnetName
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
 }
 
-locals {
-  location = var.regionName != "" ? var.regionName : data.terraform_remote_state.core.outputs.defaultLocation
-}
-
 resource azurerm_resource_group storage_data_load {
   name     = var.resourceGroupName
-  location = local.location
+  location = data.azurerm_virtual_network.studio.location
   tags = {
     AAA = basename(path.cwd)
   }

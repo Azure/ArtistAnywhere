@@ -96,7 +96,6 @@ locals {
     for virtualNetwork in local.virtualNetworks : {
       name          = virtualNetwork.name
       resourceGroup = virtualNetwork.resourceGroup
-      location      = virtualNetwork.location
       extendedZone  = virtualNetwork.extendedZone
     }
   ]
@@ -146,8 +145,7 @@ resource azurerm_subnet studio {
 
 output virtualNetwork {
   value = {
-    default   = local.virtualNetworksOutput[0]
-    locations = distinct(local.virtualNetworksOutput[*].location)
+    default = local.virtualNetworksOutput[0]
     extended = one([
       for virtualNetwork in local.virtualNetworksOutput : virtualNetwork if try(virtualNetwork.extendedZone.enable, false)
     ])

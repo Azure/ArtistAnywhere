@@ -125,8 +125,8 @@ resource azurerm_hpc_cache_blob_nfs_target storage {
 resource azurerm_private_dns_a_record cache_hpc {
   count               = var.hpcCache.enable ? 1 : 0
   name                = lower(var.dnsRecord.name)
-  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.resourceGroupName : data.azurerm_private_dns_zone.studio.resource_group_name
-  zone_name           = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.zoneName : data.azurerm_private_dns_zone.studio.name
+  resource_group_name = var.virtualNetwork.privateDNS.resourceGroupName
+  zone_name           = var.virtualNetwork.privateDNS.zoneName
   records             = azurerm_hpc_cache.studio[0].mount_addresses
   ttl                 = var.dnsRecord.ttlSeconds
 }

@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Workstation" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.Workstation"
 
 extendedZone = {
   enable   = false
@@ -32,7 +32,6 @@ virtualMachines = [
       }
     }
     network = {
-      subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -84,7 +83,6 @@ virtualMachines = [
       }
     }
     network = {
-      subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -136,7 +134,6 @@ virtualMachines = [
       }
     }
     network = {
-      subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -188,7 +185,6 @@ virtualMachines = [
       }
     }
     network = {
-      subnetName = "Workstation"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -226,10 +222,9 @@ virtualMachines = [
 ########################
 
 virtualNetwork = {
-  enable            = false
-  name              = ""
-  subnetName        = ""
-  resourceGroupName = ""
+  name              = "Studio"
+  subnetName        = "Workstation"
+  resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
 }
 
 activeDirectory = {

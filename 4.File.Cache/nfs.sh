@@ -1,8 +1,33 @@
 #!/bin/bash -ex
 
-dnf -y install mdadm policycoreutils-python-utils cachefilesd
+dnf -y install epel-release python3-pip policycoreutils-python-utils cachefilesd mdadm
+curl -s https://packagecloud.io/install/repositories/prometheus-rpm/release/script.rpm.sh | /bin/bash
+dnf -y install prometheus node_exporter
+pip install prometheus_client
 
-function set_local_cache_disks {
+metricsConfigFile="/etc/prometheus/prometheus.yml"
+sed -i "s/15 seconds/${metricsIntervalSeconds} seconds/g" $metricsConfigFile
+sed -i "s/: 15s/: ${metricsIntervalSeconds}s/g" $metricsConfigFile
+
+cat >> $metricsConfigFile <<EOF
+  - job_name: "node_exports"
+    static_configs:
+      - targets: ["localhost:${metricsLocalNodePort}"]
+  - job_name: "cache_stats"
+    static_configs:
+      - targets: ["localhost:${metricsLocalStatsPort}"]
+
+remote_write
+  - url: "${metricsIngestionUrl}"
+    azuread:
+      cloud: "AzurePublic"
+      managed_identity:
+        client_id: "${userIdentityClientId}"
+EOF
+
+systemctl --now enable prometheus node_exporter
+
+function set_cache_disks {
   diskPaths=$(lsblk -p -o name | grep nvme)
   if [ "$diskPaths" == "" ]; then
     diskPaths=$(lsblk -p -o name,type | grep disk)
@@ -21,62 +46,88 @@ function set_local_cache_disks {
   echo $cachePath
 }
 
-function set_mount_unit {
-  mountJSON=$1
-  mountName=$(echo "$mountJSON" | jq -r .name)
-  if [ "$mountName" == null ]; then
-    mountName=$(echo "$mountJSON" | jq -r .path)
-    mountName=$${mountName//\//-}
-    mountName=$${mountName:1}.mount
+function set_systemd_file {
+  unitJSON=$1
+  forMount=$2
+  unitName=$(echo "$unitJSON" | jq -r .name)
+  unitPath=$(echo "$unitJSON" | jq -r .path)
+  if [ "$unitName" == null ]; then
+    unitName=$${unitPath//\//-}
+    unitName=$${unitName:1}.mount
   fi
-  mountType=$(echo "$mountJSON" | jq -r .type)
-  mountPath=$(echo "$mountJSON" | jq -r .path)
-  mountSource=$(echo "$mountJSON" | jq -r .source)
-  mountOptions=$(echo "$mountJSON" | jq -r .options)
-  mountDescription=$(echo "$mountJSON" | jq -r .description)
-  mkdir -p $mountPath
-  filePath=/usr/lib/systemd/system/$mountName
+  unitDescription=$(echo "$unitJSON" | jq -r .description)
+  filePath=/usr/lib/systemd/system/$unitName
   echo "[Unit]" > $filePath
-  echo "Description=$mountDescription" >> $filePath
-  echo "DefaultDependencies=no" >> $filePath
+  echo "Description=$unitDescription" >> $filePath
+  if [ $forMount == true ]; then
+    echo "DefaultDependencies=no" >> $filePath
+  else
+    echo "After=syslog.target network-online.target" >> $filePath
+    echo "Wants=network.target" >> $filePath
+  fi
   echo "" >> $filePath
-  echo "[Mount]" >> $filePath
-  echo "Type=$mountType" >> $filePath
-  echo "What=$mountSource" >> $filePath
-  echo "Where=$mountPath" >> $filePath
-  echo "Options=$mountOptions" >> $filePath
+  if [ $forMount == true ]; then
+    mountType=$(echo "$unitJSON" | jq -r .type)
+    mountSource=$(echo "$unitJSON" | jq -r .source)
+    mountOptions=$(echo "$unitJSON" | jq -r .options)
+    mkdir -p $mountPath
+    echo "[Mount]" >> $filePath
+    echo "Type=$mountType" >> $filePath
+    echo "What=$mountSource" >> $filePath
+    echo "Where=$unitPath" >> $filePath
+    echo "Options=$mountOptions" >> $filePath
+  else
+    echo "[Service]" >> $filePath
+    echo "Type=simple" >> $filePath
+    echo "ExecStart=$unitPath" >> $filePath
+    echo "Restart=on-failure" >> $filePath
+    echo "RestartSec=10" >> $filePath
+  fi
   echo "" >> $filePath
   echo "[Install]" >> $filePath
   echo "WantedBy=multi-user.target" >> $filePath
-  systemctl --now enable $mountName
-  echo $mountName
+  systemctl --now enable $unitName
+  permissionsEnable=$(echo "$unitJSON" | jq -r .permissions.enable)
+  if [[ $forMount == true && $permissionsEnable == true ]]; then
+    permissionsResursive=$(echo "$unitJSON" | jq -r .permissions.recursive)
+    permissionsOctalValue=$(echo "$unitJSON" | jq -r .permissions.octalValue)
+    if [ $permissionsResursive == true ]; then
+      chmod -R $permissionsOctalValue $unitPath
+    else
+      chmod $permissionsOctalValue $unitPath
+    fi
+  fi
+  echo $unitName
 }
 
-function set_local_cache_mount {
-  mountJSON='{"name":"'$1'","path":"'$2'","source":"'$3'","type":"ext4","options":"defaults","description":"Local Cache Disks Mount"}'
-  set_mount_unit "$mountJSON"
-}
-
-function set_remote_storage_mounts {
+function set_storage_mounts {
   storageMounts="$(echo $1 | base64 -d)"
   for storageMount in $(echo "$storageMounts" | jq -r ".[] | @base64"); do
-    mountJSON="$(echo "$storageMount" | base64 -d)"
-    enabled=$(echo "$mountJSON" | jq -r .enable)
-    if [ $enabled == true ]; then
-      set_mount_unit "$mountJSON"
-      mountPath=$(echo "$mountJSON" | jq -r .path)
-      mountSource=$(echo "$mountJSON" | jq -r .source)
-      mountSource=$(echo $mountSource | cut -d ":" -f 1)
-      echo "$mountPath $mountSource(ro,no_root_squash,fsid=$(uuidgen -r))" >> /etc/exports
+    unitJSON="$(echo "$storageMount" | base64 -d)"
+    enable=$(echo "$unitJSON" | jq -r .enable)
+    if [ $enable == true ]; then
+      set_systemd_file "$unitJSON" true
+      mountPath=$(echo "$unitJSON" | jq -r .path)
+      echo "$mountPath ${exportAddressSpace}(rw,sync,no_root_squash,fsid=$(uuidgen -r))" >> /etc/exports
     fi
   done
-  exportfs -r
+  exportfs -a
 }
+
+dataFilePath="/var/lib/waagent/ovf-env.xml"
+codeFilePath="/usr/local/bin/nfs.py"
+dataFileText=$(xmllint --xpath "//*[local-name()='Environment']/*[local-name()='ProvisioningSection']/*[local-name()='LinuxProvisioningConfigurationSet']/*[local-name()='CustomData']/text()" $dataFilePath)
+echo $dataFileText | base64 -d | > $codeFilePath
+
+unitName="cache_stats.service"
+unitJSON='{"name":"'$unitName'","path":"'$codeFilePath'","description":"Local Prometheus Metrics Collection"}'
+set_systemd_file "$unitJSON" false
 
 mountName="fscache.mount"
 mountPath="/fscache"
-cachePath=$(set_local_cache_disks)
-set_local_cache_mount $mountName $mountPath $cachePath
+cachePath=$(set_cache_disks)
+unitJSON='{"name":"'$mountName'","path":"'$mountPath'","source":"'$cachePath'","type":"ext4","options":"defaults","permissions":{"recursive":true,"octalValue":777},"description":"Local Cache Disks Mount"}'
+set_systemd_file "$unitJSON" true
 
 sed -i "/^dir/c\dir $mountPath" /etc/cachefilesd.conf
 cacheFile=/usr/lib/systemd/system/cachefilesd.service
@@ -89,4 +140,4 @@ restorecon -R -v $mountPath
 systemctl restart cachefilesd
 
 storageMounts=${base64encode(jsonencode(storageMounts))}
-set_remote_storage_mounts $storageMounts
+set_storage_mounts $storageMounts

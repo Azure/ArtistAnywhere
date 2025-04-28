@@ -25,7 +25,7 @@ variable fileSystem {
           type    = "nfs"
           path    = "/mnt/cache"
           target  = "cache.azure.studio:/storage"
-          options = "ro,nconnect=8"
+          options = "rw,nconnect=8"
         }
       },
       { # File Cache (Lustre)

@@ -20,7 +20,6 @@ variable virtualMachines {
       sizeGB      = number
     })
     network = object({
-      subnetName = string
       acceleration = object({
         enable = bool
       })
@@ -73,7 +72,7 @@ locals {
         }
       }
       network = merge(virtualMachine.network, {
-        subnetId = "${virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.enable ? var.virtualNetwork.subnetName : virtualMachine.network.subnetName}"
+        subnetId = "${virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.subnetName}"
       })
       adminLogin = merge(virtualMachine.adminLogin, {
         userName     = virtualMachine.adminLogin.userName != "" ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value

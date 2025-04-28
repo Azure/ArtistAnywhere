@@ -53,7 +53,17 @@ variable nfsCache {
               source      = string
               options     = string
               description = string
+              permissions = object({
+                enable     = bool
+                recursive  = bool
+                octalValue = number
+              })
             }))
+            cacheMetrics = object({
+              localNodePort   = number
+              localStatsPort  = number
+              intervalSeconds = number
+            })
           })
         })
       })
@@ -90,6 +100,13 @@ locals {
   })
 }
 
+resource azurerm_role_assignment monitoring_metrics_publisher {
+  count                = var.nfsCache.enable ? 1 : 0
+  role_definition_name = "Monitoring Metrics Publisher" # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/monitor#monitoring-metrics-publisher
+  principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
+  scope                = data.azurerm_monitor_workspace.studio.id
+}
+
 resource azurerm_orchestrated_virtual_machine_scale_set cache {
   count                       = var.nfsCache.enable ? 1 : 0
   name                        = var.nfsCache.name
@@ -116,6 +133,10 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
     enable_accelerated_networking = var.nfsCache.network.acceleration.enable
   }
   os_profile {
+    custom_data = base64encode(templatefile("nfs.py", {
+      metricsLocalStatsPort  = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.localStatsPort
+      metricsIntervalSeconds = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.intervalSeconds
+    }))
     linux_configuration {
       computer_name_prefix            = var.nfsCache.machine.prefix != "" ? var.nfsCache.machine.prefix : null
       admin_username                  = local.nfsCache.machine.adminLogin.userName
@@ -174,7 +195,13 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
       protected_settings = jsonencode({
         script = base64encode(
           templatefile(var.nfsCache.machine.extension.custom.fileName, merge(var.nfsCache.machine.extension.custom.parameters, {
-            dataDiskCount = var.nfsCache.machine.dataDisk.count
+            dataDiskCount          = var.nfsCache.machine.dataDisk.count
+            metricsLocalNodePort   = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.localNodePort
+            metricsLocalStatsPort  = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.localStatsPort
+            metricsIntervalSeconds = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.intervalSeconds
+            metricsIngestionUrl    = data.azurerm_monitor_data_collection_endpoint.studio.metrics_ingestion_endpoint
+            exportAddressSpace     = data.azurerm_virtual_network.studio.address_space[0]
+            userIdentityClientId   = data.azurerm_user_assigned_identity.studio.client_id
           }))
         )
       })
@@ -189,8 +216,8 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
 resource azurerm_private_dns_a_record cache_nfs {
   count               = var.nfsCache.enable ? 1 : 0
   name                = lower(var.dnsRecord.name)
-  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.resourceGroupName : data.azurerm_private_dns_zone.studio.resource_group_name
-  zone_name           = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.zoneName : data.azurerm_private_dns_zone.studio.name
+  resource_group_name = var.virtualNetwork.privateDNS.resourceGroupName
+  zone_name           = var.virtualNetwork.privateDNS.zoneName
   records             = data.azurerm_virtual_machine_scale_set.cache[0].instances[*].private_ip_address
   ttl                 = var.dnsRecord.ttlSeconds
 }

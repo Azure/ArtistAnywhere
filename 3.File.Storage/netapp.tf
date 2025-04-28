@@ -49,9 +49,6 @@ variable netAppFiles {
         })
       })
     })
-    encryption = object({
-      enable = bool
-    })
   })
 }
 
@@ -77,7 +74,7 @@ locals {
 resource azurerm_resource_group netapp {
   count    = var.netAppFiles.enable ? 1 : 0
   name     = "${var.resourceGroupName}.NetApp"
-  location = local.location
+  location = data.azurerm_virtual_network.studio.location
   tags = {
     AAA = basename(path.cwd)
   }
@@ -108,13 +105,6 @@ resource azurerm_netapp_account studio {
   }
 }
 
-resource azurerm_netapp_account_encryption studio {
-  count                     = var.netAppFiles.enable && var.netAppFiles.encryption.enable ? 1 : 0
-  netapp_account_id         = azurerm_netapp_account.studio[0].id
-  user_assigned_identity_id = data.azurerm_user_assigned_identity.studio.id
-  encryption_key            = data.azurerm_key_vault_key.data_encryption.versionless_id
-}
-
 resource azurerm_netapp_pool studio {
   for_each = {
     for capacityPool in var.netAppFiles.capacityPools : capacityPool.name => capacityPool if var.netAppFiles.enable && capacityPool.enable
@@ -134,19 +124,18 @@ resource azurerm_netapp_volume studio {
   for_each = {
     for volume in local.netAppVolumes : "${volume.capacityPoolName}-${volume.name}" => volume
   }
-  name                          = each.value.name
-  resource_group_name           = azurerm_resource_group.netapp[0].name
-  location                      = azurerm_resource_group.netapp[0].location
-  pool_name                     = each.value.capacityPoolName
-  service_level                 = each.value.capacityPoolType
-  volume_path                   = each.value.path
-  storage_quota_in_gb           = each.value.sizeGiB
-  network_features              = each.value.network.features
-  protocols                     = each.value.network.protocols
-  subnet_id                     = data.azurerm_subnet.storage_netapp[0].id
-  encryption_key_source         = var.netAppFiles.encryption.enable ? "Microsoft.KeyVault" : null
-  key_vault_private_endpoint_id = var.netAppFiles.encryption.enable ? data.terraform_remote_state.network.outputs.keyVault.privateEndpoint.id : null
-  account_name                  = var.netAppFiles.name
+  name                       = each.value.name
+  resource_group_name        = azurerm_resource_group.netapp[0].name
+  location                   = azurerm_resource_group.netapp[0].location
+  pool_name                  = each.value.capacityPoolName
+  service_level              = each.value.capacityPoolType
+  volume_path                = each.value.path
+  storage_quota_in_gb        = each.value.sizeGiB
+  network_features           = each.value.network.features
+  protocols                  = each.value.network.protocols
+  subnet_id                  = data.azurerm_subnet.storage_netapp[0].id
+  account_name               = var.netAppFiles.name
+  snapshot_directory_visible = false
   dynamic export_policy_rule {
     for_each = each.value.exportPolicies
     content {

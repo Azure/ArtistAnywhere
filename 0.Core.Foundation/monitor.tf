@@ -79,24 +79,12 @@ resource azurerm_application_insights studio {
 
 output monitor {
   value = {
-    name = azurerm_monitor_workspace.studio.name
-    endpoint = {
-      query = azurerm_monitor_workspace.studio.query_endpoint
-    }
     resourceGroup = {
       name     = azurerm_resource_group.studio_monitor.name
       location = azurerm_resource_group.studio_monitor.location
     }
-    dataCollection = {
-      endpoint = {
-        id = azurerm_monitor_workspace.studio.default_data_collection_endpoint_id
-      }
-      rule = {
-        id = azurerm_monitor_workspace.studio.default_data_collection_rule_id
-      }
-    }
-    grafana = {
-      endpoint = azurerm_dashboard_grafana.studio.endpoint
+    workspace = {
+      name = azurerm_monitor_workspace.studio.name
     }
     logAnalytics = {
       id = azurerm_log_analytics_workspace.studio.id

@@ -1,6 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Storage.DataLoad" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
-
-regionName = "" # Optional default region override
+resourceGroupName = "ArtistAnywhere.Storage.DataLoad"
 
 #########################################################################
 # Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
@@ -40,5 +38,19 @@ dataLoad = {
     acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
       enable = true
     }
+  }
+}
+
+########################
+# Brownfield Resources #
+########################
+
+virtualNetwork = {
+  name              = "Studio"
+  subnetName        = "Storage"
+  resourceGroupName = "ArtistAnywhere.Network.WestUS"
+  privateDNS = {
+    zoneName          = "azure.studio"
+    resourceGroupName = "ArtistAnywhere.Network"
   }
 }

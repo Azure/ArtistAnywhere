@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.26.0"
+      version = "~>4.27.0"
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.0"
+      version = "~>3.5.0"
     }
   }
   backend azurerm {
@@ -68,7 +68,7 @@ data azurerm_subnet studio {
 
 resource azurerm_resource_group image_registry {
   name     = var.resourceGroupName
-  location = data.terraform_remote_state.core.outputs.defaultLocation
+  location = data.azurerm_virtual_network.studio.location
   tags = {
     AAA = basename(path.cwd)
   }

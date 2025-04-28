@@ -21,7 +21,7 @@ netAppFiles = {
           name        = "Shared"
           path        = "shared"
           sizeGiB     = 128
-          permissions = 7777
+          permissions = 777
           network = {
             features = "Standard"
             protocols = [
@@ -51,7 +51,7 @@ netAppFiles = {
           name        = "Scratch"
           path        = "scratch"
           sizeGiB     = 128
-          permissions = 7777
+          permissions = 777
           network = {
             features = "Standard"
             protocols = [
@@ -81,7 +81,7 @@ netAppFiles = {
           name        = "Tools"
           path        = "tools"
           sizeGiB     = 128
-          permissions = 7777
+          permissions = 777
           network = {
             features = "Standard"
             protocols = [
@@ -111,7 +111,7 @@ netAppFiles = {
           name        = "Data"
           path        = "data"
           sizeGiB     = 640
-          permissions = 7777
+          permissions = 777
           network = {
             features = "Standard"
             protocols = [
@@ -151,8 +151,5 @@ netAppFiles = {
         monthly = 1
       }
     }
-  }
-  encryption = {
-    enable = false
   }
 }

@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.AD" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.AD"
 
 #################################################################################################################################################
 # Active Directory (https://learn.microsoft.com/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview) #

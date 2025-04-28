@@ -75,6 +75,30 @@ resource azurerm_private_endpoint key_vault {
   ]
 }
 
+resource azurerm_private_endpoint monitor_workspace {
+  name                = "${lower(data.azurerm_monitor_workspace.studio.name)}-${azurerm_private_dns_zone_virtual_network_link.monitor_workspace.name}"
+  resource_group_name = data.azurerm_monitor_workspace.studio.resource_group_name
+  location            = data.azurerm_monitor_workspace.studio.location
+  subnet_id           = "${local.virtualNetwork.id}/subnets/Storage"
+  private_service_connection {
+    name                           = data.azurerm_monitor_workspace.studio.name
+    private_connection_resource_id = data.azurerm_monitor_workspace.studio.id
+    is_manual_connection           = false
+    subresource_names = [
+      "prometheusMetrics"
+    ]
+  }
+  private_dns_zone_group {
+    name = azurerm_private_dns_zone_virtual_network_link.monitor_workspace.name
+    private_dns_zone_ids = [
+      azurerm_private_dns_zone.monitor_workspace.id
+    ]
+  }
+  depends_on = [
+    azurerm_private_endpoint.key_vault
+  ]
+}
+
 resource azurerm_private_endpoint grafana {
   name                = "${lower(data.azurerm_dashboard_grafana.studio.name)}-${azurerm_private_dns_zone_virtual_network_link.grafana.name}"
   resource_group_name = data.azurerm_dashboard_grafana.studio.resource_group_name
@@ -95,7 +119,7 @@ resource azurerm_private_endpoint grafana {
     ]
   }
   depends_on = [
-    azurerm_private_endpoint.key_vault
+    azurerm_private_endpoint.monitor_workspace
   ]
 }
 
@@ -122,11 +146,3 @@ resource azurerm_private_endpoint grafana {
 #     azurerm_private_endpoint.grafana
 #   ]
 # }
-
-output keyVault {
-  value = {
-    privateEndpoint = {
-      id = azurerm_private_endpoint.key_vault.id
-    }
-  }
-}

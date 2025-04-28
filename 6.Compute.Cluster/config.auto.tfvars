@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Cluster" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.Cluster"
 
 extendedZone = {
   enable   = false
@@ -26,7 +26,6 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -109,7 +108,6 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -192,7 +190,6 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -275,7 +272,6 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -358,7 +354,6 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -441,7 +436,6 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -524,7 +518,6 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -607,7 +600,6 @@ virtualMachineScaleSets = [
       }
     }
     network = {
-      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -761,7 +753,6 @@ computeFleets = [
       }
     }
     network = {
-      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -849,7 +840,6 @@ computeFleets = [
       }
     }
     network = {
-      subnetName = "Cluster"
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
         enable = true
       }
@@ -865,10 +855,9 @@ computeFleets = [
 ########################
 
 virtualNetwork = {
-  enable            = false
-  name              = ""
-  subnetName        = ""
-  resourceGroupName = ""
+  name              = "Studio"
+  subnetName        = "Cluster"
+  resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
 }
 
 activeDirectory = {

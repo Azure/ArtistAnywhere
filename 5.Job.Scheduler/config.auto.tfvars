@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Cluster.JobScheduler" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.Cluster.JobScheduler"
 
 extendedZone = {
   enable   = false
@@ -141,13 +141,12 @@ dnsRecord = {
 ########################
 
 virtualNetwork = {
-  enable            = false
-  name              = ""
-  subnetName        = ""
-  resourceGroupName = ""
+  name              = "Studio"
+  subnetName        = "Cluster"
+  resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
   privateDNS = {
-    zoneName          = ""
-    resourceGroupName = ""
+    zoneName          = "azure.studio"
+    resourceGroupName = "ArtistAnywhere.Network"
   }
 }
 

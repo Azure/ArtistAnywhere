@@ -1,14 +1,17 @@
-resourceGroupName = "ArtistAnywhere.Cache" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.Cache"
 
-##################################################################
-# Boost (https://learn.microsoft.com/azure/azure-boost/overview) #
-##################################################################
+#################################################################################################################
+# Boost              (https://learn.microsoft.com/azure/azure-boost/overview)                                   #
+# Managed Grafana    (https://learn.microsoft.com/en-us/azure/managed-grafana/overview)                         #
+# Monitor Prometheus (https://learn.microsoft.com/azure/azure-monitor/metrics/prometheus-metrics-overview)      #
+# Monitor Workspace  (https://learn.microsoft.com/azure/azure-monitor/metrics/azure-monitor-workspace-overview) #
+#################################################################################################################
 
 nfsCache = {
   enable = false
   name   = "xcache"
   machine = {
-    size   = "Standard_L80s_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
+    size   = "Standard_L80as_v3" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     prefix = ""
     image = {
@@ -23,7 +26,7 @@ nfsCache = {
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
         enable    = true
-        placement = "CacheDisk"
+        placement = "ResourceDisk"
       }
     }
     dataDisk = {
@@ -53,10 +56,20 @@ nfsCache = {
               type        = "nfs"
               path        = "/storage"
               source      = "storage-netapp.azure.studio:/data"
-              options     = "fsc,ro,nconnect=8,vers=3"
+              options     = "fsc,rw,tcp,vers=3,nconnect=8"
               description = "Remote NFSv3 Storage"
+              permissions = {
+                enable     = true
+                recursive  = true
+                octalValue = 777
+              }
             }
           ]
+          cacheMetrics = {
+            localNodePort   = 9100
+            localStatsPort  = 9110
+            intervalSeconds = 30
+          }
         }
       }
     }
@@ -81,14 +94,18 @@ dnsRecord = {
 # Brownfield Resources #
 ########################
 
+monitorWorkspace = {
+  name              = "xstudio"
+  resourceGroupName = "ArtistAnywhere.Monitor"
+}
+
 virtualNetwork = {
-  enable            = false
-  name              = ""
-  subnetName        = ""
-  resourceGroupName = ""
+  name              = "Studio"
+  subnetName        = "Cache"
+  resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
   privateDNS = {
-    zoneName          = ""
-    resourceGroupName = ""
+    zoneName          = "azure.studio"
+    resourceGroupName = "ArtistAnywhere.Network"
   }
 }
 

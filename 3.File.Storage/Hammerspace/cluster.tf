@@ -62,8 +62,8 @@ resource azurerm_proximity_placement_group hammerspace {
 
 resource azurerm_private_dns_a_record hammerspace {
   name                = "${lower(var.dnsRecord.name)}-hs"
-  resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
-  zone_name           = data.azurerm_private_dns_zone.studio.name
+  resource_group_name = var.virtualNetwork.privateDNS.resourceGroupName
+  zone_name           = var.virtualNetwork.privateDNS.zoneName
   ttl                 = var.dnsRecord.ttlSeconds
   records = var.dnsRecord.metadataTier.enable ? local.hsHighAvailability ? [
     azurerm_lb.metadata[0].frontend_ip_configuration[0].private_ip_address

@@ -74,7 +74,6 @@ variable computeFleets {
       })
     })
     network = object({
-      subnetName = string
       acceleration = object({
         enable = bool
       })
@@ -103,7 +102,7 @@ locals {
         })
       })
       network = merge(computeFleet.network, {
-        subnetId = "${computeFleet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.enable ? var.virtualNetwork.subnetName : computeFleet.network.subnetName}"
+        subnetId = "${computeFleet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.subnetName}"
       })
       activeDirectory = merge(var.activeDirectory, {
         adminUsername = var.activeDirectory.adminUsername != "" ? var.activeDirectory.adminUsername : data.azurerm_key_vault_secret.admin_username.value

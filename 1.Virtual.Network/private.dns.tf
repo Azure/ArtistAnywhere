@@ -35,14 +35,3 @@ resource azurerm_private_dns_zone_virtual_network_link studio {
     azurerm_virtual_network.studio
   ]
 }
-
-output privateDNS {
-  value = {
-    zone = {
-      name = azurerm_private_dns_zone.studio.name
-      resourceGroup = {
-        name = azurerm_private_dns_zone.studio.resource_group_name
-      }
-    }
-  }
-}

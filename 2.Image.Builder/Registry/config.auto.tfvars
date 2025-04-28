@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Image.Registry" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.Image.Registry"
 
 ######################################################################################################
 # Container Registry (https://learn.microsoft.com/azure/container-registry/container-registry-intro) #

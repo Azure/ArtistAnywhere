@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.26.0"
+      version = "~>4.27.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -11,7 +11,7 @@ terraform {
     }
     http = {
       source  = "hashicorp/http"
-      version = "~>3.4.0"
+      version = "~>3.5.0"
     }
     time = {
       source  = "hashicorp/time"
@@ -39,7 +39,6 @@ module hammerspace {
   count             = module.core.hammerspace.enable ? 1 : 0
   source            = "../3.File.Storage/Hammerspace"
   resourceGroupName = "${var.resourceGroupName}.Hammerspace"
-  regionName        = local.location
   dnsRecord         = merge(var.dnsRecord, {metadataTier={enable=false}})
   virtualNetwork    = var.virtualNetwork
   activeDirectory   = var.activeDirectory
@@ -47,10 +46,6 @@ module hammerspace {
 }
 
 variable resourceGroupName {
-  type = string
-}
-
-variable regionName {
   type = string
 }
 
@@ -71,7 +66,6 @@ variable dnsRecord {
 
 variable virtualNetwork {
   type = object({
-    enable            = bool
     name              = string
     subnetName        = string
     resourceGroupName = string
@@ -107,25 +101,13 @@ data azurerm_subscription current {}
 data azurerm_client_config current {}
 
 data azurerm_location studio {
-  location = local.location
+  location = data.azurerm_virtual_network.studio.location
 }
 
 data terraform_remote_state core {
   backend = "local"
   config = {
     path = "../0.Core.Foundation/terraform.tfstate"
-  }
-}
-
-data terraform_remote_state network {
-  backend = "azurerm"
-  config = {
-    subscription_id      = data.terraform_remote_state.core.outputs.subscriptionId
-    resource_group_name  = data.terraform_remote_state.core.outputs.resourceGroup.name
-    storage_account_name = data.terraform_remote_state.core.outputs.storage.account.name
-    container_name       = data.terraform_remote_state.core.outputs.storage.containerName.terraformState
-    key                  = "1.Virtual.Network"
-    use_azuread_auth     = true
   }
 }
 
@@ -145,33 +127,24 @@ data azurerm_key_vault_key data_encryption {
 }
 
 data azurerm_resource_group dns {
-  name = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.resourceGroupName : data.terraform_remote_state.network.outputs.privateDNS.zone.resourceGroup.name
+  name = var.virtualNetwork.privateDNS.resourceGroupName
 }
 
 data azurerm_virtual_network studio {
-  name                = var.virtualNetwork.enable ? var.virtualNetwork.name : data.terraform_remote_state.network.outputs.virtualNetwork.default.name
-  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.resourceGroupName : var.regionName != "" ? "${data.azurerm_resource_group.dns.name}.${var.regionName}" : data.terraform_remote_state.network.outputs.virtualNetwork.default.resourceGroup.name
+  name                = var.virtualNetwork.name
+  resource_group_name = var.virtualNetwork.resourceGroupName
 }
 
 data azurerm_subnet storage {
-  name                 = var.virtualNetwork.enable ? var.virtualNetwork.subnetName : "Storage"
+  name                 = var.virtualNetwork.subnetName
   resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.studio.name
-}
-
-data azurerm_private_dns_zone studio {
-  name                = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.zoneName : data.terraform_remote_state.network.outputs.privateDNS.zone.name
-  resource_group_name = var.virtualNetwork.enable ? var.virtualNetwork.privateDNS.zone.resourceGroup.name : data.terraform_remote_state.network.outputs.privateDNS.zone.resourceGroup.name
-}
-
-locals {
-  location = var.regionName != "" ? var.regionName : data.terraform_remote_state.core.outputs.defaultLocation
 }
 
 resource azurerm_resource_group storage {
   count    = length(local.storageAccounts) > 0 ? 1 : 0
   name     = var.resourceGroupName
-  location = local.location
+  location = data.azurerm_virtual_network.studio.location
   tags = {
     AAA = basename(path.cwd)
   }
@@ -184,8 +157,8 @@ resource azurerm_resource_group storage {
 resource azurerm_private_dns_a_record netapp {
   count               = var.netAppFiles.enable && length(azurerm_netapp_volume.studio) > 0 ? 1 : 0
   name                = "${lower(var.dnsRecord.name)}-netapp"
-  resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
-  zone_name           = data.azurerm_private_dns_zone.studio.name
+  resource_group_name = var.virtualNetwork.privateDNS.resourceGroupName
+  zone_name           = var.virtualNetwork.privateDNS.zoneName
   ttl                 = var.dnsRecord.ttlSeconds
   records = distinct([
     for volume in azurerm_netapp_volume.studio : volume.mount_ip_addresses[0]
@@ -195,8 +168,8 @@ resource azurerm_private_dns_a_record netapp {
 resource azurerm_private_dns_a_record lustre {
   count               = var.managedLustre.enable ? 1 : 0
   name                = "${lower(var.dnsRecord.name)}-lustre"
-  resource_group_name = data.azurerm_private_dns_zone.studio.resource_group_name
-  zone_name           = data.azurerm_private_dns_zone.studio.name
+  resource_group_name = var.virtualNetwork.privateDNS.resourceGroupName
+  zone_name           = var.virtualNetwork.privateDNS.zoneName
   ttl                 = var.dnsRecord.ttlSeconds
   records = [
     azurerm_managed_lustre_file_system.studio[0].mgs_address

@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.26.0"
+      version = "~>4.27.0"
     }
   }
   backend azurerm {
@@ -58,12 +58,12 @@ data azurerm_app_configuration studio {
 }
 
 data azurerm_monitor_workspace studio {
-  name                = data.terraform_remote_state.core.outputs.monitor.name
+  name                = data.terraform_remote_state.core.outputs.monitor.workspace.name
   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
 }
 
 data azurerm_dashboard_grafana studio {
-  name                = data.terraform_remote_state.core.outputs.monitor.name
+  name                = data.terraform_remote_state.core.outputs.monitor.workspace.name
   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
 }
 

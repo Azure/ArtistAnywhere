@@ -24,7 +24,6 @@ variable virtualMachines {
       })
     })
     network = object({
-      subnetName = string
       acceleration = object({
         enable = bool
       })
@@ -70,7 +69,7 @@ locals {
         }
         name = "${virtualMachine.name}${i}"
         network = merge(virtualMachine.network, {
-          subnetId = "${virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.enable ? var.virtualNetwork.subnetName : virtualMachine.network.subnetName}"
+          subnetId = "${virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.subnetName}"
         })
         adminLogin = merge(virtualMachine.adminLogin, {
           userName     = virtualMachine.adminLogin.userName != "" ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -230,7 +229,7 @@ resource azurerm_windows_virtual_machine workstation {
     disk_size_gb         = each.value.osDisk.sizeGB > 0 ? each.value.osDisk.sizeGB : null
   }
   additional_capabilities {
-    hibernation_enabled = each.value.hibernation.enable
+    hibernation_enabled = each.value.osDisk.hibernation.enable
   }
   depends_on = [
     azurerm_network_interface.workstation

@@ -42,7 +42,7 @@ data azurerm_storage_account lustre {
 resource azurerm_resource_group lustre {
   count    = var.managedLustre.enable ? 1 : 0
   name     = "${var.resourceGroupName}.Lustre"
-  location = local.location
+  location = data.azurerm_virtual_network.studio.location
   tags = {
     AAA = basename(path.cwd)
   }

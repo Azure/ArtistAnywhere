@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Image" # Alphanumeric, underscores, hyphens, periods and parenthesis are allowed
+resourceGroupName = "ArtistAnywhere.Image"
 
 ###############################################################################################
 # Compute Gallery (https://learn.microsoft.com/azure/virtual-machines/shared-image-galleries) #
@@ -75,6 +75,9 @@ computeGallery = {
 #############################################################################################
 
 imageBuilder = {
+  replicaRegions = [
+    "WestUS"
+  ]
   templates = [
     {
       enable = true
@@ -531,4 +534,14 @@ imageBuilder = {
       }
     }
   ]
+}
+
+########################
+# Brownfield Resources #
+########################
+
+virtualNetwork = {
+  name              = "Studio"
+  subnetName        = "Cluster"
+  resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
 }

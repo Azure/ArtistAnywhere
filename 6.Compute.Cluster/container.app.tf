@@ -53,7 +53,7 @@ locals {
   containerAppEnvironments = [
     for appEnvironment in var.containerAppEnvironments : merge(appEnvironment, {
       network = merge(appEnvironment.network, {
-        subnetId = "${appEnvironment.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.enable ? var.virtualNetwork.subnetName : appEnvironment.network.subnetName}"
+        subnetId = "${appEnvironment.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${appEnvironment.network.subnetName}"
       })
     }) if appEnvironment.enable
   ]

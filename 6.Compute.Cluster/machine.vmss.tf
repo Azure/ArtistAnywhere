@@ -18,7 +18,6 @@ variable virtualMachineScaleSets {
       })
     })
     network = object({
-      subnetName = string
       acceleration = object({
         enable = bool
       })
@@ -89,7 +88,7 @@ variable virtualMachineScaleSets {
 }
 
 data azurerm_location studio {
-  location = data.terraform_remote_state.core.outputs.defaultLocation
+  location = data.azurerm_virtual_network.studio.location
 }
 
 locals {
@@ -103,7 +102,7 @@ locals {
         }
       }
       network = merge(virtualMachineScaleSet.network, {
-        subnetId = "${virtualMachineScaleSet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.enable ? var.virtualNetwork.subnetName : virtualMachineScaleSet.network.subnetName}"
+        subnetId = "${virtualMachineScaleSet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.subnetName}"
       })
       adminLogin = merge(virtualMachineScaleSet.adminLogin, {
         userName     = virtualMachineScaleSet.adminLogin.userName != "" ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value

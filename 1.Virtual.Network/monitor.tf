@@ -117,29 +117,29 @@ resource azurerm_private_endpoint monitor {
 }
 
 resource azurerm_monitor_private_link_scope monitor {
-  name                  = data.terraform_remote_state.core.outputs.monitor.name
+  name                  = data.terraform_remote_state.core.outputs.monitor.workspace.name
   resource_group_name   = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
   ingestion_access_mode = "PrivateOnly"
   query_access_mode     = "PrivateOnly"
 }
 
-resource azurerm_monitor_private_link_scoped_service monitor_workspace {
-  name                = "${data.terraform_remote_state.core.outputs.monitor.name}-workspace"
+resource azurerm_monitor_private_link_scoped_service monitor_log_analytics {
+  name                = "${data.terraform_remote_state.core.outputs.monitor.workspace.name}-log-analytics"
   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
   linked_resource_id  = data.terraform_remote_state.core.outputs.monitor.logAnalytics.id
   scope_name          = azurerm_monitor_private_link_scope.monitor.name
 }
 
-resource azurerm_monitor_private_link_scoped_service monitor_insight {
-  name                = "${data.terraform_remote_state.core.outputs.monitor.name}-insight"
+resource azurerm_monitor_private_link_scoped_service monitor_app_insights {
+  name                = "${data.terraform_remote_state.core.outputs.monitor.workspace.name}-app-insights"
   resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
   linked_resource_id  = data.terraform_remote_state.core.outputs.monitor.applicationInsights.id
   scope_name          = azurerm_monitor_private_link_scope.monitor.name
 }
 
-resource azurerm_monitor_private_link_scoped_service monitor_endpoint {
-  name                = "${data.terraform_remote_state.core.outputs.monitor.name}-data"
-  resource_group_name = data.terraform_remote_state.core.outputs.monitor.resourceGroup.name
-  linked_resource_id  = data.terraform_remote_state.core.outputs.monitor.dataCollection.endpoint.id
+resource azurerm_monitor_private_link_scoped_service monitor_workspace_data {
+  name                = "${data.azurerm_monitor_workspace.studio.name}-workspace-data"
+  resource_group_name = data.azurerm_monitor_workspace.studio.resource_group_name
+  linked_resource_id  = data.azurerm_monitor_workspace.studio.default_data_collection_endpoint_id
   scope_name          = azurerm_monitor_private_link_scope.monitor.name
 }
