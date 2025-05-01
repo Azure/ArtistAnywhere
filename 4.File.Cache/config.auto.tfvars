@@ -2,7 +2,7 @@ resourceGroupName = "ArtistAnywhere.Cache"
 
 #################################################################################################################
 # Boost              (https://learn.microsoft.com/azure/azure-boost/overview)                                   #
-# Managed Grafana    (https://learn.microsoft.com/en-us/azure/managed-grafana/overview)                         #
+# Managed Grafana    (https://learn.microsoft.com/azure/managed-grafana/overview)                               #
 # Monitor Prometheus (https://learn.microsoft.com/azure/azure-monitor/metrics/prometheus-metrics-overview)      #
 # Monitor Workspace  (https://learn.microsoft.com/azure/azure-monitor/metrics/azure-monitor-workspace-overview) #
 #################################################################################################################
@@ -59,16 +59,16 @@ nfsCache = {
               options     = "fsc,rw,tcp,vers=3,nconnect=8"
               description = "Remote NFSv3 Storage"
               permissions = {
-                enable     = true
-                recursive  = true
+                enable     = false
+                recursive  = false
                 octalValue = 777
               }
             }
           ]
           cacheMetrics = {
-            localNodePort   = 9100
-            localStatsPort  = 9110
-            intervalSeconds = 30
+            intervalSeconds = 15
+            nodeExportsPort = 9100
+            customStatsPort = 9110
           }
         }
       }
@@ -94,7 +94,31 @@ dnsRecord = {
 # Brownfield Resources #
 ########################
 
+managedIdentity = {
+  name              = "xstudio"
+  resourceGroupName = "ArtistAnywhere"
+}
+
+keyVault = {
+  enable            = true
+  name              = "xstudio"
+  resourceGroupName = "ArtistAnywhere"
+  secretName = {
+    adminUsername = "AdminUsername"
+    adminPassword = "AdminPassword"
+    sshKeyPublic  = "SSHKeyPublic"
+  }
+}
+
 monitorWorkspace = {
+  name              = "xstudio"
+  resourceGroupName = "ArtistAnywhere.Monitor"
+  metricsIngestion = {
+    apiVersion = "2023-04-24"
+  }
+}
+
+managedGrafana = {
   name              = "xstudio"
   resourceGroupName = "ArtistAnywhere.Monitor"
 }

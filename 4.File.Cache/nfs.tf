@@ -60,9 +60,9 @@ variable nfsCache {
               })
             }))
             cacheMetrics = object({
-              localNodePort   = number
-              localStatsPort  = number
               intervalSeconds = number
+              nodeExportsPort = number
+              customStatsPort = number
             })
           })
         })
@@ -92,9 +92,9 @@ locals {
         version   = var.nfsCache.machine.image.version != "" ? var.nfsCache.machine.image.version : module.core.image.linux.version
       })
       adminLogin = merge(var.nfsCache.machine.adminLogin, {
-        userName     = var.nfsCache.machine.adminLogin.userName != "" ? var.nfsCache.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
-        userPassword = var.nfsCache.machine.adminLogin.userPassword != "" ? var.nfsCache.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
-        sshKeyPublic = var.nfsCache.machine.adminLogin.sshKeyPublic != "" ? var.nfsCache.machine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
+        userName     = var.nfsCache.machine.adminLogin.userName != "" ? var.nfsCache.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
+        userPassword = var.nfsCache.machine.adminLogin.userPassword != "" ? var.nfsCache.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
+        sshKeyPublic = var.nfsCache.machine.adminLogin.sshKeyPublic != "" ? var.nfsCache.machine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public[0].value
       })
     })
   })
@@ -102,9 +102,30 @@ locals {
 
 resource azurerm_role_assignment monitoring_metrics_publisher {
   count                = var.nfsCache.enable ? 1 : 0
-  role_definition_name = "Monitoring Metrics Publisher" # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/monitor#monitoring-metrics-publisher
+  role_definition_name = "Monitoring Metrics Publisher" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/monitor#monitoring-metrics-publisher
+  principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
+  scope                = data.azurerm_monitor_data_collection_rule.studio.id
+}
+
+resource azurerm_role_assignment monitoring_reader {
+  count                = var.nfsCache.enable ? 1 : 0
+  role_definition_name = "Monitoring Reader" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/monitor#monitoring-reader
   principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
   scope                = data.azurerm_monitor_workspace.studio.id
+}
+
+resource azurerm_role_assignment monitoring_contributor {
+  count                = var.nfsCache.enable ? 1 : 0
+  role_definition_name = "Monitoring Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/monitor#monitoring-contributor
+  principal_id         = data.azurerm_client_config.current.object_id
+  scope                = data.azurerm_monitor_workspace.studio.id
+}
+
+resource azurerm_role_assignment grafana_admin {
+  count                = var.nfsCache.enable ? 1 : 0
+  role_definition_name = "Grafana Admin" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/monitor#grafana-admin
+  principal_id         = data.azurerm_client_config.current.object_id
+  scope                = data.azurerm_dashboard_grafana.studio.id
 }
 
 resource azurerm_orchestrated_virtual_machine_scale_set cache {
@@ -134,8 +155,8 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
   }
   os_profile {
     custom_data = base64encode(templatefile("nfs.py", {
-      metricsLocalStatsPort  = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.localStatsPort
       metricsIntervalSeconds = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.intervalSeconds
+      metricsCustomStatsPort = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.customStatsPort
     }))
     linux_configuration {
       computer_name_prefix            = var.nfsCache.machine.prefix != "" ? var.nfsCache.machine.prefix : null
@@ -190,16 +211,16 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
       name                               = var.nfsCache.machine.extension.custom.name
       type                               = "CustomScript"
       publisher                          = "Microsoft.Azure.Extensions"
-      type_handler_version               = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionLinux)].value
+      type_handler_version               = "2.1"
       auto_upgrade_minor_version_enabled = true
       protected_settings = jsonencode({
         script = base64encode(
           templatefile(var.nfsCache.machine.extension.custom.fileName, merge(var.nfsCache.machine.extension.custom.parameters, {
             dataDiskCount          = var.nfsCache.machine.dataDisk.count
-            metricsLocalNodePort   = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.localNodePort
-            metricsLocalStatsPort  = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.localStatsPort
             metricsIntervalSeconds = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.intervalSeconds
-            metricsIngestionUrl    = data.azurerm_monitor_data_collection_endpoint.studio.metrics_ingestion_endpoint
+            metricsNodeExportsPort = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.nodeExportsPort
+            metricsCustomStatsPort = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.customStatsPort
+            metricsIngestionUrl    = "${data.azurerm_monitor_data_collection_endpoint.studio.metrics_ingestion_endpoint}/dataCollectionRules/${data.azurerm_monitor_data_collection_rule.studio.immutable_id}/streams/Microsoft-PrometheusMetrics/api/v1/write?api-version=${var.monitorWorkspace.metricsIngestion.apiVersion}"
             exportAddressSpace     = data.azurerm_virtual_network.studio.address_space[0]
             userIdentityClientId   = data.azurerm_user_assigned_identity.studio.client_id
           }))

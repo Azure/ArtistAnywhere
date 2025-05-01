@@ -10,14 +10,14 @@ sed -i "s/15 seconds/${metricsIntervalSeconds} seconds/g" $metricsConfigFile
 sed -i "s/: 15s/: ${metricsIntervalSeconds}s/g" $metricsConfigFile
 
 cat >> $metricsConfigFile <<EOF
-  - job_name: "node_exports"
+  - job_name: "node_exporter"
     static_configs:
-      - targets: ["localhost:${metricsLocalNodePort}"]
+      - targets: ["localhost:${metricsNodeExportsPort}"]
   - job_name: "cache_stats"
     static_configs:
-      - targets: ["localhost:${metricsLocalStatsPort}"]
+      - targets: ["localhost:${metricsCustomStatsPort}"]
 
-remote_write
+remote_write:
   - url: "${metricsIngestionUrl}"
     azuread:
       cloud: "AzurePublic"
@@ -117,10 +117,11 @@ function set_storage_mounts {
 dataFilePath="/var/lib/waagent/ovf-env.xml"
 codeFilePath="/usr/local/bin/nfs.py"
 dataFileText=$(xmllint --xpath "//*[local-name()='Environment']/*[local-name()='ProvisioningSection']/*[local-name()='LinuxProvisioningConfigurationSet']/*[local-name()='CustomData']/text()" $dataFilePath)
-echo $dataFileText | base64 -d | > $codeFilePath
+echo $dataFileText | base64 -d > $codeFilePath
 
 unitName="cache_stats.service"
-unitJSON='{"name":"'$unitName'","path":"'$codeFilePath'","description":"Local Prometheus Metrics Collection"}'
+unitPath="/usr/bin/python3 $codeFilePath"
+unitJSON='{"name":"'$unitName'","path":"'$unitPath'","description":"Local Prometheus Metrics Collection"}'
 set_systemd_file "$unitJSON" false
 
 mountName="fscache.mount"

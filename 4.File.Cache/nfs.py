@@ -86,7 +86,7 @@ def get_stats():
 
 if __name__ == "__main__":
 
-    start_http_server(${metricsLocalStatsPort})
+    start_http_server(${metricsCustomStatsPort})
     while True:
         get_stats()
         gc.collect()
