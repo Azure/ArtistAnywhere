@@ -108,26 +108,6 @@ variable dnsRecord {
   })
 }
 
-variable managedIdentity {
-  type = object({
-    name              = string
-    resourceGroupName = string
-  })
-}
-
-variable keyVault {
-  type = object({
-    enable            = bool
-    name              = string
-    resourceGroupName = string
-    secretName = object({
-      adminUsername = string
-      adminPassword = string
-      sshKeyPublic  = string
-    })
-  })
-}
-
 variable monitorWorkspace {
   type = object({
     name              = string
@@ -183,32 +163,32 @@ data terraform_remote_state core {
 }
 
 data azurerm_user_assigned_identity studio {
-  name                = var.managedIdentity.name
-  resource_group_name = var.managedIdentity.resourceGroupName
+  name                = data.terraform_remote_state.core.outputs.managedIdentity.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault studio {
-  count               = var.keyVault.enable ? 1 : 0
-  name                = var.keyVault.name
-  resource_group_name = var.keyVault.resourceGroupName
+  name                = data.terraform_remote_state.core.outputs.keyVault.name
+  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault_secret admin_username {
-  count        = var.keyVault.enable ? 1 : 0
-  name         = var.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.adminUsername
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault_secret admin_password {
-  count        = var.keyVault.enable ? 1 : 0
-  name         = var.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.adminPassword
+  key_vault_id = data.azurerm_key_vault.studio.id
 }
 
 data azurerm_key_vault_secret ssh_key_public {
-  count        = var.keyVault.enable ? 1 : 0
-  name         = var.keyVault.secretName.sshKeyPublic
-  key_vault_id = data.azurerm_key_vault.studio[0].id
+  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.sshKeyPublic
+  key_vault_id = data.azurerm_key_vault.studio.id
+}
+
+data azurerm_app_configuration_keys studio {
+  configuration_store_id = data.terraform_remote_state.core.outputs.appConfig.id
 }
 
 data azurerm_monitor_workspace studio {

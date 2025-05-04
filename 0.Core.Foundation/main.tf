@@ -36,18 +36,10 @@ provider azurerm {
 
 variable subscriptionId {
   type = string
-  validation {
-    condition     = var.subscriptionId != ""
-    error_message = "Azure subscriptionId is a required input variable in the 0.Core.Foundation\\config.auto.tfvars file."
-  }
 }
 
 variable defaultLocation {
   type = string
-  validation {
-    condition     = var.defaultLocation != ""
-    error_message = "Azure defaultLocation is a required input variable in the 0.Core.Foundation\\config.auto.tfvars file."
-  }
 }
 
 locals {

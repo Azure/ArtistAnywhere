@@ -94,22 +94,6 @@ dnsRecord = {
 # Brownfield Resources #
 ########################
 
-managedIdentity = {
-  name              = "xstudio"
-  resourceGroupName = "ArtistAnywhere"
-}
-
-keyVault = {
-  enable            = true
-  name              = "xstudio"
-  resourceGroupName = "ArtistAnywhere"
-  secretName = {
-    adminUsername = "AdminUsername"
-    adminPassword = "AdminPassword"
-    sshKeyPublic  = "SSHKeyPublic"
-  }
-}
-
 monitorWorkspace = {
   name              = "xstudio"
   resourceGroupName = "ArtistAnywhere.Monitor"

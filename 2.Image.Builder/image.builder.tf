@@ -4,7 +4,6 @@
 
 variable imageBuilder {
   type = object({
-    replicaRegions = list(string)
     templates = list(object({
       enable = bool
       name   = string
@@ -23,15 +22,18 @@ variable imageBuilder {
         jobSchedulers  = list(string)
         jobProcessors  = list(string)
       })
-      distribute = object({
-        storageAccountType = string
-        replicaCount       = number
-      })
-      errorHandling = object({
-        validationMode    = string
-        customizationMode = string
-      })
     }))
+    distribute = object({
+      replicaCount   = number
+      replicaRegions = list(string)
+      storageAccount = object({
+        type = string
+      })
+    })
+    errorHandling = object({
+      validationMode    = string
+      customizationMode = string
+    })
   })
 }
 
@@ -108,8 +110,8 @@ resource azapi_resource linux {
         }
       }
       errorHandling = {
-        onValidationError = each.value.errorHandling.validationMode
-        onCustomizerError = each.value.errorHandling.customizationMode
+        onValidationError = var.imageBuilder.errorHandling.validationMode
+        onCustomizerError = var.imageBuilder.errorHandling.customizationMode
       }
       customize = concat(
         [
@@ -168,9 +170,11 @@ resource azapi_resource linux {
           runOutputName  = "${each.value.name}-${each.value.build.imageVersion}"
           galleryImageId = "${azurerm_shared_image.studio[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
           targetRegions = [
-            for location in var.imageBuilder.replicaRegions : merge(each.value.distribute, {
-              name = location
-            })
+            for location in concat([azurerm_shared_image_gallery.studio.location], var.imageBuilder.distribute.replicaRegions) : {
+              name               = location
+              replicaCount       = var.imageBuilder.distribute.replicaCount
+              storageAccountType = var.imageBuilder.distribute.storageAccount.type
+            }
           ]
           versioning = {
             scheme = "Latest"
@@ -234,8 +238,8 @@ resource azapi_resource windows {
         }
       }
       errorHandling = {
-        onValidationError = each.value.errorHandling.validationMode
-        onCustomizerError = each.value.errorHandling.customizationMode
+        onValidationError = var.imageBuilder.errorHandling.validationMode
+        onCustomizerError = var.imageBuilder.errorHandling.customizationMode
       }
       customize = concat(
         [
@@ -302,9 +306,11 @@ resource azapi_resource windows {
           runOutputName  = "${each.value.name}-${each.value.build.imageVersion}"
           galleryImageId = "${azurerm_shared_image.studio[each.value.source.imageDefinition.name].id}/versions/${each.value.build.imageVersion}"
           targetRegions = [
-            for location in var.imageBuilder.replicaRegions : merge(each.value.distribute, {
-              name = location
-            })
+            for location in concat([azurerm_shared_image_gallery.studio.location], var.imageBuilder.distribute.replicaRegions) : {
+              name               = location
+              replicaCount       = var.imageBuilder.distribute.replicaCount
+              storageAccountType = var.imageBuilder.distribute.storageAccount.type
+            }
           ]
           versioning = {
             scheme = "Latest"

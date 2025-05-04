@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~>4.27.0"
     }
+    azapi = {
+      source  = "azure/azapi"
+      version = "~>2.3.0"
+    }
   }
   backend azurerm {
     key              = "7.Artist.Workstation"
@@ -27,16 +31,17 @@ variable resourceGroupName {
   type = string
 }
 
-variable extendedZone {
+variable virtualNetwork {
   type = object({
-    enable   = bool
-    name     = string
-    location = string
+    name              = string
+    subnetName        = string
+    resourceGroupName = string
   })
 }
 
-variable virtualNetwork {
+variable virtualNetworkExtended {
   type = object({
+    enable            = bool
     name              = string
     subnetName        = string
     resourceGroupName = string
@@ -103,9 +108,9 @@ data azurerm_virtual_network studio {
 }
 
 data azurerm_virtual_network studio_extended {
-  count               = var.extendedZone.enable ? 1 : 0
-  name                = var.virtualNetwork.name
-  resource_group_name = var.virtualNetwork.resourceGroupName
+  count               = var.virtualNetworkExtended.enable ? 1 : 0
+  name                = var.virtualNetworkExtended.name
+  resource_group_name = var.virtualNetworkExtended.resourceGroupName
 }
 
 resource azurerm_resource_group workstation {

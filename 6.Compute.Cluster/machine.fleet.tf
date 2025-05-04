@@ -87,13 +87,8 @@ variable computeFleets {
 locals {
   computeFleets = [
     for computeFleet in var.computeFleets : merge(computeFleet, {
-      resourceLocation = {
-        name = computeFleet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : data.terraform_remote_state.core.outputs.defaultLocation
-        extendedZone = {
-          name     = computeFleet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : null
-          location = computeFleet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.location : null
-        }
-      }
+      location = var.virtualNetworkExtended.enable && computeFleet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].location : data.azurerm_virtual_network.studio.location
+      edgeZone = var.virtualNetworkExtended.enable && computeFleet.network.locationExtended.enable ? data.azapi_resource.virtual_network_extended[0].output.extendedLocation.name : null
       machine = merge(computeFleet.machine, {
         adminLogin = merge(computeFleet.machine.adminLogin, {
           userName     = computeFleet.machine.adminLogin.userName != "" ? computeFleet.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value

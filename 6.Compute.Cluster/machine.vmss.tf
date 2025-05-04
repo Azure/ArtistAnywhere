@@ -16,6 +16,9 @@ variable virtualMachineScaleSets {
         definitionName    = string
         resourceGroupName = string
       })
+      bootDiagnostics = object({
+        enable = bool
+      })
     })
     network = object({
       acceleration = object({
@@ -62,9 +65,11 @@ variable virtualMachineScaleSets {
         port        = number
         requestPath = string
       })
-      monitor = object({
-        enable = bool
-        name   = string
+    })
+    monitor = object({
+      enable = bool
+      metric = object({
+        category = string
       })
     })
     adminLogin = object({
@@ -91,18 +96,28 @@ data azurerm_location studio {
   location = data.azurerm_virtual_network.studio.location
 }
 
+data azurerm_resource_group virtual_network_extended {
+  count = var.virtualNetworkExtended.enable ? 1 : 0
+  name  = data.azurerm_virtual_network.studio_extended[0].resource_group_name
+}
+
+data azapi_resource virtual_network_extended {
+  count     = var.virtualNetworkExtended.enable ? 1 : 0
+  name      = data.azurerm_virtual_network.studio_extended[0].name
+  parent_id = data.azurerm_resource_group.virtual_network_extended[0].id
+  type      = "Microsoft.Network/virtualNetworks@2024-07-01"
+  response_export_values = [
+    "extendedLocation.name"
+  ]
+}
+
 locals {
   virtualMachineScaleSets = [
     for virtualMachineScaleSet in var.virtualMachineScaleSets : merge(virtualMachineScaleSet, {
-      resourceLocation = {
-        name = virtualMachineScaleSet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : data.terraform_remote_state.core.outputs.defaultLocation
-        extendedZone = {
-          name     = virtualMachineScaleSet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : null
-          location = virtualMachineScaleSet.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.location : null
-        }
-      }
+      location = var.virtualNetworkExtended.enable && virtualMachineScaleSet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].location : data.azurerm_virtual_network.studio.location
+      edgeZone = var.virtualNetworkExtended.enable && virtualMachineScaleSet.network.locationExtended.enable ? data.azapi_resource.virtual_network_extended[0].output.extendedLocation.name : null
       network = merge(virtualMachineScaleSet.network, {
-        subnetId = "${virtualMachineScaleSet.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.subnetName}"
+        subnetId = var.virtualNetworkExtended.enable && virtualMachineScaleSet.network.locationExtended.enable ? "${data.azurerm_virtual_network.studio_extended[0].id}/subnets/${var.virtualNetworkExtended.subnetName}" : "${data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.subnetName}"
       })
       adminLogin = merge(virtualMachineScaleSet.adminLogin, {
         userName     = virtualMachineScaleSet.adminLogin.userName != "" ? virtualMachineScaleSet.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -120,8 +135,8 @@ resource azurerm_linux_virtual_machine_scale_set cluster {
   name                            = each.value.name
   computer_name_prefix            = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
   resource_group_name             = azurerm_resource_group.cluster.name
-  location                        = each.value.resourceLocation.name
-  edge_zone                       = each.value.resourceLocation.extendedZone.name
+  location                        = each.value.location
+  edge_zone                       = each.value.edgeZone
   sku                             = each.value.machine.size
   instances                       = each.value.machine.count
   source_image_id                 = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
@@ -130,8 +145,8 @@ resource azurerm_linux_virtual_machine_scale_set cluster {
   disable_password_authentication = each.value.adminLogin.passwordAuth.disable
   priority                        = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy                 = each.value.spot.enable ? each.value.spot.evictionPolicy : null
-  zones                           = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? data.azurerm_location.studio.zone_mappings[*].logical_zone : null
-  zone_balance                    = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
+  zones                           = !each.value.network.locationExtended.enable && each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? data.azurerm_location.studio.zone_mappings[*].logical_zone : null
+  zone_balance                    = !each.value.network.locationExtended.enable && each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
   single_placement_group          = false
   overprovision                   = false
   identity {
@@ -196,25 +211,12 @@ resource azurerm_linux_virtual_machine_scale_set cluster {
       })
     }
   }
-  # dynamic extension {
-  #   for_each = each.value.extension.monitor.enable ? [1] : []
-  #   content {
-  #     name                       = each.value.extension.monitor.name
-  #     type                       = "AzureMonitorLinuxAgent"
-  #     publisher                  = "Microsoft.Azure.Monitor"
-  #     type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.monitorAgentLinux)].value
-  #     automatic_upgrade_enabled  = true
-  #     auto_upgrade_minor_version = true
-  #     settings = jsonencode({
-  #       authentication = {
-  #         managedIdentity = {
-  #           identifier-name  = "mi_res_id"
-  #           identifier-value = data.azurerm_user_assigned_identity.studio.id
-  #         }
-  #       }
-  #     })
-  #   }
-  # }
+  dynamic boot_diagnostics {
+    for_each = each.value.machine.bootDiagnostics.enable ? [1] : []
+    content {
+      storage_account_uri = null
+    }
+  }
   dynamic admin_ssh_key {
     for_each = each.value.adminLogin.sshKeyPublic != "" ? [1] : []
     content {
@@ -238,13 +240,21 @@ resource azurerm_linux_virtual_machine_scale_set cluster {
   }
 }
 
-# resource azurerm_monitor_data_collection_rule_association cluster_linux {
-#   for_each = {
-#     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "linux" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
-#   }
-#   target_resource_id          = azurerm_linux_virtual_machine_scale_set.cluster[each.value.name].id
-#   data_collection_endpoint_id = data.terraform_remote_state.core.outputs.monitor.dataCollection.endpoint.id
-# }
+resource azurerm_monitor_diagnostic_setting cluster_monitor_linux {
+  for_each = {
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "linux" && !virtualMachineScaleSet.flexMode.enable
+  }
+  name                           = each.value.name
+  target_resource_id             = "${azurerm_resource_group.cluster.id}/providers/Microsoft.Compute/virtualMachineScaleSets/${each.value.name}"
+  log_analytics_workspace_id     = data.terraform_remote_state.core.outputs.monitor.logAnalytics.id
+  log_analytics_destination_type = "Dedicated"
+  metric {
+    category = each.value.monitor.metric.category
+  }
+  depends_on = [
+    azurerm_linux_virtual_machine_scale_set.cluster
+  ]
+}
 
 resource azurerm_windows_virtual_machine_scale_set cluster {
   for_each = {
@@ -253,8 +263,8 @@ resource azurerm_windows_virtual_machine_scale_set cluster {
   name                   = each.value.name
   computer_name_prefix   = each.value.machine.namePrefix == "" ? null : each.value.machine.namePrefix
   resource_group_name    = azurerm_resource_group.cluster.name
-  location               = each.value.resourceLocation.name
-  edge_zone              = each.value.resourceLocation.extendedZone.name
+  location               = each.value.location
+  edge_zone              = each.value.edgeZone
   sku                    = each.value.machine.size
   instances              = each.value.machine.count
   source_image_id        = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
@@ -262,8 +272,8 @@ resource azurerm_windows_virtual_machine_scale_set cluster {
   admin_password         = each.value.adminLogin.userPassword
   priority               = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy        = each.value.spot.enable ? each.value.spot.evictionPolicy : null
-  zones                  = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? data.azurerm_location.studio.zone_mappings[*].logical_zone : null
-  zone_balance           = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
+  zones                  = !each.value.network.locationExtended.enable && each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? data.azurerm_location.studio.zone_mappings[*].logical_zone : null
+  zone_balance           = !each.value.network.locationExtended.enable && each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
   single_placement_group = false
   overprovision          = false
   identity {
@@ -329,25 +339,12 @@ resource azurerm_windows_virtual_machine_scale_set cluster {
       })
     }
   }
-  # dynamic extension {
-  #   for_each = each.value.extension.monitor.enable ? [1] : []
-  #   content {
-  #     name                       = each.value.extension.monitor.name
-  #     type                       = "AzureMonitorWindowsAgent"
-  #     publisher                  = "Microsoft.Azure.Monitor"
-  #     type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.monitorAgentWindows)].value
-  #     automatic_upgrade_enabled  = true
-  #     auto_upgrade_minor_version = true
-  #     settings = jsonencode({
-  #       authentication = {
-  #         managedIdentity = {
-  #           identifier-name  = "mi_res_id"
-  #           identifier-value = data.azurerm_user_assigned_identity.studio.id
-  #         }
-  #       }
-  #     })
-  #   }
-  # }
+  dynamic boot_diagnostics {
+    for_each = each.value.machine.bootDiagnostics.enable ? [1] : []
+    content {
+      storage_account_uri = null
+    }
+  }
   dynamic termination_notification {
     for_each = each.value.extension.custom.parameters.terminateNotification.enable ? [1] : []
     content {
@@ -364,13 +361,21 @@ resource azurerm_windows_virtual_machine_scale_set cluster {
   }
 }
 
-# resource azurerm_monitor_data_collection_rule_association cluster_windows {
-#   for_each = {
-#     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "windows" && !virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
-#   }
-#   target_resource_id          = azurerm_windows_virtual_machine_scale_set.cluster[each.value.name].id
-#   data_collection_endpoint_id = data.terraform_remote_state.core.outputs.monitor.dataCollection.endpoint.id
-# }
+resource azurerm_monitor_diagnostic_setting cluster_monitor_windows {
+  for_each = {
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if lower(virtualMachineScaleSet.osDisk.type) == "windows" && !virtualMachineScaleSet.flexMode.enable
+  }
+  name                           = each.value.name
+  target_resource_id             = "${azurerm_resource_group.cluster.id}/providers/Microsoft.Compute/virtualMachineScaleSets/${each.value.name}"
+  log_analytics_workspace_id     = data.terraform_remote_state.core.outputs.monitor.logAnalytics.id
+  log_analytics_destination_type = "Dedicated"
+  metric {
+    category = each.value.monitor.metric.category
+  }
+  depends_on = [
+    azurerm_windows_virtual_machine_scale_set.cluster
+  ]
+}
 
 resource azurerm_orchestrated_virtual_machine_scale_set cluster {
   for_each = {
@@ -378,15 +383,15 @@ resource azurerm_orchestrated_virtual_machine_scale_set cluster {
   }
   name                        = each.value.name
   resource_group_name         = azurerm_resource_group.cluster.name
-  location                    = each.value.resourceLocation.name
-  # edge_zone                   = each.value.resourceLocation.extendedZone.name
+  location                    = each.value.location
+  # edge_zone                   = each.value.edgeZone
   sku_name                    = each.value.machine.size
   instances                   = each.value.machine.count
   source_image_id             = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.machine.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.machine.image.galleryName}/images/${each.value.machine.image.definitionName}/versions/${each.value.machine.image.versionId}"
   priority                    = each.value.spot.enable ? "Spot" : "Regular"
   eviction_policy             = each.value.spot.enable ? each.value.spot.evictionPolicy : null
-  zones                       = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? data.azurerm_location.studio.zone_mappings[*].logical_zone : null
-  zone_balance                = each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
+  zones                       = !each.value.network.locationExtended.enable && each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? data.azurerm_location.studio.zone_mappings[*].logical_zone : null
+  zone_balance                = !each.value.network.locationExtended.enable && each.value.availabilityZones.enable && length(data.azurerm_location.studio.zone_mappings) > 0 ? each.value.availabilityZones.evenDistribution.enable : null
   platform_fault_domain_count = each.value.availabilityZones.enable || each.value.spot.enable ? 1 : 3
   identity {
     type = "UserAssigned"
@@ -480,24 +485,12 @@ resource azurerm_orchestrated_virtual_machine_scale_set cluster {
       })
     }
   }
-  # dynamic extension {
-  #   for_each = each.value.extension.monitor.enable ? [1] : []
-  #   content {
-  #     name                               = each.value.extension.monitor.name
-  #     type                               = lower(each.value.osDisk.type) == "windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
-  #     publisher                          = "Microsoft.Azure.Monitor"
-  #     type_handler_version               = lower(each.value.osDisk.type) == "windows" ? data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.monitorAgentWindows)].value : data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.monitorAgentLinux)].value
-  #     auto_upgrade_minor_version_enabled = true
-  #     settings = jsonencode({
-  #       authentication = {
-  #         managedIdentity = {
-  #           identifier-name  = "mi_res_id"
-  #           identifier-value = data.azurerm_user_assigned_identity.studio.id
-  #         }
-  #       }
-  #     })
-  #   }
-  # }
+  dynamic boot_diagnostics {
+    for_each = each.value.machine.bootDiagnostics.enable ? [1] : []
+    content {
+      storage_account_uri = null
+    }
+  }
   dynamic termination_notification {
     for_each = each.value.extension.custom.parameters.terminateNotification.enable ? [1] : []
     content {
@@ -507,10 +500,18 @@ resource azurerm_orchestrated_virtual_machine_scale_set cluster {
   }
 }
 
-# resource azurerm_monitor_data_collection_rule_association cluster {
-#   for_each = {
-#     for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable && virtualMachineScaleSet.extension.monitor.enable
-#   }
-#   target_resource_id          = azurerm_orchestrated_virtual_machine_scale_set.cluster[each.value.name].id
-#   data_collection_endpoint_id = data.terraform_remote_state.core.outputs.monitor.dataCollection.endpoint.id
-# }
+resource azurerm_monitor_diagnostic_setting cluster_monitor {
+  for_each = {
+    for virtualMachineScaleSet in local.virtualMachineScaleSets : virtualMachineScaleSet.name => virtualMachineScaleSet if virtualMachineScaleSet.flexMode.enable
+  }
+  name                           = each.value.name
+  target_resource_id             = "${azurerm_resource_group.cluster.id}/providers/Microsoft.Compute/virtualMachineScaleSets/${each.value.name}"
+  log_analytics_workspace_id     = data.terraform_remote_state.core.outputs.monitor.logAnalytics.id
+  log_analytics_destination_type = "Dedicated"
+  metric {
+    category = each.value.monitor.metric.category
+  }
+  depends_on = [
+    azurerm_orchestrated_virtual_machine_scale_set.cluster
+  ]
+}

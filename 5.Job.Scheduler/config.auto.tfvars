@@ -1,11 +1,5 @@
 resourceGroupName = "ArtistAnywhere.Cluster.JobScheduler"
 
-extendedZone = {
-  enable   = false
-  name     = "LosAngeles"
-  location = "WestUS"
-}
-
 #########################################################################
 # Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
 #########################################################################
@@ -54,9 +48,11 @@ virtualMachines = [
           }
         }
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -111,9 +107,11 @@ virtualMachines = [
           }
         }
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -144,10 +142,18 @@ virtualNetwork = {
   name              = "Studio"
   subnetName        = "Cluster"
   resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
-  privateDNS = {
-    zoneName          = "azure.studio"
-    resourceGroupName = "ArtistAnywhere.Network"
-  }
+}
+
+virtualNetworkExtended = {
+  enable            = true
+  name              = "Studio"
+  subnetName        = "Cluster"
+  resourceGroupName = "ArtistAnywhere.Network.WestUS.LosAngeles"
+}
+
+privateDNS = {
+  zoneName          = "azure.studio"
+  resourceGroupName = "ArtistAnywhere.Network"
 }
 
 activeDirectory = {

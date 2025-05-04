@@ -1,11 +1,5 @@
 resourceGroupName = "ArtistAnywhere.Cluster"
 
-extendedZone = {
-  enable   = false
-  name     = "LosAngeles"
-  location = "WestUS"
-}
-
 ######################################################################################################
 # Virtual Machine Scale Sets (https://learn.microsoft.com/azure/virtual-machine-scale-sets/overview) #
 ######################################################################################################
@@ -23,6 +17,9 @@ virtualMachineScaleSets = [
         galleryName       = "xstudio"
         definitionName    = "Linux"
         resourceGroupName = "ArtistAnywhere.Image"
+      }
+      bootDiagnostics = {
+        enable = true
       }
     }
     network = {
@@ -70,9 +67,11 @@ virtualMachineScaleSets = [
         port        = 111
         requestPath = ""
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -106,6 +105,9 @@ virtualMachineScaleSets = [
         definitionName    = "Linux"
         resourceGroupName = "ArtistAnywhere.Image"
       }
+      bootDiagnostics = {
+        enable = true
+      }
     }
     network = {
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -152,9 +154,11 @@ virtualMachineScaleSets = [
         port        = 111
         requestPath = ""
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -183,10 +187,13 @@ virtualMachineScaleSets = [
       size       = "Standard_NC40ads_H100_v5"
       count      = 3
       image = {
-        versionId         = "2.1.0"
+        versionId         = "2.2.0"
         galleryName       = "xstudio"
         definitionName    = "Linux"
         resourceGroupName = "ArtistAnywhere.Image"
+      }
+      bootDiagnostics = {
+        enable = true
       }
     }
     network = {
@@ -234,9 +241,11 @@ virtualMachineScaleSets = [
         port        = 111
         requestPath = ""
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -265,10 +274,13 @@ virtualMachineScaleSets = [
       size       = "Standard_ND96isr_MI300X_v5"
       count      = 3
       image = {
-        versionId         = "2.2.0"
+        versionId         = "2.3.0"
         galleryName       = "xstudio"
         definitionName    = "Linux"
         resourceGroupName = "ArtistAnywhere.Image"
+      }
+      bootDiagnostics = {
+        enable = true
       }
     }
     network = {
@@ -316,9 +328,11 @@ virtualMachineScaleSets = [
         port        = 111
         requestPath = ""
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -352,6 +366,9 @@ virtualMachineScaleSets = [
         definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
       }
+      bootDiagnostics = {
+        enable = true
+      }
     }
     network = {
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -398,9 +415,11 @@ virtualMachineScaleSets = [
         port        = 445
         requestPath = ""
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -434,6 +453,9 @@ virtualMachineScaleSets = [
         definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
       }
+      bootDiagnostics = {
+        enable = true
+      }
     }
     network = {
       acceleration = { # https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview
@@ -480,9 +502,11 @@ virtualMachineScaleSets = [
         port        = 445
         requestPath = ""
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -511,10 +535,13 @@ virtualMachineScaleSets = [
       size       = "Standard_NC40ads_H100_v5"
       count      = 3
       image = {
-        versionId         = "2.1.0"
+        versionId         = "2.2.0"
         galleryName       = "xstudio"
         definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
+      }
+      bootDiagnostics = {
+        enable = true
       }
     }
     network = {
@@ -562,9 +589,11 @@ virtualMachineScaleSets = [
         port        = 445
         requestPath = ""
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -593,10 +622,13 @@ virtualMachineScaleSets = [
       size       = "Standard_ND96isr_MI300X_v5"
       count      = 3
       image = {
-        versionId         = "2.1.0"
+        versionId         = "2.3.0"
         galleryName       = "xstudio"
         definitionName    = "WinCluster"
         resourceGroupName = "ArtistAnywhere.Image"
+      }
+      bootDiagnostics = {
+        enable = true
       }
     }
     network = {
@@ -644,9 +676,11 @@ virtualMachineScaleSets = [
         port        = 445
         requestPath = ""
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -858,6 +892,13 @@ virtualNetwork = {
   name              = "Studio"
   subnetName        = "Cluster"
   resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
+}
+
+virtualNetworkExtended = {
+  enable            = true
+  name              = "Studio"
+  subnetName        = "Cluster"
+  resourceGroupName = "ArtistAnywhere.Network.WestUS.LosAngeles"
 }
 
 activeDirectory = {

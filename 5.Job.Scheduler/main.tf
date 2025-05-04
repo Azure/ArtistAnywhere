@@ -9,6 +9,10 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~>3.3.0"
     }
+    azapi = {
+      source  = "azure/azapi"
+      version = "~>2.3.0"
+    }
   }
   backend azurerm {
     key              = "5.Job.Scheduler"
@@ -31,14 +35,6 @@ variable resourceGroupName {
   type = string
 }
 
-variable extendedZone {
-  type = object({
-    enable   = bool
-    name     = string
-    location = string
-  })
-}
-
 variable dnsRecord {
   type = object({
     name       = string
@@ -51,10 +47,22 @@ variable virtualNetwork {
     name              = string
     subnetName        = string
     resourceGroupName = string
-    privateDNS = object({
-      zoneName          = string
-      resourceGroupName = string
-    })
+  })
+}
+
+variable virtualNetworkExtended {
+  type = object({
+    enable            = bool
+    name              = string
+    subnetName        = string
+    resourceGroupName = string
+  })
+}
+
+variable privateDNS {
+  type = object({
+    zoneName          = string
+    resourceGroupName = string
   })
 }
 
@@ -118,9 +126,9 @@ data azurerm_virtual_network studio {
 }
 
 data azurerm_virtual_network studio_extended {
-  count               = var.extendedZone.enable ? 1 : 0
-  name                = var.virtualNetwork.name
-  resource_group_name = var.virtualNetwork.resourceGroupName
+  count               = var.virtualNetworkExtended.enable ? 1 : 0
+  name                = var.virtualNetworkExtended.name
+  resource_group_name = var.virtualNetworkExtended.resourceGroupName
 }
 
 resource azurerm_resource_group job_scheduler {
@@ -136,8 +144,8 @@ resource azurerm_private_dns_a_record job_scheduler {
     for virtualMachine in var.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable
   }
   name                = lower(var.dnsRecord.name)
-  resource_group_name = var.virtualNetwork.privateDNS.resourceGroupName
-  zone_name           = var.virtualNetwork.privateDNS.zoneName
+  resource_group_name = var.privateDNS.resourceGroupName
+  zone_name           = var.privateDNS.zoneName
   ttl                 = var.dnsRecord.ttlSeconds
   records = [
     azurerm_network_interface.job_scheduler[each.value.name].private_ip_address

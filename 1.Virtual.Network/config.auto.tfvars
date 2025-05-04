@@ -337,15 +337,15 @@ virtualWAN = {
         scaleUnit = {
           minCount = 2
         }
+        routes = [
+          {
+            enable      = false
+            nextAddress = ""
+            addressSpace = [
+            ]
+          }
+        ]
       }
-      routes = [
-        {
-          enable      = false
-          nextAddress = ""
-          addressSpace = [
-          ]
-        }
-      ]
       vpnGateway = {
         enable     = false
         name       = "xstudio"
@@ -354,10 +354,6 @@ virtualWAN = {
         client = {
           addressSpace = [
           ]
-          rootCertificate = {
-            name = ""
-            data = ""
-          }
         }
       }
     },
@@ -372,27 +368,24 @@ virtualWAN = {
         scaleUnit = {
           minCount = 2
         }
+        routes = [
+          {
+            enable      = false
+            nextAddress = ""
+            addressSpace = [
+            ]
+          }
+        ]
       }
-      routes = [
-        {
-          enable      = false
-          nextAddress = ""
-          addressSpace = [
-          ]
-        }
-      ]
       vpnGateway = {
-        enable     = false
+        enable     = true
         name       = "xstudio"
         scaleUnits = 1
         siteToSite = false
         client = {
           addressSpace = [
+            "10.20.0.0/24"
           ]
-          rootCertificate = {
-            name = ""
-            data = ""
-          }
         }
       }
     },
@@ -407,15 +400,15 @@ virtualWAN = {
         scaleUnit = {
           minCount = 2
         }
+        routes = [
+          {
+            enable      = false
+            nextAddress = ""
+            addressSpace = [
+            ]
+          }
+        ]
       }
-      routes = [
-        {
-          enable      = false
-          nextAddress = ""
-          addressSpace = [
-          ]
-        }
-      ]
       vpnGateway = {
         enable     = false
         name       = "xstudio"
@@ -424,10 +417,6 @@ virtualWAN = {
         client = {
           addressSpace = [
           ]
-          rootCertificate = {
-            name = ""
-            data = ""
-          }
         }
       }
     }

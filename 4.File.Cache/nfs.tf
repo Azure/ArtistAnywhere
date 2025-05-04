@@ -92,9 +92,9 @@ locals {
         version   = var.nfsCache.machine.image.version != "" ? var.nfsCache.machine.image.version : module.core.image.linux.version
       })
       adminLogin = merge(var.nfsCache.machine.adminLogin, {
-        userName     = var.nfsCache.machine.adminLogin.userName != "" ? var.nfsCache.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username[0].value
-        userPassword = var.nfsCache.machine.adminLogin.userPassword != "" ? var.nfsCache.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password[0].value
-        sshKeyPublic = var.nfsCache.machine.adminLogin.sshKeyPublic != "" ? var.nfsCache.machine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public[0].value
+        userName     = var.nfsCache.machine.adminLogin.userName != "" ? var.nfsCache.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
+        userPassword = var.nfsCache.machine.adminLogin.userPassword != "" ? var.nfsCache.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value
+        sshKeyPublic = var.nfsCache.machine.adminLogin.sshKeyPublic != "" ? var.nfsCache.machine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
       })
     })
   })
@@ -211,7 +211,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
       name                               = var.nfsCache.machine.extension.custom.name
       type                               = "CustomScript"
       publisher                          = "Microsoft.Azure.Extensions"
-      type_handler_version               = "2.1"
+      type_handler_version               = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionLinux)].value
       auto_upgrade_minor_version_enabled = true
       protected_settings = jsonencode({
         script = base64encode(

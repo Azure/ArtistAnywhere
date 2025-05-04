@@ -75,9 +75,6 @@ computeGallery = {
 #############################################################################################
 
 imageBuilder = {
-  replicaRegions = [
-    "WestUS"
-  ]
   templates = [
     {
       enable = true
@@ -100,14 +97,6 @@ imageBuilder = {
         ]
         jobProcessors = [
         ]
-      }
-      distribute = {
-        replicaCount       = 1
-        storageAccountType = "Premium_LRS"
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
       }
     },
     {
@@ -133,14 +122,6 @@ imageBuilder = {
           "PBRT"
         ]
       }
-      distribute = {
-        replicaCount       = 1
-        storageAccountType = "Premium_LRS"
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
-      }
     },
     {
       enable = true
@@ -165,14 +146,6 @@ imageBuilder = {
           "PBRT"
         ]
       }
-      distribute = {
-        replicaCount       = 1
-        storageAccountType = "Premium_LRS"
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
-      }
     },
     {
       enable = true
@@ -186,7 +159,7 @@ imageBuilder = {
         machineType    = "Cluster"
         machineSize    = "Standard_NC40ads_H100_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "NVIDIA"                   # NVIDIA or AMD
-        imageVersion   = "2.1.0"
+        imageVersion   = "2.2.0"
         osDiskSizeGB   = 320
         timeoutMinutes = 180
         jobSchedulers = [
@@ -197,14 +170,6 @@ imageBuilder = {
           "PBRT",
           "Blender"
         ]
-      }
-      distribute = {
-        storageAccountType = "Premium_LRS"
-        replicaCount       = 1
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
       }
     },
     {
@@ -219,7 +184,7 @@ imageBuilder = {
         machineType    = "Cluster"
         machineSize    = "Standard_ND96isr_MI300X_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "AMD"                        # NVIDIA or AMD
-        imageVersion   = "2.2.0"
+        imageVersion   = "2.3.0"
         osDiskSizeGB   = 1000
         timeoutMinutes = 180
         jobSchedulers = [
@@ -230,14 +195,6 @@ imageBuilder = {
           "PBRT",
           "Blender"
         ]
-      }
-      distribute = {
-        replicaCount       = 1
-        storageAccountType = "Premium_LRS"
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
       }
     },
     {
@@ -264,14 +221,6 @@ imageBuilder = {
           "Blender"
         ]
       }
-      distribute = {
-        replicaCount       = 1
-        storageAccountType = "Premium_LRS"
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
-      }
     },
     {
       enable = true
@@ -297,14 +246,6 @@ imageBuilder = {
           "Blender"
         ]
       }
-      distribute = {
-        replicaCount       = 1
-        storageAccountType = "Premium_LRS"
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
-      }
     },
     {
       enable = true
@@ -327,14 +268,6 @@ imageBuilder = {
         ]
         jobProcessors = [
         ]
-      }
-      distribute = {
-        storageAccountType = "Premium_LRS"
-        replicaCount       = 1
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
       }
     },
     {
@@ -360,14 +293,6 @@ imageBuilder = {
           "PBRT"
         ]
       }
-      distribute = {
-        storageAccountType = "Premium_LRS"
-        replicaCount       = 1
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
-      }
     },
     {
       enable = true
@@ -392,14 +317,6 @@ imageBuilder = {
           "PBRT"
         ]
       }
-      distribute = {
-        storageAccountType = "Premium_LRS"
-        replicaCount       = 1
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
-      }
     },
     {
       enable = true
@@ -413,7 +330,7 @@ imageBuilder = {
         machineType    = "Cluster"
         machineSize    = "Standard_NC40ads_H100_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "NVIDIA"                   # NVIDIA or AMD
-        imageVersion   = "2.1.0"
+        imageVersion   = "2.2.0"
         osDiskSizeGB   = 320
         timeoutMinutes = 360
         jobSchedulers = [
@@ -424,14 +341,6 @@ imageBuilder = {
           "PBRT",
           "Blender"
         ]
-      }
-      distribute = {
-        storageAccountType = "Premium_LRS"
-        replicaCount       = 1
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
       }
     },
     {
@@ -446,7 +355,7 @@ imageBuilder = {
         machineType    = "Cluster"
         machineSize    = "Standard_ND96isr_MI300X_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "AMD"                        # NVIDIA or AMD
-        imageVersion   = "2.2.0"
+        imageVersion   = "2.3.0"
         osDiskSizeGB   = 1000
         timeoutMinutes = 360
         jobSchedulers = [
@@ -457,14 +366,6 @@ imageBuilder = {
           "PBRT",
           "Blender"
         ]
-      }
-      distribute = {
-        storageAccountType = "Premium_LRS"
-        replicaCount       = 1
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
       }
     },
     {
@@ -491,14 +392,6 @@ imageBuilder = {
           "Blender"
         ]
       }
-      distribute = {
-        storageAccountType = "Premium_LRS"
-        replicaCount       = 1
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
-      }
     },
     {
       enable = true
@@ -524,16 +417,21 @@ imageBuilder = {
           "Blender"
         ]
       }
-      distribute = {
-        storageAccountType = "Premium_LRS"
-        replicaCount       = 1
-      }
-      errorHandling = {
-        validationMode    = "cleanup"
-        customizationMode = "cleanup"
-      }
     }
   ]
+  distribute = {
+    replicaCount = 1
+    replicaRegions = [
+      "WestUS"
+    ]
+    storageAccount = {
+      type = "Premium_LRS"
+    }
+  }
+  errorHandling = {
+    validationMode    = "cleanup"
+    customizationMode = "cleanup"
+  }
 }
 
 ########################

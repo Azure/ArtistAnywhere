@@ -45,9 +45,11 @@ variable virtualMachines {
           })
         })
       })
-      monitor = object({
-        enable = bool
-        name   = string
+    })
+    monitor = object({
+      enable = bool
+      metric = object({
+        category = string
       })
     })
     adminLogin = object({
@@ -61,18 +63,28 @@ variable virtualMachines {
   }))
 }
 
+data azurerm_resource_group virtual_network_extended {
+  count = var.virtualNetworkExtended.enable ? 1 : 0
+  name  = data.azurerm_virtual_network.studio_extended[0].resource_group_name
+}
+
+data azapi_resource virtual_network_extended {
+  count     = var.virtualNetworkExtended.enable ? 1 : 0
+  name      = data.azurerm_virtual_network.studio_extended[0].name
+  parent_id = data.azurerm_resource_group.virtual_network_extended[0].id
+  type      = "Microsoft.Network/virtualNetworks@2024-07-01"
+  response_export_values = [
+    "extendedLocation.name"
+  ]
+}
+
 locals {
   virtualMachines = [
     for virtualMachine in var.virtualMachines : merge(virtualMachine, {
-      resourceLocation = {
-        name = virtualMachine.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : data.terraform_remote_state.core.outputs.defaultLocation
-        extendedZone = {
-          name     = virtualMachine.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.name : null
-          location = virtualMachine.network.locationExtended.enable && var.extendedZone.enable ? var.extendedZone.location : null
-        }
-      }
+      location = var.virtualNetworkExtended.enable && virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].location : data.azurerm_virtual_network.studio.location
+      edgeZone = var.virtualNetworkExtended.enable && virtualMachine.network.locationExtended.enable ? data.azapi_resource.virtual_network_extended[0].output.extendedLocation.name : null
       network = merge(virtualMachine.network, {
-        subnetId = "${virtualMachine.network.locationExtended.enable ? data.azurerm_virtual_network.studio_extended[0].id : data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.subnetName}"
+        subnetId = var.virtualNetworkExtended.enable && virtualMachine.network.locationExtended.enable ? "${data.azurerm_virtual_network.studio_extended[0].id}/subnets/${var.virtualNetworkExtended.subnetName}" : "${data.azurerm_virtual_network.studio.id}/subnets/${var.virtualNetwork.subnetName}"
       })
       adminLogin = merge(virtualMachine.adminLogin, {
         userName     = virtualMachine.adminLogin.userName != "" ? virtualMachine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -97,8 +109,8 @@ resource azurerm_network_interface job_scheduler {
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.job_scheduler.name
-  location            = each.value.resourceLocation.name
-  edge_zone           = each.value.resourceLocation.extendedZone.name
+  location            = each.value.location
+  edge_zone           = each.value.edgeZone
   ip_configuration {
     name                          = "ipConfig"
     private_ip_address_allocation = "Dynamic"
@@ -113,8 +125,8 @@ resource azurerm_linux_virtual_machine job_scheduler {
   }
   name                            = each.value.name
   resource_group_name             = azurerm_resource_group.job_scheduler.name
-  location                        = each.value.resourceLocation.name
-  edge_zone                       = each.value.resourceLocation.extendedZone.name
+  location                        = each.value.location
+  edge_zone                       = each.value.edgeZone
   source_image_id                 = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                            = each.value.size
   admin_username                  = each.value.adminLogin.userName
@@ -168,37 +180,21 @@ resource azurerm_virtual_machine_extension job_scheduler_initialize_linux {
   ]
 }
 
-# resource azurerm_virtual_machine_extension job_scheduler_monitor_linux {
-#   for_each = {
-#     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "linux" && virtualMachine.extension.monitor.enable
-#   }
-#   name                       = each.value.extension.monitor.name
-#   type                       = "AzureMonitorLinuxAgent"
-#   publisher                  = "Microsoft.Azure.Monitor"
-#   type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.monitorAgentWindows)].value
-#   automatic_upgrade_enabled  = true
-#   auto_upgrade_minor_version = true
-#   virtual_machine_id         = "${azurerm_resource_group.job_scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
-#   settings = jsonencode({
-#     authentication = {
-#       managedIdentity = {
-#         identifier-name  = "mi_res_id"
-#         identifier-value = data.azurerm_user_assigned_identity.studio.id
-#       }
-#     }
-#   })
-#   depends_on = [
-#     azurerm_virtual_machine_extension.job_scheduler_initialize_linux
-#   ]
-# }
-
-# resource azurerm_monitor_data_collection_rule_association job_scheduler_linux {
-#   for_each = {
-#     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "linux" && virtualMachine.extension.monitor.enable
-#   }
-#   target_resource_id          = azurerm_linux_virtual_machine.job_scheduler[each.value.name].id
-#   data_collection_endpoint_id = data.terraform_remote_state.core.outputs.monitor.dataCollection.endpoint.id
-# }
+resource azurerm_monitor_diagnostic_setting job_scheduler_monitor_linux {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "linux" && virtualMachine.monitor.enable
+  }
+  name                           = each.value.name
+  target_resource_id             = "${azurerm_resource_group.job_scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
+  log_analytics_workspace_id     = data.terraform_remote_state.core.outputs.monitor.logAnalytics.id
+  log_analytics_destination_type = "Dedicated"
+  metric {
+    category = each.value.monitor.metric.category
+  }
+  depends_on = [
+    azurerm_linux_virtual_machine.job_scheduler
+  ]
+}
 
 resource azurerm_windows_virtual_machine job_scheduler {
   for_each = {
@@ -206,8 +202,8 @@ resource azurerm_windows_virtual_machine job_scheduler {
   }
   name                = each.value.name
   resource_group_name = azurerm_resource_group.job_scheduler.name
-  location            = each.value.resourceLocation.name
-  edge_zone           = each.value.resourceLocation.extendedZone.name
+  location            = each.value.location
+  edge_zone           = each.value.edgeZone
   source_image_id     = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.image.resourceGroupName}/providers/Microsoft.Compute/galleries/${each.value.image.galleryName}/images/${each.value.image.definitionName}/versions/${each.value.image.versionId}"
   size                = each.value.size
   admin_username      = each.value.adminLogin.userName
@@ -255,34 +251,18 @@ resource azurerm_virtual_machine_extension job_scheduler_initialize_windows {
   ]
 }
 
-# resource azurerm_virtual_machine_extension job_scheduler_monitor_windows {
-#   for_each = {
-#     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "windows" && virtualMachine.extension.monitor.enable
-#   }
-#   name                       = each.value.extension.monitor.name
-#   type                       = "AzureMonitorWindowsAgent"
-#   publisher                  = "Microsoft.Azure.Monitor"
-#   type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.monitorAgentWindows)].value
-#   automatic_upgrade_enabled  = true
-#   auto_upgrade_minor_version = true
-#   virtual_machine_id         = "${azurerm_resource_group.job_scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
-#   settings = jsonencode({
-#     authentication = {
-#       managedIdentity = {
-#         identifier-name  = "mi_res_id"
-#         identifier-value = data.azurerm_user_assigned_identity.studio.id
-#       }
-#     }
-#   })
-#   depends_on = [
-#     azurerm_virtual_machine_extension.job_scheduler_initialize_windows
-#   ]
-# }
-
-# resource azurerm_monitor_data_collection_rule_association job_scheduler_windows {
-#   for_each = {
-#     for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "windows" && virtualMachine.extension.monitor.enable
-#   }
-#   target_resource_id          = azurerm_windows_virtual_machine.job_scheduler[each.value.name].id
-#   data_collection_endpoint_id = data.terraform_remote_state.core.outputs.monitor.dataCollection.endpoint.id
-# }
+resource azurerm_monitor_diagnostic_setting job_scheduler_monitor_windows {
+  for_each = {
+    for virtualMachine in local.virtualMachines : virtualMachine.name => virtualMachine if virtualMachine.enable && lower(virtualMachine.osDisk.type) == "windows" && virtualMachine.monitor.enable
+  }
+  name                           = each.value.name
+  target_resource_id             = "${azurerm_resource_group.job_scheduler.id}/providers/Microsoft.Compute/virtualMachines/${each.value.name}"
+  log_analytics_workspace_id     = data.terraform_remote_state.core.outputs.monitor.logAnalytics.id
+  log_analytics_destination_type = "Dedicated"
+  metric {
+    category = each.value.monitor.metric.category
+  }
+  depends_on = [
+    azurerm_windows_virtual_machine.job_scheduler
+  ]
+}

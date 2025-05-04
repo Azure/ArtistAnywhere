@@ -1,11 +1,5 @@
 resourceGroupName = "ArtistAnywhere.Workstation"
 
-extendedZone = {
-  enable   = false
-  name     = "LosAngeles"
-  location = "WestUS"
-}
-
 #########################################################################
 # Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
 #########################################################################
@@ -48,9 +42,11 @@ virtualMachines = [
           remoteAgentKey = ""
         }
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -99,9 +95,11 @@ virtualMachines = [
           remoteAgentKey = ""
         }
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -150,9 +148,11 @@ virtualMachines = [
           remoteAgentKey = ""
         }
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -201,9 +201,11 @@ virtualMachines = [
           remoteAgentKey = ""
         }
       }
-      monitor = {
-        enable = false
-        name   = "Monitor"
+    }
+    monitor = {
+      enable = true
+      metric = {
+        category = "AllMetrics"
       }
     }
     adminLogin = {
@@ -225,6 +227,13 @@ virtualNetwork = {
   name              = "Studio"
   subnetName        = "Workstation"
   resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
+}
+
+virtualNetworkExtended = {
+  enable            = true
+  name              = "Studio"
+  subnetName        = "Workstation"
+  resourceGroupName = "ArtistAnywhere.Network.WestUS.LosAngeles"
 }
 
 activeDirectory = {

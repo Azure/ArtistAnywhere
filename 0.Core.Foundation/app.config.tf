@@ -1,6 +1,6 @@
-#########################################################################################
-# App Configuration (https://learn.microsoft.com/azure/azure-app-configuration/overview #
-#########################################################################################
+##################################################################################################
+# Application Configuration (https://learn.microsoft.com/azure/azure-app-configuration/overview) #
+##################################################################################################
 
 variable appConfig {
   type = object({
@@ -13,8 +13,6 @@ locals {
   appConfigKey = {
     scriptExtensionLinux   = "scriptExtensionLinux"
     scriptExtensionWindows = "scriptExtensionWindows"
-    monitorAgentLinux      = "monitorAgentLinux"
-    monitorAgentWindows    = "monitorAgentWindows"
     jobSchedulerDeadline   = "jobSchedulerDeadline"
     jobSchedulerSlurm      = "jobSchedulerSlurm"
     jobProcessorPBRT       = "jobProcessorPBRT"
@@ -75,28 +73,6 @@ resource azurerm_app_configuration_key script_extension_windows {
   ]
 }
 
-resource azurerm_app_configuration_key monitor_agent_linux {
-  configuration_store_id = azurerm_app_configuration.studio.id
-  key                    = local.appConfigKey.monitorAgentLinux
-  label                  = "Monitor Agent Linux"
-  value                  = "1.34"
-  content_type           = "kv"
-  depends_on = [
-    time_sleep.app_config_rbac
-  ]
-}
-
-resource azurerm_app_configuration_key monitor_agent_windows {
-  configuration_store_id = azurerm_app_configuration.studio.id
-  key                    = local.appConfigKey.monitorAgentWindows
-  label                  = "Monitor Agent Windows"
-  value                  = "1.34"
-  content_type           = "kv"
-  depends_on = [
-    time_sleep.app_config_rbac
-  ]
-}
-
 resource azurerm_app_configuration_key job_scheduler_deadline {
   configuration_store_id = azurerm_app_configuration.studio.id
   key                    = local.appConfigKey.jobSchedulerDeadline
@@ -134,7 +110,7 @@ resource azurerm_app_configuration_key job_processor_blender {
   configuration_store_id = azurerm_app_configuration.studio.id
   key                    = local.appConfigKey.jobProcessorBlender
   label                  = "Job Processor Blender"
-  value                  = "4.4.1"
+  value                  = "4.4.3"
   content_type           = "kv"
   depends_on = [
     time_sleep.app_config_rbac
