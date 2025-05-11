@@ -20,6 +20,7 @@ variable virtualWAN {
         })
         routes = list(object({
           enable       = bool
+          name         = string
           nextAddress  = string
           addressSpace = list(string)
         }))
@@ -58,9 +59,9 @@ resource azurerm_virtual_hub studio {
   hub_routing_preference                 = each.value.router.preferenceMode
   virtual_router_auto_scale_min_capacity = each.value.router.scaleUnit.minCount
   dynamic route {
-    for_each = [
-      for route in each.value.router.routes : route if route.enable
-    ]
+    for_each = {
+      for route in each.value.router.routes : route.name => route if route.enable
+    }
     content {
       next_hop_ip_address = route.nextAddress
       address_prefixes    = route.addressSpace

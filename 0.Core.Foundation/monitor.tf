@@ -24,11 +24,45 @@ variable monitor {
   })
 }
 
+data external az_account_user {
+  program = ["az", "account", "show", "--query", "user"]
+}
+
 resource azurerm_monitor_workspace studio {
   name                          = var.monitor.name
   resource_group_name           = azurerm_resource_group.studio_monitor.name
   location                      = azurerm_resource_group.studio_monitor.location
   public_network_access_enabled = false
+}
+
+resource azurerm_monitor_action_group studio {
+  name                = var.monitor.name
+  short_name          = var.monitor.name
+  resource_group_name = azurerm_resource_group.studio_monitor.name
+  email_receiver {
+    name                    = data.azurerm_subscription.current.display_name
+    email_address           = data.external.az_account_user.result.name
+    use_common_alert_schema = true
+  }
+}
+
+resource azurerm_monitor_metric_alert workspace_ingest_throttle {
+  name                = "Monitor Workspace Ingest Throttle"
+  resource_group_name = azurerm_resource_group.studio_monitor.name
+  severity            = 2
+  scopes = [
+    azurerm_monitor_workspace.studio.id
+  ]
+  criteria {
+    metric_namespace = "Microsoft.Monitor/accounts"
+    metric_name      = "ActiveTimeSeriesPercentUtilization"
+    aggregation      = "Average"
+    operator         = "GreaterThanOrEqual"
+    threshold        = 100
+  }
+  action {
+    action_group_id = azurerm_monitor_action_group.studio.id
+  }
 }
 
 resource azurerm_dashboard_grafana studio {

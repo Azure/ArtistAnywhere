@@ -83,7 +83,7 @@ data azurerm_virtual_machine_scale_set cache {
 }
 
 locals {
-  nfsCache = merge(var.nfsCache, {
+  nfsCache = var.nfsCache.enable ? merge(var.nfsCache, {
     machine = merge(var.nfsCache.machine, {
       image = merge(var.nfsCache.machine.image, {
         publisher = var.nfsCache.machine.image.publisher != "" ? var.nfsCache.machine.image.publisher : module.core.image.linux.publisher
@@ -97,7 +97,18 @@ locals {
         sshKeyPublic = var.nfsCache.machine.adminLogin.sshKeyPublic != "" ? var.nfsCache.machine.adminLogin.sshKeyPublic : data.azurerm_key_vault_secret.ssh_key_public.value
       })
     })
-  })
+  }) : null
+  nfsCacheDataDisks = var.nfsCache.enable ? flatten([
+    for iVirtualMachine in range(var.nfsCache.machine.count) : [
+      for iDataDisk in range(var.nfsCache.machine.dataDisk.count) : {
+        key         = "${var.nfsCache.name}_VM_${iVirtualMachine + 1}_DataDisk_${iDataDisk + 1}"
+        name        = "${data.azurerm_virtual_machine_scale_set.cache[0].instances[iVirtualMachine].name}_DataDisk_${iDataDisk + 1}"
+        machineName = data.azurerm_virtual_machine_scale_set.cache[0].instances[iVirtualMachine].name
+        cachingMode = var.nfsCache.machine.dataDisk.cachingMode
+        lun         = iDataDisk
+      }
+    ] if var.nfsCache.machine.dataDisk.enable
+  ]) : null
 }
 
 resource azurerm_role_assignment monitoring_metrics_publisher {
@@ -135,7 +146,6 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
   location                    = azurerm_resource_group.cache.location
   sku_name                    = var.nfsCache.machine.size
   instances                   = var.nfsCache.machine.count
-  single_placement_group      = false
   platform_fault_domain_count = 1
   identity {
     type = "UserAssigned"
@@ -144,7 +154,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
     ]
   }
   network_interface {
-    name    = "nic"
+    name    = var.nfsCache.name
     primary = true
     ip_configuration {
       name      = "ipConfig"
@@ -190,44 +200,66 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
     sku       = local.nfsCache.machine.image.name
     version   = local.nfsCache.machine.image.version
   }
-  dynamic data_disk {
-    for_each = var.nfsCache.machine.dataDisk.enable ? [1] : []
-    content {
-      storage_account_type = var.nfsCache.machine.dataDisk.storageType
-      caching              = var.nfsCache.machine.dataDisk.cachingType
-      disk_size_gb         = var.nfsCache.machine.dataDisk.sizeGB
-      lun                  = 0
-    }
-  }
   dynamic additional_capabilities {
     for_each = var.nfsCache.machine.dataDisk.enable ? [1] : []
     content {
       ultra_ssd_enabled = lower(var.nfsCache.machine.dataDisk.storageType) == "ultrassd_lrs"
     }
   }
-  dynamic extension {
-    for_each = var.nfsCache.machine.extension.custom.enable ? [1] : []
-    content {
-      name                               = var.nfsCache.machine.extension.custom.name
-      type                               = "CustomScript"
-      publisher                          = "Microsoft.Azure.Extensions"
-      type_handler_version               = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionLinux)].value
-      auto_upgrade_minor_version_enabled = true
-      protected_settings = jsonencode({
-        script = base64encode(
-          templatefile(var.nfsCache.machine.extension.custom.fileName, merge(var.nfsCache.machine.extension.custom.parameters, {
-            dataDiskCount          = var.nfsCache.machine.dataDisk.count
-            metricsIntervalSeconds = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.intervalSeconds
-            metricsNodeExportsPort = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.nodeExportsPort
-            metricsCustomStatsPort = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.customStatsPort
-            metricsIngestionUrl    = "${data.azurerm_monitor_data_collection_endpoint.studio.metrics_ingestion_endpoint}/dataCollectionRules/${data.azurerm_monitor_data_collection_rule.studio.immutable_id}/streams/Microsoft-PrometheusMetrics/api/v1/write?api-version=${var.monitorWorkspace.metricsIngestion.apiVersion}"
-            exportAddressSpace     = data.azurerm_virtual_network.studio.address_space[0]
-            userIdentityClientId   = data.azurerm_user_assigned_identity.studio.client_id
-          }))
-        )
-      })
-    }
+}
+
+resource azurerm_managed_disk cache {
+  for_each = {
+    for dataDisk in local.nfsCacheDataDisks : dataDisk.key => dataDisk
   }
+  name                          = each.value.name
+  resource_group_name           = azurerm_resource_group.cache.name
+  location                      = azurerm_resource_group.cache.location
+  storage_account_type          = var.nfsCache.machine.dataDisk.storageType
+  disk_size_gb                  = var.nfsCache.machine.dataDisk.sizeGB
+  create_option                 = "Empty"
+  public_network_access_enabled = false
+}
+
+resource azurerm_virtual_machine_data_disk_attachment cache {
+  for_each = {
+    for dataDisk in local.nfsCacheDataDisks : dataDisk.key => dataDisk
+  }
+  virtual_machine_id = "${azurerm_resource_group.cache.id}/providers/Microsoft.Compute/virtualMachines/${each.value.machineName}"
+  managed_disk_id    = "${azurerm_resource_group.cache.id}/providers/Microsoft.Compute/disks/${each.value.name}"
+  caching            = each.value.cachingMode
+  lun                = each.value.lun
+  depends_on = [
+    azurerm_orchestrated_virtual_machine_scale_set.cache,
+    azurerm_managed_disk.cache,
+  ]
+}
+
+resource azurerm_virtual_machine_extension cache {
+  count                      = var.nfsCache.enable ? var.nfsCache.machine.count : 0
+  name                       = var.nfsCache.machine.extension.custom.name
+  type                       = "CustomScript"
+  publisher                  = "Microsoft.Azure.Extensions"
+  type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionLinux)].value
+  virtual_machine_id         = "${azurerm_resource_group.cache.id}/providers/Microsoft.Compute/virtualMachines/${data.azurerm_virtual_machine_scale_set.cache[0].instances[count.index].name}"
+  automatic_upgrade_enabled  = false
+  auto_upgrade_minor_version = true
+  protected_settings = jsonencode({
+    script = base64encode(
+      templatefile(var.nfsCache.machine.extension.custom.fileName, merge(var.nfsCache.machine.extension.custom.parameters, {
+        dataDiskCount          = var.nfsCache.machine.dataDisk.count
+        metricsIntervalSeconds = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.intervalSeconds
+        metricsNodeExportsPort = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.nodeExportsPort
+        metricsCustomStatsPort = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.customStatsPort
+        metricsIngestionUrl    = "${data.azurerm_monitor_data_collection_endpoint.studio.metrics_ingestion_endpoint}/dataCollectionRules/${data.azurerm_monitor_data_collection_rule.studio.immutable_id}/streams/Microsoft-PrometheusMetrics/api/v1/write?api-version=${var.monitorWorkspace.metricsIngestion.apiVersion}"
+        exportAddressSpace     = data.azurerm_virtual_network.studio.address_space[0]
+        userIdentityClientId   = data.azurerm_user_assigned_identity.studio.client_id
+      }))
+    )
+  })
+  depends_on = [
+    azurerm_virtual_machine_data_disk_attachment.cache
+  ]
 }
 
 ############################################################################

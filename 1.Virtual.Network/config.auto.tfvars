@@ -340,6 +340,7 @@ virtualWAN = {
         routes = [
           {
             enable      = false
+            name        = ""
             nextAddress = ""
             addressSpace = [
             ]
@@ -371,6 +372,7 @@ virtualWAN = {
         routes = [
           {
             enable      = false
+            name        = ""
             nextAddress = ""
             addressSpace = [
             ]
@@ -403,6 +405,7 @@ virtualWAN = {
         routes = [
           {
             enable      = false
+            name        = ""
             nextAddress = ""
             addressSpace = [
             ]

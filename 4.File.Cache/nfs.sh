@@ -28,21 +28,25 @@ EOF
 systemctl --now enable prometheus node_exporter
 
 function set_cache_disks {
+  nvmeDisks=true
   diskPaths=$(lsblk -p -o name | grep nvme)
   if [ "$diskPaths" == "" ]; then
+    nvmeDisks=false
     diskPaths=$(lsblk -p -o name,type | grep disk)
     diskPaths=$(echo $${diskPaths//disk})
     diskPaths=$(echo "$diskPaths" | rev | cut -d " " -f 1-${dataDiskCount} | rev)
   fi
+  logPath="/var/log/aaa"
+  mkdir -p $logPath
   diskCount=$(echo "$diskPaths" | wc -w)
   if (( $diskCount > 1 )); then
     cachePath="/dev/md/fscache"
-    mdadm --create $cachePath --level=0 --raid-devices=$diskCount $diskPaths > /var/log/aaa-mdadm.log
+    mdadm --create $cachePath --level=0 --raid-devices=$diskCount $diskPaths > $logPath/mdadm.log
   else
-    cachePath="/dev/nvme0n1p1"
-    echo ,,83 | sfdisk /dev/nvme0n1 > /var/log/aaa-sfdisk.log
+    [ $nvmeDisks == true ] && cachePath="/dev/nvme0n1p1" || cachePath=$diskPaths
+    sgdisk --new=1:0:0 --typecode=1:8300 $diskPaths > $logPath/sgdisk.log
   fi
-  mkfs.ext4 $cachePath > /var/log/aaa-mkfs.log
+  mkfs.ext4 $cachePath > $logPath/mkfs.log
   echo $cachePath
 }
 

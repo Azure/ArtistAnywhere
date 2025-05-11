@@ -34,7 +34,7 @@ nfsCache = {
       storageType = "UltraSSD_LRS"
       cachingMode = "None"
       sizeGB      = 65536
-      count       = 3
+      count       = 1
     }
     adminLogin = {
       userName     = ""
