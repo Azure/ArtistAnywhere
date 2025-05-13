@@ -21,7 +21,7 @@ The following solution design principles and features are implemented throughout
 
 ## Render Job Samples
 
-The following sample images were rendered on Azure using scalable compute clusters with HPC CPU and GPU infrastructure.
+The following sample images were rendered on Azure using scalable clusters with HPC CPU and GPU infrastructure.
 
 ### [Disney Moana Island](https://www.disneyanimation.com/resources/moana-island-scene)
 
