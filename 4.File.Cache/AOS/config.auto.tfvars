@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Cache.AOS"
+resourceGroupName = "AAA.Cache.AOS"
 
 ##############################################################################
 # HPC Cache (https://learn.microsoft.com/azure/hpc-cache/hpc-cache-overview) #
@@ -13,7 +13,7 @@ resourceGroupName = "ArtistAnywhere.Cache.AOS"
 #      Standard_8G - 12288, 24576, 49152  Read Write
 hpcCache = {
   enable     = false
-  name       = "xstudio"
+  name       = "hpcai"
   throughput = "Standard_L4_5G"
   size       = 21623
   mtuSize    = 1500
@@ -31,7 +31,7 @@ hpcCache = {
 
 vfxtCache = {
   enable = false
-  name   = "xstudio"
+  name   = "hpcai"
   cluster = {
     nodeSize      = 1024 # Set to either 1024 GB (1 TB) or 4096 GB (4 TB) nodes
     nodeCount     = 3    # Set to a minimum of 3 nodes up to a maximum of 12 nodes
@@ -71,9 +71,9 @@ storageTargets = [
     name              = "Storage"
     clientPath        = "/storage"
     usageModel        = "READ_ONLY" # https://learn.microsoft.com/azure/hpc-cache/cache-usage-models
-    hostName          = "xstudio1"
+    hostName          = "hpcai1"
     containerName     = "storage"
-    resourceGroupName = "ArtistAnywhere.Storage"
+    resourceGroupName = "AAA.Storage"
     fileIntervals = {
       verificationSeconds = 30
       writeBackSeconds    = null
@@ -102,19 +102,19 @@ dnsRecord = {
 ########################
 
 virtualNetwork = {
-  name              = "Studio"
+  name              = "HPC"
   subnetName        = "Cache"
-  resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
+  resourceGroupName = "AAA.Network.SouthCentralUS"
   privateDNS = {
-    zoneName          = "azure.studio"
-    resourceGroupName = "ArtistAnywhere.Network"
+    zoneName          = "azure.hpc"
+    resourceGroupName = "AAA.Network"
   }
 }
 
 activeDirectory = {
   enable = false
   domain = {
-    name = "azure.studio"
+    name = "azure.hpc"
   }
   machine = {
     name = "WinADController"

@@ -11,10 +11,10 @@ variable netAppFiles {
       name    = string
       type    = string
       sizeTiB = number
-      # coolAccess = object({
-      #   enable = bool
-      #   period = number
-      # })
+      coolAccess = object({
+        enable = bool
+        period = number
+      })
       volumes = list(object({
         enable      = bool
         name        = string
@@ -55,8 +55,8 @@ variable netAppFiles {
 data azurerm_subnet storage_netapp {
   count                = var.netAppFiles.enable ? 1 : 0
   name                 = "StorageNetApp"
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
+  resource_group_name  = data.azurerm_virtual_network.main.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.main.name
 }
 
 locals {
@@ -65,7 +65,7 @@ locals {
       for volume in capacityPool.volumes : merge(volume, {
         capacityPoolName       = capacityPool.name
         capacityPoolType       = capacityPool.type
-        # capacityPoolCoolAccess = capacityPool.coolAccess
+        capacityPoolCoolAccess = capacityPool.coolAccess
       }) if volume.enable
     ] if var.netAppFiles.enable && capacityPool.enable
   ])
@@ -74,13 +74,13 @@ locals {
 resource azurerm_resource_group netapp {
   count    = var.netAppFiles.enable ? 1 : 0
   name     = "${var.resourceGroupName}.NetApp"
-  location = data.azurerm_virtual_network.studio.location
+  location = data.azurerm_virtual_network.main.location
   tags = {
-    AAA = basename(path.cwd)
+    "AAA.Module" = basename(path.cwd)
   }
 }
 
-resource azurerm_netapp_account studio {
+resource azurerm_netapp_account main {
   count               = var.netAppFiles.enable ? 1 : 0
   name                = var.netAppFiles.name
   resource_group_name = azurerm_resource_group.netapp[0].name
@@ -88,7 +88,7 @@ resource azurerm_netapp_account studio {
   identity {
     type = "UserAssigned"
     identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
+      data.azurerm_user_assigned_identity.main.id
     ]
   }
   dynamic active_directory {
@@ -105,7 +105,7 @@ resource azurerm_netapp_account studio {
   }
 }
 
-resource azurerm_netapp_pool studio {
+resource azurerm_netapp_pool main {
   for_each = {
     for capacityPool in var.netAppFiles.capacityPools : capacityPool.name => capacityPool if var.netAppFiles.enable && capacityPool.enable
   }
@@ -114,13 +114,14 @@ resource azurerm_netapp_pool studio {
   location            = azurerm_resource_group.netapp[0].location
   service_level       = each.value.type
   size_in_tb          = each.value.sizeTiB
+  cool_access_enabled = each.value.coolAccess.enable
   account_name        = var.netAppFiles.name
   depends_on = [
-    azurerm_netapp_account.studio
+    azurerm_netapp_account.main
   ]
 }
 
-resource azurerm_netapp_volume studio {
+resource azurerm_netapp_volume main {
   for_each = {
     for volume in local.netAppVolumes : "${volume.capacityPoolName}-${volume.name}" => volume
   }
@@ -148,7 +149,7 @@ resource azurerm_netapp_volume studio {
     }
   }
   depends_on = [
-    azurerm_netapp_pool.studio
+    azurerm_netapp_pool.main
   ]
 }
 
@@ -156,20 +157,20 @@ resource azurerm_netapp_volume studio {
 # NetApp Files Backup (https://learn.microsoft.com/azure/azure-netapp-files/backup-introduction #
 #################################################################################################
 
-resource azurerm_netapp_backup_vault studio {
+resource azurerm_netapp_backup_vault main {
   count               = var.netAppFiles.enable && var.netAppFiles.backup.enable ? 1 : 0
   name                = var.netAppFiles.backup.name
-  resource_group_name = azurerm_netapp_account.studio[0].resource_group_name
-  location            = azurerm_netapp_account.studio[0].location
-  account_name        = azurerm_netapp_account.studio[0].name
+  resource_group_name = azurerm_netapp_account.main[0].resource_group_name
+  location            = azurerm_netapp_account.main[0].location
+  account_name        = azurerm_netapp_account.main[0].name
 }
 
-resource azurerm_netapp_backup_policy studio {
+resource azurerm_netapp_backup_policy main {
   count                   = var.netAppFiles.enable && var.netAppFiles.backup.enable ? 1 : 0
   name                    = var.netAppFiles.backup.policy.name
-  resource_group_name     = azurerm_netapp_account.studio[0].resource_group_name
-  location                = azurerm_netapp_account.studio[0].location
-  account_name            = azurerm_netapp_account.studio[0].name
+  resource_group_name     = azurerm_netapp_account.main[0].resource_group_name
+  location                = azurerm_netapp_account.main[0].location
+  account_name            = azurerm_netapp_account.main[0].name
   daily_backups_to_keep   = var.netAppFiles.backup.policy.retention.daily
   weekly_backups_to_keep  = var.netAppFiles.backup.policy.retention.weekly
   monthly_backups_to_keep = var.netAppFiles.backup.policy.retention.monthly

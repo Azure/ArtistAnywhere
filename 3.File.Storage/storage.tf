@@ -35,7 +35,7 @@ locals {
     for storageAccount in var.storageAccounts : merge(storageAccount, {
       resourceGroup = {
         name     = var.resourceGroupName
-        location = storageAccount.extendedZone.enable && var.extendedZone.enable ? var.extendedZone.location : data.azurerm_virtual_network.studio.location
+        location = storageAccount.extendedZone.enable && var.extendedZone.enable ? var.extendedZone.location : data.azurerm_virtual_network.main.location
       }
       extendedZone = {
         name = storageAccount.extendedZone.enable && var.extendedZone.enable ? var.extendedZone.name : null
@@ -80,7 +80,7 @@ resource azurerm_role_assignment storage_blob_data_owner {
   principal_id         = data.azurerm_client_config.current.object_id
   scope                = each.value.storageAccount.id
   depends_on = [
-    azurerm_storage_account.studio
+    azurerm_storage_account.main
   ]
 }
 
@@ -89,10 +89,10 @@ resource azurerm_role_assignment storage_blob_data_contributor {
     for storageAccount in local.storageAccounts : storageAccount.name => storageAccount
   }
   role_definition_name = "Storage Blob Data Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor
-  principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
+  principal_id         = data.azurerm_user_assigned_identity.main.principal_id
   scope                = each.value.storageAccount.id
   depends_on = [
-    azurerm_storage_account.studio
+    azurerm_storage_account.main
   ]
 }
 
@@ -107,7 +107,7 @@ resource time_sleep storage_rbac {
   ]
 }
 
-resource azurerm_storage_account studio {
+resource azurerm_storage_account main {
   for_each = {
     for storageAccount in local.storageAccounts : storageAccount.name => storageAccount
   }
@@ -131,12 +131,9 @@ resource azurerm_storage_account studio {
     ip_rules = [
       jsondecode(data.http.client_address.response_body).ip
     ]
-    dynamic private_link_access {
-      for_each = data.terraform_remote_state.core.outputs.defender.storage.malwareScanning.enable ? [1] : []
-      content {
-        endpoint_tenant_id   = data.azurerm_client_config.current.tenant_id
-        endpoint_resource_id = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/providers/Microsoft.Security/datascanners/storageDataScanner"
-      }
+    private_link_access {
+      endpoint_tenant_id   = data.azurerm_client_config.current.tenant_id
+      endpoint_resource_id = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/providers/Microsoft.Security/dataScanners/storageDataScanner"
     }
   }
   depends_on = [
@@ -144,7 +141,7 @@ resource azurerm_storage_account studio {
   ]
 }
 
-resource azurerm_storage_container core {
+resource azurerm_storage_container main {
   for_each = {
     for blobContainer in local.blobContainers : blobContainer.key => blobContainer
   }
@@ -155,7 +152,7 @@ resource azurerm_storage_container core {
   ]
 }
 
-resource azurerm_storage_share core {
+resource azurerm_storage_share main {
   for_each = {
     for fileShare in local.fileShares : fileShare.key => fileShare
   }
@@ -193,13 +190,13 @@ resource azurerm_private_endpoint storage {
     ]
   }
   depends_on = [
-    azurerm_storage_account.studio
+    azurerm_storage_account.main
   ]
 }
 
 output storageAccounts {
   value = [
-    for storageAccount in azurerm_storage_account.studio : {
+    for storageAccount in azurerm_storage_account.main : {
       name         = storageAccount.name
       location     = storageAccount.primary_location
       blobEndpoint = storageAccount.primary_blob_endpoint

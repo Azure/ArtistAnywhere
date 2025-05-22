@@ -1,5 +1,5 @@
-module core {
-  source = "../../0.Core.Foundation/config"
+module config {
+  source = "../../0.Foundation/config"
 }
 
 variable resourceGroupName {
@@ -157,47 +157,47 @@ variable activeDirectory {
   })
 }
 
-data terraform_remote_state core {
+data terraform_remote_state foundation {
   backend = "local"
   config = {
-    path = "../0.Core.Foundation/terraform.tfstate"
+    path = "../0.Foundation/terraform.tfstate"
   }
 }
 
-data azurerm_user_assigned_identity studio {
-  name                = data.terraform_remote_state.core.outputs.managedIdentity.name
-  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
+data azurerm_user_assigned_identity main {
+  name                = data.terraform_remote_state.foundation.outputs.managedIdentity.name
+  resource_group_name = data.terraform_remote_state.foundation.outputs.resourceGroup.name
 }
 
-data azurerm_key_vault studio {
-  name                = data.terraform_remote_state.core.outputs.keyVault.name
-  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
+data azurerm_key_vault main {
+  name                = data.terraform_remote_state.foundation.outputs.keyVault.name
+  resource_group_name = data.terraform_remote_state.foundation.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault_secret admin_username {
-  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
+  name         = data.terraform_remote_state.foundation.outputs.keyVault.secretName.adminUsername
+  key_vault_id = data.azurerm_key_vault.main.id
 }
 
 data azurerm_key_vault_secret admin_password {
-  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio.id
+  name         = data.terraform_remote_state.foundation.outputs.keyVault.secretName.adminPassword
+  key_vault_id = data.azurerm_key_vault.main.id
 }
 
 data azurerm_key_vault_secret ssh_key_public {
-  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.sshKeyPublic
-  key_vault_id = data.azurerm_key_vault.studio.id
+  name         = data.terraform_remote_state.foundation.outputs.keyVault.secretName.sshKeyPublic
+  key_vault_id = data.azurerm_key_vault.main.id
 }
 
-data azurerm_virtual_network studio {
+data azurerm_virtual_network main {
   name                = var.virtualNetwork.name
   resource_group_name = var.virtualNetwork.resourceGroupName
 }
 
 data azurerm_subnet storage {
   name                 = var.virtualNetwork.subnetName
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
+  resource_group_name  = data.azurerm_virtual_network.main.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.main.name
 }
 
 locals {
@@ -212,8 +212,8 @@ locals {
 
 resource azurerm_resource_group hammerspace {
   name     = var.resourceGroupName
-  location = data.azurerm_virtual_network.studio.location
+  location = data.azurerm_virtual_network.main.location
   tags = {
-    AAA = basename(path.cwd)
+    "AAA.Module" = "${basename(dirname(path.cwd))}.${basename(path.cwd)}"
   }
 }

@@ -58,8 +58,8 @@ module vfxt_controller {
   admin_username                 = local.vfxtCache.cluster.adminUsername
   admin_password                 = local.vfxtCache.cluster.adminPassword
   ssh_key_data                   = local.vfxtCache.cluster.sshKeyPublic != "" ? local.vfxtCache.cluster.sshKeyPublic : null
-  virtual_network_name           = data.azurerm_virtual_network.studio.name
-  virtual_network_resource_group = data.azurerm_virtual_network.studio.resource_group_name
+  virtual_network_name           = data.azurerm_virtual_network.main.name
+  virtual_network_resource_group = data.azurerm_virtual_network.main.resource_group_name
   virtual_network_subnet_name    = data.azurerm_subnet.cache.name
   static_ip_address              = cidrhost(data.azurerm_subnet.cache.address_prefixes[0], 4)
   image_id                       = var.vfxtCache.cluster.imageUrn.controller
@@ -76,8 +76,8 @@ resource avere_vfxt cache {
   node_cache_size                 = var.vfxtCache.cluster.nodeSize
   vfxt_node_count                 = var.vfxtCache.cluster.nodeCount
   image_id                        = var.vfxtCache.cluster.imageUrn.node
-  azure_network_name              = data.azurerm_virtual_network.studio.name
-  azure_network_resource_group    = data.azurerm_virtual_network.studio.resource_group_name
+  azure_network_name              = data.azurerm_virtual_network.main.name
+  azure_network_resource_group    = data.azurerm_virtual_network.main.resource_group_name
   azure_subnet_name               = data.azurerm_subnet.cache.name
   controller_address              = module.vfxt_controller[count.index].controller_address
   controller_admin_username       = local.vfxtCache.cluster.adminUsername

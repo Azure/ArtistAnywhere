@@ -51,7 +51,7 @@ resource time_sleep hpc_cache_storage_rbac {
   ]
 }
 
-resource azurerm_hpc_cache studio {
+resource azurerm_hpc_cache main {
   count               = var.hpcCache.enable ? 1 : 0
   name                = var.hpcCache.name
   resource_group_name = azurerm_resource_group.cache.name
@@ -64,7 +64,7 @@ resource azurerm_hpc_cache studio {
   identity {
     type = "UserAssigned"
     identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
+      data.azurerm_user_assigned_identity.main.id
     ]
   }
   dynamic dns {
@@ -96,7 +96,7 @@ resource azurerm_hpc_cache_nfs_target storage {
     }
   }
   depends_on = [
-    azurerm_hpc_cache.studio
+    azurerm_hpc_cache.main
   ]
 }
 
@@ -113,7 +113,7 @@ resource azurerm_hpc_cache_blob_nfs_target storage {
   write_back_timer_in_seconds   = each.value.fileIntervals.writeBackSeconds
   storage_container_id          = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${each.value.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${each.value.hostName}/blobServices/default/containers/${each.value.containerName}"
   depends_on = [
-    azurerm_hpc_cache.studio,
+    azurerm_hpc_cache.main,
     time_sleep.hpc_cache_storage_rbac
   ]
 }
@@ -127,6 +127,6 @@ resource azurerm_private_dns_a_record cache_hpc {
   name                = lower(var.dnsRecord.name)
   resource_group_name = var.virtualNetwork.privateDNS.resourceGroupName
   zone_name           = var.virtualNetwork.privateDNS.zoneName
-  records             = azurerm_hpc_cache.studio[0].mount_addresses
+  records             = azurerm_hpc_cache.main[0].mount_addresses
   ttl                 = var.dnsRecord.ttlSeconds
 }

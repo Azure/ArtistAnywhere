@@ -4,17 +4,17 @@
 
 netAppFiles = {
   enable = false
-  name   = "xstudio"
+  name   = "hpcai"
   capacityPools = [
     {
       enable  = true
       name    = "Pool1"
       type    = "Premium"
       sizeTiB = 1
-      # coolAccess = {
-      #   enable = true
-      #   period = 30
-      # }
+      coolAccess = {
+        enable = true
+        period = 31
+      }
       volumes = [
         {
           enable      = true
@@ -141,7 +141,7 @@ netAppFiles = {
   ]
   backup = {
     enable = false
-    name   = "xstudio"
+    name   = "hpcai"
     policy = {
       enable = true
       name   = "Default"

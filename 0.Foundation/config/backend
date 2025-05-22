@@ -1,0 +1,3 @@
+resource_group_name  = "AAA"
+storage_account_name = "hpcai0"
+container_name       = "terraform-state"

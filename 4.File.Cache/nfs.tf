@@ -86,10 +86,10 @@ locals {
   nfsCache = var.nfsCache.enable ? merge(var.nfsCache, {
     machine = merge(var.nfsCache.machine, {
       image = merge(var.nfsCache.machine.image, {
-        publisher = var.nfsCache.machine.image.publisher != "" ? var.nfsCache.machine.image.publisher : module.core.image.linux.publisher
-        product   = var.nfsCache.machine.image.product != "" ? var.nfsCache.machine.image.product : module.core.image.linux.offer
-        name      = var.nfsCache.machine.image.name != "" ? var.nfsCache.machine.image.name : module.core.image.linux.sku
-        version   = var.nfsCache.machine.image.version != "" ? var.nfsCache.machine.image.version : module.core.image.linux.version
+        publisher = var.nfsCache.machine.image.publisher != "" ? var.nfsCache.machine.image.publisher : module.config.image.linux.x64.publisher
+        product   = var.nfsCache.machine.image.product != "" ? var.nfsCache.machine.image.product : module.config.image.linux.x64.offer
+        name      = var.nfsCache.machine.image.name != "" ? var.nfsCache.machine.image.name : module.config.image.linux.x64.sku
+        version   = var.nfsCache.machine.image.version != "" ? var.nfsCache.machine.image.version : module.config.image.linux.version
       })
       adminLogin = merge(var.nfsCache.machine.adminLogin, {
         userName     = var.nfsCache.machine.adminLogin.userName != "" ? var.nfsCache.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -111,34 +111,6 @@ locals {
   ]) : null
 }
 
-resource azurerm_role_assignment monitoring_metrics_publisher {
-  count                = var.nfsCache.enable ? 1 : 0
-  role_definition_name = "Monitoring Metrics Publisher" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/monitor#monitoring-metrics-publisher
-  principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-  scope                = data.azurerm_monitor_data_collection_rule.studio.id
-}
-
-resource azurerm_role_assignment monitoring_reader {
-  count                = var.nfsCache.enable ? 1 : 0
-  role_definition_name = "Monitoring Reader" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/monitor#monitoring-reader
-  principal_id         = data.azurerm_user_assigned_identity.studio.principal_id
-  scope                = data.azurerm_monitor_workspace.studio.id
-}
-
-resource azurerm_role_assignment monitoring_contributor {
-  count                = var.nfsCache.enable ? 1 : 0
-  role_definition_name = "Monitoring Contributor" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/monitor#monitoring-contributor
-  principal_id         = data.azurerm_client_config.current.object_id
-  scope                = data.azurerm_monitor_workspace.studio.id
-}
-
-resource azurerm_role_assignment grafana_admin {
-  count                = var.nfsCache.enable ? 1 : 0
-  role_definition_name = "Grafana Admin" # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/monitor#grafana-admin
-  principal_id         = data.azurerm_client_config.current.object_id
-  scope                = data.azurerm_dashboard_grafana.studio.id
-}
-
 resource azurerm_orchestrated_virtual_machine_scale_set cache {
   count                       = var.nfsCache.enable ? 1 : 0
   name                        = var.nfsCache.name
@@ -150,7 +122,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
   identity {
     type = "UserAssigned"
     identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
+      data.azurerm_user_assigned_identity.main.id
     ]
   }
   network_interface {
@@ -240,7 +212,7 @@ resource azurerm_virtual_machine_extension cache {
   name                       = var.nfsCache.machine.extension.custom.name
   type                       = "CustomScript"
   publisher                  = "Microsoft.Azure.Extensions"
-  type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionLinux)].value
+  type_handler_version       = data.azurerm_app_configuration_keys.main.items[index(data.azurerm_app_configuration_keys.main.items[*].key, data.terraform_remote_state.foundation.outputs.appConfig.key.scriptExtensionLinux)].value
   virtual_machine_id         = "${azurerm_resource_group.cache.id}/providers/Microsoft.Compute/virtualMachines/${data.azurerm_virtual_machine_scale_set.cache[0].instances[count.index].name}"
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
@@ -251,9 +223,9 @@ resource azurerm_virtual_machine_extension cache {
         metricsIntervalSeconds = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.intervalSeconds
         metricsNodeExportsPort = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.nodeExportsPort
         metricsCustomStatsPort = var.nfsCache.machine.extension.custom.parameters.cacheMetrics.customStatsPort
-        metricsIngestionUrl    = "${data.azurerm_monitor_data_collection_endpoint.studio.metrics_ingestion_endpoint}/dataCollectionRules/${data.azurerm_monitor_data_collection_rule.studio.immutable_id}/streams/Microsoft-PrometheusMetrics/api/v1/write?api-version=${var.monitorWorkspace.metricsIngestion.apiVersion}"
-        exportAddressSpace     = data.azurerm_virtual_network.studio.address_space[0]
-        userIdentityClientId   = data.azurerm_user_assigned_identity.studio.client_id
+        metricsIngestionUrl    = "${data.azurerm_monitor_data_collection_endpoint.main.metrics_ingestion_endpoint}/dataCollectionRules/${data.azurerm_monitor_data_collection_rule.main.immutable_id}/streams/Microsoft-PrometheusMetrics/api/v1/write?api-version=${var.monitorWorkspace.metricsIngestion.apiVersion}"
+        exportAddressSpace     = data.azurerm_virtual_network.main.address_space[0]
+        userIdentityClientId   = data.azurerm_user_assigned_identity.main.client_id
       }))
     )
   })

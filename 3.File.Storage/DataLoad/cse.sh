@@ -2,7 +2,7 @@
 
 dnf -y install unzip
 
-echo "Customize (Start): Azure Managed Lustre (AMLFS) Client"
+echo "(AAA Start): Azure Managed Lustre (AMLFS) Client"
 repoName="amlfs"
 repoPath="/etc/yum.repos.d/$repoName.repo"
 echo "[$repoName]" > $repoPath
@@ -12,7 +12,7 @@ echo "enabled=1" >> $repoPath
 echo "gpgcheck=1" >> $repoPath
 echo "gpgkey=https://packages.microsoft.com/keys/microsoft.asc" >> $repoPath
 dnf -y install amlfs-lustre-client-2.15.6_39_g3e00a10-5.14.0.503.14.1.el9.5-1
-echo "Customize (End): Azure Managed Lustre (AMLFS) Client"
+echo "(AAA End): Azure Managed Lustre (AMLFS) Client"
 
 mountPath=${dataLoadMount.path}
 mkdir -p $mountPath

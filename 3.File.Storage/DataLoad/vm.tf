@@ -45,10 +45,10 @@ locals {
   dataLoad = merge(var.dataLoad, {
     machine = merge(var.dataLoad.machine, {
       image = merge(var.dataLoad.machine.image, {
-        publisher = var.dataLoad.machine.image.publisher != "" ? var.dataLoad.machine.image.publisher : module.core.image.linux.publisher
-        product   = var.dataLoad.machine.image.product != "" ? var.dataLoad.machine.image.product : module.core.image.linux.offer
-        name      = var.dataLoad.machine.image.name != "" ? var.dataLoad.machine.image.name : module.core.image.linux.sku
-        version   = var.dataLoad.machine.image.version != "" ? var.dataLoad.machine.image.version : module.core.image.linux.version
+        publisher = var.dataLoad.machine.image.publisher != "" ? var.dataLoad.machine.image.publisher : module.config.image.linux.x64.publisher
+        product   = var.dataLoad.machine.image.product != "" ? var.dataLoad.machine.image.product : module.config.image.linux.x64.offer
+        name      = var.dataLoad.machine.image.name != "" ? var.dataLoad.machine.image.name : module.config.image.linux.x64.sku
+        version   = var.dataLoad.machine.image.version != "" ? var.dataLoad.machine.image.version : module.config.image.linux.version
       })
       adminLogin = merge(var.dataLoad.machine.adminLogin, {
         userName     = var.dataLoad.machine.adminLogin.userName != "" ? var.dataLoad.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
@@ -82,7 +82,7 @@ resource azurerm_network_interface storage_data_load {
   identity {
     type = "UserAssigned"
     identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
+      data.azurerm_user_assigned_identity.main.id
     ]
   }
   network_interface_ids = [
@@ -112,7 +112,7 @@ resource azurerm_virtual_machine_extension storage_data_load {
   name                       = "DataLoad"
   type                       = "CustomScript"
   publisher                  = "Microsoft.Azure.Extensions"
-  type_handler_version       = data.azurerm_app_configuration_keys.studio.items[index(data.azurerm_app_configuration_keys.studio.items[*].key, data.terraform_remote_state.core.outputs.appConfig.key.scriptExtensionLinux)].value
+  type_handler_version       = data.azurerm_app_configuration_keys.main.items[index(data.azurerm_app_configuration_keys.main.items[*].key, data.terraform_remote_state.foundation.outputs.appConfig.key.scriptExtensionLinux)].value
   automatic_upgrade_enabled  = false
   auto_upgrade_minor_version = true
   virtual_machine_id         = azurerm_linux_virtual_machine.storage_data_load.id

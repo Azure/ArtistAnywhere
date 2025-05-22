@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">=1.11.0"
+  required_version = ">=1.12.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.27.0"
+      version = "~>4.29.0"
     }
   }
   backend azurerm {
@@ -15,22 +15,22 @@ terraform {
 provider azurerm {
   features {
   }
-  subscription_id     = data.terraform_remote_state.core.outputs.subscriptionId
+  subscription_id     = data.terraform_remote_state.foundation.outputs.subscriptionId
   storage_use_azuread = true
 }
 
-module core {
-  source = "../0.Core.Foundation/config"
+module config {
+  source = "../0.Foundation/config"
 }
 
 module hammerspace {
-  count             = module.core.hammerspace.enable ? 1 : 0
+  count             = module.config.hammerspace.enable ? 1 : 0
   source            = "../3.File.Storage/Hammerspace"
   resourceGroupName = "${var.resourceGroupName}.Hammerspace"
   dnsRecord         = merge(var.dnsRecord, {metadataTier={enable=false}})
   virtualNetwork    = var.virtualNetwork
   activeDirectory   = var.activeDirectory
-  hammerspace = merge(module.core.hammerspace, {
+  hammerspace = merge(module.config.hammerspace, {
     shares = [
       {
         enable = false
@@ -153,80 +153,78 @@ variable activeDirectory {
   })
 }
 
-data azurerm_client_config current {}
-
-data terraform_remote_state core {
+data terraform_remote_state foundation {
   backend = "local"
   config = {
-    path = "../0.Core.Foundation/terraform.tfstate"
+    path = "../0.Foundation/terraform.tfstate"
   }
 }
 
-data azurerm_user_assigned_identity studio {
-  name                = data.terraform_remote_state.core.outputs.managedIdentity.name
-  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
+data azurerm_user_assigned_identity main {
+  name                = data.terraform_remote_state.foundation.outputs.managedIdentity.name
+  resource_group_name = data.terraform_remote_state.foundation.outputs.resourceGroup.name
 }
 
-data azurerm_key_vault studio {
-  name                = data.terraform_remote_state.core.outputs.keyVault.name
-  resource_group_name = data.terraform_remote_state.core.outputs.resourceGroup.name
+data azurerm_key_vault main {
+  name                = data.terraform_remote_state.foundation.outputs.keyVault.name
+  resource_group_name = data.terraform_remote_state.foundation.outputs.resourceGroup.name
 }
 
 data azurerm_key_vault_secret admin_username {
-  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.adminUsername
-  key_vault_id = data.azurerm_key_vault.studio.id
+  name         = data.terraform_remote_state.foundation.outputs.keyVault.secretName.adminUsername
+  key_vault_id = data.azurerm_key_vault.main.id
 }
 
 data azurerm_key_vault_secret admin_password {
-  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.adminPassword
-  key_vault_id = data.azurerm_key_vault.studio.id
+  name         = data.terraform_remote_state.foundation.outputs.keyVault.secretName.adminPassword
+  key_vault_id = data.azurerm_key_vault.main.id
 }
 
 data azurerm_key_vault_secret ssh_key_public {
-  name         = data.terraform_remote_state.core.outputs.keyVault.secretName.sshKeyPublic
-  key_vault_id = data.azurerm_key_vault.studio.id
+  name         = data.terraform_remote_state.foundation.outputs.keyVault.secretName.sshKeyPublic
+  key_vault_id = data.azurerm_key_vault.main.id
 }
 
-data azurerm_app_configuration_keys studio {
-  configuration_store_id = data.terraform_remote_state.core.outputs.appConfig.id
+data azurerm_app_configuration_keys main {
+  configuration_store_id = data.terraform_remote_state.foundation.outputs.appConfig.id
 }
 
-data azurerm_monitor_workspace studio {
+data azurerm_monitor_workspace main {
   name                = var.monitorWorkspace.name
   resource_group_name = var.monitorWorkspace.resourceGroupName
 }
 
-data azurerm_monitor_data_collection_endpoint studio {
-  name                = basename(data.azurerm_monitor_workspace.studio.default_data_collection_endpoint_id)
-  resource_group_name = split("/", data.azurerm_monitor_workspace.studio.default_data_collection_endpoint_id)[4]
+data azurerm_monitor_data_collection_endpoint main {
+  name                = basename(data.azurerm_monitor_workspace.main.default_data_collection_endpoint_id)
+  resource_group_name = split("/", data.azurerm_monitor_workspace.main.default_data_collection_endpoint_id)[4]
 }
 
-data azurerm_monitor_data_collection_rule studio {
-  name                = basename(data.azurerm_monitor_workspace.studio.default_data_collection_rule_id)
-  resource_group_name = split("/", data.azurerm_monitor_workspace.studio.default_data_collection_rule_id)[4]
+data azurerm_monitor_data_collection_rule main {
+  name                = basename(data.azurerm_monitor_workspace.main.default_data_collection_rule_id)
+  resource_group_name = split("/", data.azurerm_monitor_workspace.main.default_data_collection_rule_id)[4]
 }
 
-data azurerm_dashboard_grafana studio {
+data azurerm_dashboard_grafana main {
   name                = var.managedGrafana.name
   resource_group_name = var.managedGrafana.resourceGroupName
 }
 
-data azurerm_virtual_network studio {
+data azurerm_virtual_network main {
   name                = var.virtualNetwork.name
   resource_group_name = var.virtualNetwork.resourceGroupName
 }
 
 data azurerm_subnet cache {
   name                 = var.virtualNetwork.subnetName
-  resource_group_name  = data.azurerm_virtual_network.studio.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.studio.name
+  resource_group_name  = data.azurerm_virtual_network.main.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.main.name
 }
 
 resource azurerm_resource_group cache {
   name     = var.resourceGroupName
-  location = data.azurerm_virtual_network.studio.location
+  location = data.azurerm_virtual_network.main.location
   tags = {
-    AAA = basename(path.cwd)
+    "AAA.Module" = basename(path.cwd)
   }
 }
 
@@ -236,7 +234,7 @@ output privateDNS {
       fqdn    = azurerm_private_dns_a_record.cache_nfs[0].fqdn
       records = azurerm_private_dns_a_record.cache_nfs[0].records
     } : null
-    hs = module.core.hammerspace.enable ? {
+    hs = module.config.hammerspace.enable ? {
       fqdn    = module.hammerspace[0].privateDNS.fqdn
       records = module.hammerspace[0].privateDNS.records
     } : null

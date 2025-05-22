@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Cache"
+resourceGroupName = "AAA.Cache"
 
 #################################################################################################################
 # Boost              (https://learn.microsoft.com/azure/azure-boost/overview)                                   #
@@ -55,7 +55,7 @@ nfsCache = {
               enable      = true
               type        = "nfs"
               path        = "/storage"
-              source      = "storage-netapp.azure.studio:/data"
+              source      = "storage-netapp.azure.hpc:/data"
               options     = "fsc,rw,tcp,vers=3,nconnect=8"
               description = "Remote NFSv3 Storage"
               permissions = {
@@ -95,32 +95,32 @@ dnsRecord = {
 ########################
 
 monitorWorkspace = {
-  name              = "xstudio"
-  resourceGroupName = "ArtistAnywhere.Monitor"
+  name              = "hpcai"
+  resourceGroupName = "AAA.Monitor"
   metricsIngestion = {
     apiVersion = "2023-04-24"
   }
 }
 
 managedGrafana = {
-  name              = "xstudio"
-  resourceGroupName = "ArtistAnywhere.Monitor"
+  name              = "hpcai"
+  resourceGroupName = "AAA.Monitor"
 }
 
 virtualNetwork = {
-  name              = "Studio"
+  name              = "HPC"
   subnetName        = "Cache"
-  resourceGroupName = "ArtistAnywhere.Network.SouthCentralUS"
+  resourceGroupName = "AAA.Network.SouthCentralUS"
   privateDNS = {
-    zoneName          = "azure.studio"
-    resourceGroupName = "ArtistAnywhere.Network"
+    zoneName          = "azure.hpc"
+    resourceGroupName = "AAA.Network"
   }
 }
 
 activeDirectory = {
   enable = false
   domain = {
-    name = "azure.studio"
+    name = "azure.hpc"
   }
   machine = {
     name = "WinADController"

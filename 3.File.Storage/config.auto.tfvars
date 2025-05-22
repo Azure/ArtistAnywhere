@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Storage"
+resourceGroupName = "AAA.Storage"
 
 extendedZone = {
   enable   = false
@@ -13,7 +13,7 @@ extendedZone = {
 storageAccounts = [
   {
     enable               = false
-    name                 = "xstudio1"         # Name must be globally unique (lowercase alphanumeric)
+    name                 = "hpcai1"           # Name must be globally unique (lowercase alphanumeric)
     type                 = "BlockBlobStorage" # https://learn.microsoft.com/azure/storage/common/storage-account-overview
     tier                 = "Premium"          # https://learn.microsoft.com/azure/storage/common/storage-account-overview#performance-tiers
     redundancy           = "LRS"              # https://learn.microsoft.com/azure/storage/common/storage-redundancy
@@ -37,7 +37,7 @@ storageAccounts = [
   },
   {
     enable               = false
-    name                 = "xstudio2"    # Name must be globally unique (lowercase alphanumeric)
+    name                 = "hpcai2"      # Name must be globally unique (lowercase alphanumeric)
     type                 = "FileStorage" # https://learn.microsoft.com/azure/storage/common/storage-account-overview
     tier                 = "Premium"     # https://learn.microsoft.com/azure/storage/common/storage-account-overview#performance-tiers
     redundancy           = "LRS"         # https://learn.microsoft.com/azure/storage/common/storage-redundancy
@@ -70,13 +70,13 @@ storageAccounts = [
 
 managedLustre = {
   enable  = false
-  name    = "xstudio"
+  name    = "hpcai"
   type    = "AMLFS-Durable-Premium-40" # https://learn.microsoft.com/azure/azure-managed-lustre/create-file-system-resource-manager#file-system-type-and-size-options
   sizeTiB = 48
   blobStorage = {
     enable            = true
-    accountName       = "xstudio1"
-    resourceGroupName = "ArtistAnywhere.Storage"
+    accountName       = "hpcai1"
+    resourceGroupName = "AAA.Storage"
     containerName = {
       archive = "lustre"
       logging = "lustre-logging"
@@ -106,19 +106,19 @@ dnsRecord = {
 ########################
 
 virtualNetwork = {
-  name              = "Studio"
+  name              = "HPC"
   subnetName        = "Storage"
-  resourceGroupName = "ArtistAnywhere.Network.WestUS"
+  resourceGroupName = "AAA.Network.WestUS"
   privateDNS = {
-    zoneName          = "azure.studio"
-    resourceGroupName = "ArtistAnywhere.Network"
+    zoneName          = "azure.hpc"
+    resourceGroupName = "AAA.Network"
   }
 }
 
 activeDirectory = {
   enable = false
   domain = {
-    name = "azure.studio"
+    name = "azure.hpc"
   }
   machine = {
     name = "WinADController"

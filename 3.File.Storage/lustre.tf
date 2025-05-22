@@ -42,9 +42,9 @@ data azurerm_storage_account lustre {
 resource azurerm_resource_group lustre {
   count    = var.managedLustre.enable ? 1 : 0
   name     = "${var.resourceGroupName}.Lustre"
-  location = data.azurerm_virtual_network.studio.location
+  location = data.azurerm_virtual_network.main.location
   tags = {
-    AAA = basename(path.cwd)
+    "AAA.Module" = basename(path.cwd)
   }
 }
 
@@ -71,7 +71,7 @@ resource time_sleep lustre_storage_rbac {
   ]
 }
 
-resource azurerm_managed_lustre_file_system studio {
+resource azurerm_managed_lustre_file_system main {
   count                  = var.managedLustre.enable ? 1 : 0
   name                   = var.managedLustre.name
   resource_group_name    = azurerm_resource_group.lustre[0].name
@@ -79,11 +79,11 @@ resource azurerm_managed_lustre_file_system studio {
   sku_name               = var.managedLustre.type
   storage_capacity_in_tb = var.managedLustre.sizeTiB
   subnet_id              = data.azurerm_subnet.storage.id
-  zones                  = data.azurerm_location.studio.zone_mappings[*].logical_zone
+  zones                  = data.azurerm_location.main.zone_mappings[*].logical_zone
   identity {
     type = "UserAssigned"
     identity_ids = [
-      data.azurerm_user_assigned_identity.studio.id
+      data.azurerm_user_assigned_identity.main.id
     ]
   }
   maintenance_window {
@@ -93,7 +93,7 @@ resource azurerm_managed_lustre_file_system studio {
   dynamic encryption_key {
     for_each = var.managedLustre.encryption.enable ? [1] : []
     content {
-      source_vault_id = data.azurerm_key_vault.studio.id
+      source_vault_id = data.azurerm_key_vault.main.id
       key_url         = data.azurerm_key_vault_key.data_encryption.id
     }
   }
@@ -106,7 +106,7 @@ resource azurerm_managed_lustre_file_system studio {
     }
   }
   depends_on = [
-    azurerm_storage_account.studio,
+    azurerm_storage_account.main,
     time_sleep.lustre_storage_rbac
   ]
 }

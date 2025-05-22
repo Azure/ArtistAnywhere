@@ -1,4 +1,4 @@
-resourceGroupName = "ArtistAnywhere.Storage.DataLoad"
+resourceGroupName = "AAA.Storage.DataLoad"
 
 #########################################################################
 # Virtual Machines (https://learn.microsoft.com/azure/virtual-machines) #
@@ -12,7 +12,7 @@ dataLoad = {
     options = "vers=3" # "noatime"
   }
   machine = {
-    name = "xstudio"
+    name = "hpcai"
     size = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       publisher = ""
@@ -46,11 +46,11 @@ dataLoad = {
 ########################
 
 virtualNetwork = {
-  name              = "Studio"
+  name              = "HPC"
   subnetName        = "Storage"
-  resourceGroupName = "ArtistAnywhere.Network.WestUS"
+  resourceGroupName = "AAA.Network.WestUS"
   privateDNS = {
-    zoneName          = "azure.studio"
-    resourceGroupName = "ArtistAnywhere.Network"
+    zoneName          = "azure.hpc"
+    resourceGroupName = "AAA.Network"
   }
 }
