@@ -25,7 +25,7 @@ if [ "$gpuProvider" == NVIDIA ]; then
     dnf -y install libglvnd-devel mesa-vulkan-drivers xorg-x11-drivers
     run_process "./$fileName --silent" $binDirectory/$fileType
     echo "(AAA End): NVIDIA GPU (GRID)"
-  elif [ $machineType == Cluster ]; then
+  elif [ $machineType == JobCluster ]; then
     echo "(AAA Start): NVIDIA GPU (CUDA)"
     dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo
     dnf -y install cuda
@@ -37,14 +37,14 @@ if [ "$gpuProvider" == AMD ]; then
   if [ $machineType == VDI ]; then
     echo "(AAA Start): AMD GPU (Radeon)"
     echo "(AAA End): AMD GPU (Radeon)"
-  elif [ $machineType == Cluster ]; then
+  elif [ $machineType == JobCluster ]; then
     echo "(AAA Start): AMD GPU (Instinct)"
     echo "(AAA End): AMD GPU (Instinct)"
   fi
 fi
 
 if [ $machineType == VDI ]; then
-  echo "(AAA Start): HP Anyware"
+  echo "(AAA Start): HP Anyware (Teradici)"
   appVersion=$(echo $buildConfig | jq -r .appVersion.hpAnywareAgent)
   [ "$gpuProvider" == "" ] && fileType="pcoip-agent-standard" || fileType="pcoip-agent-graphics"
   fileName="pcoip-agent-offline-rhel9.5_$appVersion-1.el9.x86_64.tar.gz"
@@ -55,7 +55,7 @@ if [ $machineType == VDI ]; then
   cd $fileType
   run_process "./install-pcoip-agent.sh $fileType usb-vhci" $binDirectory/$fileType
   cd $binDirectory
-  echo "(AAA End): HP Anyware"
+  echo "(AAA End): HP Anyware (Teradici)"
 fi
 
 if [ "$binPaths" != "" ]; then

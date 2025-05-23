@@ -7,7 +7,7 @@ resourceGroupName = "AAA.Job.Manager"
 virtualMachines = [
   {
     enable = false
-    name   = "LnxJobManager"
+    name   = "JobManagerXL"
     size   = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       versionId         = "1.0.0"
@@ -36,7 +36,7 @@ virtualMachines = [
             enable                   = false
             resourceGroupName        = "AAA.Job.Cluster"
             jobManagerName           = "Deadline"
-            computeClusterName       = "LnxJobClusterCA"
+            computeClusterName       = "JobClusterXLCA"
             computeClusterNodeLimit  = 100
             workerIdleDeleteSeconds  = 300
             jobWaitThresholdSeconds  = 60
@@ -62,7 +62,7 @@ virtualMachines = [
   },
   {
     enable = false
-    name   = "WinJobManager"
+    name   = "JobManagerXW"
     size   = "Standard_D8as_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     image = {
       versionId         = "1.0.0"
@@ -91,7 +91,7 @@ virtualMachines = [
             enable                   = false
             resourceGroupName        = "AAA.Job.Cluster"
             jobManagerName           = "Deadline"
-            computeClusterName       = "WinJobClusterCA"
+            computeClusterName       = "JobClusterXWCA"
             computeClusterNodeLimit  = 100
             workerIdleDeleteSeconds  = 300
             jobWaitThresholdSeconds  = 60

@@ -89,7 +89,7 @@ if ($machineType -eq "JobManager") {
   Write-Information "(AAA End): Cinebench"
 }
 
-if ($machineType -eq "Cluster") {
+if ($machineType -eq "JobCluster") {
   Write-Information "(AAA Start): Privacy Experience"
   $registryKeyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OOBE"
   New-Item -ItemType Directory -Path $registryKeyPath -Force
@@ -98,14 +98,14 @@ if ($machineType -eq "Cluster") {
 }
 
 if ($machineType -eq "VDI") {
-  Write-Information "(AAA Start): HP Anyware"
+  Write-Information "(AAA Start): HP Anyware (Teradici)"
   $appVersion = $buildConfig.appVersion.hpAnywareAgent
   $fileType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
   $fileName = "${fileType}_$appVersion.exe"
   $fileLink = "$($blobStorage.endpointUrl)/Teradici/$appVersion/$fileName"
   DownloadFile $fileName $fileLink $true
   RunProcess .\$fileName "/S /NoPostReboot /Force" "$binDirectory\$fileType"
-  Write-Information "(AAA End): HP Anyware"
+  Write-Information "(AAA End): HP Anyware (Teradici)"
 }
 
 if ($binPaths -ne "") {

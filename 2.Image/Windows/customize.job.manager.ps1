@@ -39,7 +39,7 @@ if ($jobManagers -contains "Deadline") {
   $fileArgs = "--mode unattended --prefix $deadlinePath"
   $workerService = "false"
   $workerStartup = "false"
-  if ($machineType -eq "Cluster") {
+  if ($machineType -eq "JobCluster") {
     $workerService = "true"
     $workerStartup = "true"
     $securePassword = ConvertTo-SecureString $servicePassword -AsPlainText -Force

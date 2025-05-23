@@ -7,7 +7,7 @@ resourceGroupName = "AAA.Workstation"
 virtualMachines = [
   {
     enable = false
-    name   = "xLnxVDIGN"
+    name   = "VDIUserXLGN"
     size   = "Standard_NV72ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
@@ -57,7 +57,7 @@ virtualMachines = [
   },
   {
     enable = false
-    name   = "xLnxVDIGA"
+    name   = "VDIUserXLGA"
     size   = "Standard_NV28adms_V710_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
@@ -107,7 +107,7 @@ virtualMachines = [
   },
   {
     enable = false
-    name   = "aLnxVDI"
+    name   = "VDIUserAL"
     size   = "Standard_E96ps_v6" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
@@ -157,13 +157,13 @@ virtualMachines = [
   },
   {
     enable = false
-    name   = "xWinVDIGN"
+    name   = "VDIUserXWGN"
     size   = "Standard_NV72ads_A10_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
       versionId         = "3.0.0"
       galleryName       = "hpcai"
-      definitionName    = "WinVDI"
+      definitionName    = "WinUser"
       resourceGroupName = "AAA.Image"
     }
     osDisk = {
@@ -207,13 +207,13 @@ virtualMachines = [
   },
   {
     enable = false
-    name   = "xWinVDIGA"
+    name   = "VDIUserXWGA"
     size   = "Standard_NV28adms_V710_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
       versionId         = "3.1.0"
       galleryName       = "hpcai"
-      definitionName    = "WinVDI"
+      definitionName    = "WinUser"
       resourceGroupName = "AAA.Image"
     }
     osDisk = {
@@ -257,13 +257,13 @@ virtualMachines = [
   },
   {
     enable = false
-    name   = "aWinVDI"
+    name   = "VDIUserAW"
     size   = "Standard_E96ps_v6" # https://learn.microsoft.com/azure/virtual-machines/sizes
     count  = 1
     image = {
       versionId         = "3.0.0"
       galleryName       = "hpcai"
-      definitionName    = "WinVDI"
+      definitionName    = "WinUser"
       resourceGroupName = "AAA.Image"
     }
     osDisk = {

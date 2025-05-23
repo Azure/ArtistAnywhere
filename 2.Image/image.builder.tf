@@ -72,7 +72,7 @@ resource time_sleep image_builder_rbac {
 
 resource azapi_resource linux {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if module.config.image.linux.enable && imageTemplate.enable && lower(imageTemplate.source.imageDefinition.name) == "linux"
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if module.config.image.linux.enable && imageTemplate.enable && strcontains(lower(imageTemplate.source.imageDefinition.name), "lnx")
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2024-02-01"
@@ -200,7 +200,7 @@ resource azapi_resource linux {
 
 resource azapi_resource windows {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if module.config.image.windows.enable && imageTemplate.enable && startswith(imageTemplate.source.imageDefinition.name, "Win")
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if module.config.image.windows.enable && imageTemplate.enable && strcontains(lower(imageTemplate.source.imageDefinition.name), "win")
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2024-02-01"

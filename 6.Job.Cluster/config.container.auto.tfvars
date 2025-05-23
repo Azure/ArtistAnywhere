@@ -30,10 +30,10 @@ containerAppEnvironments = [
       },
       {
         enable = false
-        name   = "xwin-jobcluster-c"
+        name   = "job-cluster-xwc"
         container = {
-          name   = "xwin-jobcluster-c"
-          image  = "hpcai.azurecr.io/xwin-jobcluster-c:latest"
+          name   = "job-cluster-xwc"
+          image  = "hpcai.azurecr.io/job-cluster-xwc:latest"
           memory = "0.5Gi"
           cpu    = 0.25
         }
@@ -82,10 +82,10 @@ containerAppEnvironments = [
       },
       {
         enable = false
-        name   = "xwin-jobcluster-c"
+        name   = "job-cluster-xwc"
         container = {
-          name   = "xwin-jobcluster-c"
-          image  = "hpcai.azurecr.io/xwin-jobcluster-c:latest"
+          name   = "job-cluster-xwc"
+          image  = "hpcai.azurecr.io/job-cluster-xwc:latest"
           memory = "0.5Gi"
           cpu    = 0.25
         }
@@ -134,10 +134,10 @@ containerAppEnvironments = [
       },
       {
         enable = false
-        name   = "xwin-jobcluster-g"
+        name   = "job-cluster-xwgn"
         container = {
-          name   = "xwin-jobcluster-g"
-          image  = "hpcai.azurecr.io/xwin-jobcluster-g:latest"
+          name   = "job-cluster-xwgn"
+          image  = "hpcai.azurecr.io/job-cluster-xwgn:latest"
           memory = "0.5Gi"
           cpu    = 0.25
         }

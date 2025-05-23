@@ -7,7 +7,7 @@ resourceGroupName = "AAA.Job.Cluster"
 vmScaleSets = [
   {
     enable = false
-    name   = "LnxJobClusterCA"
+    name   = "JobClusterXLCA"
     machine = {
       namePrefix = ""
       size       = "Standard_HX176rs"
@@ -91,7 +91,7 @@ vmScaleSets = [
   },
   {
     enable = false
-    name   = "LnxJobClusterCI"
+    name   = "JobClusterXLCI"
     machine = {
       namePrefix = ""
       size       = "Standard_FX96ms_v2"
@@ -175,7 +175,7 @@ vmScaleSets = [
   },
   {
     enable = false
-    name   = "LnxJobClusterGN"
+    name   = "JobClusterXLGN"
     machine = {
       namePrefix = ""
       size       = "Standard_NC40ads_H100_v5"
@@ -259,7 +259,7 @@ vmScaleSets = [
   },
   {
     enable = false
-    name   = "LnxJobClusterGA"
+    name   = "JobClusterXLGA"
     machine = {
       namePrefix = ""
       size       = "Standard_ND96isr_MI300X_v5"
@@ -343,7 +343,7 @@ vmScaleSets = [
   },
   {
     enable = false
-    name   = "WinJobClusterCA"
+    name   = "JobClusterXWCA"
     machine = {
       namePrefix = ""
       size       = "Standard_HX176rs"
@@ -351,7 +351,7 @@ vmScaleSets = [
       image = {
         versionId         = "2.0.0"
         galleryName       = "hpcai"
-        definitionName    = "WinJobCluster"
+        definitionName    = "WinCluster"
         resourceGroupName = "AAA.Image"
       }
       bootDiagnostics = {
@@ -427,7 +427,7 @@ vmScaleSets = [
   },
   {
     enable = false
-    name   = "WinJobClusterCI"
+    name   = "JobClusterXWCI"
     machine = {
       namePrefix = ""
       size       = "Standard_FX96ms_v2"
@@ -435,7 +435,7 @@ vmScaleSets = [
       image = {
         versionId         = "2.1.0"
         galleryName       = "hpcai"
-        definitionName    = "WinJobCluster"
+        definitionName    = "WinCluster"
         resourceGroupName = "AAA.Image"
       }
       bootDiagnostics = {
@@ -511,7 +511,7 @@ vmScaleSets = [
   },
   {
     enable = false
-    name   = "WinJobClusterGN"
+    name   = "JobClusterXWGN"
     machine = {
       namePrefix = ""
       size       = "Standard_NC40ads_H100_v5"
@@ -519,7 +519,7 @@ vmScaleSets = [
       image = {
         versionId         = "2.2.0"
         galleryName       = "hpcai"
-        definitionName    = "WinJobCluster"
+        definitionName    = "WinCluster"
         resourceGroupName = "AAA.Image"
       }
       bootDiagnostics = {
@@ -595,7 +595,7 @@ vmScaleSets = [
   },
   {
     enable = false
-    name   = "WinJobClusterGA"
+    name   = "JobClusterXWGA"
     machine = {
       namePrefix = ""
       size       = "Standard_ND96isr_MI300X_v5"
@@ -603,7 +603,7 @@ vmScaleSets = [
       image = {
         versionId         = "2.3.0"
         galleryName       = "hpcai"
-        definitionName    = "WinJobCluster"
+        definitionName    = "WinCluster"
         resourceGroupName = "AAA.Image"
       }
       bootDiagnostics = {

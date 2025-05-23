@@ -25,10 +25,10 @@ variable storage {
 locals {
   storage = {
     account = {
-      name = regex("storage_account_name${local.backendConfig.patternSuffix}", file("./config/backend"))[0]
+      name = regex("storage_account_name${local.backendConfig.patternSuffix}", file("./Config/backend"))[0]
     }
     containerName = {
-      terraformState = regex("container_name${local.backendConfig.patternSuffix}", file("./config/backend"))[0]
+      terraformState = regex("container_name${local.backendConfig.patternSuffix}", file("./Config/backend"))[0]
     }
   }
 }

@@ -20,7 +20,7 @@ provider azurerm {
 }
 
 module config {
-  source = "../0.Foundation/config"
+  source = "../0.Foundation/Config"
 }
 
 module hammerspace {

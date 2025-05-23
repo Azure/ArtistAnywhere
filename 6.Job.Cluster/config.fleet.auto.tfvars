@@ -5,7 +5,7 @@
 computeFleets = [
   {
     enable = false
-    name   = "LnxJobClusterCA"
+    name   = "JobClusterXLCA"
     machine = {
       namePrefix = ""
       sizes = [
@@ -89,7 +89,7 @@ computeFleets = [
   },
   {
     enable = false
-    name   = "WinJobClusterCA"
+    name   = "JobClusterXWCA"
     machine = {
       namePrefix = ""
       sizes = [
@@ -106,7 +106,7 @@ computeFleets = [
       image = {
         versionId         = "2.0.0"
         galleryName       = "hpcai"
-        definitionName    = "WinJobCluster"
+        definitionName    = "WinCluster"
         resourceGroupName = "AAA.Image"
       }
       osDisk = {

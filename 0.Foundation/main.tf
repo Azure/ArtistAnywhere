@@ -47,7 +47,7 @@ locals {
     patternSuffix = "\\s+=\\s+\"([^\"]+)"
   }
   resourceGroup = {
-    name     = regex("resource_group_name${local.backendConfig.patternSuffix}", file("./config/backend"))[0]
+    name     = regex("resource_group_name${local.backendConfig.patternSuffix}", file("./Config/backend"))[0]
     location = var.defaultLocation
   }
 }

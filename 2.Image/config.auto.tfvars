@@ -8,7 +8,7 @@ computeGallery = {
   name = "hpcai"
   imageDefinitions = [
     {
-      name       = "xLinux"
+      name       = "LnxX"
       type       = "Linux"
       generation = "V2"
       publisher  = "AlmaLinux"
@@ -23,7 +23,7 @@ computeGallery = {
       }
     },
     {
-      name       = "aLinux"
+      name       = "LnxA"
       type       = "Linux"
       generation = "V2"
       publisher  = "AlmaLinux"
@@ -38,7 +38,7 @@ computeGallery = {
       }
     },
     {
-      name       = "WinJobManager"
+      name       = "WinServer"
       type       = "Windows"
       generation = "V2"
       publisher  = "MicrosoftWindowsServer"
@@ -53,7 +53,7 @@ computeGallery = {
       }
     },
     {
-      name       = "WinJobCluster"
+      name       = "WinCluster"
       type       = "Windows"
       generation = "V2"
       publisher  = "MicrosoftWindowsDesktop"
@@ -68,7 +68,7 @@ computeGallery = {
       }
     },
     {
-      name       = "WinVDI"
+      name       = "WinUser"
       type       = "Windows"
       generation = "V2"
       publisher  = "MicrosoftWindowsDesktop"
@@ -93,10 +93,10 @@ imageBuilder = {
   templates = [
     {
       enable = true
-      name   = "LnxJobManager"
+      name   = "JobManagerXL"
       source = {
         imageDefinition = {
-          name = "xLinux"
+          name = "LnxX"
         }
       }
       build = {
@@ -116,15 +116,15 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "LnxJobManagerARM"
+      name   = "JobManagerAL"
       source = {
         imageDefinition = {
-          name = "aLinux"
+          name = "LnxA"
         }
       }
       build = {
         machineType    = "JobManager"
-        machineSize    = "Standard_E4ps_v6" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        machineSize    = "Standard_E8ps_v6" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "1.0.0"
         osDiskSizeGB   = 1024
@@ -139,14 +139,14 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "xLnxJobClusterCA"
+      name   = "JobClusterXLCA"
       source = {
         imageDefinition = {
-          name = "xLinux"
+          name = "LnxX"
         }
       }
       build = {
-        machineType    = "Cluster"
+        machineType    = "JobCluster"
         machineSize    = "Standard_HX176rs" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "2.0.0"
@@ -163,14 +163,14 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "xLnxJobClusterCI"
+      name   = "JobClusterXLCI"
       source = {
         imageDefinition = {
-          name = "xLinux"
+          name = "LnxX"
         }
       }
       build = {
-        machineType    = "Cluster"
+        machineType    = "JobCluster"
         machineSize    = "Standard_FX96ms_v2" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                   # NVIDIA or AMD
         imageVersion   = "2.1.0"
@@ -187,14 +187,14 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "xLnxJobClusterGN"
+      name   = "JobClusterXLGN"
       source = {
         imageDefinition = {
-          name = "xLinux"
+          name = "LnxX"
         }
       }
       build = {
-        machineType    = "Cluster"
+        machineType    = "JobCluster"
         machineSize    = "Standard_NC40ads_H100_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "NVIDIA"                   # NVIDIA or AMD
         imageVersion   = "2.2.0"
@@ -212,14 +212,14 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "xLnxJobClusterGA"
+      name   = "JobClusterXLGA"
       source = {
         imageDefinition = {
-          name = "xLinux"
+          name = "LnxX"
         }
       }
       build = {
-        machineType    = "Cluster"
+        machineType    = "JobCluster"
         machineSize    = "Standard_ND96isr_MI300X_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "AMD"                        # NVIDIA or AMD
         imageVersion   = "2.3.0"
@@ -237,10 +237,34 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "xLnxVDIGN"
+      name   = "JobClusterAL"
       source = {
         imageDefinition = {
-          name = "xLinux"
+          name = "LnxA"
+        }
+      }
+      build = {
+        machineType    = "JobCluster"
+        machineSize    = "Standard_E96ps_v6" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                  # NVIDIA or AMD
+        imageVersion   = "2.0.0"
+        osDiskSizeGB   = 480
+        timeoutMinutes = 180
+        jobManagers = [
+          "Slurm",
+          "Deadline"
+        ]
+        jobProcessors = [
+          "PBRT"
+        ]
+      }
+    },
+    {
+      enable = true
+      name   = "VDIUserXLGN"
+      source = {
+        imageDefinition = {
+          name = "LnxX"
         }
       }
       build = {
@@ -262,10 +286,10 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "xLnxVDIGA"
+      name   = "VDIUserXLGA"
       source = {
         imageDefinition = {
-          name = "xLinux"
+          name = "LnxX"
         }
       }
       build = {
@@ -287,10 +311,34 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinJobManager"
+      name   = "VDIUserAL"
       source = {
         imageDefinition = {
-          name = "WinJobManager"
+          name = "LnxA"
+        }
+      }
+      build = {
+        machineType    = "VDI"
+        machineSize    = "Standard_E96ps_v6" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                  # NVIDIA or AMD
+        imageVersion   = "3.0.0"
+        osDiskSizeGB   = 1024
+        timeoutMinutes = 180
+        jobManagers = [
+          "Slurm",
+          "Deadline"
+        ]
+        jobProcessors = [
+          "PBRT"
+        ]
+      }
+    },
+    {
+      enable = true
+      name   = "JobManagerXW"
+      source = {
+        imageDefinition = {
+          name = "WinServer"
         }
       }
       build = {
@@ -310,14 +358,37 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinJobClusterCA"
+      name   = "JobManagerAW"
       source = {
         imageDefinition = {
-          name = "WinJobCluster"
+          name = "WinServer"
         }
       }
       build = {
-        machineType    = "Cluster"
+        machineType    = "JobManager"
+        machineSize    = "Standard_E96ps_v6" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                  # NVIDIA or AMD
+        imageVersion   = "1.0.0"
+        osDiskSizeGB   = 1024
+        timeoutMinutes = 180
+        jobManagers = [
+          "Slurm",
+          "Deadline"
+        ]
+        jobProcessors = [
+        ]
+      }
+    },
+    {
+      enable = true
+      name   = "JobClusterXWCA"
+      source = {
+        imageDefinition = {
+          name = "WinCluster"
+        }
+      }
+      build = {
+        machineType    = "JobCluster"
         machineSize    = "Standard_HX176rs" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                 # NVIDIA or AMD
         imageVersion   = "2.0.0"
@@ -334,14 +405,14 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinJobClusterCI"
+      name   = "JobClusterXWCI"
       source = {
         imageDefinition = {
-          name = "WinJobCluster"
+          name = "WinCluster"
         }
       }
       build = {
-        machineType    = "Cluster"
+        machineType    = "JobCluster"
         machineSize    = "Standard_FX96ms_v2" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = ""                   # NVIDIA or AMD
         imageVersion   = "2.1.0"
@@ -358,14 +429,14 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinJobClusterGN"
+      name   = "JobClusterXWGN"
       source = {
         imageDefinition = {
-          name = "WinJobCluster"
+          name = "WinCluster"
         }
       }
       build = {
-        machineType    = "Cluster"
+        machineType    = "JobCluster"
         machineSize    = "Standard_NC40ads_H100_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "NVIDIA"                   # NVIDIA or AMD
         imageVersion   = "2.2.0"
@@ -383,14 +454,14 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "WinJobClusterGA"
+      name   = "JobClusterXWGA"
       source = {
         imageDefinition = {
-          name = "WinJobCluster"
+          name = "WinCluster"
         }
       }
       build = {
-        machineType    = "Cluster"
+        machineType    = "JobCluster"
         machineSize    = "Standard_ND96isr_MI300X_v5" # https://learn.microsoft.com/azure/virtual-machines/sizes
         gpuProvider    = "AMD"                        # NVIDIA or AMD
         imageVersion   = "2.3.0"
@@ -408,10 +479,34 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "xWinVDIGN"
+      name   = "JobClusterAW"
       source = {
         imageDefinition = {
-          name = "xWinVDI"
+          name = "WinCluster"
+        }
+      }
+      build = {
+        machineType    = "JobCluster"
+        machineSize    = "Standard_E96ps_v6" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                  # NVIDIA or AMD
+        imageVersion   = "2.0.0"
+        osDiskSizeGB   = 1000
+        timeoutMinutes = 360
+        jobManagers = [
+          "Slurm",
+          "Deadline"
+        ]
+        jobProcessors = [
+          "PBRT"
+        ]
+      }
+    },
+    {
+      enable = true
+      name   = "VDIUserXWGN"
+      source = {
+        imageDefinition = {
+          name = "WinUser"
         }
       }
       build = {
@@ -433,10 +528,10 @@ imageBuilder = {
     },
     {
       enable = true
-      name   = "xWinVDIGA"
+      name   = "VDIUserXWGA"
       source = {
         imageDefinition = {
-          name = "xWinVDI"
+          name = "WinUser"
         }
       }
       build = {
@@ -453,6 +548,30 @@ imageBuilder = {
         jobProcessors = [
           "PBRT",
           "Blender"
+        ]
+      }
+    },
+    {
+      enable = true
+      name   = "VDIUserAW"
+      source = {
+        imageDefinition = {
+          name = "WinUser"
+        }
+      }
+      build = {
+        machineType    = "VDI"
+        machineSize    = "Standard_E96ps_v6" # https://learn.microsoft.com/azure/virtual-machines/sizes
+        gpuProvider    = ""                  # NVIDIA or AMD
+        imageVersion   = "3.0.0"
+        osDiskSizeGB   = 1024
+        timeoutMinutes = 360
+        jobManagers = [
+          "Slurm",
+          "Deadline"
+        ]
+        jobProcessors = [
+          "PBRT"
         ]
       }
     }

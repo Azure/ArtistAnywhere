@@ -54,16 +54,16 @@ containerRegistry = {
   tasks = [
     {
       enable = true
-      name   = "xLnxJobClusterC"
+      name   = "JobClusterXLC"
       type   = "Linux"
       docker = {
         context = {
           hostUrl     = "https://github.com/Azure/ArtistAnywhere.git"
           accessToken = " "
         }
-        filePath    = "2.Image/Registry/Docker/xLnxJobClusterC"
+        filePath    = "2.Image/Registry/Docker/JobClusterXLC"
         imageNames = [
-          "xlnx-jobcluster-c"
+          "job-cluster-xlc"
         ]
         cache = {
           enable = false
@@ -79,16 +79,16 @@ containerRegistry = {
     },
     {
       enable = true
-      name   = "xWinJobClusterC"
+      name   = "JobClusterXWC"
       type   = "Windows"
       docker = {
         context = {
           hostUrl     = "https://github.com/Azure/ArtistAnywhere.git"
           accessToken = " "
         }
-        filePath = "2.Image/Registry/Docker/xWinJobClusterC"
+        filePath = "2.Image/Registry/Docker/JobClusterXWC"
         imageNames = [
-          "xwin-jobcluster-c"
+          "job-cluster-xwc"
         ]
         cache = {
           enable = false

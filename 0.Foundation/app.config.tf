@@ -132,7 +132,7 @@ resource azurerm_app_configuration_key hp_anyware_agent {
   configuration_store_id = azurerm_app_configuration.main.id
   key                    = local.appConfigKey.hpAnywareAgent
   label                  = "HP Anyware Agent"
-  value                  = "24.10.2"
+  value                  = "25.03.2"
   content_type           = "kv"
   depends_on = [
     time_sleep.app_config_rbac
