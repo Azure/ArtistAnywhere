@@ -52,8 +52,8 @@ locals {
 resource azurerm_network_interface active_directory_client {
   count               = var.activeDirectoryClient.enable ? 1 : 0
   name                = var.activeDirectoryClient.machine.name
-  resource_group_name = azurerm_resource_group.active_directory_client[0].name
-  location            = azurerm_resource_group.active_directory_client[0].location
+  resource_group_name = azurerm_resource_group.active_directory.name
+  location            = azurerm_resource_group.active_directory.location
   ip_configuration {
     name                          = "ipConfig"
     private_ip_address_allocation = "Dynamic"
@@ -65,8 +65,8 @@ resource azurerm_network_interface active_directory_client {
  resource azurerm_windows_virtual_machine active_directory_client {
   count               = var.activeDirectoryClient.enable ? 1 : 0
   name                = var.activeDirectoryClient.machine.name
-  resource_group_name = azurerm_resource_group.active_directory_client[0].name
-  location            = azurerm_resource_group.active_directory_client[0].location
+  resource_group_name = azurerm_resource_group.active_directory.name
+  location            = azurerm_resource_group.active_directory.location
   size                = var.activeDirectoryClient.machine.size
   admin_username      = local.activeDirectoryClient.machine.adminLogin.userName
   admin_password      = local.activeDirectoryClient.machine.adminLogin.userPassword

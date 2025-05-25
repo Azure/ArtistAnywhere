@@ -1,5 +1,5 @@
 param (
-  [string] $buildConfigEncoded
+  [string] $imageBuildConfigEncoded
 )
 
 . C:\AzureData\functions.ps1
@@ -22,37 +22,37 @@ $fileType = "chocolatey"
 $fileName = "$fileType.ps1"
 $fileLink = "https://community.chocolatey.org/install.ps1"
 DownloadFile $fileName $fileLink $false
-RunProcess PowerShell.exe "-ExecutionPolicy Unrestricted -File .\$fileName" "$binDirectory\$fileType"
-$binPathChoco = "C:\ProgramData\chocolatey"
-$binPaths += ";$binPathChoco"
+RunProcess PowerShell.exe "-ExecutionPolicy Unrestricted -File .\$fileName" "$aaaRoot\$fileType"
+$aaaPathChoco = "C:\ProgramData\chocolatey"
+$aaaPath += ";$aaaPathChoco"
 Write-Information "(AAA End): Chocolatey"
 
 Write-Information "(AAA Start): Python"
 $fileType = "python"
-RunProcess "$binPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$binDirectory\$fileType"
+RunProcess "$aaaPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$aaaRoot\$fileType"
 Write-Information "(AAA End): Python"
 
 Write-Information "(AAA Start): Git"
 $fileType = "git"
-RunProcess "$binPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$binDirectory\$fileType"
-$binPathGit = "C:\Program Files\Git\bin"
-$binPaths += ";$binPathGit"
-$Env:GIT_BIN_PATH = $binPathGit
+RunProcess "$aaaPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$aaaRoot\$fileType"
+$aaaPathGit = "C:\Program Files\Git\bin"
+$aaaPath += ";$aaaPathGit"
+$Env:GIT_BIN_PATH = $aaaPathGit
 Write-Information "(AAA End): Git"
 
 Write-Information "(AAA Start): 7-Zip"
 $fileType = "7zip"
-RunProcess "$binPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$binDirectory\$fileType"
+RunProcess "$aaaPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$aaaRoot\$fileType"
 Write-Information "(AAA End): 7-Zip"
 
 Write-Information "(AAA Start): Visual Studio Build Tools"
 $fileType = "vsBuildTools"
-RunProcess "$binPathChoco\choco.exe" "install visualstudio2022buildtools --package-parameters ""--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.Component.MSBuild"" --confirm --no-progress" "$binDirectory\$fileType"
-$binPathCMake = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
-$binPathMSBuild = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64"
-$binPaths += ";$binPathCMake;$binPathMSBuild"
-$Env:CMAKE_BIN_PATH = $binPathCMake
-$Env:MSBUILD_BIN_PATH = $binPathMSBuild
+RunProcess "$aaaPathChoco\choco.exe" "install visualstudio2022buildtools --package-parameters ""--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.Component.MSBuild"" --confirm --no-progress" "$aaaRoot\$fileType"
+$aaaPathCMake = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
+$aaaPathMSBuild = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64"
+$aaaPath += ";$aaaPathCMake;$aaaPathMSBuild"
+$Env:CMAKE_BIN_PATH = $aaaPathCMake
+$Env:MSBUILD_BIN_PATH = $aaaPathMSBuild
 Write-Information "(AAA End): Visual Studio Build Tools"
 
 Write-Information "(AAA End): Image Build Platform"
@@ -72,12 +72,12 @@ if ($machineType -eq "JobManager") {
 } else {
   Write-Information "(AAA Start): NFS Client"
   $fileType = "nfs-client"
-  dism /Online /NoRestart /LogPath:"$binDirectory\$fileType" /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All
+  dism /Online /NoRestart /LogPath:"$aaaRoot\$fileType" /Enable-Feature /FeatureName:ClientForNFS-Infrastructure /All
   Write-Information "(AAA End): NFS Client"
 
   Write-Information "(AAA Start): AD Tools"
   $fileType = "ad-tools" # RSAT: Active Directory Domain Services and Lightweight Directory Services Tools
-  dism /Online /NoRestart /LogPath:"$binDirectory\$fileType" /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
+  dism /Online /NoRestart /LogPath:"$aaaRoot\$fileType" /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
   Write-Information "(AAA End): AD Tools"
 
   Write-Information "(AAA Start): Cinebench"
@@ -99,18 +99,18 @@ if ($machineType -eq "JobCluster") {
 
 if ($machineType -eq "VDI") {
   Write-Information "(AAA Start): HP Anyware (Teradici)"
-  $appVersion = $buildConfig.appVersion.hpAnywareAgent
+  $appVersion = $imageBuildConfig.appVersion.hpAnywareAgent
   $fileType = if ([string]::IsNullOrEmpty($gpuProvider)) {"pcoip-agent-standard"} else {"pcoip-agent-graphics"}
   $fileName = "${fileType}_$appVersion.exe"
   $fileLink = "$($blobStorage.endpointUrl)/Teradici/$appVersion/$fileName"
   DownloadFile $fileName $fileLink $true
-  RunProcess .\$fileName "/S /NoPostReboot /Force" "$binDirectory\$fileType"
+  RunProcess .\$fileName "/S /NoPostReboot /Force" "$aaaRoot\$fileType"
   Write-Information "(AAA End): HP Anyware (Teradici)"
 }
 
-if ($binPaths -ne "") {
-  Write-Information "(AAA Path): $($binPaths.substring(1))"
-  [Environment]::SetEnvironmentVariable("PATH", "$Env:PATH$binPaths", "Machine")
+if ($aaaPath -ne "") {
+  Write-Information "(AAA Path): $($aaaPath.substring(1))"
+  [Environment]::SetEnvironmentVariable("PATH", "$Env:PATH$aaaPath", "Machine")
 }
 
 Write-Information "(AAA End): Core"

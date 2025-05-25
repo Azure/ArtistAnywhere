@@ -117,7 +117,7 @@ activeDirectory = {
     name = "azure.hpc"
   }
   machine = {
-    name = "WinADController"
+    name = "WinAD"
     adminLogin = {
       userName     = ""
       userPassword = ""

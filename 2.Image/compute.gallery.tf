@@ -37,7 +37,7 @@ resource azurerm_shared_image_gallery main {
 
 resource azurerm_shared_image main {
   for_each = {
-    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if (module.config.image.linux.enable && lower(imageDefinition.type) == "linux") || (module.config.image.windows.enable && lower(imageDefinition.type) == "windows")
+    for imageDefinition in var.computeGallery.imageDefinitions : imageDefinition.name => imageDefinition if (lower(imageDefinition.type) == "linux") || (module.config.image.windows.cluster.enable && lower(imageDefinition.type) == "windows") || (!module.config.image.windows.cluster.enable && lower(imageDefinition.name) == "winuser")
   }
   name                                = each.value.name
   resource_group_name                 = azurerm_resource_group.image_gallery.name
@@ -58,10 +58,10 @@ resource azurerm_shared_image main {
 }
 
 output linux {
-  value = module.config.image.linux.enable && local.imageDefinitionLinux != null ? {
+  value = {
     publisher = lower(local.imageDefinitionLinux.publisher)
     offer     = lower(local.imageDefinitionLinux.offer)
     sku       = lower(local.imageDefinitionLinux.sku)
     version   = module.config.image.linux.version
-  } : null
+  }
 }

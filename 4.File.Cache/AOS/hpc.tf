@@ -23,9 +23,9 @@ data azuread_service_principal hpc_cache {
 }
 
 locals {
-  nfsBlobStorageAccount = one([
+  nfsBlobStorageAccount = [
     for storageTarget in var.storageTargets : storageTarget if storageTarget.enable && storageTarget.containerName != ""
-  ])
+  ][0]
 }
 
 resource azurerm_role_assignment storage_account_contributor {

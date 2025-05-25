@@ -33,9 +33,9 @@ variable virtualMachines {
           autoScale = object({
             enable = bool
             resourceGroupName        = string
-            computeJobManager        = string
-            computeClusterName       = string
-            computeClusterNodeLimit  = number
+            jobManagerName           = string
+            jobClusterName           = string
+            jobClusterNodeLimit      = number
             workerIdleDeleteSeconds  = number
             jobWaitThresholdSeconds  = number
             detectionIntervalSeconds = number

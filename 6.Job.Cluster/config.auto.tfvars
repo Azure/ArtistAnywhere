@@ -15,8 +15,8 @@ vmScaleSets = [
       image = {
         versionId         = "2.0.0"
         galleryName       = "hpcai"
-        definitionName    = "Linux"
-        resourceGroupName = "AAA.Image"
+        definitionName    = "LnxX"
+        resourceGroupName = "AAA.Image.Gallery"
       }
       bootDiagnostics = {
         enable = true
@@ -99,8 +99,8 @@ vmScaleSets = [
       image = {
         versionId         = "2.1.0"
         galleryName       = "hpcai"
-        definitionName    = "Linux"
-        resourceGroupName = "AAA.Image"
+        definitionName    = "LnxX"
+        resourceGroupName = "AAA.Image.Gallery"
       }
       bootDiagnostics = {
         enable = true
@@ -183,8 +183,8 @@ vmScaleSets = [
       image = {
         versionId         = "2.2.0"
         galleryName       = "hpcai"
-        definitionName    = "Linux"
-        resourceGroupName = "AAA.Image"
+        definitionName    = "LnxX"
+        resourceGroupName = "AAA.Image.Gallery"
       }
       bootDiagnostics = {
         enable = true
@@ -267,8 +267,8 @@ vmScaleSets = [
       image = {
         versionId         = "2.3.0"
         galleryName       = "hpcai"
-        definitionName    = "Linux"
-        resourceGroupName = "AAA.Image"
+        definitionName    = "LnxX"
+        resourceGroupName = "AAA.Image.Gallery"
       }
       bootDiagnostics = {
         enable = true
@@ -352,7 +352,7 @@ vmScaleSets = [
         versionId         = "2.0.0"
         galleryName       = "hpcai"
         definitionName    = "WinCluster"
-        resourceGroupName = "AAA.Image"
+        resourceGroupName = "AAA.Image.Gallery"
       }
       bootDiagnostics = {
         enable = true
@@ -436,7 +436,7 @@ vmScaleSets = [
         versionId         = "2.1.0"
         galleryName       = "hpcai"
         definitionName    = "WinCluster"
-        resourceGroupName = "AAA.Image"
+        resourceGroupName = "AAA.Image.Gallery"
       }
       bootDiagnostics = {
         enable = true
@@ -520,7 +520,7 @@ vmScaleSets = [
         versionId         = "2.2.0"
         galleryName       = "hpcai"
         definitionName    = "WinCluster"
-        resourceGroupName = "AAA.Image"
+        resourceGroupName = "AAA.Image.Gallery"
       }
       bootDiagnostics = {
         enable = true
@@ -604,7 +604,7 @@ vmScaleSets = [
         versionId         = "2.3.0"
         galleryName       = "hpcai"
         definitionName    = "WinCluster"
-        resourceGroupName = "AAA.Image"
+        resourceGroupName = "AAA.Image.Gallery"
       }
       bootDiagnostics = {
         enable = true
@@ -696,7 +696,7 @@ activeDirectory = {
     name = "azure.hpc"
   }
   machine = {
-    name = "WinADController"
+    name = "WinAD"
     adminLogin = {
       userName     = ""
       userPassword = ""

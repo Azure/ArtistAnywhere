@@ -11,7 +11,7 @@ if ("${machineType}" -eq "WinServer") {
   . $scriptFile
 
   $fileType = "ad-tools" # RSAT: Active Directory Domain Services and Lightweight Directory Services Tools
-  dism /Online /NoRestart /LogPath:"$binDirectory\$fileType" /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
+  dism /Online /NoRestart /LogPath:"$aaaRoot\$fileType" /Add-Capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
 
   JoinActiveDirectory -activeDirectory (ConvertFrom-Json -InputObject '${jsonencode(activeDirectory)}')
 }

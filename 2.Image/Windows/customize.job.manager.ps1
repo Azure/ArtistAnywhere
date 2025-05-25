@@ -1,5 +1,5 @@
 param (
-  [string] $buildConfigEncoded
+  [string] $imageBuildConfigEncoded
 )
 
 . C:\AzureData\functions.ps1
@@ -7,12 +7,12 @@ param (
 Write-Information "(AAA Start): Job Manager"
 
 if ($jobManagers -contains "Deadline") {
-  $appVersion = $buildConfig.appVersion.jobManagerDeadline
+  $appVersion = $imageBuildConfig.appVersion.jobManagerDeadline
   $databaseHost = $(hostname)
   $databasePath = "C:\DeadlineData"
   $deadlinePath = "C:\DeadlineServer"
   $deadlineCertificate = "Deadline10Client.pfx"
-  $binPathJobManager = "$deadlinePath\bin"
+  $aaaPathJobManager = "$deadlinePath\bin"
 
   Write-Information "(AAA Start): Deadline Download"
   $fileName = "Deadline-$appVersion-windows-installers.zip"
@@ -26,8 +26,8 @@ if ($jobManagers -contains "Deadline") {
     Write-Information "(AAA Start): Deadline Server"
     $fileType = "deadline-repository"
     $fileName = "DeadlineRepository-$appVersion-windows-installer.exe"
-    RunProcess .\$fileName "--mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$binDirectory\$fileType"
-    Move-Item -Path $Env:TMP\installbuilder_installer.log -Destination $binDirectory\$fileType.log
+    RunProcess .\$fileName "--mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$aaaRoot\$fileType"
+    Move-Item -Path $Env:TMP\installbuilder_installer.log -Destination $aaaRoot\$fileType.log
     Copy-Item -Path $databasePath\certs\$deadlineCertificate -Destination $deadlinePath\$deadlineCertificate
     New-NfsShare -Name "Deadline" -Path $deadlinePath -Permission ReadWrite
     Write-Information "(AAA End): Deadline Server"
@@ -47,17 +47,17 @@ if ($jobManagers -contains "Deadline") {
     $fileArgs = "$fileArgs --serviceuser $serviceUsername --servicepassword $servicePassword"
   }
   $fileArgs = "$fileArgs --launcherservice $workerService --slavestartup $workerStartup"
-  RunProcess .\$fileName $fileArgs "$binDirectory\$fileType"
-  Move-Item -Path $Env:TMP\installbuilder_installer.log -Destination $binDirectory\$fileType.log
-  Set-Location -Path $binDirectory
+  RunProcess .\$fileName $fileArgs "$aaaRoot\$fileType"
+  Move-Item -Path $Env:TMP\installbuilder_installer.log -Destination $aaaRoot\$fileType.log
+  Set-Location -Path $aaaRoot
   Write-Information "(AAA End): Deadline Client"
 
   Write-Information "(AAA Start): Deadline Repository"
   $taskName = "AAA Deadline Repository"
   if ($machineType -eq "JobManager") {
-    $taskAction = New-ScheduledTaskAction -Execute "$binPathJobManager\deadlinecommand.exe" -Argument "-ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate"
+    $taskAction = New-ScheduledTaskAction -Execute "$aaaPathJobManager\deadlinecommand.exe" -Argument "-ChangeRepository Direct $deadlinePath $deadlinePath\$deadlineCertificate"
   } else {
-    $taskAction = New-ScheduledTaskAction -Execute "$binPathJobManager\deadlinecommand.exe" -Argument "-ChangeRepository Direct S:\ S:\$deadlineCertificate"
+    $taskAction = New-ScheduledTaskAction -Execute "$aaaPathJobManager\deadlinecommand.exe" -Argument "-ChangeRepository Direct S:\ S:\$deadlineCertificate"
   }
   $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
   $taskPrincipal = New-ScheduledTaskPrincipal -GroupId "Users"
@@ -69,17 +69,17 @@ if ($jobManagers -contains "Deadline") {
   $shortcutPath = "$Env:AllUsersProfile\Desktop\Deadline Monitor.lnk"
   $scriptShell = New-Object -ComObject WScript.Shell
   $shortcut = $scriptShell.CreateShortcut($shortcutPath)
-  $shortcut.WorkingDirectory = $binPathJobManager
-  $shortcut.TargetPath = "$binPathJobManager\deadlinemonitor.exe"
+  $shortcut.WorkingDirectory = $aaaPathJobManager
+  $shortcut.TargetPath = "$aaaPathJobManager\deadlinemonitor.exe"
   $shortcut.Save()
   Write-Information "(AAA End): Deadline Monitor"
 
-  $binPaths += ";$binPathJobManager"
+  $aaaPath += ";$aaaPathJobManager"
 }
 
-if ($binPaths -ne "") {
-  Write-Information "(AAA Path): $($binPaths.substring(1))"
-  [Environment]::SetEnvironmentVariable("PATH", "$Env:PATH$binPaths", "Machine")
+if ($aaaPath -ne "") {
+  Write-Information "(AAA Path): $($aaaPath.substring(1))"
+  [Environment]::SetEnvironmentVariable("PATH", "$Env:PATH$aaaPath", "Machine")
 }
 
 Write-Information "(AAA End): Job Manager"

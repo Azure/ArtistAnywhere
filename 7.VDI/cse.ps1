@@ -4,7 +4,7 @@ if ("${remoteAgentKey}" -ne "") {
   $fileType = "pcoip-register-host"
   $fileName = "$fileType.ps1"
   $filePath = "C:\Program Files\Teradici\PCoIP Agent"
-  RunProcess PowerShell.exe "-ExecutionPolicy Unrestricted -File ""$filePath\$fileName"" -RegistrationCode ${remoteAgentKey}" "$binDirectory\$fileType"
+  RunProcess PowerShell.exe "-ExecutionPolicy Unrestricted -File ""$filePath\$fileName"" -RegistrationCode ${remoteAgentKey}" $fileType
 }
 
 SetFileSystem (ConvertFrom-Json -InputObject '${jsonencode(fileSystem)}')

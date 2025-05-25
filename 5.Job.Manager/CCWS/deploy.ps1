@@ -42,7 +42,7 @@ az network bastion tunnel --resource-group $bastionHost.resourceGroupName --name
 $loginNode = @{
   resourceGroupName = "AAA.Job.Manager.CCWS"
   authType          = "ssh-key"
-  userName          = "xadmin"
+  userName          = "hpcadmin"
   sshKeyFile        = "~/.ssh/id_rsa"
 }
 $bastionHost = @{

@@ -1,25 +1,27 @@
 $ErrorActionPreference = "Stop"
+$InformationPreference = "Continue"
 
-$binPaths = ""
-$binDirectory = "C:\Users\Public\Downloads"
-Set-Location -Path $binDirectory
+$aaaPath = ""
+$aaaRoot = "C:\Program Files\AAA"
+New-Item -ItemType Directory -Path $aaaRoot -Force
+Set-Location -Path $aaaRoot
 
-$fileSystemsMountPath = "$binDirectory\fileSystems.bat"
+$fileSystemsMount = "$aaaRoot\fileSystems.bat"
 
-if ($buildConfigEncoded -ne "") {
-  Write-Information "(AAA Start): Image Build Parameters"
-  $buildConfigBytes = [System.Convert]::FromBase64String($buildConfigEncoded)
-  $buildConfig = [System.Text.Encoding]::UTF8.GetString($buildConfigBytes) | ConvertFrom-Json
-  $blobStorage = $buildConfig.blobStorage
-  $machineType = $buildConfig.machineType
-  $gpuProvider = $buildConfig.gpuProvider
-  $jobManagers = $buildConfig.jobManagers
-  $jobProcessors = $buildConfig.jobProcessors
-  $adminUsername = $buildConfig.authCredential.adminUsername
-  $adminPassword = $buildConfig.authCredential.adminPassword
-  $serviceUsername = $buildConfig.authCredential.serviceUsername
-  $servicePassword = $buildConfig.authCredential.servicePassword
-  Write-Information "(AAA End): Image Build Parameters"
+if ($imageBuildConfigEncoded -ne "") {
+  Write-Information "(AAA Start): Image Build Config"
+  $imageBuildConfigBytes = [System.Convert]::FromBase64String($imageBuildConfigEncoded)
+  $imageBuildConfig = [System.Text.Encoding]::UTF8.GetString($imageBuildConfigBytes) | ConvertFrom-Json
+  $blobStorage = $imageBuildConfig.blobStorage
+  $machineType = $imageBuildConfig.machineType
+  $gpuProvider = $imageBuildConfig.gpuProvider
+  $jobManagers = $imageBuildConfig.jobManagers
+  $jobProcessors = $imageBuildConfig.jobProcessors
+  $adminUsername = $imageBuildConfig.authCredential.adminUsername
+  $adminPassword = $imageBuildConfig.authCredential.adminPassword
+  $serviceUsername = $imageBuildConfig.authCredential.serviceUsername
+  $servicePassword = $imageBuildConfig.authCredential.servicePassword
+  Write-Information "(AAA End): Image Build Config"
 }
 
 function DownloadFile ($fileName, $fileLink, $authRequired) {
@@ -46,6 +48,7 @@ function DownloadFile ($fileName, $fileLink, $authRequired) {
 function RunProcess ($filePath, $argumentList, $logFile) {
   try {
     if ($logFile) {
+      $logFile = "$aaaRoot\$logFile"
       if ($argumentList) {
         Start-Process -FilePath $filePath -ArgumentList $argumentList -Wait -RedirectStandardOutput $logFile-out -RedirectStandardError $logFile-err
       } else {
@@ -67,61 +70,56 @@ function RunProcess ($filePath, $argumentList, $logFile) {
   }
 }
 
-function FileExists ($filePath) {
-  return Test-Path -PathType Leaf -Path $filePath
-}
-
 function SetFileSystem ($fileSystemConfig) {
-  if ($fileSystemConfig -ne $null) {
-    foreach ($fileSystem in $fileSystemConfig) {
-      if ($fileSystem.enable) {
-        SetFileSystemMount $fileSystem.mount
-      }
+  foreach ($fileSystem in $fileSystemConfig) {
+    if ($fileSystem.enable) {
+      SetFileSystemMount $fileSystem.mount
     }
-    RegisterFileSystemMounts
   }
+  RegisterFileSystemMounts
 }
 
 function SetFileSystemMount ($fileSystemMount) {
-  if (!(FileExists $fileSystemsMountPath)) {
-    New-Item -ItemType File -Path $fileSystemsMountPath
+  if (!(Test-Path -PathType Leaf -Path $fileSystemMount)) {
+    New-Item -ItemType File -Path $fileSystemsMount
   }
-  $mountScript = Get-Content -Path $fileSystemsMountPath
+  $mountScript = Get-Content -Path $fileSystemsMount
   if ($mountScript -eq $null -or $mountScript -notlike "*$($fileSystemMount.path)*") {
     $mount = "mount $($fileSystemMount.options) $($fileSystemMount.target) $($fileSystemMount.path)"
-    Add-Content -Path $fileSystemsMountPath -Value $mount
+    Add-Content -Path $fileSystemsMount -Value $mount
   }
 }
 
 function RegisterFileSystemMounts {
-  if (FileExists $fileSystemsMountPath) {
-    RunProcess $fileSystemsMountPath $null file-system-mount
-    $taskName = "AAA File System Mount"
-    $taskTrigger = New-ScheduledTaskTrigger -AtStartup
-    $taskAction = New-ScheduledTaskAction -Execute $fileSystemsMountPath
-    Register-ScheduledTask -TaskName $taskName -Trigger $taskTrigger -Action $taskAction -User System -Force
-  }
+  RunProcess $fileSystemsMount $null file-system-mount
+  $taskName = "AAA File System Mount"
+  $taskTrigger = New-ScheduledTaskTrigger -AtStartup
+  $taskAction = New-ScheduledTaskAction -Execute $fileSystemsMount
+  Register-ScheduledTask -TaskName $taskName -Trigger $taskTrigger -Action $taskAction -User System -Force
 }
 
-function Retry ($delaySeconds, $maxCount, $scriptBlock) {
-  $exOriginal = $null
+function Retry {
+  param (
+    [int] $retryCountMax,
+    [int] $delaySeconds,
+    [ScriptBlock] $scriptBlock
+  )
+  $ex = $null
   $retryCount = 0
   do {
     $retryCount++
     try {
-      $scriptBlock.Invoke()
-      $exOriginal = $null
-      exit
+      return $scriptBlock.Invoke()
     } catch {
-      Write-Information "(AAA) Error: ", $_.Exception.Message
-      if ($exOriginal -eq $null) {
-        $exOriginal = $_.Exception.MembershipwiseClone
+      Write-Information "(AAA) Error $retryCount of $retryCountMax Retry: $($_.Exception.Message)"
+      if ($ex -eq $null) {
+        $ex = $_.Exception
       }
       Start-Sleep -Seconds $delaySeconds
     }
-  } while ($retryCount -lt $maxCount)
-  if ($exOriginal -ne $null) {
-    throw $exOriginal
+  } while ($retryCount -lt $retryCountMax)
+  if ($ex -ne $null) {
+    throw $ex
   }
 }
 
@@ -135,46 +133,46 @@ function JoinActiveDirectory {
     [string] $userName,
     [string] $userPassword
   )
-  process {
-    if ($PSCmdlet.ParameterSetName -eq "Retry") {
-      if ($activeDirectory.enable) {
-        Retry 3 10 {
-          JoinActiveDirectory -serverName $activeDirectory.serverName -domainName $activeDirectory.domainName -userName $activeDirectory.machine.adminLogin.userName -userPassword $activeDirectory.machine.adminLogin.userPassword
-        }
+  if ($PSCmdlet.ParameterSetName -eq "Retry") {
+    if ($activeDirectory.enable) {
+      Retry 3 10 {
+        JoinActiveDirectory -serverName $activeDirectory.serverName -domainName $activeDirectory.domainName -userName $activeDirectory.machine.adminLogin.userName -userPassword $activeDirectory.machine.adminLogin.userPassword
       }
-    } else {
-      if ($userName -notlike "*@*") {
-        $userName = "$userName@$domainName"
-      }
-      $securePassword = ConvertTo-SecureString $userPassword -AsPlainText -Force
-      $userCredential = New-Object System.Management.Automation.PSCredential($userName, $securePassword)
+    }
+  } else {
+    if ($userName -notlike "*@*") {
+      $userName = "$userName@$domainName"
+    }
+    $securePassword = ConvertTo-SecureString $userPassword -AsPlainText -Force
+    $userCredential = New-Object System.Management.Automation.PSCredential($userName, $securePassword)
 
-      try {
-        $oldComputer = Get-ADComputer -Server $serverName -Identity $(hostname) -Credential $userCredential
-        Write-Information "(AAA) Get-ADComputer: $oldComputer"
+    $oldComputer = $null
+    try {
+      $machineName = [System.Environment]::MachineName
+      $oldComputer = Get-ADComputer -Server $serverName -Identity $machineName -Credential $userCredential
+      Write-Information "(AAA) Get-ADComputer: $oldComputer"
+    }
+    catch {
+      Write-Information "(AAA) Error: $($_.Exception.Message)"
+    }
+    finally {
+      if ($oldComputer) {
+        Write-Information "(AAA) Remove-ADObject: $serverName, $oldComputer"
+        Remove-ADObject -Server $serverName -Identity $oldComputer -Recursive -Confirm:$false
       }
-      catch {}
-      finally {
-        if ($oldComputer) {
-          Write-Information "(AAA) Remove-ADObject: $serverName, $oldComputer"
-          Remove-ADObject -Server $serverName -Identity $oldComputer -Recursive -Confirm:$false
-        }
-      }
+    }
 
-      Write-Information "(AAA) Add-Computer: $serverName, $domainName"
+    Write-Information "(AAA) Add-Computer: $serverName, $domainName"
+    try {
       Add-Computer -Server $serverName -DomainName $domainName -Credential $userCredential -Force -PassThru -Verbose
-      if ($?) {
-        Write-Information "(AAA) Set-ADComputer: $serverName, $(hostname), $(Get-Date)"
-        Set-ADComputer -Server $serverName -Identity $(hostname) -Description $(Get-Date)
-        Write-Information "(AAA) Restart-Computer"
-        Restart-Computer
-      } else {
-        $ex = $Error[0].Exception
-        while ($ex.InnerException) {
-          $ex = $ex.InnerException
-        }
-        Write-Information "(AAA) Error: ", $ex.Message
+      Write-Information "(AAA) Restart-Computer"
+      Restart-Computer
+    } catch {
+      $ex = $_.Exception
+      while ($ex.InnerException) {
+        $ex = $ex.InnerException
       }
+      Write-Information "(AAA) Error: $($ex.Message)"
     }
   }
 }

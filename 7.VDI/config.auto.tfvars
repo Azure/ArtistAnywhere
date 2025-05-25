@@ -13,8 +13,8 @@ virtualMachines = [
     image = {
       versionId         = "3.0.0"
       galleryName       = "hpcai"
-      definitionName    = "Linux"
-      resourceGroupName = "AAA.Image"
+      definitionName    = "LnxX"
+      resourceGroupName = "AAA.Image.Gallery"
     }
     osDisk = {
       type        = "Linux"
@@ -63,8 +63,8 @@ virtualMachines = [
     image = {
       versionId         = "3.1.0"
       galleryName       = "hpcai"
-      definitionName    = "Linux"
-      resourceGroupName = "AAA.Image"
+      definitionName    = "LnxX"
+      resourceGroupName = "AAA.Image.Gallery"
     }
     osDisk = {
       type        = "Linux"
@@ -114,7 +114,7 @@ virtualMachines = [
       versionId         = "3.0.0"
       galleryName       = "hpcai"
       definitionName    = "aLinux"
-      resourceGroupName = "AAA.Image"
+      resourceGroupName = "AAA.Image.Gallery"
     }
     osDisk = {
       type        = "Linux"
@@ -164,7 +164,7 @@ virtualMachines = [
       versionId         = "3.0.0"
       galleryName       = "hpcai"
       definitionName    = "WinUser"
-      resourceGroupName = "AAA.Image"
+      resourceGroupName = "AAA.Image.Gallery"
     }
     osDisk = {
       type        = "Windows"
@@ -214,7 +214,7 @@ virtualMachines = [
       versionId         = "3.1.0"
       galleryName       = "hpcai"
       definitionName    = "WinUser"
-      resourceGroupName = "AAA.Image"
+      resourceGroupName = "AAA.Image.Gallery"
     }
     osDisk = {
       type        = "Windows"
@@ -264,7 +264,7 @@ virtualMachines = [
       versionId         = "3.0.0"
       galleryName       = "hpcai"
       definitionName    = "WinUser"
-      resourceGroupName = "AAA.Image"
+      resourceGroupName = "AAA.Image.Gallery"
     }
     osDisk = {
       type        = "Windows"
@@ -324,7 +324,7 @@ activeDirectory = {
     name = "azure.hpc"
   }
   machine = {
-    name = "WinADController"
+    name = "WinAD"
     adminLogin = {
       userName     = ""
       userPassword = ""

@@ -7,7 +7,7 @@ serviceName="AAA Auto Scaler"
 
 dataFilePath="/var/lib/waagent/ovf-env.xml"
 dataFileText=$(xmllint --xpath "//*[local-name()='Environment']/*[local-name()='ProvisioningSection']/*[local-name()='LinuxProvisioningConfigurationSet']/*[local-name()='CustomData']/text()" $dataFilePath)
-codeFilePath="$binDirectory/$serviceFile.sh"
+codeFilePath="$aaaRoot/$serviceFile.sh"
 echo $dataFileText | base64 -d > $codeFilePath
 chmod +x $codeFilePath
 
@@ -19,9 +19,9 @@ echo "" >> $servicePath
 echo "[Service]" >> $servicePath
 echo "Environment=PATH=$PATH" >> $servicePath
 echo "Environment=resourceGroupName=${autoScale.resourceGroupName}" >> $servicePath
-echo "Environment=computeJobManager=${autoScale.computeJobManager}" >> $servicePath
-echo "Environment=computeClusterName=${autoScale.computeClusterName}" >> $servicePath
-echo "Environment=computeClusterNodeLimit=${autoScale.computeClusterNodeLimit}" >> $servicePath
+echo "Environment=jobManagerName=${autoScale.jobManagerName}" >> $servicePath
+echo "Environment=jobClusterName=${autoScale.jobClusterName}" >> $servicePath
+echo "Environment=jobClusterNodeLimit=${autoScale.jobClusterNodeLimit}" >> $servicePath
 echo "Environment=workerIdleDeleteSeconds=${autoScale.workerIdleDeleteSeconds}" >> $servicePath
 echo "Environment=jobWaitThresholdSeconds=${autoScale.jobWaitThresholdSeconds}" >> $servicePath
 echo "ExecStart=/bin/bash $codeFilePath" >> $servicePath

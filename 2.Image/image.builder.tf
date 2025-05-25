@@ -72,7 +72,7 @@ resource time_sleep image_builder_rbac {
 
 resource azapi_resource linux {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if module.config.image.linux.enable && imageTemplate.enable && strcontains(lower(imageTemplate.source.imageDefinition.name), "lnx")
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if imageTemplate.enable && strcontains(lower(imageTemplate.source.imageDefinition.name), "lnx")
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2024-02-01"
@@ -156,10 +156,10 @@ resource azapi_resource linux {
           {
             type = "Shell"
             inline = [
-              "cat /tmp/customize.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))} /bin/bash",
-              "cat /tmp/customize.gpu.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))} /bin/bash",
-              "cat /tmp/customize.job.manager.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))} /bin/bash",
-              "cat /tmp/customize.job.processor.sh | tr -d \r | buildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))} /bin/bash"
+              "cat /tmp/customize.sh | tr -d \r | imageBuildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))} /bin/bash",
+              "cat /tmp/customize.gpu.sh | tr -d \r | imageBuildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))} /bin/bash",
+              "cat /tmp/customize.job.manager.sh | tr -d \r | imageBuildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))} /bin/bash",
+              "cat /tmp/customize.job.processor.sh | tr -d \r | imageBuildConfigEncoded=${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))} /bin/bash"
             ]
           }
         ]
@@ -200,7 +200,7 @@ resource azapi_resource linux {
 
 resource azapi_resource windows {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if module.config.image.windows.enable && imageTemplate.enable && strcontains(lower(imageTemplate.source.imageDefinition.name), "win")
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if (module.config.image.windows.cluster.enable && imageTemplate.enable && strcontains(lower(imageTemplate.source.imageDefinition.name), "win")) || (!module.config.image.windows.cluster.enable && strcontains(lower(imageTemplate.source.imageDefinition.name), "winuser"))
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2024-02-01"
@@ -287,10 +287,10 @@ resource azapi_resource windows {
           {
             type = "PowerShell"
             inline = [
-              "C:\\AzureData\\customize.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))}",
-              "C:\\AzureData\\customize.gpu.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))}",
-              "C:\\AzureData\\customize.job.manager.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))}",
-              "C:\\AzureData\\customize.job.processor.ps1 -buildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))}"
+              "C:\\AzureData\\customize.ps1 -imageBuildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))}",
+              "C:\\AzureData\\customize.gpu.ps1 -imageBuildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))}",
+              "C:\\AzureData\\customize.job.manager.ps1 -imageBuildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))}",
+              "C:\\AzureData\\customize.job.processor.ps1 -imageBuildConfigEncoded ${base64encode(jsonencode(merge(each.value.build, {blobStorage = local.blobStorage}, {appVersion = local.appVersion}, {authCredential = local.authCredential})))}"
             ]
             runElevated = true
             runAsSystem = true

@@ -1,15 +1,15 @@
 param (
   [string] $resourceGroupName,
-  [string] $computeJobManager,
-  [string] $computeClusterName,
-  [int] $computeClusterNodeLimit
+  [string] $jobManagerName,
+  [string] $jobClusterName,
+  [int] $jobClusterNodeLimit
   [int] $jobWaitThresholdSeconds
   [int] $workerIdleDeleteSeconds
 )
 
 az login --identity
 
-if ($computeJobManager -eq "Deadline") {
+if ($jobManagerName -eq "Deadline") {
   $queuedTasks = 0
   $activeJobIds = deadlinecommand -GetJobIdsFilter Status=Active
   foreach ($jobId in $activeJobIds) {
@@ -27,13 +27,13 @@ if ($computeJobManager -eq "Deadline") {
     }
   }
   if ($queuedTasks -gt 0) { # Scale Up
-    $computeClusterNodeCount = az vmss show --resource-group $resourceGroupName --name $computeClusterName --query "sku.capacity"
-    if ($computeClusterNodeLimit -gt 0 -and $computeClusterNodeCount + $queuedTasks -gt $computeClusterNodeLimit) {
-      $computeClusterNodeCount = $computeClusterNodeLimit
+    $jobClusterNodeCount = az vmss show --resource-group $resourceGroupName --name $jobClusterName --query "sku.capacity"
+    if ($jobClusterNodeLimit -gt 0 -and $jobClusterNodeCount + $queuedTasks -gt $jobClusterNodeLimit) {
+      $jobClusterNodeCount = $jobClusterNodeLimit
     } else {
-      $computeClusterNodeCount += $queuedTasks
+      $jobClusterNodeCount += $queuedTasks
     }
-    az vmss scale --resource-group $resourceGroupName --name $computeClusterName --new-capacity $computeClusterNodeCount
+    az vmss scale --resource-group $resourceGroupName --name $jobClusterName --new-capacity $jobClusterNodeCount
   } else { # Scale Down
     $workerNames = deadlinecommand -GetSlaveNames
     foreach ($workerName in $workerNames) {
@@ -43,12 +43,12 @@ if ($computeJobManager -eq "Deadline") {
         $workerIdleEndTime = Get-Date -AsUtc
         $workerIdleSeconds = (New-TimeSpan -Start $workerIdleStartTime -End $workerIdleEndTime).TotalSeconds
         if ($workerIdleSeconds -gt $workerIdleDeleteSeconds) {
-          $instanceId = az vmss list-instances --resource-group $resourceGroupName --name $computeClusterName --query "[?osProfile.computerName=='$workerName'].instanceId" --output tsv
-          az vmss delete-instances --resource-group $resourceGroupName --name $computeClusterName --instance-ids $instanceId
+          $instanceId = az vmss list-instances --resource-group $resourceGroupName --name $jobClusterName --query "[?osProfile.computerName=='$workerName'].instanceId" --output tsv
+          az vmss delete-instances --resource-group $resourceGroupName --name $jobClusterName --instance-ids $instanceId
         }
       }
     }
   }
-} else if ($computeJobManager -eq "Slurm") {
+} else if ($jobManagerName -eq "Slurm") {
 
 }

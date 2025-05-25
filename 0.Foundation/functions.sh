@@ -1,24 +1,25 @@
-binPaths=""
-binDirectory="/usr/local/bin"
-cd $binDirectory
+aaaPath=""
+aaaRoot="/usr/local/aaa"
+mkdir -p $aaaRoot
+cd $aaaRoot
 
-if [ "$buildConfigEncoded" != "" ]; then
-  aaaProfile="/etc/profile.d/aaa.sh"
-  touch $aaaProfile
+aaaProfile="/etc/profile.d/aaa.sh"
+touch $aaaProfile
 
-  echo "(AAA Start): Image Build Parameters"
-  buildConfig=$(echo $buildConfigEncoded | base64 -d)
-  blobStorage=$(echo $buildConfig | jq -c .blobStorage)
+if [ "$imageBuildConfigEncoded" != "" ]; then
+  echo "(AAA Start): Image Build Config"
+  imageBuildConfig=$(echo $imageBuildConfigEncoded | base64 -d)
+  blobStorage=$(echo $imageBuildConfig | jq -c .blobStorage)
   blobStorageEndpointUrl=$(echo $blobStorage | jq -r .endpointUrl)
-  machineType=$(echo $buildConfig | jq -r .machineType)
-  gpuProvider=$(echo $buildConfig | jq -r .gpuProvider)
-  jobManagers=$(echo $buildConfig | jq -c .jobManagers)
-  jobProcessors=$(echo $buildConfig | jq -c .jobProcessors)
-  adminUsername=$(echo $buildConfig | jq -r .authCredential.adminUsername)
-  adminPassword=$(echo $buildConfig | jq -r .authCredential.adminPassword)
-  serviceUsername=$(echo $buildConfig | jq -r .authCredential.serviceUsername)
-  servicePassword=$(echo $buildConfig | jq -r .authCredential.servicePassword)
-  echo "(AAA End): Image Build Parameters"
+  machineType=$(echo $imageBuildConfig | jq -r .machineType)
+  gpuProvider=$(echo $imageBuildConfig | jq -r .gpuProvider)
+  jobManagers=$(echo $imageBuildConfig | jq -c .jobManagers)
+  jobProcessors=$(echo $imageBuildConfig | jq -c .jobProcessors)
+  adminUsername=$(echo $imageBuildConfig | jq -r .authCredential.adminUsername)
+  adminPassword=$(echo $imageBuildConfig | jq -r .authCredential.adminPassword)
+  serviceUsername=$(echo $imageBuildConfig | jq -r .authCredential.serviceUsername)
+  servicePassword=$(echo $imageBuildConfig | jq -r .authCredential.servicePassword)
+  echo "(AAA End): Image Build Config"
 fi
 
 function download_file {
@@ -40,6 +41,7 @@ function run_process {
   local retryCount=0
   local command="$1"
   local logFile=$2
+  logFile="$aaaRoot/$logFile"
   while [[ $exitStatus -ne 0 && $retryCount -lt 3 ]]; do
     $command 1> $logFile.out 2> $logFile.err
     exitStatus=$?
@@ -47,7 +49,7 @@ function run_process {
     if [ $exitStatus ]; then
       cat $logFile.out
       cat $logFile.err
-      sleep 5s
+      sleep 10s
     fi
   done
 }

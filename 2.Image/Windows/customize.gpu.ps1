@@ -1,5 +1,5 @@
 param (
-  [string] $buildConfigEncoded
+  [string] $imageBuildConfigEncoded
 )
 
 . C:\AzureData\functions.ps1
@@ -13,14 +13,14 @@ if ($gpuProvider -eq "AMD") {
     $fileName = "$fileType.exe"
     $fileLink = "https://go.microsoft.com/fwlink/?linkid=2248541"
     DownloadFile $fileName $fileLink $false
-    RunProcess .\$fileName "-install -log $binDirectory\$fileType.log" $null
+    RunProcess .\$fileName "-install -log $aaaRoot\$fileType.log" $null
     Write-Information "(AAA End): AMD GPU (NG v1)"
   } elseif ($machineType -like "*NV*" -and $machineType -like "*v4*") {
     Write-Information "(AAA Start): AMD GPU (NV v4)"
     $fileName = "$fileType.exe"
     $fileLink = "https://go.microsoft.com/fwlink/?linkid=2175154"
     DownloadFile $fileName $fileLink $false
-    RunProcess .\$fileName "-install -log $binDirectory\$fileType.log" $null
+    RunProcess .\$fileName "-install -log $aaaRoot\$fileType.log" $null
     Write-Information "(AAA End): AMD GPU (NV v4)"
   }
 }
@@ -31,24 +31,24 @@ if ($gpuProvider -eq "NVIDIA.GRID") {
   $fileName = "$fileType.exe"
   $fileLink = "https://go.microsoft.com/fwlink/?linkid=874181"
   DownloadFile $fileName $fileLink $false
-  RunProcess .\$fileName "-s -n -log:$binDirectory\$fileType" $null
+  RunProcess .\$fileName "-s -n -log:$aaaRoot\$fileType" $null
   Write-Information "(AAA End): NVIDIA GPU (GRID)"
 }
 
 if ($gpuProvider.StartsWith("NVIDIA")) {
   Write-Information "(AAA Start): NVIDIA GPU (CUDA)"
-  $appVersion = $buildConfig.appVersion.nvidiaCUDAWindows
+  $appVersion = $imageBuildConfig.appVersion.nvidiaCUDAWindows
   $fileType = "nvidia-gpu-cuda"
   $fileName = "cuda_${appVersion}_windows_network.exe"
   $fileLink = "$($blobStorage.endpointUrl)/NVIDIA/CUDA/$appVersion/$fileName"
   DownloadFile $fileName $fileLink $true
-  RunProcess .\$fileName "-s -n -log:$binDirectory\$fileType" $null
+  RunProcess .\$fileName "-s -n -log:$aaaRoot\$fileType" $null
   Write-Information "(AAA End): NVIDIA GPU (CUDA)"
 }
 
-if ($binPaths -ne "") {
-  Write-Information "(AAA Path): $($binPaths.substring(1))"
-  [Environment]::SetEnvironmentVariable("PATH", "$Env:PATH$binPaths", "Machine")
+if ($aaaPath -ne "") {
+  Write-Information "(AAA Path): $($aaaPath.substring(1))"
+  [Environment]::SetEnvironmentVariable("PATH", "$Env:PATH$aaaPath", "Machine")
 }
 
 Write-Information "(AAA End): Core (GPU)"

@@ -36,9 +36,9 @@ else
   echo "(AAA End): Azure Managed Lustre (AMLFS) Client"
 fi
 
-if [ "$binPaths" != "" ]; then
-  echo "(AAA Path): ${binPaths:1}"
-  echo 'PATH=$PATH'$binPaths >> $aaaProfile
+if [ "$aaaPath" != "" ]; then
+  echo "(AAA Path): ${aaaPath:1}"
+  echo 'PATH=$PATH'$aaaPath >> $aaaProfile
 fi
 
 echo "(AAA End): Core"

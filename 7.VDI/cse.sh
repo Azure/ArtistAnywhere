@@ -3,7 +3,7 @@
 source /tmp/functions.sh
 
 if [ "${remoteAgentKey}" != "" ]; then
-  run_process "/sbin/pcoip-register-host --registration-code=${remoteAgentKey}" $binDirectory/pcoip-agent-license
+  run_process "/sbin/pcoip-register-host --registration-code=${remoteAgentKey}" pcoip-agent-license
 fi
 
 set_file_system '${jsonencode(fileSystem)}'

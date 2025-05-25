@@ -23,7 +23,7 @@ if [ "$gpuProvider" == NVIDIA ]; then
     download_file $fileName $fileLink false
     chmod +x $fileName
     dnf -y install libglvnd-devel mesa-vulkan-drivers xorg-x11-drivers
-    run_process "./$fileName --silent" $binDirectory/$fileType
+    run_process "./$fileName --silent" $aaaRoot/$fileType
     echo "(AAA End): NVIDIA GPU (GRID)"
   elif [ $machineType == JobCluster ]; then
     echo "(AAA Start): NVIDIA GPU (CUDA)"
@@ -45,7 +45,7 @@ fi
 
 if [ $machineType == VDI ]; then
   echo "(AAA Start): HP Anyware (Teradici)"
-  appVersion=$(echo $buildConfig | jq -r .appVersion.hpAnywareAgent)
+  appVersion=$(echo $imageBuildConfig | jq -r .appVersion.hpAnywareAgent)
   [ "$gpuProvider" == "" ] && fileType="pcoip-agent-standard" || fileType="pcoip-agent-graphics"
   fileName="pcoip-agent-offline-rhel9.5_$appVersion-1.el9.x86_64.tar.gz"
   fileLink="$blobStorageEndpointUrl/Teradici/$appVersion/$fileName"
@@ -53,14 +53,14 @@ if [ $machineType == VDI ]; then
   mkdir -p $fileType
   tar -xzf $fileName -C $fileType
   cd $fileType
-  run_process "./install-pcoip-agent.sh $fileType usb-vhci" $binDirectory/$fileType
-  cd $binDirectory
+  run_process "./install-pcoip-agent.sh $fileType usb-vhci" $aaaRoot/$fileType
+  cd $aaaRoot
   echo "(AAA End): HP Anyware (Teradici)"
 fi
 
-if [ "$binPaths" != "" ]; then
-  echo "(AAA Path): ${binPaths:1}"
-  echo 'PATH=$PATH'$binPaths >> $aaaProfile
+if [ "$aaaPath" != "" ]; then
+  echo "(AAA Path): ${aaaPath:1}"
+  echo 'PATH=$PATH'$aaaPath >> $aaaProfile
 fi
 
 echo "(AAA End): Core (GPU)"

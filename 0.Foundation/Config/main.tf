@@ -1,7 +1,6 @@
 output image {
   value = {
     linux = {
-      enable  = true
       version = "9.5.202411260"
       x64 = {
         publisher = "AlmaLinux"
@@ -15,8 +14,10 @@ output image {
       }
     }
     windows = {
-      enable  = true
       version = "Latest"
+      cluster = {
+        enable = false
+      }
     }
   }
 }

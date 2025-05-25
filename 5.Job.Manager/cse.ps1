@@ -2,13 +2,13 @@
 
 sc start Deadline10DatabaseService
 
-$scriptFile = "$binDirectory\aaaAutoScaler.ps1"
+$scriptFile = "$aaaRoot\aaaAutoScaler.ps1"
 Copy-Item -Path "C:\AzureData\CustomData.bin" -Destination $scriptFile
 
 $taskName     = "AAA Auto Scaler"
 $taskStart    = Get-Date
 $taskInterval = New-TimeSpan -Seconds ${autoScale.detectionIntervalSeconds}
-$taskAction   = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-ExecutionPolicy Unrestricted -File $scriptFile -resourceGroupName ${autoScale.resourceGroupName} -computeJobManager ${autoScale.computeJobManager} -computeClusterName ${autoScale.computeClusterName} -computeClusterNodeLimit ${autoScale.computeClusterNodeLimit} -jobWaitThresholdSeconds ${autoScale.jobWaitThresholdSeconds} -workerIdleDeleteSeconds ${autoScale.workerIdleDeleteSeconds}"
+$taskAction   = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-ExecutionPolicy Unrestricted -File $scriptFile -resourceGroupName ${autoScale.resourceGroupName} -jobManagerName ${autoScale.jobManagerName} -jobClusterName ${autoScale.jobClusterName} -jobClusterNodeLimit ${autoScale.jobClusterNodeLimit} -jobWaitThresholdSeconds ${autoScale.jobWaitThresholdSeconds} -workerIdleDeleteSeconds ${autoScale.workerIdleDeleteSeconds}"
 $taskTrigger  = New-ScheduledTaskTrigger -RepetitionInterval $taskInterval -At $taskStart -Once
 if ("${autoScale.enable}" -ne $false) {
   $taskSettings = New-ScheduledTaskSettingsSet

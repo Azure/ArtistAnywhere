@@ -100,12 +100,3 @@ resource azurerm_resource_group active_directory {
     "AAA.Module" = "${basename(dirname(path.cwd))}.${basename(path.cwd)}"
   }
 }
-
-resource azurerm_resource_group active_directory_client {
-  count    = var.activeDirectoryClient.enable ? 1 : 0
-  name     = "${azurerm_resource_group.active_directory.name}.Client"
-  location = azurerm_resource_group.active_directory.location
-  tags = {
-    "AAA.Module" = "${basename(dirname(path.cwd))}.${basename(path.cwd)}"
-  }
-}

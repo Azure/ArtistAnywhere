@@ -22,8 +22,8 @@ computeFleets = [
       image = {
         versionId         = "2.0.0"
         galleryName       = "hpcai"
-        definitionName    = "Linux"
-        resourceGroupName = "AAA.Image"
+        definitionName    = "LnxX"
+        resourceGroupName = "AAA.Image.Gallery"
       }
       osDisk = {
         type        = "Linux"
@@ -107,7 +107,7 @@ computeFleets = [
         versionId         = "2.0.0"
         galleryName       = "hpcai"
         definitionName    = "WinCluster"
-        resourceGroupName = "AAA.Image"
+        resourceGroupName = "AAA.Image.Gallery"
       }
       osDisk = {
         type        = "Windows"

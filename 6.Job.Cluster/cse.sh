@@ -3,7 +3,7 @@
 source /tmp/functions.sh
 
 if [ ${terminateNotification.enable} == true ]; then
-  cronFilePath="$binDirectory/crontab"
+  cronFilePath="$aaaRoot/crontab"
   echo "* * * * * /tmp/terminate.sh" > $cronFilePath
   crontab $cronFilePath
 fi

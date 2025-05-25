@@ -6,7 +6,7 @@ echo "(AAA Start): Job Processor"
 
 if [[ $jobProcessors == *PBRT* ]]; then
   echo "(AAA Start): PBRT"
-  appVersion=$(echo $buildConfig | jq -r .appVersion.jobProcessorPBRT)
+  appVersion=$(echo $imageBuildConfig | jq -r .appVersion.jobProcessorPBRT)
   fileType="pbrt"
   filePath="/usr/local/$fileType"
   mkdir -p $filePath
@@ -21,13 +21,13 @@ if [[ $jobProcessors == *PBRT* ]]; then
   git clone --recursive https://github.com/mmp/$fileSource.git
   cmake -B $filePath -S ./$fileSource
   make -C $filePath
-  binPaths="$binPaths:$filePath"
+  aaaPath="$aaaPath:$filePath"
   echo "(AAA End): PBRT"
 fi
 
 if [[ $jobProcessors == *Blender* ]]; then
   echo "(AAA Start): Blender"
-  appVersion=$(echo $buildConfig | jq -r .appVersion.jobProcessorBlender)
+  appVersion=$(echo $imageBuildConfig | jq -r .appVersion.jobProcessorBlender)
   hostType="linux-x64"
   fileType="blender"
   filePath="/usr/local/$fileType"
@@ -43,13 +43,13 @@ if [[ $jobProcessors == *Blender* ]]; then
   dnf -y install libSM
   mkdir -p $filePath
   mv $fileType-$appVersion-$hostType/* $filePath
-  binPaths="$binPaths:$filePath"
+  aaaPath="$aaaPath:$filePath"
   echo "(AAA End): Blender"
 fi
 
-if [ "$binPaths" != "" ]; then
-  echo "(AAA Path): ${binPaths:1}"
-  echo 'PATH=$PATH'$binPaths >> $aaaProfile
+if [ "$aaaPath" != "" ]; then
+  echo "(AAA Path): ${aaaPath:1}"
+  echo 'PATH=$PATH'$aaaPath >> $aaaProfile
 fi
 
 echo "(AAA End): Job Processor"

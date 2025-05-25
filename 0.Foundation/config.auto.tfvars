@@ -47,7 +47,7 @@ keyVault = {
   secrets = [
     {
       name  = "AdminUsername"
-      value = "xadmin"
+      value = "hpcadmin"
     },
     {
       name  = "AdminPassword"
@@ -55,7 +55,7 @@ keyVault = {
     },
     {
       name  = "ServiceUsername"
-      value = "xservice"
+      value = "hpcservice"
     },
     {
       name  = "ServicePassword"

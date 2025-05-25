@@ -5,12 +5,12 @@ source /tmp/functions.sh
 echo "(AAA Start): Job Manager"
 
 if [[ $jobManagers == *Deadline* ]]; then
-  appVersion=$(echo $buildConfig | jq -r .appVersion.jobManagerDeadline)
+  appVersion=$(echo $imageBuildConfig | jq -r .appVersion.jobManagerDeadline)
   deadlinePath="/deadline"
   databaseName="deadline10db"
   databaseHost=$(hostname)
   databasePort=27017
-  binPathJobManager="$deadlinePath/bin"
+  aaaPathJobManager="$deadlinePath/bin"
 
   echo "(AAA Start): Deadline Download"
   fileName="Deadline-$appVersion-linux-installers.tar"
@@ -54,7 +54,7 @@ if [[ $jobManagers == *Deadline* ]]; then
     echo "    { role: \"readWriteAnyDatabase\", db: \"admin\" }" >> $fileName
     echo "  ]" >> $fileName
     echo "})" >> $fileName
-    run_process "mongosh $fileName" $binDirectory/$fileType
+    run_process "mongosh $fileName" $aaaRoot/$fileType
 
     fileType="mongo-create-database-user"
     fileName="$fileType.js"
@@ -66,15 +66,15 @@ if [[ $jobManagers == *Deadline* ]]; then
     echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $fileName
     echo "  ]" >> $fileName
     echo "})" >> $fileName
-    run_process "mongosh $fileName" $binDirectory/$fileType
+    run_process "mongosh $fileName" $aaaRoot/$fileType
     echo "(AAA End): Mongo DB Users"
 
     echo "(AAA Start): Deadline Server"
     fileType="deadline-repository"
     fileName="DeadlineRepository-$appVersion-linux-x64-installer.run"
     export DB_PASSWORD=$servicePassword
-    run_process "$filePath/$fileName --mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $binDirectory/$fileType
-    mv /tmp/installbuilder_installer.log $binDirectory/deadline-repository.log
+    run_process "$filePath/$fileName --mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $aaaRoot/$fileType
+    mv /tmp/installbuilder_installer.log $aaaRoot/deadline-repository.log
     echo "$deadlinePath *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
     exportfs -a
     echo "(AAA End): Deadline Server"
@@ -87,22 +87,22 @@ if [[ $jobManagers == *Deadline* ]]; then
   [ $machineType == JobManager ] && workerService="false" || workerService="true"
   [ $machineType == JobCluster ] && workerStartup="true" || workerStartup="false"
   fileArgs="$fileArgs --launcherdaemon $workerService --slavestartup $workerStartup"
-  run_process "$filePath/$fileName $fileArgs" $binDirectory/$fileType
-  mv /tmp/installbuilder_installer.log $binDirectory/deadline-client.log
+  run_process "$filePath/$fileName $fileArgs" $aaaRoot/$fileType
+  mv /tmp/installbuilder_installer.log $aaaRoot/deadline-client.log
   echo "(AAA End): Deadline Client"
 
   echo "(AAA Start): Deadline Repository"
   [ $machineType == JobManager ] && repositoryPath=$deadlinePath || repositoryPath="/mnt/deadline"
-  echo "$binPathJobManager/deadlinecommand -StoreDatabaseCredentials $serviceUsername $servicePassword" >> $aaaProfile
-  echo "$binPathJobManager/deadlinecommand -ChangeRepository Direct $repositoryPath" >> $aaaProfile
+  echo "$aaaPathJobManager/deadlinecommand -StoreDatabaseCredentials $serviceUsername $servicePassword" >> $aaaProfile
+  echo "$aaaPathJobManager/deadlinecommand -ChangeRepository Direct $repositoryPath" >> $aaaProfile
   echo "(AAA End): Deadline Repository"
 
-  binPaths="$binPaths:$binPathJobManager"
+  aaaPath="$aaaPath:$aaaPathJobManager"
 fi
 
 if [[ $jobManagers == *Slurm* ]]; then
   dnf -y install slurm
-  appVersion=$(echo $buildConfig | jq -r .appVersion.jobManagerSlurm)
+  appVersion=$(echo $imageBuildConfig | jq -r .appVersion.jobManagerSlurm)
 
   echo "(AAA Start): Slurm Download"
   fileName="slurm-$appVersion.tar.bz2"
@@ -114,9 +114,9 @@ if [[ $jobManagers == *Slurm* ]]; then
   echo "(AAA End): Slurm Download"
 fi
 
-if [ "$binPaths" != "" ]; then
-  echo "(AAA Path): ${binPaths:1}"
-  echo 'PATH=$PATH'$binPaths >> $aaaProfile
+if [ "$aaaPath" != "" ]; then
+  echo "(AAA Path): ${aaaPath:1}"
+  echo 'PATH=$PATH'$aaaPath >> $aaaProfile
 fi
 
 echo "(AAA End): Job Manager"

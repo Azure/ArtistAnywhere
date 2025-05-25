@@ -3,7 +3,7 @@
     "value": "southcentralus"
   },
   "adminUsername": {
-    "value": "xadmin"
+    "value": "hpcadmin"
   },
   "adminPassword": {
     "value": "P@ssword1234"
@@ -56,7 +56,7 @@
   "databaseConfig": {
     "value": {
       "type": "fqdn",
-      "databaseUser": "xadmin",
+      "databaseUser": "hpcadmin",
       "fqdn": "hpc.mysql.database.azure.com"
     }
   },
