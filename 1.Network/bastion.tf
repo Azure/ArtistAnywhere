@@ -145,7 +145,7 @@ resource azurerm_public_ip bastion {
   for_each = {
     for virtualNetwork in local.bastionNetworks : virtualNetwork.key => virtualNetwork if var.bastion.type != "Developer"
   }
-  name                = "Bastion-${each.value.name}"
+  name                = "Bastion"
   resource_group_name = each.value.resourceGroup.name
   location            = each.value.location
   sku                 = "Standard"

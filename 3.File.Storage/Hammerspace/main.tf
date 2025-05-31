@@ -8,7 +8,6 @@ variable resourceGroupName {
 
 variable hammerspace {
   type = object({
-    version    = string
     namePrefix = string
     domainName = string
     metadata = object({
@@ -205,7 +204,7 @@ locals {
     publisher = "Hammerspace"
     product   = "Hammerspace_BYOL_5_0"
     name      = "Hammerspace_5_0"
-    version   = var.hammerspace.version
+    version   = "24.06.19"
   }
   hsSubnetSize = "/${reverse(split("/", data.azurerm_subnet.storage.address_prefixes[0]))[0]}"
 }

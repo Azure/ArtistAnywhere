@@ -25,7 +25,6 @@ output image {
 output hammerspace {
   value = {
     enable     = false
-    version    = "24.06.19"
     namePrefix = "hpcai"
     domainName = "azure.hpc"
     metadata = { # Anvil

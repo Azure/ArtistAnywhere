@@ -182,7 +182,7 @@ resource azurerm_orchestrated_virtual_machine_scale_set cache {
 
 resource azurerm_managed_disk cache {
   for_each = {
-    for dataDisk in local.nfsCacheDataDisks : dataDisk.key => dataDisk
+    for dataDisk in var.nfsCache.enable ? local.nfsCacheDataDisks : [] : dataDisk.key => dataDisk
   }
   name                          = each.value.name
   resource_group_name           = azurerm_resource_group.cache.name
@@ -195,7 +195,7 @@ resource azurerm_managed_disk cache {
 
 resource azurerm_virtual_machine_data_disk_attachment cache {
   for_each = {
-    for dataDisk in local.nfsCacheDataDisks : dataDisk.key => dataDisk
+    for dataDisk in var.nfsCache.enable ? local.nfsCacheDataDisks : [] : dataDisk.key => dataDisk
   }
   virtual_machine_id = "${azurerm_resource_group.cache.id}/providers/Microsoft.Compute/virtualMachines/${each.value.machineName}"
   managed_disk_id    = "${azurerm_resource_group.cache.id}/providers/Microsoft.Compute/disks/${each.value.name}"

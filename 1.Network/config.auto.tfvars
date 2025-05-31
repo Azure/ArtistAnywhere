@@ -194,24 +194,24 @@ virtualNetworks = [
         ]
         serviceDelegation = null
       },
-      {
-        name = "AzureFirewallSubnet"
-        addressSpace = [
-          "10.0.255.0/25"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = null
-      },
-      {
-        name = "AzureFirewallManagementSubnet"
-        addressSpace = [
-          "10.0.255.128/25"
-        ]
-        serviceEndpoints = [
-        ]
-        serviceDelegation = null
-      }
+      # {
+      #   name = "AzureFirewallSubnet"
+      #   addressSpace = [
+      #     "10.0.255.0/25"
+      #   ]
+      #   serviceEndpoints = [
+      #   ]
+      #   serviceDelegation = null
+      # },
+      # {
+      #   name = "AzureFirewallManagementSubnet"
+      #   addressSpace = [
+      #     "10.0.255.128/25"
+      #   ]
+      #   serviceEndpoints = [
+      #   ]
+      #   serviceDelegation = null
+      # }
     ]
   }
 ]
@@ -347,16 +347,6 @@ virtualWAN = {
           }
         ]
       }
-      vpnGateway = {
-        enable     = false
-        name       = "hpcai"
-        scaleUnits = 1
-        siteToSite = false
-        client = {
-          addressSpace = [
-          ]
-        }
-      }
     },
     {
       enable       = true
@@ -378,17 +368,6 @@ virtualWAN = {
             ]
           }
         ]
-      }
-      vpnGateway = {
-        enable     = true
-        name       = "hpcai"
-        scaleUnits = 1
-        siteToSite = false
-        client = {
-          addressSpace = [
-            "10.20.0.0/24"
-          ]
-        }
       }
     },
     {
@@ -412,13 +391,104 @@ virtualWAN = {
           }
         ]
       }
-      vpnGateway = {
-        enable     = false
-        name       = "hpcai"
-        scaleUnits = 1
-        siteToSite = false
+    }
+  ]
+}
+
+#############################################################################################
+# VPN Gateway (https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-about-vpngateways) #
+#############################################################################################
+
+vpnGateway = {
+  enable = true
+  name   = "hpcai"
+  sites = [
+    {
+      enable     = true
+      name       = "uscentral"
+      hubName    = "USCentral"
+      scaleUnits = 1
+      siteToSite = {
+        enable = false
+        addressSpace = [
+        ]
+        link = {
+          fqdn    = "" # Set the fully-qualified domain name (FQDN) of your on-premises VPN gateway device
+          address = "" # or set the device public IP address. Do NOT set both configuration parameters.
+        }
+        bgp = {
+          enable = false
+          asn    = 0
+          peering = {
+            address = ""
+          }
+        }
+      }
+      pointToSite = {
+        enable = true
         client = {
           addressSpace = [
+            "10.20.0.0/24"
+          ]
+        }
+      }
+    },
+    {
+      enable     = false
+      name       = "uswest"
+      hubName    = "USWest"
+      scaleUnits = 1
+      siteToSite = {
+        enable = false
+        addressSpace = [
+        ]
+        link = {
+          fqdn    = "" # Set the fully-qualified domain name (FQDN) of your on-premises VPN gateway device
+          address = "" # or set the device public IP address. Do NOT set both configuration parameters.
+        }
+        bgp = {
+          enable = false
+          asn    = 0
+          peering = {
+            address = ""
+          }
+        }
+      }
+      pointToSite = {
+        enable = false
+        client = {
+          addressSpace = [
+            "10.21.0.0/24"
+          ]
+        }
+      }
+    },
+    {
+      enable     = false
+      name       = "useast"
+      hubName    = "USEast"
+      scaleUnits = 1
+      siteToSite = {
+        enable = false
+        addressSpace = [
+        ]
+        link = {
+          fqdn    = "" # Set the fully-qualified domain name (FQDN) of your on-premises VPN gateway device
+          address = "" # or set the device public IP address. Do NOT set both configuration parameters.
+        }
+        bgp = {
+          enable = false
+          asn    = 0
+          peering = {
+            address = ""
+          }
+        }
+      }
+      pointToSite = {
+        enable = false
+        client = {
+          addressSpace = [
+            "10.22.0.0/24"
           ]
         }
       }
@@ -442,9 +512,8 @@ privateDNS = {
 ##################################################################
 
 firewall = {
-  enable = false
+  enable = true
   name   = "hpcai"
-  type   = "AZFW_VNet"
   tier   = "Standard"
 }
 
@@ -491,17 +560,4 @@ networkPeering = {
     computeNetwork = false
     storageNetwork = false
   }
-}
-
-######################################################################################################################
-# Application Gateway                (https://learn.microsoft.com/azure/application-gateway/overview-v2)             #
-# Application Gateway for Containers (https://learn.microsoft.com/azure/application-gateway/for-containers/overview) #
-######################################################################################################################
-
-appGateway = {
-  enable   = false
-  name     = "Gateway-App"
-  type     = "Standard_v2"
-  tier     = "Standard_v2"
-  capacity = 1
 }

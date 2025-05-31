@@ -25,15 +25,6 @@ variable virtualWAN {
           addressSpace = list(string)
         }))
       })
-      vpnGateway = object({
-        enable     = bool
-        name       = string
-        scaleUnits = number
-        siteToSite = bool
-        client = object({
-          addressSpace = list(string)
-        })
-      })
     }))
   })
 }
@@ -76,57 +67,4 @@ resource azurerm_virtual_hub_connection main {
   name                      = each.value.key
   remote_virtual_network_id = each.value.id
   virtual_hub_id            = azurerm_virtual_hub.main[each.value.hubName].id
-}
-
-####################################################################################################
-# Point-to-Site VPN Gateway (https://learn.microsoft.com/azure/virtual-wan/point-to-site-concepts) #
-####################################################################################################
-
-resource azurerm_vpn_server_configuration main {
-  for_each = {
-    for hub in var.virtualWAN.hubs : hub.name => hub if var.virtualWAN.enable && hub.enable && hub.vpnGateway.enable && !hub.vpnGateway.siteToSite
-  }
-  name                     = each.value.vpnGateway.name
-  resource_group_name      = azurerm_virtual_hub.main[each.value.name].resource_group_name
-  location                 = azurerm_virtual_hub.main[each.value.name].location
-  vpn_protocols            = ["OpenVPN"]
-  vpn_authentication_types = ["AAD"]
-  azure_active_directory_authentication {
-    tenant   = "https://login.microsoftonline.com/${data.azurerm_subscription.current.tenant_id}"
-    issuer   = "https://sts.windows.net/${data.azurerm_subscription.current.tenant_id}/"
-    audience = "c632b3df-fb67-4d84-bdcf-b95ad541b5c8" # Azure VPN Client
-  }
-}
-
-resource azurerm_point_to_site_vpn_gateway main {
-  for_each = {
-    for hub in var.virtualWAN.hubs : hub.name => hub if var.virtualWAN.enable && hub.enable && hub.vpnGateway.enable && !hub.vpnGateway.siteToSite
-  }
-  name                        = each.value.vpnGateway.name
-  resource_group_name         = azurerm_virtual_hub.main[each.value.name].resource_group_name
-  location                    = azurerm_virtual_hub.main[each.value.name].location
-  virtual_hub_id              = azurerm_virtual_hub.main[each.value.name].id
-  vpn_server_configuration_id = azurerm_vpn_server_configuration.main[each.value.name].id
-  scale_unit                  = each.value.vpnGateway.scaleUnits
-  connection_configuration {
-    name = each.value.vpnGateway.name
-    vpn_client_address_pool {
-      address_prefixes = each.value.vpnGateway.client.addressSpace
-    }
-  }
-}
-
-#################################################################################################################
-# Site-to-Site VPN Gateway (https://learn.microsoft.com/azure/virtual-wan/connect-virtual-network-gateway-vwan) #
-#################################################################################################################
-
-resource azurerm_vpn_gateway main {
-  for_each = {
-    for hub in var.virtualWAN.hubs : hub.name => hub if var.virtualWAN.enable && hub.enable && hub.vpnGateway.enable && hub.vpnGateway.siteToSite
-  }
-  name                = each.value.vpnGateway.name
-  resource_group_name = azurerm_virtual_hub.main[each.value.name].resource_group_name
-  location            = azurerm_virtual_hub.main[each.value.name].location
-  virtual_hub_id      = azurerm_virtual_hub.main[each.value.name].id
-  scale_unit          = each.value.vpnGateway.scaleUnits
 }
