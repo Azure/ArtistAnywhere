@@ -36,17 +36,134 @@ module config {
 }
 
 module hammerspace {
-  count             = module.config.hammerspace.enable ? 1 : 0
+  count             = var.hammerspace.enable ? 1 : 0
   source            = "../3.File.Storage/Hammerspace"
   resourceGroupName = "${var.resourceGroupName}.Hammerspace"
   dnsRecord         = merge(var.dnsRecord, {metadataTier={enable=false}})
   virtualNetwork    = var.virtualNetwork
   activeDirectory   = var.activeDirectory
-  hammerspace       = module.config.hammerspace
+  hammerspace       = var.hammerspace
+  depends_on = [
+    azurerm_resource_group.storage_hammerspace
+  ]
 }
 
 variable resourceGroupName {
   type = string
+}
+
+variable hammerspace {
+  type = object({
+    enable     = bool
+    namePrefix = string
+    domainName = string
+    metadata = object({
+      machine = object({
+        namePrefix = string
+        size       = string
+        count      = number
+        osDisk = object({
+          storageType = string
+          cachingMode = string
+          sizeGB      = number
+        })
+        dataDisk = object({
+          storageType = string
+          cachingMode = string
+          sizeGB      = number
+        })
+        adminLogin = object({
+          userName     = string
+          userPassword = string
+          sshKeyPublic = string
+          passwordAuth = object({
+            disable = bool
+          })
+        })
+      })
+      network = object({
+        acceleration = object({
+          enable = bool
+        })
+      })
+    })
+    data = object({
+      machine = object({
+        namePrefix = string
+        size       = string
+        count      = number
+        osDisk = object({
+          storageType = string
+          cachingMode = string
+          sizeGB      = number
+        })
+        dataDisk = object({
+          storageType = string
+          cachingMode = string
+          sizeGB      = number
+          count       = number
+          raid0 = object({
+            enable = bool
+          })
+        })
+        adminLogin = object({
+          userName     = string
+          userPassword = string
+          sshKeyPublic = string
+          passwordAuth = object({
+            disable = bool
+          })
+        })
+      })
+      network = object({
+        acceleration = object({
+          enable = bool
+        })
+      })
+    })
+    proximityPlacementGroup = object({
+      enable = bool
+    })
+    storageAccounts = list(object({
+      enable    = bool
+      name      = string
+      accessKey = string
+    }))
+    shares = list(object({
+      enable = bool
+      name   = string
+      path   = string
+      size   = number
+      export = string
+    }))
+    volumes = list(object({
+      enable = bool
+      name   = string
+      type   = string
+      path   = string
+      purge  = bool
+      node = object({
+        name    = string
+        type    = string
+        address = string
+      })
+      assimilation = object({
+        enable = bool
+        share = object({
+          name = string
+          path = object({
+            source      = string
+            destination = string
+          })
+        })
+      })
+    }))
+    volumeGroups = list(object({
+      enable      = bool
+      name        = string
+      volumeNames = list(string)
+    }))
+  })
 }
 
 variable extendedZone {
@@ -150,6 +267,15 @@ resource azurerm_resource_group storage {
   }
 }
 
+resource azurerm_resource_group storage_hammerspace {
+  count    = var.hammerspace.enable ? 1 : 0
+  name     = "${var.resourceGroupName}.Hammerspace"
+  location = data.azurerm_virtual_network.main.location
+  tags = {
+    "AAA.Module" = basename(path.cwd)
+  }
+}
+
 ############################################################################
 # Private DNS (https://learn.microsoft.com/azure/dns/private-dns-overview) #
 ############################################################################
@@ -186,7 +312,7 @@ output privateDNS {
       fqdn    = azurerm_private_dns_a_record.lustre[0].fqdn
       records = azurerm_private_dns_a_record.lustre[0].records
     } : null
-    hammerspace = module.config.hammerspace.enable ? {
+    hammerspace = var.hammerspace.enable ? {
       fqdn    = module.hammerspace[0].privateDNS.fqdn
       records = module.hammerspace[0].privateDNS.records
     } : null

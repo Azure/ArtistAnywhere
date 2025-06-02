@@ -57,8 +57,8 @@ locals {
 
 resource azurerm_availability_set data {
   name                         = "${var.hammerspace.namePrefix}${var.hammerspace.data.machine.namePrefix}"
-  resource_group_name          = azurerm_resource_group.hammerspace.name
-  location                     = azurerm_resource_group.hammerspace.location
+  resource_group_name          = data.azurerm_resource_group.hammerspace.name
+  location                     = data.azurerm_resource_group.hammerspace.location
   proximity_placement_group_id = var.hammerspace.proximityPlacementGroup.enable ? azurerm_proximity_placement_group.hammerspace[0].id : null
 }
 
@@ -71,8 +71,8 @@ resource azurerm_network_interface data {
     for node in local.hsDataNodes : node.machine.name => node
   }
   name                = each.value.machine.name
-  resource_group_name = azurerm_resource_group.hammerspace.name
-  location            = azurerm_resource_group.hammerspace.location
+  resource_group_name = data.azurerm_resource_group.hammerspace.name
+  location            = data.azurerm_resource_group.hammerspace.location
   ip_configuration {
     name                          = "ipConfig"
     private_ip_address_allocation = "Dynamic"
@@ -86,8 +86,8 @@ resource azurerm_linux_virtual_machine data {
     for node in local.hsDataNodes : node.machine.name => node
   }
   name                            = each.value.machine.name
-  resource_group_name             = azurerm_resource_group.hammerspace.name
-  location                        = azurerm_resource_group.hammerspace.location
+  resource_group_name             = data.azurerm_resource_group.hammerspace.name
+  location                        = data.azurerm_resource_group.hammerspace.location
   size                            = each.value.machine.size
   admin_username                  = each.value.machine.adminLogin.userName
   admin_password                  = each.value.machine.adminLogin.userPassword
@@ -134,8 +134,8 @@ resource azurerm_managed_disk data {
     for disk in local.hsDataNodeDisks : disk.machine.dataDisk.name => disk
   }
   name                          = each.value.machine.dataDisk.name
-  resource_group_name           = azurerm_resource_group.hammerspace.name
-  location                      = azurerm_resource_group.hammerspace.location
+  resource_group_name           = data.azurerm_resource_group.hammerspace.name
+  location                      = data.azurerm_resource_group.hammerspace.location
   storage_account_type          = each.value.machine.dataDisk.storageType
   disk_size_gb                  = each.value.machine.dataDisk.sizeGB
   create_option                 = "Empty"
@@ -146,8 +146,8 @@ resource azurerm_virtual_machine_data_disk_attachment data {
   for_each = {
     for disk in local.hsDataNodeDisks : disk.machine.dataDisk.name => disk
   }
-  virtual_machine_id = "${azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/virtualMachines/${each.value.machine.name}"
-  managed_disk_id    = "${azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/disks/${each.value.machine.dataDisk.name}"
+  virtual_machine_id = "${data.azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/virtualMachines/${each.value.machine.name}"
+  managed_disk_id    = "${data.azurerm_resource_group.hammerspace.id}/providers/Microsoft.Compute/disks/${each.value.machine.dataDisk.name}"
   caching            = each.value.machine.dataDisk.cachingMode
   lun                = each.value.machine.dataDisk.index
   depends_on = [

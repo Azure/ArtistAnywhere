@@ -1,5 +1,213 @@
 resourceGroupName = "AAA.Cache"
 
+######################################################################################################
+# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) #
+######################################################################################################
+
+hammerspace = {
+  enable     = false
+  namePrefix = "hpcai"
+  domainName = "azure.hpc"
+  metadata = { # Anvil
+    machine = {
+      namePrefix = "-anvil"
+      size       = "Standard_E8as_v5"
+      count      = 1
+      osDisk = {
+        storageType = "Premium_LRS"
+        cachingMode = "ReadWrite"
+        sizeGB      = 128
+      }
+      dataDisk = {
+        storageType = "Premium_LRS"
+        cachingMode = "None"
+        sizeGB      = 1024
+      }
+      adminLogin = {
+        userName     = ""
+        userPassword = ""
+        sshKeyPublic = ""
+        passwordAuth = {
+          disable = true
+        }
+      }
+    }
+    network = {
+      acceleration = {
+        enable = true
+      }
+    }
+  }
+  data = { # DSX
+    machine = {
+      namePrefix = "-dsx"
+      size       = "Standard_E32as_v5"
+      count      = 2
+      osDisk = {
+        storageType = "Premium_LRS"
+        cachingMode = "ReadWrite"
+        sizeGB      = 128
+      }
+      dataDisk = {
+        storageType = "Premium_LRS"
+        cachingMode = "None"
+        sizeGB      = 1024
+        count       = 4
+        raid0 = {
+          enable = false
+        }
+      }
+      adminLogin = {
+        userName     = ""
+        userPassword = ""
+        sshKeyPublic = ""
+        passwordAuth = {
+          disable = true
+        }
+      }
+    }
+    network = {
+      acceleration = {
+        enable = true
+      }
+    }
+  }
+  proximityPlacementGroup = {
+    enable = false
+  }
+  storageAccounts = [
+    {
+      enable    = false
+      name      = ""
+      accessKey = ""
+    }
+  ]
+  shares = [
+    {
+      enable = true
+      name   = "ReadOnly"
+      path   = "/ro"
+      size   = 0
+      export = "*,ro,root-squash,insecure"
+    },
+    {
+      enable = true
+      name   = "ReadWrite"
+      path   = "/rw"
+      size   = 0
+      export = "*,rw,root-squash,insecure"
+    }
+  ]
+  volumes = [
+    {
+      enable = true
+      name   = "data"
+      type   = "READ_ONLY"
+      path   = "/data"
+      purge  = false
+      node = {
+        name    = "node1"
+        type    = "OTHER"
+        address = "10.1.194.4"
+      }
+      assimilation = {
+        enable = true
+        share = {
+          name = "ReadOnly"
+          path = {
+            source      = "/"
+            destination = "/data"
+          }
+        }
+      }
+    },
+    {
+      enable = true
+      name   = "tools"
+      type   = "READ_ONLY"
+      path   = "/tools"
+      purge  = false
+      node = {
+        name    = "node1"
+        type    = "OTHER"
+        address = "10.1.194.4"
+      }
+      assimilation = {
+        enable = true
+        share = {
+          name = "ReadOnly"
+          path = {
+            source      = "/"
+            destination = "/tools"
+          }
+        }
+      }
+    },
+    {
+      enable = true
+      name   = "shared"
+      type   = "READ_ONLY"
+      path   = "/shared"
+      purge  = false
+      node = {
+        name    = "node1"
+        type    = "OTHER"
+        address = "10.1.194.4"
+      }
+      assimilation = {
+        enable = true
+        share = {
+          name = "ReadOnly"
+          path = {
+            source      = "/"
+            destination = "/shared"
+          }
+        }
+      }
+    },
+    {
+      enable = true
+      name   = "scratch"
+      type   = "READ_WRITE"
+      path   = "/scratch"
+      purge  = true
+      node = {
+        name    = "node1"
+        type    = "OTHER"
+        address = "10.1.194.4"
+      }
+      assimilation = {
+        enable = true
+        share = {
+          name = "ReadWrite"
+          path = {
+            source      = "/"
+            destination = "/scratch"
+          }
+        }
+      }
+    }
+  ]
+  volumeGroups = [
+    {
+      enable = true
+      name   = "ReadOnly"
+      volumeNames = [
+        "data",
+        "tools",
+        "shared"
+      ]
+    },
+    {
+      enable = true
+      name   = "ReadWrite"
+      volumeNames = [
+        "scratch"
+      ]
+    }
+  ]
+}
+
 #################################################################################################################
 # Boost              (https://learn.microsoft.com/azure/azure-boost/overview)                                   #
 # Managed Grafana    (https://learn.microsoft.com/azure/managed-grafana/overview)                               #

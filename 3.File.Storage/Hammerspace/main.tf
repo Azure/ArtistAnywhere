@@ -1,3 +1,7 @@
+######################################################################################################
+# Hammerspace (https://azuremarketplace.microsoft.com/marketplace/apps/hammerspace.hammerspace-byol) #
+######################################################################################################
+
 module config {
   source = "../../0.Foundation/Config"
 }
@@ -94,6 +98,7 @@ variable hammerspace {
       name   = string
       type   = string
       path   = string
+      purge  = bool
       node = object({
         name    = string
         type    = string
@@ -199,6 +204,10 @@ data azurerm_subnet storage {
   virtual_network_name = data.azurerm_virtual_network.main.name
 }
 
+data azurerm_resource_group hammerspace {
+  name = var.resourceGroupName
+}
+
 locals {
   hsImage = {
     publisher = "Hammerspace"
@@ -207,12 +216,4 @@ locals {
     version   = "24.06.19"
   }
   hsSubnetSize = "/${reverse(split("/", data.azurerm_subnet.storage.address_prefixes[0]))[0]}"
-}
-
-resource azurerm_resource_group hammerspace {
-  name     = var.resourceGroupName
-  location = data.azurerm_virtual_network.main.location
-  tags = {
-    "AAA.Module" = "${basename(dirname(path.cwd))}.${basename(path.cwd)}"
-  }
 }

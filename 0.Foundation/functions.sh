@@ -75,7 +75,7 @@ function set_file_system_mount {
   local mountPath=$(echo $fileSystemMount | jq -r .path)
   local mountTarget=$(echo $fileSystemMount | jq -r .target)
   local mountOptions=$(echo $fileSystemMount | jq -r .options)
-  if [ $(grep -c $mountPath /etc/fstab) ]; then
+  if ! grep -q $mountPath /etc/fstab; then
     mkdir -p $mountPath
     echo "$mountTarget $mountPath $mountType $mountOptions 0 2" >> /etc/fstab
   fi

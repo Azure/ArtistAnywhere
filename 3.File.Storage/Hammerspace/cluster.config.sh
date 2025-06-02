@@ -27,21 +27,26 @@ while read volume; do
   enable=$(echo $volume | jq -r .enable)
   if [ $enable == true ]; then
     nodeName="$(echo $volume | jq -r .node.name)"
-    nodeType="$(echo $volume | jq -r .node.type)"
-    nodeAddress="$(echo $volume | jq -r .node.address)"
-    hscli node-add --name "$nodeName" --type "$nodeType" --ip "$nodeAddress"
+
+    if ! hscli node-list | grep Name: | grep -q "$nodeName"; then
+      nodeType="$(echo $volume | jq -r .node.type)"
+      nodeAddress="$(echo $volume | jq -r .node.address)"
+      hscli node-add --name "$nodeName" --type "$nodeType" --ip "$nodeAddress"
+    fi
 
     volumeName="$(echo $volume | jq -r .name)"
     volumeType="$(echo $volume | jq -r .type)"
     volumePath="$(echo $volume | jq -r .path)"
-    hscli volume-add --name "$volumeName" --access-type "$volumeType" --logical-volume-name "$volumePath" --node-name "$nodeName"
+    deleteData="$(echo $volume | jq -r .purge)"
+    [ $deleteData == true ] && addForce="--force" || addForce=""
+    hscli volume-add --name "$volumeName" --access-type "$volumeType" --logical-volume-name "$volumePath" --node-name "$nodeName" $addForce
 
     enable=$(echo $volume | jq -r .assimilation.enable)
     if [ $enable == true ]; then
       shareName="$(echo $volume | jq -r .assimilation.share.name)"
       sharePathSource="$(echo $volume | jq -r .assimilation.share.path.source)"
       sharePathDestination="$(echo $volume | jq -r .assimilation.share.path.destination)"
-      hscli volume-assimilation --name "$volumeName" --share-name "$shareName" --source-path "$sharePathSource" --destination-path "$sharePathDestination" --log
+      hscli volume-assimilation --name "$volumeName" --share-name "$shareName" --source-path "$sharePathSource" --destination-path "$sharePathDestination" --async --log
     fi
   fi
 done < <(echo $volumes | jq -c .[])

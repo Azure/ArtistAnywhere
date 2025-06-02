@@ -15,6 +15,7 @@ variable vpnGateway {
         enable       = bool
         addressSpace = list(string)
         link = object({
+          enable  = bool
           fqdn    = string
           address = string
         })
@@ -60,15 +61,18 @@ resource azurerm_vpn_site main {
   location            = azurerm_virtual_hub.main[each.value.hubName].location
   virtual_wan_id      = azurerm_virtual_wan.main[0].id
   address_cidrs       = each.value.siteToSite.addressSpace
-  link {
-    name       = "default"
-    fqdn       = each.value.fqdn != "" ? each.value.fqdn : null
-    ip_address = each.value.address != "" ? each.value.address : null
-    dynamic bgp {
-      for_each = each.value.siteToSite.bgp.enable ? [1] : []
-      content {
-        asn             = each.value.siteToSite.bgp.asn
-        peering_address = each.value.siteToSite.bgp.peering.address
+  dynamic link {
+    for_each = each.value.siteToSite.link.enable ? [1] : []
+    content {
+      name       = "default"
+      fqdn       = each.value.fqdn != "" ? each.value.fqdn : null
+      ip_address = each.value.address != "" ? each.value.address : null
+      dynamic bgp {
+        for_each = each.value.siteToSite.bgp.enable ? [1] : []
+        content {
+          asn             = each.value.siteToSite.bgp.asn
+          peering_address = each.value.siteToSite.bgp.peering.address
+        }
       }
     }
   }

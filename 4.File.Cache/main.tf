@@ -24,81 +24,134 @@ module config {
 }
 
 module hammerspace {
-  count             = module.config.hammerspace.enable ? 1 : 0
+  count             = var.hammerspace.enable ? 1 : 0
   source            = "../3.File.Storage/Hammerspace"
-  resourceGroupName = "${var.resourceGroupName}.Hammerspace"
+  resourceGroupName = var.resourceGroupName
   dnsRecord         = merge(var.dnsRecord, {metadataTier={enable=false}})
   virtualNetwork    = var.virtualNetwork
   activeDirectory   = var.activeDirectory
-  hammerspace = merge(module.config.hammerspace, {
-    shares = [
-      {
-        enable = false
-        name   = "cache"
-        path   = "/cache"
-        size   = 0
-        export = "*,ro,root-squash,insecure"
-      }
-    ]
-    volumes = [
-      {
-        enable = false
-        name   = "data-cpu"
-        type   = "READ_ONLY"
-        path   = "/data/cpu"
-        node = {
-          name    = "node1"
-          type    = "OTHER"
-          address = "10.1.194.4"
-        }
-        assimilation = {
-          enable = true
-          share = {
-            name = "cache"
-            path = {
-              source      = "/"
-              destination = "/moana"
-            }
-          }
-        }
-      },
-      {
-        enable = false
-        name   = "data-gpu"
-        type   = "READ_ONLY"
-        path   = "/data/gpu"
-        node = {
-          name    = "node2"
-          type    = "OTHER"
-          address = "10.1.194.4"
-        }
-        assimilation = {
-          enable = true
-          share = {
-            name = "cache"
-            path = {
-              source      = "/"
-              destination = "/blender"
-            }
-          }
-        }
-      }
-    ]
-    volumeGroups = [
-      {
-        enable = false
-        name   = "cache"
-        volumeNames = [
-          "data-cpu",
-          "data-gpu"
-        ]
-      }
-    ]
-  })
+  hammerspace       = var.hammerspace
+  depends_on = [
+    azurerm_resource_group.cache
+  ]
 }
 
 variable resourceGroupName {
   type = string
+}
+
+variable hammerspace {
+  type = object({
+    enable     = bool
+    namePrefix = string
+    domainName = string
+    metadata = object({
+      machine = object({
+        namePrefix = string
+        size       = string
+        count      = number
+        osDisk = object({
+          storageType = string
+          cachingMode = string
+          sizeGB      = number
+        })
+        dataDisk = object({
+          storageType = string
+          cachingMode = string
+          sizeGB      = number
+        })
+        adminLogin = object({
+          userName     = string
+          userPassword = string
+          sshKeyPublic = string
+          passwordAuth = object({
+            disable = bool
+          })
+        })
+      })
+      network = object({
+        acceleration = object({
+          enable = bool
+        })
+      })
+    })
+    data = object({
+      machine = object({
+        namePrefix = string
+        size       = string
+        count      = number
+        osDisk = object({
+          storageType = string
+          cachingMode = string
+          sizeGB      = number
+        })
+        dataDisk = object({
+          storageType = string
+          cachingMode = string
+          sizeGB      = number
+          count       = number
+          raid0 = object({
+            enable = bool
+          })
+        })
+        adminLogin = object({
+          userName     = string
+          userPassword = string
+          sshKeyPublic = string
+          passwordAuth = object({
+            disable = bool
+          })
+        })
+      })
+      network = object({
+        acceleration = object({
+          enable = bool
+        })
+      })
+    })
+    proximityPlacementGroup = object({
+      enable = bool
+    })
+    storageAccounts = list(object({
+      enable    = bool
+      name      = string
+      accessKey = string
+    }))
+    shares = list(object({
+      enable = bool
+      name   = string
+      path   = string
+      size   = number
+      export = string
+    }))
+    volumes = list(object({
+      enable = bool
+      name   = string
+      type   = string
+      path   = string
+      purge  = bool
+      node = object({
+        name    = string
+        type    = string
+        address = string
+      })
+      assimilation = object({
+        enable = bool
+        share = object({
+          name = string
+          path = object({
+            source      = string
+            destination = string
+          })
+        })
+      })
+    }))
+    volumeGroups = list(object({
+      enable      = bool
+      name        = string
+      volumeNames = list(string)
+    }))
+  })
 }
 
 variable dnsRecord {
@@ -234,7 +287,7 @@ output privateDNS {
       fqdn    = azurerm_private_dns_a_record.cache_nfs[0].fqdn
       records = azurerm_private_dns_a_record.cache_nfs[0].records
     } : null
-    hs = module.config.hammerspace.enable ? {
+    hs = var.hammerspace.enable ? {
       fqdn    = module.hammerspace[0].privateDNS.fqdn
       records = module.hammerspace[0].privateDNS.records
     } : null

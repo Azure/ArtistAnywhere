@@ -18,39 +18,9 @@ netAppFiles = {
       volumes = [
         {
           enable      = true
-          name        = "Shared"
-          path        = "shared"
-          sizeGiB     = 128
-          permissions = 777
-          network = {
-            features = "Standard"
-            protocols = [
-              "NFSv3",
-              # "CIFS"
-            ]
-          }
-          exportPolicies = [
-            {
-              ruleIndex  = 1
-              ownerMode  = "Restricted"
-              readOnly   = false
-              readWrite  = true
-              rootAccess = true
-              networkProtocols = [
-                "NFSv3",
-                # "CIFS"
-              ]
-              allowedClients = [
-                "0.0.0.0/0"
-              ]
-            }
-          ]
-        },
-        {
-          enable      = true
-          name        = "Scratch"
-          path        = "scratch"
-          sizeGiB     = 128
+          name        = "Data"
+          path        = "data"
+          sizeGiB     = 640
           permissions = 777
           network = {
             features = "Standard"
@@ -108,9 +78,39 @@ netAppFiles = {
         },
         {
           enable      = true
-          name        = "Data"
-          path        = "data"
-          sizeGiB     = 640
+          name        = "Shared"
+          path        = "shared"
+          sizeGiB     = 128
+          permissions = 777
+          network = {
+            features = "Standard"
+            protocols = [
+              "NFSv3",
+              # "CIFS"
+            ]
+          }
+          exportPolicies = [
+            {
+              ruleIndex  = 1
+              ownerMode  = "Restricted"
+              readOnly   = false
+              readWrite  = true
+              rootAccess = true
+              networkProtocols = [
+                "NFSv3",
+                # "CIFS"
+              ]
+              allowedClients = [
+                "0.0.0.0/0"
+              ]
+            }
+          ]
+        },
+        {
+          enable      = true
+          name        = "Scratch"
+          path        = "scratch"
+          sizeGiB     = 128
           permissions = 777
           network = {
             features = "Standard"

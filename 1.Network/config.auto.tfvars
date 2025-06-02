@@ -411,8 +411,10 @@ vpnGateway = {
       siteToSite = {
         enable = false
         addressSpace = [
+          "10.20.0.0/24"
         ]
         link = {
+          enable  = false
           fqdn    = "" # Set the fully-qualified domain name (FQDN) of your on-premises VPN gateway device
           address = "" # or set the device public IP address. Do NOT set both configuration parameters.
         }
@@ -428,7 +430,7 @@ vpnGateway = {
         enable = true
         client = {
           addressSpace = [
-            "10.20.0.0/24"
+            "10.30.0.0/24"
           ]
         }
       }
@@ -441,8 +443,10 @@ vpnGateway = {
       siteToSite = {
         enable = false
         addressSpace = [
+          "10.21.0.0/24"
         ]
         link = {
+          enable  = false
           fqdn    = "" # Set the fully-qualified domain name (FQDN) of your on-premises VPN gateway device
           address = "" # or set the device public IP address. Do NOT set both configuration parameters.
         }
@@ -458,7 +462,7 @@ vpnGateway = {
         enable = false
         client = {
           addressSpace = [
-            "10.21.0.0/24"
+            "10.31.0.0/24"
           ]
         }
       }
@@ -471,8 +475,10 @@ vpnGateway = {
       siteToSite = {
         enable = false
         addressSpace = [
+          "10.22.0.0/24"
         ]
         link = {
+          enable  = false
           fqdn    = "" # Set the fully-qualified domain name (FQDN) of your on-premises VPN gateway device
           address = "" # or set the device public IP address. Do NOT set both configuration parameters.
         }
@@ -488,7 +494,7 @@ vpnGateway = {
         enable = false
         client = {
           addressSpace = [
-            "10.22.0.0/24"
+            "10.32.0.0/24"
           ]
         }
       }
@@ -540,7 +546,7 @@ bastion = {
 
 natGateway = {
   enable = true
-  name   = "Gateway-NAT"
+  name   = "Gateway"
   ipAddress = {
     tier = "Standard"
     type = "Regional"
