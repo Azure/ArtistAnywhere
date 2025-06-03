@@ -518,7 +518,7 @@ privateDNS = {
 ##################################################################
 
 firewall = {
-  enable = true
+  enable = false
   name   = "hpcai"
   tier   = "Standard"
 }
