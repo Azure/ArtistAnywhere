@@ -154,7 +154,7 @@ resource azapi_resource fleet {
             adminPassword      = each.value.machine.adminLogin.userPassword
           }
           networkProfile = {
-            networkApiVersion = "2024-07-01"
+            networkApiVersion = "2024-10-01"
             networkInterfaceConfigurations = [
               {
                 name = "nic"

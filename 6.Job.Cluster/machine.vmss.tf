@@ -252,7 +252,7 @@ resource azurerm_monitor_diagnostic_setting cluster_monitor_linux {
   name                       = each.value.name
   target_resource_id         = "${azurerm_resource_group.cluster.id}/providers/Microsoft.Compute/virtualMachineScaleSets/${each.value.name}"
   log_analytics_workspace_id = data.terraform_remote_state.foundation.outputs.monitor.logAnalytics.id
-  metric {
+  enabled_metric {
     category = each.value.monitor.metric.category
   }
   depends_on = [
@@ -372,7 +372,7 @@ resource azurerm_monitor_diagnostic_setting cluster_monitor_windows {
   name                       = each.value.name
   target_resource_id         = "${azurerm_resource_group.cluster.id}/providers/Microsoft.Compute/virtualMachineScaleSets/${each.value.name}"
   log_analytics_workspace_id = data.terraform_remote_state.foundation.outputs.monitor.logAnalytics.id
-  metric {
+  enabled_metric {
     category = each.value.monitor.metric.category
   }
   depends_on = [
@@ -522,7 +522,7 @@ resource azurerm_monitor_diagnostic_setting cluster_monitor {
   name                       = each.value.name
   target_resource_id         = "${azurerm_resource_group.cluster.id}/providers/Microsoft.Compute/virtualMachineScaleSets/${each.value.name}"
   log_analytics_workspace_id = data.terraform_remote_state.foundation.outputs.monitor.logAnalytics.id
-  metric {
+  enabled_metric {
     category = each.value.monitor.metric.category
   }
   depends_on = [
