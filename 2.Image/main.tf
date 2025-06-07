@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4.29.0"
+      version = "~>4.32.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -37,6 +37,30 @@ module config {
 
 variable resourceGroupName {
   type = string
+}
+
+variable image {
+  type = object({
+    linux = object({
+      version = string
+      x64     = object({
+        publisher = string
+        offer     = string
+        sku       = string
+      })
+      arm = object({
+        publisher = string
+        offer     = string
+        sku       = string
+      })
+    })
+    windows = object({
+      version  = string
+      cluster  = object({
+        enable = bool
+      })
+    })
+  })
 }
 
 variable virtualNetwork {

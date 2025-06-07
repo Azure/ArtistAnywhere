@@ -77,7 +77,7 @@ resource azurerm_app_configuration_key job_manager_slurm {
   configuration_store_id = azurerm_app_configuration.main.id
   key                    = local.appConfigKey.jobManagerSlurm
   label                  = "Job Manager Slurm"
-  value                  = "24.11.5"
+  value                  = "25.05.0"
   content_type           = "kv"
   depends_on = [
     time_sleep.app_config_rbac

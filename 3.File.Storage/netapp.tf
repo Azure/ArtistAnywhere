@@ -20,6 +20,7 @@ variable netAppFiles {
         name        = string
         path        = string
         sizeGiB     = number
+        enableLarge = bool
         permissions = number
         network = object({
           features  = string
@@ -132,6 +133,7 @@ resource azurerm_netapp_volume main {
   service_level              = each.value.capacityPoolType
   volume_path                = each.value.path
   storage_quota_in_gb        = each.value.sizeGiB
+  large_volume_enabled       = each.value.enableLarge
   network_features           = each.value.network.features
   protocols                  = each.value.network.protocols
   subnet_id                  = data.azurerm_subnet.storage_netapp[0].id

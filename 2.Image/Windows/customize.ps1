@@ -22,19 +22,19 @@ $fileType = "chocolatey"
 $fileName = "$fileType.ps1"
 $fileLink = "https://community.chocolatey.org/install.ps1"
 DownloadFile $fileName $fileLink $false
-RunProcess PowerShell.exe "-ExecutionPolicy Unrestricted -File .\$fileName" "$aaaRoot\$fileType"
+RunProcess PowerShell.exe "-ExecutionPolicy Unrestricted -File .\$fileName" $fileType
 $aaaPathChoco = "C:\ProgramData\chocolatey"
 $aaaPath += ";$aaaPathChoco"
 Write-Information "(AAA End): Chocolatey"
 
 Write-Information "(AAA Start): Python"
 $fileType = "python"
-RunProcess "$aaaPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$aaaRoot\$fileType"
+RunProcess "$aaaPathChoco\choco.exe" "install $fileType --confirm --no-progress" $fileType
 Write-Information "(AAA End): Python"
 
 Write-Information "(AAA Start): Git"
 $fileType = "git"
-RunProcess "$aaaPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$aaaRoot\$fileType"
+RunProcess "$aaaPathChoco\choco.exe" "install $fileType --confirm --no-progress" $fileType
 $aaaPathGit = "C:\Program Files\Git\bin"
 $aaaPath += ";$aaaPathGit"
 $Env:GIT_BIN_PATH = $aaaPathGit
@@ -42,12 +42,12 @@ Write-Information "(AAA End): Git"
 
 Write-Information "(AAA Start): 7-Zip"
 $fileType = "7zip"
-RunProcess "$aaaPathChoco\choco.exe" "install $fileType --confirm --no-progress" "$aaaRoot\$fileType"
+RunProcess "$aaaPathChoco\choco.exe" "install $fileType --confirm --no-progress" $fileType
 Write-Information "(AAA End): 7-Zip"
 
 Write-Information "(AAA Start): Visual Studio Build Tools"
 $fileType = "vsBuildTools"
-RunProcess "$aaaPathChoco\choco.exe" "install visualstudio2022buildtools --package-parameters ""--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.Component.MSBuild"" --confirm --no-progress" "$aaaRoot\$fileType"
+RunProcess "$aaaPathChoco\choco.exe" "install visualstudio2022buildtools --package-parameters ""--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.Component.MSBuild"" --confirm --no-progress" $fileType
 $aaaPathCMake = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
 $aaaPathMSBuild = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64"
 $aaaPath += ";$aaaPathCMake;$aaaPathMSBuild"
@@ -104,7 +104,7 @@ if ($machineType -eq "VDI") {
   $fileName = "${fileType}_$appVersion.exe"
   $fileLink = "$($blobStorage.endpointUrl)/Teradici/$appVersion/$fileName"
   DownloadFile $fileName $fileLink $true
-  RunProcess .\$fileName "/S /NoPostReboot /Force" "$aaaRoot\$fileType"
+  RunProcess .\$fileName "/S /NoPostReboot /Force" $fileType
   Write-Information "(AAA End): HP Anyware (Teradici)"
 }
 

@@ -223,10 +223,10 @@ nfsCache = {
     count  = 1
     prefix = ""
     image = {
-      publisher = ""
-      product   = ""
-      name      = ""
-      version   = ""
+      publisher = "AlmaLinux"
+      product   = "AlmaLinux-x86_64"
+      name      = "9-Gen2"
+      version   = "9.5.202411260"
     }
     osDisk = {
       storageType = "Premium_LRS"

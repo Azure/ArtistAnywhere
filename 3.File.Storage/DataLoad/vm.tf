@@ -44,12 +44,6 @@ variable dataLoad {
 locals {
   dataLoad = merge(var.dataLoad, {
     machine = merge(var.dataLoad.machine, {
-      image = merge(var.dataLoad.machine.image, {
-        publisher = var.dataLoad.machine.image.publisher != "" ? var.dataLoad.machine.image.publisher : module.config.image.linux.x64.publisher
-        product   = var.dataLoad.machine.image.product != "" ? var.dataLoad.machine.image.product : module.config.image.linux.x64.offer
-        name      = var.dataLoad.machine.image.name != "" ? var.dataLoad.machine.image.name : module.config.image.linux.x64.sku
-        version   = var.dataLoad.machine.image.version != "" ? var.dataLoad.machine.image.version : module.config.image.linux.version
-      })
       adminLogin = merge(var.dataLoad.machine.adminLogin, {
         userName     = var.dataLoad.machine.adminLogin.userName != "" ? var.dataLoad.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
         userPassword = var.dataLoad.machine.adminLogin.userPassword != "" ? var.dataLoad.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value

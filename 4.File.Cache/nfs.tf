@@ -85,12 +85,6 @@ data azurerm_virtual_machine_scale_set cache {
 locals {
   nfsCache = var.nfsCache.enable ? merge(var.nfsCache, {
     machine = merge(var.nfsCache.machine, {
-      image = merge(var.nfsCache.machine.image, {
-        publisher = var.nfsCache.machine.image.publisher != "" ? var.nfsCache.machine.image.publisher : module.config.image.linux.x64.publisher
-        product   = var.nfsCache.machine.image.product != "" ? var.nfsCache.machine.image.product : module.config.image.linux.x64.offer
-        name      = var.nfsCache.machine.image.name != "" ? var.nfsCache.machine.image.name : module.config.image.linux.x64.sku
-        version   = var.nfsCache.machine.image.version != "" ? var.nfsCache.machine.image.version : module.config.image.linux.version
-      })
       adminLogin = merge(var.nfsCache.machine.adminLogin, {
         userName     = var.nfsCache.machine.adminLogin.userName != "" ? var.nfsCache.machine.adminLogin.userName : data.azurerm_key_vault_secret.admin_username.value
         userPassword = var.nfsCache.machine.adminLogin.userPassword != "" ? var.nfsCache.machine.adminLogin.userPassword : data.azurerm_key_vault_secret.admin_password.value

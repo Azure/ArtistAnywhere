@@ -102,7 +102,7 @@ resource azapi_resource linux {
         publisher = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].publisher
         offer     = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].offer
         sku       = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].sku
-        version   = module.config.image.linux.version
+        version   = var.image.linux.version
       }
       optimize = {
         vmBoot = {
@@ -200,7 +200,7 @@ resource azapi_resource linux {
 
 resource azapi_resource windows {
   for_each = {
-    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if (module.config.image.windows.cluster.enable && imageTemplate.enable && strcontains(lower(imageTemplate.source.imageDefinition.name), "win")) || (!module.config.image.windows.cluster.enable && strcontains(lower(imageTemplate.source.imageDefinition.name), "winuser"))
+    for imageTemplate in var.imageBuilder.templates : imageTemplate.name => imageTemplate if (var.image.windows.cluster.enable && imageTemplate.enable && strcontains(lower(imageTemplate.source.imageDefinition.name), "win")) || (!var.image.windows.cluster.enable && strcontains(lower(imageTemplate.source.imageDefinition.name), "winuser"))
   }
   name      = each.value.name
   type      = "Microsoft.VirtualMachineImages/imageTemplates@2024-02-01"
@@ -230,7 +230,7 @@ resource azapi_resource windows {
         publisher = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].publisher
         offer     = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].offer
         sku       = var.computeGallery.imageDefinitions[index(var.computeGallery.imageDefinitions.*.name, each.value.source.imageDefinition.name)].sku
-        version   = module.config.image.windows.version
+        version   = var.image.windows.version
       }
       optimize = {
         vmBoot = {

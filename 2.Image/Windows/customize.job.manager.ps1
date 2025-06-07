@@ -26,7 +26,7 @@ if ($jobManagers -contains "Deadline") {
     Write-Information "(AAA Start): Deadline Server"
     $fileType = "deadline-repository"
     $fileName = "DeadlineRepository-$appVersion-windows-installer.exe"
-    RunProcess .\$fileName "--mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --mongodir $databasePath --installmongodb true" "$aaaRoot\$fileType"
+    RunProcess .\$fileName "--mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --mongodir $databasePath --installmongodb true" $fileType
     Move-Item -Path $Env:TMP\installbuilder_installer.log -Destination $aaaRoot\$fileType.log
     Copy-Item -Path $databasePath\certs\$deadlineCertificate -Destination $deadlinePath\$deadlineCertificate
     New-NfsShare -Name "Deadline" -Path $deadlinePath -Permission ReadWrite
@@ -47,7 +47,7 @@ if ($jobManagers -contains "Deadline") {
     $fileArgs = "$fileArgs --serviceuser $serviceUsername --servicepassword $servicePassword"
   }
   $fileArgs = "$fileArgs --launcherservice $workerService --slavestartup $workerStartup"
-  RunProcess .\$fileName $fileArgs "$aaaRoot\$fileType"
+  RunProcess .\$fileName $fileArgs $fileType
   Move-Item -Path $Env:TMP\installbuilder_installer.log -Destination $aaaRoot\$fileType.log
   Set-Location -Path $aaaRoot
   Write-Information "(AAA End): Deadline Client"
