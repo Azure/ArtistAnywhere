@@ -12,9 +12,9 @@ if ($jobProcessors -contains "PBRT") {
   $fileType = "pbrt"
   $filePath = "C:\Program Files\PBRT"
   New-Item -ItemType Directory -Path "$filePath" -Force
-  RunProcess "$Env:GIT_BIN_PATH\git.exe" "clone --recursive https://github.com/mmp/$fileType-$appVersion.git" "$aaaRoot\$fileType-1"
-  RunProcess "$Env:CMAKE_BIN_PATH\cmake.exe" "-B ""$filePath"" -S $aaaRoot\$fileType-$appVersion" "$aaaRoot\$fileType-2"
-  RunProcess "$Env:MSBUILD_BIN_PATH\MSBuild.exe" """$filePath\PBRT-$appVersion.sln"" -p:Configuration=Release" "$aaaRoot\$fileType-3"
+  RunProcess "$Env:GIT_BIN_PATH\git.exe" "clone --recursive https://github.com/mmp/$fileType-$appVersion.git" $fileType-1
+  RunProcess "$Env:CMAKE_BIN_PATH\cmake.exe" "-B ""$filePath"" -S $aaaRoot\$fileType-$appVersion" $fileType-2
+  RunProcess "$Env:MSBUILD_BIN_PATH\MSBuild.exe" """$filePath\PBRT-$appVersion.sln"" -p:Configuration=Release" $fileType-3
   $aaaPath += ";$filePath\Release"
   Write-Information "(AAA End): PBRT"
 }
