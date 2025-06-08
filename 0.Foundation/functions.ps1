@@ -54,7 +54,10 @@ function RunProcess ($filePath, $argumentList, $logFile) {
       } else {
         Start-Process -FilePath $filePath -Wait -RedirectStandardOutput $logFile-out -RedirectStandardError $logFile-err
       }
-      Get-Content -Path $logFile-err | Write-Information
+      $errFile = Get-Item -Path $logFile-err
+      if ($errFile.Length -gt 0) {
+        Get-Content -Path $logFile-err | Write-Information
+      }
     } else {
       if ($argumentList) {
         Start-Process -FilePath $filePath -ArgumentList $argumentList -Wait
