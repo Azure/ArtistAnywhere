@@ -41,7 +41,6 @@ function run_process {
   local retryCount=0
   local command="$1"
   local logFile=$2
-  logFile="$aaaRoot/$logFile"
   while [[ $exitStatus -ne 0 && $retryCount -lt 3 ]]; do
     $command 1> $logFile.out 2> $logFile.err
     exitStatus=$?
