@@ -54,7 +54,7 @@ if [[ $jobManagers == *Deadline* ]]; then
     echo "    { role: \"readWriteAnyDatabase\", db: \"admin\" }" >> $fileName
     echo "  ]" >> $fileName
     echo "})" >> $fileName
-    run_process "mongosh $fileName" $aaaRoot/$fileType
+    run_process "mongosh $fileName" $fileType
 
     fileType="mongo-create-database-user"
     fileName="$fileType.js"
@@ -66,14 +66,14 @@ if [[ $jobManagers == *Deadline* ]]; then
     echo "    { role: \"dbOwner\", db: \"$databaseName\" }" >> $fileName
     echo "  ]" >> $fileName
     echo "})" >> $fileName
-    run_process "mongosh $fileName" $aaaRoot/$fileType
+    run_process "mongosh $fileName" $fileType
     echo "(AAA End): Mongo DB Users"
 
     echo "(AAA Start): Deadline Server"
     fileType="deadline-repository"
     fileName="DeadlineRepository-$appVersion-linux-x64-installer.run"
     export DB_PASSWORD=$servicePassword
-    run_process "$filePath/$fileName --mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $aaaRoot/$fileType
+    run_process "$filePath/$fileName --mode unattended --dbLicenseAcceptance accept --prefix $deadlinePath --dbhost $databaseHost --dbport $databasePort --dbname $databaseName --dbuser $serviceUsername --dbpassword env:DB_PASSWORD --dbauth true --installmongodb false" $fileType
     mv /tmp/installbuilder_installer.log $aaaRoot/deadline-repository.log
     echo "$deadlinePath *(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
     exportfs -a
@@ -87,7 +87,7 @@ if [[ $jobManagers == *Deadline* ]]; then
   [ $machineType == JobManager ] && workerService="false" || workerService="true"
   [ $machineType == JobCluster ] && workerStartup="true" || workerStartup="false"
   fileArgs="$fileArgs --launcherdaemon $workerService --slavestartup $workerStartup"
-  run_process "$filePath/$fileName $fileArgs" $aaaRoot/$fileType
+  run_process "$filePath/$fileName $fileArgs" $fileType
   mv /tmp/installbuilder_installer.log $aaaRoot/deadline-client.log
   echo "(AAA End): Deadline Client"
 

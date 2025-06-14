@@ -23,7 +23,7 @@ if [ "$gpuProvider" == NVIDIA ]; then
     download_file $fileName $fileLink false
     chmod +x $fileName
     dnf -y install libglvnd-devel mesa-vulkan-drivers xorg-x11-drivers
-    run_process "./$fileName --silent" $aaaRoot/$fileType
+    run_process "./$fileName --silent" $fileType
     echo "(AAA End): NVIDIA GPU (GRID)"
   elif [ $machineType == JobCluster ]; then
     echo "(AAA Start): NVIDIA GPU (CUDA)"
@@ -53,7 +53,7 @@ if [ $machineType == VDI ]; then
   mkdir -p $fileType
   tar -xzf $fileName -C $fileType
   cd $fileType
-  run_process "./install-pcoip-agent.sh $fileType usb-vhci" $aaaRoot/$fileType
+  run_process "./install-pcoip-agent.sh $fileType usb-vhci" $fileType
   cd $aaaRoot
   echo "(AAA End): HP Anyware (Teradici)"
 fi

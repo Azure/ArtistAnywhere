@@ -202,7 +202,7 @@ vmScaleSets = [
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
         enable    = true
-        placement = "CacheDisk"
+        placement = "ResourceDisk"
       }
     }
     spot = {
@@ -538,7 +538,7 @@ vmScaleSets = [
       sizeGB      = 0
       ephemeral = { # https://learn.microsoft.com/azure/virtual-machines/ephemeral-os-disks
         enable    = true
-        placement = "CacheDisk"
+        placement = "ResourceDisk"
       }
     }
     spot = {
