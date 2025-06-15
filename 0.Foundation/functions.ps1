@@ -56,7 +56,8 @@ function RunProcess ($filePath, $argumentList, $logFile) {
       }
       $errFile = Get-Item -Path $logFile-err
       if ($errFile.Length -gt 0) {
-        Get-Content -Path $logFile-err | Write-Information
+        $errMessage = Get-Content -Path $logFile-err
+        Write-Information -MessageData $errMessage
       }
     } else {
       if ($argumentList) {
