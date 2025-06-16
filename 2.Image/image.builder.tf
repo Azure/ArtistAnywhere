@@ -294,9 +294,6 @@ resource azapi_resource windows {
             ]
             runElevated = true
             runAsSystem = true
-          },
-          {
-            type = "WindowsRestart"
           }
         ]
       )
